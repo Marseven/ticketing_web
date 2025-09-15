@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Event extends Model
 {
@@ -122,5 +123,49 @@ class Event extends Model
     public function getUrlAttribute()
     {
         return config('app.url') . '/events/' . $this->slug;
+    }
+
+    /**
+     * Boot the model.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($event) {
+            if (empty($event->slug)) {
+                $event->slug = Str::slug($event->title);
+                
+                // Ensure uniqueness
+                $originalSlug = $event->slug;
+                $counter = 1;
+                while (static::where('slug', $event->slug)->exists()) {
+                    $event->slug = $originalSlug . '-' . $counter;
+                    $counter++;
+                }
+            }
+        });
+
+        static::updating(function ($event) {
+            if ($event->isDirty('title') && empty($event->slug)) {
+                $event->slug = Str::slug($event->title);
+                
+                // Ensure uniqueness
+                $originalSlug = $event->slug;
+                $counter = 1;
+                while (static::where('slug', $event->slug)->where('id', '!=', $event->id)->exists()) {
+                    $event->slug = $originalSlug . '-' . $counter;
+                    $counter++;
+                }
+            }
+        });
+    }
+
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName()
+    {
+        return 'slug';
     }
 }

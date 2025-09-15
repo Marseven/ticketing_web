@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Str;
 
 class Organizer extends Model
 {
@@ -100,5 +101,49 @@ class Organizer extends Model
         return $this->orders()
                     ->where('status', 'paid')
                     ->sum('total_amount');
+    }
+
+    /**
+     * Boot the model.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($organizer) {
+            if (empty($organizer->slug)) {
+                $organizer->slug = Str::slug($organizer->name);
+                
+                // Ensure uniqueness
+                $originalSlug = $organizer->slug;
+                $counter = 1;
+                while (static::where('slug', $organizer->slug)->exists()) {
+                    $organizer->slug = $originalSlug . '-' . $counter;
+                    $counter++;
+                }
+            }
+        });
+
+        static::updating(function ($organizer) {
+            if ($organizer->isDirty('name') && empty($organizer->slug)) {
+                $organizer->slug = Str::slug($organizer->name);
+                
+                // Ensure uniqueness
+                $originalSlug = $organizer->slug;
+                $counter = 1;
+                while (static::where('slug', $organizer->slug)->where('id', '!=', $organizer->id)->exists()) {
+                    $organizer->slug = $originalSlug . '-' . $counter;
+                    $counter++;
+                }
+            }
+        });
+    }
+
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName()
+    {
+        return 'slug';
     }
 }

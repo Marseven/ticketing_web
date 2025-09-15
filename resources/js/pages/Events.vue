@@ -328,7 +328,7 @@ export default {
     }
 
     const goToEvent = (event) => {
-      router.push(`/events/${event.id}`)
+      router.push(`/events/${event.slug}`)
     }
 
     const goBack = () => {

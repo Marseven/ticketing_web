@@ -398,32 +398,32 @@ export default {
     }
 
     const goToBooking = () => {
-      // Rediriger vers la page de checkout avec l'ID de l'événement
-      router.push(`/checkout/${route.params.id}`)
+      // Rediriger vers la page de checkout avec le slug de l'événement
+      router.push(`/checkout/${route.params.slug}`)
     }
 
     const loadEvent = async () => {
-      const eventId = route.params.id
-      if (!eventId) return
+      const eventSlug = route.params.slug
+      if (!eventSlug) return
 
       try {
         loading.value = true
         error.value = null
         
-        const data = await eventsStore.fetchEvent(eventId)
+        const data = await eventsStore.fetchEvent(eventSlug)
         event.value = data.event
         
         // Charger les événements similaires
         if (event.value?.category) {
           const eventsData = await eventsStore.getEventsByCategory(event.value.category)
           similarEvents.value = eventsData.events
-            .filter(e => e.id !== event.value.id)
+            .filter(e => e.slug !== event.value.slug)
             .slice(0, 5)
         } else {
           // Si pas de catégorie, charger tous les événements et filtrer
           const allEventsData = await eventsStore.fetchEvents()
           similarEvents.value = allEventsData.events
-            .filter(e => e.id !== event.value.id)
+            .filter(e => e.slug !== event.value.slug)
             .slice(0, 5)
         }
         
@@ -458,8 +458,8 @@ export default {
     }
 
     // Watchers
-    watch(() => route.params.id, () => {
-      if (route.params.id) {
+    watch(() => route.params.slug, () => {
+      if (route.params.slug) {
         loadEvent()
       }
     })

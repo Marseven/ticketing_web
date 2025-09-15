@@ -43,8 +43,8 @@ import ScannerApp from './pages/scanner/ScannerApp.vue';
 const routes = [
     { path: '/', component: Home, name: 'home' },
     { path: '/events', component: Events, name: 'events' },
-    { path: '/events/:id', component: EventDetail, name: 'event-detail' },
-    { path: '/checkout/:eventId', component: Checkout, name: 'checkout' },
+    { path: '/events/:slug', component: EventDetail, name: 'event-detail' },
+    { path: '/checkout/:eventSlug', component: Checkout, name: 'checkout' },
     { path: '/login', component: Login, name: 'login' },
     { path: '/register', component: Register, name: 'register' },
     { path: '/retrieve-ticket', component: TicketRetrieve, name: 'ticket-retrieve' },

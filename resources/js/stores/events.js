@@ -99,12 +99,12 @@ export const useEventsStore = defineStore('events', () => {
     }
   }
 
-  const fetchEvent = async (id) => {
+  const fetchEvent = async (slug) => {
     loading.value = true
     error.value = null
 
     try {
-      const response = await fetch(`/api/client/events/${id}`, {
+      const response = await fetch(`/api/client/events/${slug}`, {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
@@ -125,7 +125,7 @@ export const useEventsStore = defineStore('events', () => {
       error.value = err.message || 'Erreur lors du chargement de l\'événement'
       
       // Données de fallback pour le développement
-      currentEvent.value = getDemoEvent(id)
+      currentEvent.value = getDemoEvent(slug)
       return { event: currentEvent.value }
     } finally {
       loading.value = false
@@ -190,6 +190,7 @@ export const useEventsStore = defineStore('events', () => {
       // Événements dans 2 mois
       {
         id: 1,
+        slug: "festival-electro-gabonais",
         title: "Festival Électro Gabonais",
         description: "Le plus grand festival de musique électronique du Gabon avec des DJs internationaux et locaux. Une nuit de folie garantie !",
         venue_name: "Stade d'Angondjé",
@@ -228,6 +229,7 @@ export const useEventsStore = defineStore('events', () => {
       },
       {
         id: 2,
+        slug: "concert-afrobeat-live",
         title: "Concert Afrobeat Live",
         description: "Une soirée dédiée à l'afrobeat avec des artistes locaux et internationaux. Danse et musique garanties !",
         venue_name: "Palais des Sports",
@@ -663,9 +665,10 @@ export const useEventsStore = defineStore('events', () => {
     }
   }
 
-  const getDemoEvent = (id) => {
+  const getDemoEvent = (slugOrId) => {
     const demoEvents = getDemoEvents().events
-    return demoEvents.find(event => event.id == id) || demoEvents[0]
+    // Chercher d'abord par slug, puis par ID pour compatibilité
+    return demoEvents.find(event => event.slug === slugOrId || event.id == slugOrId) || demoEvents[0]
   }
 
   return {

@@ -13,7 +13,10 @@ Route::get('/user', function (Request $request) {
 Route::prefix('client')->group(function () {
     // Événements publics (sans authentification)
     Route::get('events', [App\Http\Controllers\Client\EventController::class, 'index']);
-    Route::get('events/{event}', [App\Http\Controllers\Client\EventController::class, 'show']);
+    Route::get('events/{event:slug}', [App\Http\Controllers\Client\EventController::class, 'show']);
+    
+    // Organisateurs publics
+    Route::get('organizers/{organizer:slug}', [App\Http\Controllers\Client\OrganizerController::class, 'show']);
     
     // Routes avec authentification optionnelle
     Route::middleware(['auth:sanctum'])->group(function () {
@@ -32,8 +35,8 @@ Route::get('me', [App\Http\Controllers\Api\AuthController::class, 'me'])->middle
 // Routes des événements (sans préfixe v1 pour correspondre aux annotations)
 Route::prefix('events')->middleware('auth:sanctum')->group(function () {
     Route::get('/', [App\Http\Controllers\Api\EventController::class, 'index']);
-    Route::get('{id}', [App\Http\Controllers\Api\EventController::class, 'show']);
-    Route::get('{id}/scan-stats', [App\Http\Controllers\Api\EventController::class, 'scanStats']);
+    Route::get('{event:slug}', [App\Http\Controllers\Api\EventController::class, 'show']);
+    Route::get('{event:slug}/scan-stats', [App\Http\Controllers\Api\EventController::class, 'scanStats']);
 });
 
 Route::prefix('v1')->group(function () {
@@ -81,8 +84,8 @@ Route::prefix('v1')->group(function () {
     Route::prefix('organizer')->middleware('auth:sanctum')->group(function () {
         Route::get('dashboard', [App\Http\Controllers\Api\OrganizerController::class, 'dashboard']);
         Route::get('/', [App\Http\Controllers\Api\OrganizerController::class, 'index']);
-        Route::get('{id}', [App\Http\Controllers\Api\OrganizerController::class, 'show']);
-        Route::get('{id}/stats', [App\Http\Controllers\Api\OrganizerController::class, 'stats']);
+        Route::get('{organizer:slug}', [App\Http\Controllers\Api\OrganizerController::class, 'show']);
+        Route::get('{organizer:slug}/stats', [App\Http\Controllers\Api\OrganizerController::class, 'stats']);
     });
 
     // Routes des scans
