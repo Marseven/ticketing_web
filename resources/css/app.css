@@ -1,0 +1,68 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Polices Myriad Pro */
+@font-face {
+    font-family: 'Myriad Pro';
+    src: url('/fonts/MYRIADPRO-REGULAR.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Myriad Pro';
+    src: url('/fonts/MYRIADPRO-BOLD.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Myriad Pro';
+    src: url('/fonts/MYRIADPRO-SEMIBOLD.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Myriad Pro';
+    src: url('/fonts/MyriadPro-Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+}
+
+/* Configuration des polices */
+:root {
+    --font-sans: 'Myriad Pro', 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-primea: 'Myriad Pro', sans-serif;
+}
+
+/* Styles globaux Primea */
+body {
+    font-family: var(--font-primea);
+}
+
+/* Classes utilitaires Primea */
+.text-primea-blue {
+    color: #272d63;
+}
+
+.text-primea-yellow {
+    color: #fab511;
+}
+
+.bg-primea-blue {
+    background-color: #272d63;
+}
+
+.bg-primea-yellow {
+    background-color: #fab511;
+}
+
+.border-primea-blue {
+    border-color: #272d63;
+}
+
+.border-primea-yellow {
+    border-color: #fab511;
+}
