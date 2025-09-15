@@ -44,7 +44,7 @@ class TestUsersSeeder extends Seeder
                 'is_organizer' => false,
                 'status' => 'active',
                 'email_verified_at' => now(),
-                'phone_verified_at' => now(),
+                'phone_verified_at' => null,
                 'role' => $adminRole
             ],
             // Organisateurs
@@ -56,7 +56,7 @@ class TestUsersSeeder extends Seeder
                 'is_organizer' => true,
                 'status' => 'active',
                 'email_verified_at' => now(),
-                'phone_verified_at' => now(),
+                'phone_verified_at' => null,
                 'role' => $organizerRole
             ],
             [
@@ -67,7 +67,7 @@ class TestUsersSeeder extends Seeder
                 'is_organizer' => true,
                 'status' => 'active',
                 'email_verified_at' => now(),
-                'phone_verified_at' => now(),
+                'phone_verified_at' => null,
                 'role' => $organizerRole
             ],
             // Clients test
@@ -79,7 +79,7 @@ class TestUsersSeeder extends Seeder
                 'is_organizer' => false,
                 'status' => 'active',
                 'email_verified_at' => now(),
-                'phone_verified_at' => now(),
+                'phone_verified_at' => null,
                 'role' => $clientRole
             ],
             [
@@ -90,7 +90,7 @@ class TestUsersSeeder extends Seeder
                 'is_organizer' => false,
                 'status' => 'active',
                 'email_verified_at' => now(),
-                'phone_verified_at' => now(),
+                'phone_verified_at' => null,
                 'role' => $clientRole
             ]
         ];
