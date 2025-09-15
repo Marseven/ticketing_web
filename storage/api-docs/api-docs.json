@@ -10,7 +10,7 @@
     },
     "servers": [
         {
-            "url": "http://localhost:8000",
+            "url": "https://primea.ga",
             "description": "API Server"
         }
     ],
