@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Event;
 use App\Models\User;
 use App\Models\Organizer;
+use App\Models\Category;
 use App\Models\Schedule;
 use App\Models\TicketType;
 use Illuminate\Database\Seeder;
@@ -50,19 +51,122 @@ class TestEventsSeeder extends Seeder
         );
 
         // Associer les utilisateurs aux organisateurs
-        if (!$marieUser->organizers()->where('organizer_id', $primeatOrganizer->id)->exists()) {
-            $marieUser->organizers()->attach($primeatOrganizer->id, [
+        if (!$marieUser->organizers()->where('organizer_id', $primeatOrganizer)->exists()) {
+            $marieUser->organizers()->attach($primeatOrganizer, [
                 'role' => 'admin',
                 'permissions' => json_encode(['create_events', 'manage_events', 'view_reports']),
             ]);
         }
         
-        if (!$jeanUser->organizers()->where('organizer_id', $sportOrganizer->id)->exists()) {
-            $jeanUser->organizers()->attach($sportOrganizer->id, [
+        if (!$jeanUser->organizers()->where('organizer_id', $sportOrganizer)->exists()) {
+            $jeanUser->organizers()->attach($sportOrganizer, [
                 'role' => 'admin', 
                 'permissions' => json_encode(['create_events', 'manage_events', 'view_reports']),
             ]);
         }
+
+        // Créer les catégories directement dans event_categories
+        $festivalCategory = \DB::table('event_categories')->insertGetId([
+            'name' => 'Festival',
+            'slug' => 'festival',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        
+        $concertCategory = \DB::table('event_categories')->insertGetId([
+            'name' => 'Concert', 
+            'slug' => 'concert',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        
+        $theaterCategory = \DB::table('event_categories')->insertGetId([
+            'name' => 'Théâtre',
+            'slug' => 'theater', 
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        
+        $conferenceCategory = \DB::table('event_categories')->insertGetId([
+            'name' => 'Conférence',
+            'slug' => 'conference',
+            'created_at' => now(), 
+            'updated_at' => now(),
+        ]);
+        
+        $sportCategory = \DB::table('event_categories')->insertGetId([
+            'name' => 'Sport',
+            'slug' => 'sport',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Créer les venues
+        $stadeAngondje = \DB::table('venues')->insertGetId([
+            'organizer_id' => $primeatOrganizer->id,
+            'name' => 'Stade d\'Angondjé',
+            'city' => 'Libreville',
+            'address' => 'Quartier d\'Angondjé',
+            'geo_lat' => 0.3656,
+            'geo_lng' => 9.4681,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        
+        $palaisSports = \DB::table('venues')->insertGetId([
+            'organizer_id' => $primeatOrganizer->id,
+            'name' => 'Palais des Sports',
+            'city' => 'Port-Gentil',
+            'address' => 'Boulevard Triomphal',
+            'geo_lat' => -0.7193,
+            'geo_lng' => 8.7815,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        
+        $theatreNational = \DB::table('venues')->insertGetId([
+            'organizer_id' => $primeatOrganizer->id,
+            'name' => 'Théâtre National',
+            'city' => 'Libreville', 
+            'address' => 'Boulevard de l\'Indépendance',
+            'geo_lat' => 0.3839,
+            'geo_lng' => 9.4577,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        
+        $centreConferences = \DB::table('venues')->insertGetId([
+            'organizer_id' => $primeatOrganizer->id,
+            'name' => 'Centre de Conférences Omar Bongo',
+            'city' => 'Libreville',
+            'address' => 'Avenue du Général de Gaulle',
+            'geo_lat' => 0.3924,
+            'geo_lng' => 9.4538,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        
+        $placeIndependance = \DB::table('venues')->insertGetId([
+            'organizer_id' => $primeatOrganizer->id,
+            'name' => 'Place de l\'Indépendance',
+            'city' => 'Libreville',
+            'address' => 'Place de l\'Indépendance',
+            'geo_lat' => 0.3937,
+            'geo_lng' => 9.4543,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        
+        $amphitheatreMarina = \DB::table('venues')->insertGetId([
+            'organizer_id' => $primeatOrganizer->id,
+            'name' => 'Amphithéâtre de la Marina',
+            'city' => 'Port-Gentil',
+            'address' => 'Boulevard de la Marina',
+            'geo_lat' => -0.7193,
+            'geo_lng' => 8.7815,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         // Calculer les dates pour les prochains mois
         $now = Carbon::now();
@@ -72,19 +176,12 @@ class TestEventsSeeder extends Seeder
             [
                 'title' => 'Festival Électro Gabonais 2025',
                 'description' => 'Le plus grand festival de musique électronique du Gabon avec des DJs internationaux et locaux. Une nuit de folie garantie avec les meilleurs artistes électroniques d\'Afrique centrale !',
-                'category' => 'festival',
-                'venue_name' => 'Stade d\'Angondjé',
-                'venue_address' => 'Quartier d\'Angondjé',
-                'venue_city' => 'Libreville',
-                'venue_latitude' => 0.3656,
-                'venue_longitude' => 9.4681,
+                'category_id' => $festivalCategory,
+                'venue_id' => $stadeAngondje,
                 'image_url' => 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800',
                 'status' => 'published',
-                'is_active' => true,
-                'is_featured' => true,
-                'max_capacity' => 5000,
+                'slug' => 'festival-electro-gabonais-2025',
                 'organizer_id' => $primeatOrganizer->id,
-                'created_by' => $marieUser->id,
                 'start_date' => $now->copy()->addMonths(2)->setDay(15)->setHour(20)->setMinute(0),
                 'end_date' => $now->copy()->addMonths(2)->setDay(16)->setHour(4)->setMinute(0),
                 'tickets' => [
@@ -111,19 +208,12 @@ class TestEventsSeeder extends Seeder
             [
                 'title' => 'Concert Afrobeat Live',
                 'description' => 'Une soirée dédiée à l\'afrobeat avec des artistes locaux et internationaux. Danse et musique garanties ! Venez découvrir les sons authentiques de l\'Afrique moderne.',
-                'category' => 'concert',
-                'venue_name' => 'Palais des Sports',
-                'venue_address' => 'Boulevard Triomphal',
-                'venue_city' => 'Port-Gentil',
-                'venue_latitude' => -0.7193,
-                'venue_longitude' => 8.7815,
+                'category_id' => $concertCategory,
+                'venue_id' => $palaisSports,
                 'image_url' => 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800',
                 'status' => 'published',
-                'is_active' => true,
-                'is_featured' => true,
-                'max_capacity' => 2000,
+                'slug' => 'concert-afrobeat-live',
                 'organizer_id' => $primeatOrganizer->id,
-                'created_by' => $marieUser->id,
                 'start_date' => $now->copy()->addMonths(2)->setDay(22)->setHour(21)->setMinute(0),
                 'end_date' => $now->copy()->addMonths(2)->setDay(23)->setHour(2)->setMinute(0),
                 'tickets' => [
@@ -152,19 +242,12 @@ class TestEventsSeeder extends Seeder
             [
                 'title' => 'Théâtre: Les Misérables',
                 'description' => 'Une adaptation moderne du chef-d\'œuvre de Victor Hugo par la troupe nationale. Une expérience théâtrale inoubliable qui vous transportera dans le Paris du XIXe siècle.',
-                'category' => 'theater',
-                'venue_name' => 'Théâtre National',
-                'venue_address' => 'Boulevard de l\'Indépendance',
-                'venue_city' => 'Libreville',
-                'venue_latitude' => 0.3839,
-                'venue_longitude' => 9.4577,
+                'category_id' => $theaterCategory,
+                'venue_id' => $theatreNational,
                 'image_url' => 'https://images.unsplash.com/photo-1507924538820-ede94a04019d?w=800',
                 'status' => 'published',
-                'is_active' => true,
-                'is_featured' => true,
-                'max_capacity' => 400,
+                'slug' => 'theatre-les-miserables',
                 'organizer_id' => $primeatOrganizer->id,
-                'created_by' => $marieUser->id,
                 'start_date' => $now->copy()->addMonths(3)->setDay(8)->setHour(19)->setMinute(0),
                 'end_date' => $now->copy()->addMonths(3)->setDay(8)->setHour(22)->setMinute(0),
                 'tickets' => [
@@ -191,19 +274,12 @@ class TestEventsSeeder extends Seeder
             [
                 'title' => 'Conférence Tech Innovation 2025',
                 'description' => 'La plus grande conférence technologique de l\'année avec des experts internationaux partageant les dernières innovations en IA, blockchain, IoT et transformation digitale en Afrique.',
-                'category' => 'conference',
-                'venue_name' => 'Centre de Conférences Omar Bongo',
-                'venue_address' => 'Avenue du Général de Gaulle',
-                'venue_city' => 'Libreville',
-                'venue_latitude' => 0.3924,
-                'venue_longitude' => 9.4538,
+                'category_id' => $conferenceCategory,
+                'venue_id' => $centreConferences,
                 'image_url' => 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800',
                 'status' => 'published',
-                'is_active' => true,
-                'is_featured' => false,
-                'max_capacity' => 800,
+                'slug' => 'conference-tech-innovation-2025',
                 'organizer_id' => $primeatOrganizer->id,
-                'created_by' => $marieUser->id,
                 'start_date' => $now->copy()->addMonths(3)->setDay(20)->setHour(9)->setMinute(0),
                 'end_date' => $now->copy()->addMonths(3)->setDay(20)->setHour(17)->setMinute(0),
                 'tickets' => [
@@ -232,19 +308,12 @@ class TestEventsSeeder extends Seeder
             [
                 'title' => 'Festival des Arts Urbains Libreville',
                 'description' => 'Un festival unique célébrant la culture urbaine avec des spectacles de danse, rap, graffiti, breakdance et bien plus encore. Street art et performances live dans toute la ville !',
-                'category' => 'festival',
-                'venue_name' => 'Place de l\'Indépendance',
-                'venue_address' => 'Place de l\'Indépendance',
-                'venue_city' => 'Libreville',
-                'venue_latitude' => 0.3937,
-                'venue_longitude' => 9.4543,
+                'category_id' => $festivalCategory,
+                'venue_id' => $placeIndependance,
                 'image_url' => 'https://images.unsplash.com/photo-1493676304819-0d7a8d026dcf?w=800',
                 'status' => 'published',
-                'is_active' => true,
-                'is_featured' => true,
-                'max_capacity' => 3000,
+                'slug' => 'festival-arts-urbains-libreville',
                 'organizer_id' => $primeatOrganizer->id,
-                'created_by' => $marieUser->id,
                 'start_date' => $now->copy()->addMonths(6)->setDay(10)->setHour(14)->setMinute(0),
                 'end_date' => $now->copy()->addMonths(6)->setDay(10)->setHour(22)->setMinute(0),
                 'tickets' => [
@@ -271,19 +340,12 @@ class TestEventsSeeder extends Seeder
             [
                 'title' => 'Match de Gala - Lions vs Panthères',
                 'description' => 'Le match de l\'année ! Un affrontement spectaculaire entre les Lions de l\'Estuaire et les Panthères du Haut-Ogooué. Venez supporter votre équipe favorite dans ce derby gabonais !',
-                'category' => 'sport',
-                'venue_name' => 'Stade d\'Angondjé',
-                'venue_address' => 'Quartier d\'Angondjé',
-                'venue_city' => 'Libreville',
-                'venue_latitude' => 0.3656,
-                'venue_longitude' => 9.4681,
+                'category_id' => $sportCategory,
+                'venue_id' => $stadeAngondje,
                 'image_url' => 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=800',
                 'status' => 'published',
-                'is_active' => true,
-                'is_featured' => true,
-                'max_capacity' => 10000,
+                'slug' => 'match-gala-lions-vs-pantheres',
                 'organizer_id' => $sportOrganizer->id,
-                'created_by' => $jeanUser->id,
                 'start_date' => $now->copy()->addMonths(6)->setDay(25)->setHour(15)->setMinute(0),
                 'end_date' => $now->copy()->addMonths(6)->setDay(25)->setHour(17)->setMinute(0),
                 'tickets' => [
@@ -310,19 +372,12 @@ class TestEventsSeeder extends Seeder
             [
                 'title' => 'Festival de Jazz du Golfe de Guinée',
                 'description' => 'Un festival de jazz exceptionnel réunissant les plus grands noms du jazz africain et international. Trois jours de concerts dans un cadre magique au bord de l\'océan.',
-                'category' => 'festival',
-                'venue_name' => 'Amphithéâtre de la Marina',
-                'venue_address' => 'Boulevard de la Marina',
-                'venue_city' => 'Port-Gentil',
-                'venue_latitude' => -0.7193,
-                'venue_longitude' => 8.7815,
+                'category_id' => $festivalCategory,
+                'venue_id' => $amphitheatreMarina,
                 'image_url' => 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800',
                 'status' => 'published',
-                'is_active' => true,
-                'is_featured' => true,
-                'max_capacity' => 1200,
+                'slug' => 'festival-jazz-golfe-guinee',
                 'organizer_id' => $primeatOrganizer->id,
-                'created_by' => $marieUser->id,
                 'start_date' => $now->copy()->addMonths(6)->setDay(5)->setHour(18)->setMinute(0),
                 'end_date' => $now->copy()->addMonths(6)->setDay(7)->setHour(23)->setMinute(0),
                 'tickets' => [
@@ -370,29 +425,24 @@ class TestEventsSeeder extends Seeder
             );
 
             // Créer le schedule
-            Schedule::updateOrCreate(
-                ['event_id' => $event->id],
-                [
-                    'starts_at' => $startDate,
-                    'ends_at' => $endDate,
-                    'timezone' => 'Africa/Libreville',
-                    'created_by' => $marieUser->id,
-                ]
-            );
+            \DB::table('event_schedules')->insert([
+                'event_id' => $event->id,
+                'starts_at' => $startDate,
+                'ends_at' => $endDate,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
             // Créer les types de tickets
             foreach ($tickets as $ticketData) {
-                TicketType::updateOrCreate(
-                    [
-                        'event_id' => $event->id,
-                        'name' => $ticketData['name']
-                    ],
-                    array_merge($ticketData, [
-                        'event_id' => $event->id,
-                        'is_active' => true,
-                        'created_by' => $marieUser->id,
-                    ])
-                );
+                \DB::table('ticket_types')->insert([
+                    'event_id' => $event->id,
+                    'name' => $ticketData['name'],
+                    'description' => $ticketData['description'],
+                    'status' => 'active',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
             }
         }
 
