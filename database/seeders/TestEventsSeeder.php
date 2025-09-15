@@ -30,24 +30,22 @@ class TestEventsSeeder extends Seeder
         $primeatOrganizer = Organizer::firstOrCreate(
             ['name' => 'Primea Events Gabon'],
             [
-                'description' => 'Organisateur principal d\'événements culturels au Gabon',
-                'email' => 'contact@primea-events.ga',
-                'phone' => '+241011111111',
-                'website' => 'https://primea-events.ga',
+                'bio' => 'Organisateur principal d\'événements culturels au Gabon',
+                'slug' => 'primea-events-gabon',
+                'contact_email' => 'contact@primea-events.ga',
+                'contact_phone' => '+241011111111',
                 'status' => 'active',
-                'created_by' => $marieUser->id,
             ]
         );
         
         $sportOrganizer = Organizer::firstOrCreate(
             ['name' => 'Sport Events Gabon'],
             [
-                'description' => 'Spécialisé dans l\'organisation d\'événements sportifs',
-                'email' => 'sport@primea-events.ga',
-                'phone' => '+241022222222',
-                'website' => 'https://sport-events.ga',
+                'bio' => 'Spécialisé dans l\'organisation d\'événements sportifs',
+                'slug' => 'sport-events-gabon',
+                'contact_email' => 'sport@primea-events.ga',
+                'contact_phone' => '+241022222222',
                 'status' => 'active',
-                'created_by' => $jeanUser->id,
             ]
         );
 
@@ -378,7 +376,7 @@ class TestEventsSeeder extends Seeder
                     'starts_at' => $startDate,
                     'ends_at' => $endDate,
                     'timezone' => 'Africa/Libreville',
-                    'created_by' => $organizerUser->id,
+                    'created_by' => $marieUser->id,
                 ]
             );
 
