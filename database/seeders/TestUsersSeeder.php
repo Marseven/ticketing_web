@@ -33,41 +33,71 @@ class TestUsersSeeder extends Seeder
             'description' => 'Administrateur système'
         ]);
 
-        // Créer les utilisateurs de test
+        // Créer les utilisateurs de production
         $users = [
+            // Administrateur principal
             [
-                'name' => 'Utilisateur Test',
-                'email' => 'user@test.com',
-                'phone' => '+241012345678',
-                'password' => Hash::make('user123'),
+                'name' => 'Admin Primea',
+                'email' => 'admin@primea.ga',
+                'phone' => '+241011223344',
+                'password' => Hash::make('AdminPrimea2025!'),
                 'is_organizer' => false,
+                'is_admin' => true,
                 'status' => 'active',
                 'email_verified_at' => now(),
                 'phone_verified_at' => now(),
-                'role' => $clientRole
+                'role' => $adminRole
             ],
+            // Organisateurs
             [
-                'name' => 'Organisateur Test',
-                'email' => 'organizer@test.com',
-                'phone' => '+241078901234',
-                'password' => Hash::make('organizer123'),
+                'name' => 'Marie Nzougou',
+                'email' => 'marie@primea.ga',
+                'phone' => '+241077889900',
+                'password' => Hash::make('Organizer2025!'),
                 'is_organizer' => true,
+                'is_admin' => false,
                 'status' => 'active',
                 'email_verified_at' => now(),
                 'phone_verified_at' => now(),
                 'role' => $organizerRole
             ],
             [
-                'name' => 'Admin Test',
-                'email' => 'admin@test.com',
-                'phone' => '+241065432100',
-                'password' => Hash::make('admin123'),
+                'name' => 'Jean Mbeng',
+                'email' => 'jean@primea.ga',
+                'phone' => '+241066554433',
+                'password' => Hash::make('Organizer2025!'),
                 'is_organizer' => true,
+                'is_admin' => false,
                 'status' => 'active',
                 'email_verified_at' => now(),
                 'phone_verified_at' => now(),
-                'role' => $adminRole
+                'role' => $organizerRole
             ],
+            // Clients test
+            [
+                'name' => 'Alice Mboma',
+                'email' => 'alice@example.com',
+                'phone' => '+241055667788',
+                'password' => Hash::make('Client2025!'),
+                'is_organizer' => false,
+                'is_admin' => false,
+                'status' => 'active',
+                'email_verified_at' => now(),
+                'phone_verified_at' => now(),
+                'role' => $clientRole
+            ],
+            [
+                'name' => 'Paul Nguema',
+                'email' => 'paul@example.com',
+                'phone' => '+241044556677',
+                'password' => Hash::make('Client2025!'),
+                'is_organizer' => false,
+                'is_admin' => false,
+                'status' => 'active',
+                'email_verified_at' => now(),
+                'phone_verified_at' => now(),
+                'role' => $clientRole
+            ]
         ];
 
         foreach ($users as $userData) {
@@ -88,10 +118,12 @@ class TestUsersSeeder extends Seeder
             }
         }
 
-        $this->command->info('Utilisateurs de test créés avec succès !');
+        $this->command->info('Utilisateurs créés avec succès !');
         $this->command->info('Comptes disponibles :');
-        $this->command->info('- user@test.com / +241012345678 : user123 (Client)');
-        $this->command->info('- organizer@test.com / +241078901234 : organizer123 (Organisateur)');
-        $this->command->info('- admin@test.com / +241065432100 : admin123 (Admin)');
+        $this->command->info('- admin@primea.ga / +241011223344 : AdminPrimea2025! (Admin)');
+        $this->command->info('- marie@primea.ga / +241077889900 : Organizer2025! (Organisateur)');
+        $this->command->info('- jean@primea.ga / +241066554433 : Organizer2025! (Organisateur)');
+        $this->command->info('- alice@example.com / +241055667788 : Client2025! (Client)');
+        $this->command->info('- paul@example.com / +241044556677 : Client2025! (Client)');
     }
 }

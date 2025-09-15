@@ -17,31 +17,51 @@ class TestEventsSeeder extends Seeder
      */
     public function run(): void
     {
-        // Récupérer un organisateur de test
-        $organizerUser = User::where('email', 'organizer@test.com')->first();
+        // Récupérer les organisateurs
+        $marieUser = User::where('email', 'marie@primea.ga')->first();
+        $jeanUser = User::where('email', 'jean@primea.ga')->first();
         
-        if (!$organizerUser) {
+        if (!$marieUser || !$jeanUser) {
             $this->command->error('Veuillez d\'abord exécuter le seeder TestUsersSeeder');
             return;
         }
 
-        // Créer un organizer si nécessaire
-        $organizer = Organizer::firstOrCreate(
+        // Créer les organisateurs
+        $primeatOrganizer = Organizer::firstOrCreate(
             ['name' => 'Primea Events Gabon'],
             [
-                'description' => 'Organisateur principal d\'événements au Gabon',
+                'description' => 'Organisateur principal d\'événements culturels au Gabon',
                 'email' => 'contact@primea-events.ga',
                 'phone' => '+241011111111',
                 'website' => 'https://primea-events.ga',
                 'status' => 'active',
-                'created_by' => $organizerUser->id,
+                'created_by' => $marieUser->id,
+            ]
+        );
+        
+        $sportOrganizer = Organizer::firstOrCreate(
+            ['name' => 'Sport Events Gabon'],
+            [
+                'description' => 'Spécialisé dans l\'organisation d\'événements sportifs',
+                'email' => 'sport@primea-events.ga',
+                'phone' => '+241022222222',
+                'website' => 'https://sport-events.ga',
+                'status' => 'active',
+                'created_by' => $jeanUser->id,
             ]
         );
 
-        // Associer l'utilisateur à l'organizer
-        if (!$organizerUser->organizers()->where('organizer_id', $organizer->id)->exists()) {
-            $organizerUser->organizers()->attach($organizer->id, [
+        // Associer les utilisateurs aux organisateurs
+        if (!$marieUser->organizers()->where('organizer_id', $primeatOrganizer->id)->exists()) {
+            $marieUser->organizers()->attach($primeatOrganizer->id, [
                 'role' => 'admin',
+                'permissions' => json_encode(['create_events', 'manage_events', 'view_reports']),
+            ]);
+        }
+        
+        if (!$jeanUser->organizers()->where('organizer_id', $sportOrganizer->id)->exists()) {
+            $jeanUser->organizers()->attach($sportOrganizer->id, [
+                'role' => 'admin', 
                 'permissions' => json_encode(['create_events', 'manage_events', 'view_reports']),
             ]);
         }
@@ -65,8 +85,8 @@ class TestEventsSeeder extends Seeder
                 'is_active' => true,
                 'is_featured' => true,
                 'max_capacity' => 5000,
-                'organizer_id' => $organizer->id,
-                'created_by' => $organizerUser->id,
+                'organizer_id' => $primeatOrganizer->id,
+                'created_by' => $marieUser->id,
                 'start_date' => $now->copy()->addMonths(2)->setDay(15)->setHour(20)->setMinute(0),
                 'end_date' => $now->copy()->addMonths(2)->setDay(16)->setHour(4)->setMinute(0),
                 'tickets' => [
@@ -104,8 +124,8 @@ class TestEventsSeeder extends Seeder
                 'is_active' => true,
                 'is_featured' => true,
                 'max_capacity' => 2000,
-                'organizer_id' => $organizer->id,
-                'created_by' => $organizerUser->id,
+                'organizer_id' => $primeatOrganizer->id,
+                'created_by' => $marieUser->id,
                 'start_date' => $now->copy()->addMonths(2)->setDay(22)->setHour(21)->setMinute(0),
                 'end_date' => $now->copy()->addMonths(2)->setDay(23)->setHour(2)->setMinute(0),
                 'tickets' => [
@@ -145,8 +165,8 @@ class TestEventsSeeder extends Seeder
                 'is_active' => true,
                 'is_featured' => true,
                 'max_capacity' => 400,
-                'organizer_id' => $organizer->id,
-                'created_by' => $organizerUser->id,
+                'organizer_id' => $primeatOrganizer->id,
+                'created_by' => $marieUser->id,
                 'start_date' => $now->copy()->addMonths(3)->setDay(8)->setHour(19)->setMinute(0),
                 'end_date' => $now->copy()->addMonths(3)->setDay(8)->setHour(22)->setMinute(0),
                 'tickets' => [
@@ -184,8 +204,8 @@ class TestEventsSeeder extends Seeder
                 'is_active' => true,
                 'is_featured' => false,
                 'max_capacity' => 800,
-                'organizer_id' => $organizer->id,
-                'created_by' => $organizerUser->id,
+                'organizer_id' => $primeatOrganizer->id,
+                'created_by' => $marieUser->id,
                 'start_date' => $now->copy()->addMonths(3)->setDay(20)->setHour(9)->setMinute(0),
                 'end_date' => $now->copy()->addMonths(3)->setDay(20)->setHour(17)->setMinute(0),
                 'tickets' => [
@@ -225,8 +245,8 @@ class TestEventsSeeder extends Seeder
                 'is_active' => true,
                 'is_featured' => true,
                 'max_capacity' => 3000,
-                'organizer_id' => $organizer->id,
-                'created_by' => $organizerUser->id,
+                'organizer_id' => $primeatOrganizer->id,
+                'created_by' => $marieUser->id,
                 'start_date' => $now->copy()->addMonths(6)->setDay(10)->setHour(14)->setMinute(0),
                 'end_date' => $now->copy()->addMonths(6)->setDay(10)->setHour(22)->setMinute(0),
                 'tickets' => [
@@ -264,8 +284,8 @@ class TestEventsSeeder extends Seeder
                 'is_active' => true,
                 'is_featured' => true,
                 'max_capacity' => 10000,
-                'organizer_id' => $organizer->id,
-                'created_by' => $organizerUser->id,
+                'organizer_id' => $sportOrganizer->id,
+                'created_by' => $jeanUser->id,
                 'start_date' => $now->copy()->addMonths(6)->setDay(25)->setHour(15)->setMinute(0),
                 'end_date' => $now->copy()->addMonths(6)->setDay(25)->setHour(17)->setMinute(0),
                 'tickets' => [
@@ -303,8 +323,8 @@ class TestEventsSeeder extends Seeder
                 'is_active' => true,
                 'is_featured' => true,
                 'max_capacity' => 1200,
-                'organizer_id' => $organizer->id,
-                'created_by' => $organizerUser->id,
+                'organizer_id' => $primeatOrganizer->id,
+                'created_by' => $marieUser->id,
                 'start_date' => $now->copy()->addMonths(6)->setDay(5)->setHour(18)->setMinute(0),
                 'end_date' => $now->copy()->addMonths(6)->setDay(7)->setHour(23)->setMinute(0),
                 'tickets' => [
@@ -372,7 +392,7 @@ class TestEventsSeeder extends Seeder
                     array_merge($ticketData, [
                         'event_id' => $event->id,
                         'is_active' => true,
-                        'created_by' => $organizerUser->id,
+                        'created_by' => $marieUser->id,
                     ])
                 );
             }

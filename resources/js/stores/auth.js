@@ -22,7 +22,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (token.value && !user.value && !loading.value) {
       await fetchUser()
     }
-    // Plus de simulation automatique - authentification réelle uniquement
+    // Authentification réelle uniquement
   }
   
   const login = async (credentials) => {
@@ -33,7 +33,7 @@ export const useAuthStore = defineStore('auth', () => {
         password: credentials.password
       }
 
-      const response = await axios.post('/login', loginData, {
+      const response = await axios.post('/api/login', loginData, {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ export const useAuthStore = defineStore('auth', () => {
   
   const register = async (userData) => {
     try {
-      const response = await axios.post('/api/v1/auth/register', userData)
+      const response = await axios.post('/api/register', userData)
       
       token.value = response.data.token
       user.value = response.data.user
@@ -89,7 +89,7 @@ export const useAuthStore = defineStore('auth', () => {
   
   const logout = async () => {
     try {
-      await axios.post('/api/v1/auth/logout')
+      await axios.post('/api/logout')
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error)
     } finally {
@@ -105,7 +105,7 @@ export const useAuthStore = defineStore('auth', () => {
     
     loading.value = true
     try {
-      const response = await axios.get('/api/v1/auth/me')
+      const response = await axios.get('/api/me')
       user.value = response.data
     } catch (error) {
       console.error('Erreur lors de la récupération de l\'utilisateur:', error)
@@ -115,21 +115,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
   
-  // Méthode de test pour simuler une connexion admin (à retirer en production)
-  const simulateLogin = () => {
-    token.value = 'admin-token-123'
-    user.value = {
-      id: 1,
-      name: 'Admin Primea',
-      email: 'admin@primea.ga',
-      is_organizer: false,
-      is_admin: true,
-      active_tickets_count: 0,
-      role: 'admin'
-    }
-    localStorage.setItem('auth_token', token.value)
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
-  }
+  // Méthode de développement supprimée - authentification réelle uniquement
 
   return {
     user,
@@ -143,7 +129,6 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     logout,
     fetchUser,
-    initialize,
-    simulateLogin
+    initialize
   }
 })

@@ -125,21 +125,25 @@ class AuthController extends Controller
     public function login(Request $request): JsonResponse
     {
         $request->validate([
-            'email' => 'required|string|email',
+            'login' => 'required|string', // Peut être email ou téléphone
             'password' => 'required|string',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        // Déterminer si le login est un email ou un téléphone
+        $loginField = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
+        
+        $user = User::where($loginField, $request->login)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
-                'email' => ['Les informations de connexion sont incorrectes.'],
+                'login' => ['Les informations de connexion sont incorrectes.'],
             ]);
         }
 
         // Vérifier si l'utilisateur est actif
         if ($user->status !== 'active') {
             return response()->json([
+                'success' => false,
                 'message' => 'Votre compte est inactif ou suspendu.',
             ], 403);
         }
@@ -148,6 +152,7 @@ class AuthController extends Controller
         $userAgent = $request->header('User-Agent');
         if (str_contains($userAgent, 'TicketingMobile') && !$user->is_organizer) {
             return response()->json([
+                'success' => false,
                 'message' => 'Seuls les organisateurs peuvent utiliser l\'application mobile.',
             ], 403);
         }
@@ -157,16 +162,32 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        // Charger les rôles
+        $userData = $user->load('roles');
+        
+        // Déterminer le type d'utilisateur
+        $isAdmin = $userData->roles->contains('slug', 'admin');
+        $isOrganizer = $userData->roles->contains('slug', 'organizer') || $userData->is_organizer;
+        
+        // Ajouter les propriétés calculées
+        $userData->is_admin = $isAdmin;
+        $userData->is_organizer = $isOrganizer;
+
         return response()->json([
+            'success' => true,
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
                 'phone' => $user->phone,
-                'is_organizer' => $user->is_organizer,
+                'is_organizer' => $userData->is_organizer,
+                'is_admin' => $userData->is_admin,
+                'roles' => $userData->roles,
+                'active_tickets_count' => 0, // TODO: calculer
             ],
             'token' => $token,
             'message' => 'Connexion réussie',
+            'access_level' => $isAdmin ? 'admin' : ($isOrganizer ? 'organizer' : 'client')
         ]);
     }
 
@@ -226,7 +247,16 @@ class AuthController extends Controller
      */
     public function me(Request $request): JsonResponse
     {
-        $user = $request->user();
+        $user = $request->user()->load('roles');
+        
+        // Déterminer le type d'utilisateur
+        $isAdmin = $user->roles->contains('slug', 'admin');
+        $isOrganizer = $user->roles->contains('slug', 'organizer') || $user->is_organizer;
+        
+        // Ajouter les propriétés calculées
+        $user->is_admin = $isAdmin;
+        $user->is_organizer = $isOrganizer;
+        $user->active_tickets_count = 0; // TODO: calculer le vrai nombre de billets actifs
 
         // Charger les organisateurs associés si c'est un organisateur
         if ($user->is_organizer) {
@@ -234,14 +264,15 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'phone' => $user->phone,
-                'is_organizer' => $user->is_organizer,
-                'organizers' => $user->is_organizer ? $user->organizers : [],
-            ],
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'is_organizer' => $user->is_organizer,
+            'is_admin' => $user->is_admin,
+            'active_tickets_count' => $user->active_tickets_count,
+            'roles' => $user->roles,
+            'organizers' => $user->is_organizer ? $user->organizers : [],
         ]);
     }
 
