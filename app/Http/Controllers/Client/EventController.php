@@ -14,7 +14,17 @@ class EventController extends Controller
     public function index(Request $request)
     {
         $query = Event::where('status', 'published')
-            ->with(['organizer', 'schedules', 'ticketTypes', 'venue', 'category']);
+            ->with([
+                'organizer:id,name,slug',
+                'schedules' => function($q) {
+                    $q->where('status', 'active')->orderBy('starts_at');
+                },
+                'ticketTypes' => function($q) {
+                    $q->where('status', 'active')->orderBy('price');
+                },
+                'venue:id,name,city,address',
+                'category:id,name,slug'
+            ]);
 
         // Recherche par mot-clé
         if ($request->filled('search')) {
@@ -64,14 +74,61 @@ class EventController extends Controller
         if ($request->wantsJson() || $request->is('api/*')) {
             // Enrichir les données pour le frontend
             $enrichedEvents = collect($events->items())->map(function($event) {
-                // Ajouter un prix fictif aux ticket types pour l'affichage
-                if ($event->ticketTypes) {
-                    $event->ticketTypes = $event->ticketTypes->map(function($ticketType) {
-                        $ticketType->price = 10000; // Prix par défaut pour l'affichage
-                        return $ticketType;
+                // Assurer que les relations sont bien formatées
+                $eventArray = $event->toArray();
+                
+                // Ajouter des données calculées pour l'affichage
+                if ($event->ticketTypes && $event->ticketTypes->count() > 0) {
+                    $ticketTypes = $event->ticketTypes->map(function($ticketType) {
+                        return [
+                            'id' => $ticketType->id,
+                            'name' => $ticketType->name,
+                            'description' => $ticketType->description,
+                            'price' => (float) $ticketType->price,
+                            'available_quantity' => $ticketType->available_quantity,
+                            'sold_quantity' => $ticketType->sold_quantity,
+                            'remaining_quantity' => $ticketType->remaining_quantity,
+                            'is_available' => $ticketType->isAvailable(),
+                        ];
                     });
+                    $eventArray['ticket_types'] = $ticketTypes;
+                    $eventArray['min_price'] = $ticketTypes->min('price') ?? 0;
+                    $eventArray['max_price'] = $ticketTypes->max('price') ?? 0;
+                } else {
+                    $eventArray['ticket_types'] = [];
+                    $eventArray['min_price'] = 0;
+                    $eventArray['max_price'] = 0;
                 }
-                return $event;
+
+                // S'assurer que les dates sont au bon format
+                if ($event->schedules && $event->schedules->count() > 0) {
+                    $schedules = $event->schedules->map(function($schedule) {
+                        return [
+                            'id' => $schedule->id,
+                            'starts_at' => $schedule->starts_at->toISOString(),
+                            'ends_at' => $schedule->ends_at->toISOString(),
+                            'door_time' => $schedule->door_time ? $schedule->door_time->toISOString() : null,
+                            'status' => $schedule->status,
+                        ];
+                    });
+                    $eventArray['schedules'] = $schedules;
+                    $eventArray['next_schedule'] = $schedules->first();
+                } else {
+                    $eventArray['schedules'] = [];
+                    $eventArray['next_schedule'] = null;
+                }
+
+                // Ajouter des informations de venue formatées
+                if ($event->venue) {
+                    $eventArray['venue_name'] = $event->venue->name;
+                    $eventArray['venue_city'] = $event->venue->city;
+                    $eventArray['venue_address'] = $event->venue->address;
+                }
+
+                // Marquer comme featured pour certains événements (logique à définir)
+                $eventArray['is_featured'] = $event->id % 3 === 0; // Exemple: chaque 3e événement
+
+                return $eventArray;
             });
 
             return response()->json([

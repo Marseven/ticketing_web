@@ -17,9 +17,9 @@
       </div>
       
       <!-- Badge de catégorie -->
-      <div v-if="event.category?.name" class="absolute top-4 left-4">
+      <div v-if="event.category?.name || event.category_name" class="absolute top-4 left-4">
         <span class="bg-yellow-400 primea-text-blue px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide">
-          {{ event.category.name }}
+          {{ event.category?.name || event.category_name || 'Événement' }}
         </span>
       </div>
       
@@ -72,6 +72,7 @@
       <div class="flex items-center gap-1 mb-3 text-gray-600">
         <MapPinIcon class="w-4 h-4" />
         <span v-if="event.venue">{{ event.venue.name }}, {{ event.venue.city }}</span>
+        <span v-else-if="event.venue_name">{{ event.venue_name }}, {{ event.venue_city }}</span>
         <span v-else>Lieu à confirmer</span>
       </div>
 
@@ -143,26 +144,77 @@ export default {
 
     // Computed properties
     const eventDate = computed(() => {
+      // Essayer plusieurs sources de dates
+      let dateStr = null;
+      
+      // 1. Vérifier dans schedules
       if (props.event.schedules && props.event.schedules.length > 0) {
-        // L'API retourne starts_at au format "27/07/2025 20:00:00"
-        const dateStr = props.event.schedules[0].starts_at
-        if (dateStr) {
-          // Convertir le format français vers un format ISO
-          const [datePart, timePart] = dateStr.split(' ')
-          const [day, month, year] = datePart.split('/')
-          return new Date(`${year}-${month}-${day}T${timePart}`)
-        }
+        const schedule = props.event.schedules[0];
+        dateStr = schedule.starts_at;
       }
-      return null
+      
+      // 2. Vérifier dans next_schedule (ajouté par l'API)
+      if (!dateStr && props.event.next_schedule) {
+        dateStr = props.event.next_schedule.starts_at;
+      }
+      
+      if (!dateStr) {
+        return null;
+      }
+
+      try {
+        // Gérer différents formats de date
+        let date;
+        
+        // Format ISO (2024-03-15T20:00:00.000000Z)
+        if (dateStr.includes('T') || dateStr.includes('Z')) {
+          date = new Date(dateStr);
+        }
+        // Format français (27/07/2025 20:00:00)
+        else if (dateStr.includes('/')) {
+          const [datePart, timePart] = dateStr.split(' ');
+          const [day, month, year] = datePart.split('/');
+          date = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${timePart || '00:00:00'}`);
+        }
+        // Format SQL (2024-03-15 20:00:00)
+        else if (dateStr.includes('-')) {
+          // Remplacer l'espace par T pour le format ISO
+          const isoString = dateStr.replace(' ', 'T');
+          date = new Date(isoString);
+        }
+        else {
+          date = new Date(dateStr);
+        }
+
+        // Vérifier que la date est valide
+        if (isNaN(date.getTime())) {
+          console.warn('Date invalide pour l\'événement:', props.event.title, 'Date reçue:', dateStr);
+          return null;
+        }
+
+        return date;
+      } catch (error) {
+        console.error('Erreur lors du parsing de la date:', error, 'Date reçue:', dateStr);
+        return null;
+      }
     })
 
     const minPrice = computed(() => {
-      // Vérifier d'abord ticket_types (snake_case) puis ticketTypes (camelCase)
+      // Utiliser les prix pré-calculés par l'API si disponibles
+      if (props.event.min_price !== undefined && props.event.min_price !== null) {
+        return props.event.min_price;
+      }
+      
+      // Sinon calculer à partir des types de tickets
       const ticketTypes = props.event.ticket_types || props.event.ticketTypes
       if (ticketTypes && ticketTypes.length > 0) {
-        return Math.min(...ticketTypes.map(t => t.price || 0))
+        const prices = ticketTypes.map(t => parseFloat(t.price) || 0).filter(price => price > 0);
+        if (prices.length > 0) {
+          return Math.min(...prices);
+        }
       }
-      return 10000 // Prix par défaut pour l'affichage
+      
+      return 0; // Gratuit si aucun prix trouvé
     })
 
     const isEventPassed = computed(() => {
@@ -177,7 +229,14 @@ export default {
       const ticketTypes = props.event.ticket_types || props.event.ticketTypes
       if (ticketTypes && ticketTypes.length > 0) {
         return ticketTypes.reduce((total, ticketType) => {
-          return total + (ticketType.quantity - (ticketType.sold || 0))
+          // Utiliser remaining_quantity si disponible (calculé par l'API)
+          if (ticketType.remaining_quantity !== undefined && ticketType.remaining_quantity !== null) {
+            return total + ticketType.remaining_quantity;
+          }
+          // Sinon utiliser l'ancien calcul
+          const available = (ticketType.available_quantity || ticketType.quantity || 0);
+          const sold = (ticketType.sold_quantity || ticketType.sold || 0);
+          return total + Math.max(0, available - sold);
         }, 0)
       }
       return 100 // Valeur par défaut si pas d'info
@@ -216,6 +275,7 @@ export default {
     }
 
     const truncateText = (text, maxLength) => {
+      if (!text || typeof text !== 'string') return ''
       if (text.length <= maxLength) return text
       return text.substr(0, maxLength).trim() + '...'
     }
