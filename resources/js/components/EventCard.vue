@@ -1,5 +1,5 @@
 <template>
-  <article class="event-card-modern group cursor-pointer" @click="goToEvent">
+  <article v-if="event && event.title" class="event-card-modern group cursor-pointer" @click="goToEvent">
     <!-- Image de l'événement -->
     <div class="event-image">
       <img 

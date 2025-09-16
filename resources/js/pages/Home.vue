@@ -102,7 +102,7 @@
           <div v-else-if="filteredEvents.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <EventCard 
               v-for="event in filteredEvents.slice(0, 6)" 
-              :key="event.id" 
+              :key="event.id || event.slug" 
               :event="event"
               class="transform hover:scale-105 transition-all duration-300 hover:shadow-primea-lg"
             />
@@ -154,7 +154,7 @@
           <div v-else-if="featuredEvents.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <EventCard 
               v-for="event in featuredEvents.slice(0, 3)" 
-              :key="event.id" 
+              :key="event.id || event.slug" 
               :event="event"
               class="transform hover:scale-105 transition-all duration-300 hover:shadow-primea-lg"
             />

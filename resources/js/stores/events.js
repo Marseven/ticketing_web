@@ -668,7 +668,38 @@ export const useEventsStore = defineStore('events', () => {
   const getDemoEvent = (slugOrId) => {
     const demoEvents = getDemoEvents().events
     // Chercher d'abord par slug, puis par ID pour compatibilité
-    return demoEvents.find(event => event.slug === slugOrId || event.id == slugOrId) || demoEvents[0]
+    const found = demoEvents.find(event => event.slug === slugOrId || event.id == slugOrId)
+    if (found) return found
+    
+    // Si rien trouvé, créer un événement par défaut
+    return {
+      id: 1,
+      slug: slugOrId,
+      title: "Événement de démonstration",
+      description: "Ceci est un événement de démonstration pour les tests.",
+      venue_name: "Lieu de test",
+      venue_city: "Libreville",
+      category_name: "Événement",
+      image_url: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800",
+      is_featured: false,
+      schedules: [{
+        id: 1,
+        starts_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString(),
+        status: 'active'
+      }],
+      ticket_types: [{
+        id: 1,
+        name: "Standard",
+        description: "Accès standard",
+        price: 10000,
+        available_quantity: 100,
+        remaining_quantity: 100,
+        is_available: true
+      }],
+      min_price: 10000,
+      max_price: 10000
+    }
   }
 
   return {
