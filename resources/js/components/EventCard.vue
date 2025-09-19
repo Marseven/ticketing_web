@@ -102,7 +102,7 @@
 
         <!-- Bouton d'action -->
         <button 
-          @click.stop="canPurchase ? goToEvent : null"
+          @click.stop="canPurchase ? goToCheckout : null"
           :class="[
             'px-6 py-2 rounded-primea text-sm font-bold transition-all duration-200 font-primea shadow-primea border-2',
             canPurchase 
@@ -306,6 +306,10 @@ export default {
       router.push(`/events/${props.event.slug}`)
     }
 
+    const goToCheckout = () => {
+      router.push(`/checkout/${props.event.slug}`)
+    }
+
     return {
       eventDate,
       minPrice,
@@ -317,7 +321,8 @@ export default {
       formatTime,
       formatPrice,
       truncateText,
-      goToEvent
+      goToEvent,
+      goToCheckout
     }
   }
 }
