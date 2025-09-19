@@ -107,6 +107,7 @@
                   </div>
                 </div>
               </div>
+
             </div>
 
             <!-- Colonne droite - Formulaire de commande -->
@@ -180,18 +181,6 @@
                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-primea-lg focus:border-primea-blue focus:outline-none transition-colors"
                       required
                     />
-                  </div>
-                  
-                  <div>
-                    <label class="block text-sm font-semibold text-primea-blue mb-2">Email *</label>
-                    <input 
-                      type="email"
-                      v-model="orderForm.guestEmail"
-                      placeholder="votre.email@example.com"
-                      class="w-full px-4 py-3 border-2 border-gray-200 rounded-primea-lg focus:border-primea-blue focus:outline-none transition-colors"
-                      required
-                    />
-                    <p class="text-sm text-gray-500 mt-1">Vos billets vous seront envoyés par email</p>
                   </div>
                   
                   <div>
@@ -456,7 +445,6 @@ export default {
       expiryDate: '',
       cvv: '',
       guestName: '',
-      guestEmail: '',
       guestPhone: ''
     })
 
@@ -571,8 +559,8 @@ export default {
         return false
       }
 
-      // Vérifier les informations de l'invité
-      if (!orderForm.value.guestName || !orderForm.value.guestEmail) {
+      // Vérifier les informations de l'invité (seulement le nom est obligatoire)
+      if (!orderForm.value.guestName) {
         return false
       }
 
@@ -653,6 +641,33 @@ export default {
       } finally {
         eventLoading.value = false
       }
+    }
+
+    const updateCountdown = () => {
+      const timeLeft = timeUntilEvent.value
+      if (timeLeft) {
+        countdown.value = {
+          days: timeLeft.days,
+          hours: timeLeft.hours,
+          minutes: timeLeft.minutes,
+          seconds: timeLeft.seconds
+        }
+      }
+    }
+
+    const startCountdown = () => {
+      // Mise à jour initiale
+      updateCountdown()
+      
+      // Mise à jour chaque seconde
+      countdownTimer.value = setInterval(() => {
+        updateCountdown()
+        
+        // Arrêter le timer si l'événement est passé
+        if (timeUntilEvent.value?.expired) {
+          clearInterval(countdownTimer.value)
+        }
+      }, 1000)
     }
 
     const validatePhoneNumber = () => {
@@ -738,32 +753,6 @@ export default {
             `Événement: ${event.value?.title}`)
     }
 
-    const updateCountdown = () => {
-      const timeLeft = timeUntilEvent.value
-      if (timeLeft) {
-        countdown.value = {
-          days: timeLeft.days,
-          hours: timeLeft.hours,
-          minutes: timeLeft.minutes,
-          seconds: timeLeft.seconds
-        }
-      }
-    }
-
-    const startCountdown = () => {
-      // Mise à jour initiale
-      updateCountdown()
-      
-      // Mise à jour chaque seconde
-      countdownTimer.value = setInterval(() => {
-        updateCountdown()
-        
-        // Arrêter le timer si l'événement est passé
-        if (timeUntilEvent.value?.expired) {
-          clearInterval(countdownTimer.value)
-        }
-      }, 1000)
-    }
 
     const processOrder = async () => {
       try {
@@ -786,7 +775,6 @@ export default {
           ticket_type_id: orderForm.value.ticketTypeId,
           quantity: orderForm.value.quantity,
           guest_name: orderForm.value.guestName,
-          guest_email: orderForm.value.guestEmail,
           guest_phone: orderForm.value.guestPhone || null
         }
 
