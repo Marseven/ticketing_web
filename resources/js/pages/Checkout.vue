@@ -89,21 +89,21 @@
                 </div>
 
                 <div v-else class="flex justify-center space-x-2">
-                  <div v-if="countdown.days > 0" class="text-center bg-primea-blue text-white rounded-primea-lg p-4 min-w-[70px]">
-                    <div class="text-2xl font-bold">{{ countdown.days }}</div>
-                    <div class="text-xs text-primea-yellow">JOURS</div>
+                  <div v-if="countdown.days > 0" class="text-center bg-gray-100 border-2 border-primea-blue rounded-primea-lg p-4 min-w-[70px]">
+                    <div class="text-2xl font-bold text-primea-blue">{{ countdown.days }}</div>
+                    <div class="text-xs text-gray-600">JOURS</div>
                   </div>
-                  <div class="text-center bg-primea-blue text-white rounded-primea-lg p-4 min-w-[70px]">
-                    <div class="text-2xl font-bold">{{ countdown.hours }}</div>
-                    <div class="text-xs text-primea-yellow">HEURES</div>
+                  <div class="text-center bg-gray-100 border-2 border-primea-blue rounded-primea-lg p-4 min-w-[70px]">
+                    <div class="text-2xl font-bold text-primea-blue">{{ countdown.hours }}</div>
+                    <div class="text-xs text-gray-600">HEURES</div>
                   </div>
-                  <div class="text-center bg-primea-blue text-white rounded-primea-lg p-4 min-w-[70px]">
-                    <div class="text-2xl font-bold">{{ countdown.minutes }}</div>
-                    <div class="text-xs text-primea-yellow">MIN</div>
+                  <div class="text-center bg-gray-100 border-2 border-primea-blue rounded-primea-lg p-4 min-w-[70px]">
+                    <div class="text-2xl font-bold text-primea-blue">{{ countdown.minutes }}</div>
+                    <div class="text-xs text-gray-600">MIN</div>
                   </div>
-                  <div class="text-center bg-primea-blue text-white rounded-primea-lg p-4 min-w-[70px]">
-                    <div class="text-2xl font-bold">{{ countdown.seconds }}</div>
-                    <div class="text-xs text-primea-yellow">SEC</div>
+                  <div class="text-center bg-gray-100 border-2 border-primea-blue rounded-primea-lg p-4 min-w-[70px]">
+                    <div class="text-2xl font-bold text-primea-blue">{{ countdown.seconds }}</div>
+                    <div class="text-xs text-gray-600">SEC</div>
                   </div>
                 </div>
               </div>
