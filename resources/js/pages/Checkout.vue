@@ -580,8 +580,8 @@ export default {
     }
 
     const loadEvent = async () => {
-      const eventId = route.params.eventId
-      if (!eventId) {
+      const eventSlug = route.params.eventSlug
+      if (!eventSlug) {
         eventError.value = 'ID d\'événement manquant'
         eventLoading.value = false
         return
@@ -591,7 +591,7 @@ export default {
         eventLoading.value = true
         eventError.value = ''
         
-        const data = await eventsStore.fetchEvent(eventId)
+        const data = await eventsStore.fetchEvent(eventSlug)
         event.value = data.event
         
         // Si l'événement n'a qu'un seul type de billet, le sélectionner automatiquement
@@ -660,7 +660,7 @@ export default {
       // Simuler la redirection vers un gateway de paiement Visa
       // Dans un vrai cas, cela redirigerait vers Stripe, PayPal, ou un autre processeur
       const paymentData = {
-        eventId: route.params.eventId,
+        eventSlug: route.params.eventSlug,
         eventTitle: event.value?.title,
         quantity: orderForm.value.quantity,
         ticketTypeId: orderForm.value.ticketTypeId,
