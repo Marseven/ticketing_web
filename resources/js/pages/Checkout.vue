@@ -185,11 +185,11 @@
                   
                   <div>
                     <label class="block text-sm font-semibold text-primea-blue mb-2">Téléphone (optionnel)</label>
-                    <input 
-                      type="tel"
+                    <PhoneInput
                       v-model="orderForm.guestPhone"
-                      placeholder="+241 XX XX XX XX"
-                      class="w-full px-4 py-3 border-2 border-gray-200 rounded-primea-lg focus:border-primea-blue focus:outline-none transition-colors"
+                      id="guest-phone"
+                      placeholder="01 23 45 67"
+                      class="w-full"
                     />
                   </div>
                 </div>
@@ -392,6 +392,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useEventsStore } from '../stores/events'
 import { guestService } from '../services/api'
+import PhoneInput from '../components/PhoneInput.vue'
 import { 
   ExclamationCircleIcon,
   PhotoIcon,
@@ -404,6 +405,7 @@ import {
 export default {
   name: 'Checkout',
   components: {
+    PhoneInput,
     ExclamationCircleIcon,
     PhotoIcon,
     MapPinIcon,
