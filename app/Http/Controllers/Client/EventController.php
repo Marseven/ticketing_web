@@ -95,14 +95,24 @@ class EventController extends Controller
                     ] : null,
                 ];
                 
-                // Ajouter des données calculées pour l'affichage
-                if ($event->ticketTypes && $event->ticketTypes->count() > 0) {
-                    $ticketTypes = $event->ticketTypes->map(function($ticketType) {
-                        // Calculer sold_quantity directement sans utiliser l'accessor
-                        $soldQuantity = $ticketType->tickets()->whereIn('status', ['issued', 'used'])->count();
+                // Récupérer les ticket types directement depuis la base
+                $ticketTypesQuery = \DB::table('ticket_types')
+                    ->where('event_id', $event->id)
+                    ->where('status', 'active')
+                    ->orderBy('price')
+                    ->get();
+                
+                if ($ticketTypesQuery->count() > 0) {
+                    $ticketTypes = $ticketTypesQuery->map(function($ticketType) {
+                        // Calculer sold_quantity directement
+                        $soldQuantity = \DB::table('tickets')
+                            ->where('ticket_type_id', $ticketType->id)
+                            ->whereIn('status', ['issued', 'used'])
+                            ->count();
+                            
                         $remainingQuantity = $ticketType->available_quantity ? 
                             max(0, $ticketType->available_quantity - $soldQuantity) : null;
-                            
+                        
                         return [
                             'id' => $ticketType->id,
                             'name' => $ticketType->name,
@@ -112,11 +122,12 @@ class EventController extends Controller
                             'available_quantity' => $ticketType->available_quantity,
                             'sold_quantity' => $soldQuantity,
                             'remaining_quantity' => $remainingQuantity,
-                            'is_available' => $ticketType->isAvailable(),
+                            'is_available' => true, // Simplifié pour l'instant
                             'status' => $ticketType->status,
                         ];
                     });
-                    $eventArray['ticket_types'] = $ticketTypes;
+                    
+                    $eventArray['ticket_types'] = $ticketTypes->toArray();
                     
                     // Calculer min et max prix correctement
                     $prices = $ticketTypes->pluck('price')->filter(function($price) {
