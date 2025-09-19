@@ -53,7 +53,7 @@
                   <div class="absolute inset-0 bg-primea-blue/60"></div>
                   <div class="absolute inset-0 p-6 text-white flex flex-col justify-end">
                     <div class="bg-primea-yellow text-primea-blue px-3 py-1 rounded-primea text-sm font-bold w-fit mb-2">
-                      {{ event?.category?.toUpperCase() || 'ÉVÉNEMENT' }}
+                      {{ (event?.category?.name || event?.category_name || event?.category || 'ÉVÉNEMENT').toUpperCase() }}
                     </div>
                     <h2 class="text-2xl font-bold mb-2">{{ event?.title || 'Chargement...' }}</h2>
                     <p class="text-white/90">{{ formatEventDate }}</p>
@@ -159,7 +159,7 @@
                       :value="ticketType.id"
                     >
                       {{ ticketType.name }} - {{ formatPrice(ticketType.price) }} FCFA 
-                      ({{ ticketType.quantity - (ticketType.sold || 0) }} disponibles)
+                      ({{ getAvailableQuantityText(ticketType) }})
                     </option>
                   </select>
                   <div v-if="availableTicketTypes.length === 0 && !eventLoading" class="text-sm text-red-600 mt-1">
@@ -531,9 +531,23 @@ export default {
 
     const availableTicketTypes = computed(() => {
       if (!event.value?.ticket_types || isEventPassed.value) return []
-      return event.value.ticket_types.filter(type => 
-        (type.quantity - (type.sold || 0)) > 0
-      )
+      return event.value.ticket_types.filter(type => {
+        // Si remaining_quantity est défini, l'utiliser
+        if (type.remaining_quantity !== undefined && type.remaining_quantity !== null) {
+          return type.remaining_quantity > 0;
+        }
+        // Sinon, si available_quantity est défini
+        if (type.available_quantity !== undefined && type.available_quantity !== null) {
+          const sold = type.sold_quantity || 0;
+          return (type.available_quantity - sold) > 0;
+        }
+        // Si available_quantity est null (quantité illimitée)
+        if (type.available_quantity === null) {
+          return true;
+        }
+        // Fallback sur l'ancien calcul
+        return (type.quantity - (type.sold || 0)) > 0
+      })
     })
 
     const canPurchaseTickets = computed(() => {
@@ -577,6 +591,22 @@ export default {
     // Méthodes
     const formatPrice = (price) => {
       return new Intl.NumberFormat('fr-FR').format(price)
+    }
+
+    const getAvailableQuantityText = (ticketType) => {
+      if (ticketType.remaining_quantity !== undefined && ticketType.remaining_quantity !== null) {
+        return ticketType.remaining_quantity > 0 ? `${ticketType.remaining_quantity} disponibles` : 'Épuisé'
+      }
+      if (ticketType.available_quantity === null) {
+        return 'Illimité'
+      }
+      if (ticketType.available_quantity !== undefined && ticketType.available_quantity !== null) {
+        const remaining = ticketType.available_quantity - (ticketType.sold_quantity || 0)
+        return remaining > 0 ? `${remaining} disponibles` : 'Épuisé'
+      }
+      // Fallback
+      const qty = ticketType.quantity - (ticketType.sold || 0)
+      return qty > 0 ? `${qty} disponibles` : 'Épuisé'
     }
 
     const loadEvent = async () => {
@@ -803,6 +833,7 @@ export default {
       availableTicketTypes,
       canPurchaseTickets,
       formatPrice,
+      getAvailableQuantityText,
       loadEvent,
       validatePhoneNumber,
       selectPaymentMethod,
