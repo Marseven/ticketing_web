@@ -1,0 +1,538 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Models\Organizer;
+use App\Models\Event;
+use App\Models\Order;
+use App\Models\Payment;
+use App\Models\Payout;
+use App\Models\OrganizerBalance;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
+class AdminController extends Controller
+{
+    /**
+     * Admin dashboard avec statistiques complètes
+     */
+    public function dashboard(Request $request): JsonResponse
+    {
+        try {
+            // Statistiques générales
+            $stats = [
+                'total_users' => User::count(),
+                'total_organizers' => Organizer::count(),
+                'total_events' => Event::count(),
+                'total_balance' => OrganizerBalance::sum('balance'),
+                'orders_today' => Order::whereDate('created_at', today())->count(),
+                'revenue_today' => Payment::where('status', 'success')
+                    ->whereDate('created_at', today())
+                    ->sum('amount'),
+                'tickets_sold' => DB::table('tickets')
+                    ->whereIn('status', ['issued', 'used'])
+                    ->count(),
+                'failed_payments' => Payment::where('status', 'failed')
+                    ->whereDate('created_at', today())
+                    ->count(),
+            ];
+
+            // Commandes récentes
+            $recentOrders = Order::with(['event', 'organizer'])
+                ->orderBy('created_at', 'desc')
+                ->limit(10)
+                ->get();
+
+            // Activité récente (simulée pour l'exemple)
+            $recentActivity = collect([
+                [
+                    'id' => 1,
+                    'type' => 'order',
+                    'description' => 'Nouvelle commande #' . $recentOrders->first()?->reference,
+                    'created_at' => now()->subMinutes(5),
+                ],
+                [
+                    'id' => 2,
+                    'type' => 'payment',
+                    'description' => 'Paiement de ' . number_format(15000) . ' XAF reçu',
+                    'created_at' => now()->subMinutes(15),
+                ],
+                [
+                    'id' => 3,
+                    'type' => 'user',
+                    'description' => 'Nouvel utilisateur inscrit',
+                    'created_at' => now()->subHours(1),
+                ],
+                [
+                    'id' => 4,
+                    'type' => 'payout',
+                    'description' => 'Payout de ' . number_format(25000) . ' XAF traité',
+                    'created_at' => now()->subHours(2),
+                ],
+            ]);
+
+            // Données de revenus des 7 derniers jours
+            $revenueData = Payment::where('status', 'success')
+                ->where('created_at', '>=', now()->subDays(7))
+                ->select(
+                    DB::raw('DATE(created_at) as date'),
+                    DB::raw('SUM(amount) as amount')
+                )
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
+
+            // Top événements
+            $topEvents = Event::with(['organizer'])
+                ->withCount(['tickets as tickets_sold' => function ($query) {
+                    $query->whereIn('status', ['issued', 'used']);
+                }])
+                ->withSum(['tickets as revenue' => function ($query) {
+                    $query->join('ticket_types', 'tickets.ticket_type_id', '=', 'ticket_types.id')
+                        ->whereIn('tickets.status', ['issued', 'used']);
+                }], 'ticket_types.price')
+                ->orderBy('tickets_sold', 'desc')
+                ->limit(5)
+                ->get()
+                ->map(function ($event) {
+                    return [
+                        'id' => $event->id,
+                        'title' => $event->title,
+                        'organizer_name' => $event->organizer->name,
+                        'tickets_sold' => $event->tickets_sold,
+                        'revenue' => $event->revenue ?: 0,
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'stats' => $stats,
+                    'recent_orders' => $recentOrders,
+                    'recent_activity' => $recentActivity,
+                    'revenue_data' => $revenueData,
+                    'top_events' => $topEvents,
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur dashboard admin', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors du chargement du dashboard'
+            ], 500);
+        }
+    }
+
+    /**
+     * Gestion des utilisateurs - Liste avec filtres
+     */
+    public function users(Request $request): JsonResponse
+    {
+        try {
+            $query = User::query();
+
+            // Filtres
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
+            }
+
+            if ($request->filled('role')) {
+                if ($request->role === 'admin') {
+                    $query->where('is_admin', true);
+                } elseif ($request->role === 'organizer') {
+                    $query->where('is_organizer', true);
+                } elseif ($request->role === 'client') {
+                    $query->where('is_admin', false)->where('is_organizer', false);
+                }
+            }
+
+            if ($request->filled('status')) {
+                if ($request->status === 'active') {
+                    $query->whereNull('deleted_at');
+                } elseif ($request->status === 'inactive') {
+                    $query->whereNotNull('deleted_at');
+                }
+            }
+
+            $users = $query->withCount(['organizers'])
+                ->orderBy('created_at', 'desc')
+                ->paginate(20);
+
+            return response()->json([
+                'success' => true,
+                'data' => ['users' => $users]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur liste utilisateurs admin', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors du chargement des utilisateurs'
+            ], 500);
+        }
+    }
+
+    /**
+     * Créer un utilisateur
+     */
+    public function createUser(Request $request): JsonResponse
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+            'is_admin' => 'boolean',
+            'is_organizer' => 'boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
+                'is_admin' => $request->boolean('is_admin'),
+                'is_organizer' => $request->boolean('is_organizer'),
+                'email_verified_at' => now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Utilisateur créé avec succès',
+                'data' => ['user' => $user]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur création utilisateur admin', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de la création'
+            ], 500);
+        }
+    }
+
+    /**
+     * Mettre à jour un utilisateur
+     */
+    public function updateUser(Request $request, User $user): JsonResponse
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'sometimes|string|min:8',
+            'is_admin' => 'sometimes|boolean',
+            'is_organizer' => 'sometimes|boolean',
+            'is_active' => 'sometimes|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $updateData = $request->only(['name', 'email', 'is_admin', 'is_organizer']);
+
+            if ($request->filled('password')) {
+                $updateData['password'] = bcrypt($request->password);
+            }
+
+            $user->update($updateData);
+
+            // Gestion activation/désactivation
+            if ($request->has('is_active')) {
+                if ($request->boolean('is_active')) {
+                    $user->restore();
+                } else {
+                    $user->delete();
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Utilisateur mis à jour avec succès',
+                'data' => ['user' => $user->fresh()]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur mise à jour utilisateur admin', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de la mise à jour'
+            ], 500);
+        }
+    }
+
+    /**
+     * Activer/Désactiver un utilisateur
+     */
+    public function toggleUserStatus(User $user): JsonResponse
+    {
+        try {
+            if ($user->trashed()) {
+                $user->restore();
+                $message = 'Utilisateur activé avec succès';
+            } else {
+                $user->delete();
+                $message = 'Utilisateur désactivé avec succès';
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'data' => ['user' => $user->fresh()]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur toggle statut utilisateur', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors du changement de statut'
+            ], 500);
+        }
+    }
+
+    /**
+     * Gestion des organisateurs - Liste avec filtres
+     */
+    public function organizers(Request $request): JsonResponse
+    {
+        try {
+            $query = Organizer::with(['users']);
+
+            // Filtres
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('contact_email', 'like', "%{$search}%");
+                });
+            }
+
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
+            if ($request->filled('verified')) {
+                if ($request->boolean('verified')) {
+                    $query->whereNotNull('verified_at');
+                } else {
+                    $query->whereNull('verified_at');
+                }
+            }
+
+            $organizers = $query->withCount(['events'])
+                ->orderBy('created_at', 'desc')
+                ->paginate(20);
+
+            return response()->json([
+                'success' => true,
+                'data' => ['organizers' => $organizers]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur liste organisateurs admin', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors du chargement des organisateurs'
+            ], 500);
+        }
+    }
+
+    /**
+     * Créer un organisateur
+     */
+    public function createOrganizer(Request $request): JsonResponse
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'contact_email' => 'required|email|max:255',
+            'contact_phone' => 'nullable|string|max:20',
+            'website_url' => 'nullable|url|max:255',
+            'status' => 'required|in:active,inactive,suspended',
+            'user_ids' => 'nullable|array',
+            'user_ids.*' => 'exists:users,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $organizer = Organizer::create([
+                'name' => $request->name,
+                'description' => $request->description,
+                'contact_email' => $request->contact_email,
+                'contact_phone' => $request->contact_phone,
+                'website_url' => $request->website_url,
+                'status' => $request->status,
+                'verified_at' => $request->status === 'active' ? now() : null,
+            ]);
+
+            // Associer les utilisateurs
+            if ($request->filled('user_ids')) {
+                $organizer->users()->attach($request->user_ids, [
+                    'role' => 'admin',
+                    'permissions' => json_encode(['manage_events', 'view_analytics']),
+                ]);
+
+                // Marquer les utilisateurs comme organisateurs
+                User::whereIn('id', $request->user_ids)->update(['is_organizer' => true]);
+            }
+
+            // Créer les balances par défaut
+            foreach (['airtelmoney', 'moovmoney'] as $gateway) {
+                OrganizerBalance::create([
+                    'organizer_id' => $organizer->id,
+                    'gateway' => $gateway,
+                    'balance' => 0,
+                    'auto_payout_enabled' => false,
+                    'auto_payout_threshold' => 10000,
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Organisateur créé avec succès',
+                'data' => ['organizer' => $organizer->load('users')]
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Erreur création organisateur admin', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de la création'
+            ], 500);
+        }
+    }
+
+    /**
+     * Mettre à jour un organisateur
+     */
+    public function updateOrganizer(Request $request, Organizer $organizer): JsonResponse
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'name' => 'sometimes|string|max:255',
+            'description' => 'nullable|string',
+            'contact_email' => 'sometimes|email|max:255',
+            'contact_phone' => 'nullable|string|max:20',
+            'website_url' => 'nullable|url|max:255',
+            'status' => 'sometimes|in:active,inactive,suspended',
+            'user_ids' => 'nullable|array',
+            'user_ids.*' => 'exists:users,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $updateData = $request->only([
+                'name', 'description', 'contact_email', 
+                'contact_phone', 'website_url', 'status'
+            ]);
+
+            // Gérer la vérification
+            if ($request->filled('status') && $request->status === 'active' && !$organizer->verified_at) {
+                $updateData['verified_at'] = now();
+            } elseif ($request->filled('status') && $request->status !== 'active') {
+                $updateData['verified_at'] = null;
+            }
+
+            $organizer->update($updateData);
+
+            // Mettre à jour les associations utilisateurs
+            if ($request->has('user_ids')) {
+                // Retirer le statut organisateur des anciens utilisateurs
+                $oldUserIds = $organizer->users->pluck('id')->toArray();
+                User::whereIn('id', $oldUserIds)->update(['is_organizer' => false]);
+
+                // Mettre à jour les associations
+                $organizer->users()->sync($request->user_ids);
+
+                // Marquer les nouveaux utilisateurs comme organisateurs
+                if (!empty($request->user_ids)) {
+                    User::whereIn('id', $request->user_ids)->update(['is_organizer' => true]);
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Organisateur mis à jour avec succès',
+                'data' => ['organizer' => $organizer->fresh()->load('users')]
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Erreur mise à jour organisateur admin', [
+                'organizer_id' => $organizer->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de la mise à jour'
+            ], 500);
+        }
+    }
+}

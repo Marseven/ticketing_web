@@ -182,4 +182,285 @@ class OrganizerController extends Controller
             'recent_events' => $recentEvents,
         ]);
     }
+
+    /**
+     * Get organizer balances
+     */
+    public function balances(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        if (!$user->is_organizer) {
+            return response()->json([
+                'message' => 'Accès refusé. Seuls les organisateurs peuvent accéder aux balances.',
+            ], 403);
+        }
+
+        $organizerIds = $user->organizers->pluck('id');
+
+        $balances = \App\Models\OrganizerBalance::whereIn('organizer_id', $organizerIds)
+            ->with(['organizer:id,name'])
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => ['balances' => $balances]
+        ]);
+    }
+
+    /**
+     * Request a payout
+     */
+    public function requestPayout(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        if (!$user->is_organizer) {
+            return response()->json([
+                'message' => 'Accès refusé. Seuls les organisateurs peuvent demander des payouts.',
+            ], 403);
+        }
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'gateway' => 'required|string|in:airtelmoney,moovmoney',
+            'amount' => 'required|numeric|min:1000',
+            'phone_number' => 'required|string|size:9|regex:/^[0-9]+$/',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $organizerIds = $user->organizers->pluck('id');
+
+        // Vérifier le solde disponible
+        $balance = \App\Models\OrganizerBalance::whereIn('organizer_id', $organizerIds)
+            ->where('gateway', $request->gateway)
+            ->first();
+
+        if (!$balance || $balance->balance < $request->amount) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Solde insuffisant pour ce payout'
+            ], 400);
+        }
+
+        try {
+            $payoutService = app(\App\Services\PayoutService::class);
+            
+            $result = $payoutService->createManualPayout(
+                $balance->organizer_id,
+                $request->gateway,
+                $request->amount,
+                $request->phone_number
+            );
+
+            if ($result['success']) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Demande de payout créée avec succès',
+                    'data' => ['payout' => $result['payout']]
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => $result['message']
+            ], 400);
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Erreur demande payout organisateur', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de la demande de payout'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get organizer events
+     */
+    public function events(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        if (!$user->is_organizer) {
+            return response()->json([
+                'message' => 'Accès refusé. Seuls les organisateurs peuvent accéder aux événements.',
+            ], 403);
+        }
+
+        $organizerIds = $user->organizers->pluck('id');
+
+        $query = Event::whereIn('organizer_id', $organizerIds)
+            ->with(['schedules', 'ticketTypes', 'venue', 'category'])
+            ->orderBy('created_at', 'desc');
+
+        // Filtres
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $events = $query->paginate(15);
+
+        return response()->json([
+            'success' => true,
+            'data' => ['events' => $events]
+        ]);
+    }
+
+    /**
+     * Get event sales details
+     */
+    public function eventSales(Request $request, $eventId): JsonResponse
+    {
+        $user = $request->user();
+        
+        if (!$user->is_organizer) {
+            return response()->json([
+                'message' => 'Accès refusé. Seuls les organisateurs peuvent accéder aux ventes.',
+            ], 403);
+        }
+
+        $organizerIds = $user->organizers->pluck('id');
+
+        $event = Event::whereIn('organizer_id', $organizerIds)
+            ->with(['tickets.ticketType', 'tickets.order'])
+            ->findOrFail($eventId);
+
+        // Statistiques des ventes
+        $totalTickets = $event->tickets->count();
+        $soldTickets = $event->tickets->whereIn('status', ['issued', 'used'])->count();
+        $usedTickets = $event->tickets->where('status', 'used')->count();
+        $revenue = $event->tickets->whereIn('status', ['issued', 'used'])
+            ->sum(function($ticket) {
+                return $ticket->ticketType->price;
+            });
+
+        // Ventes par type de ticket
+        $salesByType = $event->ticketTypes->map(function($type) {
+            $tickets = $type->tickets;
+            return [
+                'type_name' => $type->name,
+                'price' => $type->price,
+                'total_capacity' => $type->capacity,
+                'sold' => $tickets->whereIn('status', ['issued', 'used'])->count(),
+                'used' => $tickets->where('status', 'used')->count(),
+                'revenue' => $tickets->whereIn('status', ['issued', 'used'])->count() * $type->price,
+            ];
+        });
+
+        // Ventes par jour
+        $salesByDay = $event->tickets->whereIn('status', ['issued', 'used'])
+            ->groupBy(function($ticket) {
+                return $ticket->created_at->format('Y-m-d');
+            })
+            ->map(function($tickets, $date) {
+                return [
+                    'date' => $date,
+                    'count' => $tickets->count(),
+                    'revenue' => $tickets->sum(function($ticket) {
+                        return $ticket->ticketType->price;
+                    }),
+                ];
+            })->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'event' => $event,
+                'stats' => [
+                    'total_tickets' => $totalTickets,
+                    'sold_tickets' => $soldTickets,
+                    'used_tickets' => $usedTickets,
+                    'revenue' => $revenue,
+                    'usage_rate' => $soldTickets > 0 ? round(($usedTickets / $soldTickets) * 100, 1) : 0,
+                ],
+                'sales_by_type' => $salesByType,
+                'sales_by_day' => $salesByDay,
+            ]
+        ]);
+    }
+
+    /**
+     * Get organizer payments
+     */
+    public function payments(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        if (!$user->is_organizer) {
+            return response()->json([
+                'message' => 'Accès refusé. Seuls les organisateurs peuvent accéder aux paiements.',
+            ], 403);
+        }
+
+        $organizerIds = $user->organizers->pluck('id');
+
+        $query = \App\Models\Payment::whereHas('order', function($q) use ($organizerIds) {
+            $q->whereIn('organizer_id', $organizerIds);
+        })
+        ->with(['order.event', 'order.organizer'])
+        ->orderBy('created_at', 'desc');
+
+        // Filtres
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('gateway')) {
+            $query->where('gateway', $request->gateway);
+        }
+
+        $payments = $query->paginate(20);
+
+        return response()->json([
+            'success' => true,
+            'data' => ['payments' => $payments]
+        ]);
+    }
+
+    /**
+     * Get organizer payouts
+     */
+    public function payouts(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        if (!$user->is_organizer) {
+            return response()->json([
+                'message' => 'Accès refusé. Seuls les organisateurs peuvent accéder aux payouts.',
+            ], 403);
+        }
+
+        $organizerIds = $user->organizers->pluck('id');
+
+        $query = \App\Models\Payout::whereIn('organizer_id', $organizerIds)
+            ->with(['organizer'])
+            ->orderBy('created_at', 'desc');
+
+        // Filtres
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('gateway')) {
+            $query->where('gateway', $request->gateway);
+        }
+
+        $payouts = $query->paginate(20);
+
+        return response()->json([
+            'success' => true,
+            'data' => ['payouts' => $payouts]
+        ]);
+    }
 }

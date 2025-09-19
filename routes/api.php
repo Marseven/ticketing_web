@@ -116,6 +116,12 @@ Route::prefix('v1')->group(function () {
     // Routes de l'espace organisateur
     Route::prefix('organizer')->middleware('auth:sanctum')->group(function () {
         Route::get('dashboard', [App\Http\Controllers\Api\OrganizerController::class, 'dashboard']);
+        Route::get('balances', [App\Http\Controllers\Api\OrganizerController::class, 'balances']);
+        Route::post('payouts', [App\Http\Controllers\Api\OrganizerController::class, 'requestPayout']);
+        Route::get('payouts', [App\Http\Controllers\Api\OrganizerController::class, 'payouts']);
+        Route::get('events', [App\Http\Controllers\Api\OrganizerController::class, 'events']);
+        Route::get('events/{eventId}/sales', [App\Http\Controllers\Api\OrganizerController::class, 'eventSales']);
+        Route::get('payments', [App\Http\Controllers\Api\OrganizerController::class, 'payments']);
         Route::get('/', [App\Http\Controllers\Api\OrganizerController::class, 'index']);
         Route::get('{organizer:slug}', [App\Http\Controllers\Api\OrganizerController::class, 'show']);
         Route::get('{organizer:slug}/stats', [App\Http\Controllers\Api\OrganizerController::class, 'stats']);
@@ -137,8 +143,28 @@ Route::prefix('v1')->group(function () {
         Route::post('shap-payout', [App\Http\Controllers\Api\WebhookController::class, 'shapPayout'])->name('webhook.shap-payout');
     });
 
-    // Routes d'administration pour les payouts
+    // Routes d'administration
     Route::prefix('admin')->middleware(['auth:sanctum', 'admin.access'])->group(function () {
+        // Dashboard
+        Route::get('dashboard', [App\Http\Controllers\Admin\AdminController::class, 'dashboard']);
+        
+        // Gestion des utilisateurs
+        Route::prefix('users')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'users']);
+            Route::post('/', [App\Http\Controllers\Admin\AdminController::class, 'createUser']);
+            Route::put('{user}', [App\Http\Controllers\Admin\AdminController::class, 'updateUser']);
+            Route::post('{user}/toggle-status', [App\Http\Controllers\Admin\AdminController::class, 'toggleUserStatus']);
+        });
+        
+        // Gestion des organisateurs
+        Route::prefix('organizers')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'organizers']);
+            Route::post('/', [App\Http\Controllers\Admin\AdminController::class, 'createOrganizer']);
+            Route::put('{organizer}', [App\Http\Controllers\Admin\AdminController::class, 'updateOrganizer']);
+            Route::put('{organizer}/auto-payout-config', [App\Http\Controllers\Admin\PayoutController::class, 'updateAutoPayoutConfig']);
+        });
+        
+        // Gestion des payouts
         Route::prefix('payouts')->group(function () {
             Route::get('/', [App\Http\Controllers\Admin\PayoutController::class, 'index']);
             Route::post('/', [App\Http\Controllers\Admin\PayoutController::class, 'store']);
@@ -148,11 +174,6 @@ Route::prefix('v1')->group(function () {
             Route::post('check-all-pending', [App\Http\Controllers\Admin\PayoutController::class, 'checkAllPending']);
             Route::get('{payout}', [App\Http\Controllers\Admin\PayoutController::class, 'show']);
             Route::post('{payout}/check-status', [App\Http\Controllers\Admin\PayoutController::class, 'checkStatus']);
-        });
-        
-        Route::prefix('organizers')->group(function () {
-            Route::get('/', [App\Http\Controllers\Admin\PayoutController::class, 'organizers']);
-            Route::put('{organizer}/auto-payout-config', [App\Http\Controllers\Admin\PayoutController::class, 'updateAutoPayoutConfig']);
         });
     });
 });
