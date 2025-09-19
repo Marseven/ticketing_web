@@ -273,12 +273,6 @@ class EventController extends Controller
                 ->get();
             
             if ($ticketTypesQuery->count() > 0) {
-                // DEBUG: Log pour vérifier les données récupérées
-                \Log::info('DEBUG EventController show - Raw ticket types:', [
-                    'count' => $ticketTypesQuery->count(),
-                    'first_ticket' => $ticketTypesQuery->first()
-                ]);
-                
                 $ticketTypes = $ticketTypesQuery->map(function($ticketType) {
                     // Calculer sold_quantity directement
                     $soldQuantity = \DB::table('tickets')
