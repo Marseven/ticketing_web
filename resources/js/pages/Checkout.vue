@@ -53,7 +53,7 @@
                   <div class="absolute inset-0 bg-primea-blue/60"></div>
                   <div class="absolute inset-0 p-6 text-white flex flex-col justify-end">
                     <div class="bg-primea-yellow text-primea-blue px-3 py-1 rounded-primea text-sm font-bold w-fit mb-2">
-                      {{ (event?.category?.name || event?.category_name || event?.category || 'ÉVÉNEMENT').toUpperCase() }}
+                      {{ getCategoryName() }}
                     </div>
                     <h2 class="text-2xl font-bold mb-2">{{ event?.title || 'Chargement...' }}</h2>
                     <p class="text-white/90">{{ formatEventDate }}</p>
@@ -609,6 +609,25 @@ export default {
       return qty > 0 ? `${qty} disponibles` : 'Épuisé'
     }
 
+    const getCategoryName = () => {
+      if (!event.value) return 'ÉVÉNEMENT'
+      
+      // Si category est un objet avec name
+      if (event.value.category && typeof event.value.category === 'object' && event.value.category.name) {
+        return event.value.category.name.toUpperCase()
+      }
+      // Si category est une chaîne
+      if (event.value.category && typeof event.value.category === 'string') {
+        return event.value.category.toUpperCase()
+      }
+      // Si category_name existe
+      if (event.value.category_name && typeof event.value.category_name === 'string') {
+        return event.value.category_name.toUpperCase()
+      }
+      
+      return 'ÉVÉNEMENT'
+    }
+
     const loadEvent = async () => {
       const eventSlug = route.params.eventSlug
       if (!eventSlug) {
@@ -834,6 +853,7 @@ export default {
       canPurchaseTickets,
       formatPrice,
       getAvailableQuantityText,
+      getCategoryName,
       loadEvent,
       validatePhoneNumber,
       selectPaymentMethod,
