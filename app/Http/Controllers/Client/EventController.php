@@ -62,18 +62,6 @@ class EventController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        // Récupération des catégories depuis event_categories
-        $categories = \DB::table('event_categories')
-            ->select('id', 'name', 'slug')
-            ->whereExists(function($query) {
-                $query->select(\DB::raw(1))
-                      ->from('events')
-                      ->whereColumn('events.category_id', 'event_categories.id')
-                      ->where('events.status', 'published')
-                      ->where('events.is_active', true);
-            })
-            ->get()
-            ->toArray();
 
         // Si c'est une requête API (JSON)
         if ($request->wantsJson() || $request->is('api/*')) {
@@ -90,15 +78,23 @@ class EventController extends Controller
                             'name' => $ticketType->name,
                             'description' => $ticketType->description,
                             'price' => (float) $ticketType->price,
+                            'currency' => $ticketType->currency ?? 'XOF',
                             'available_quantity' => $ticketType->available_quantity,
                             'sold_quantity' => $ticketType->sold_quantity,
                             'remaining_quantity' => $ticketType->remaining_quantity,
                             'is_available' => $ticketType->isAvailable(),
+                            'status' => $ticketType->status,
                         ];
                     });
                     $eventArray['ticket_types'] = $ticketTypes;
-                    $eventArray['min_price'] = $ticketTypes->min('price') ?? 0;
-                    $eventArray['max_price'] = $ticketTypes->max('price') ?? 0;
+                    
+                    // Calculer min et max prix correctement
+                    $prices = $ticketTypes->pluck('price')->filter(function($price) {
+                        return $price > 0;
+                    });
+                    
+                    $eventArray['min_price'] = $prices->count() > 0 ? $prices->min() : 0;
+                    $eventArray['max_price'] = $prices->count() > 0 ? $prices->max() : 0;
                 } else {
                     $eventArray['ticket_types'] = [];
                     $eventArray['min_price'] = 0;
@@ -154,11 +150,10 @@ class EventController extends Controller
                 'per_page' => $events->perPage(),
                 'current_page' => $events->currentPage(),
                 'last_page' => $events->lastPage(),
-                'categories' => $categories,
             ]);
         }
 
-        return view('client.events.index', compact('events', 'categories'));
+        return view('client.events.index', compact('events'));
     }
 
     /**

@@ -15,6 +15,10 @@ Route::prefix('client')->group(function () {
     Route::get('events', [App\Http\Controllers\Client\EventController::class, 'index']);
     Route::get('events/{event:slug}', [App\Http\Controllers\Client\EventController::class, 'show']);
     
+    // Catégories publiques
+    Route::get('categories', [App\Http\Controllers\Client\CategoryController::class, 'index']);
+    Route::get('categories/{slug}', [App\Http\Controllers\Client\CategoryController::class, 'show']);
+    
     // Organisateurs publics
     Route::get('organizers/{organizer:slug}', [App\Http\Controllers\Client\OrganizerController::class, 'show']);
     

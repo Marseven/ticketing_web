@@ -260,23 +260,43 @@ export default {
         loading.value = true
         const data = await eventsStore.fetchEvents()
         events.value = data.events || []
+      } catch (error) {
+        console.error('Erreur lors du chargement des événements:', error)
+        events.value = []
+      } finally {
+        loading.value = false
+      }
+    }
+
+    const loadCategories = async () => {
+      try {
+        const response = await fetch('/api/client/categories', {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const data = await response.json()
         
-        // Récupérer les catégories depuis l'API
-        if (data.categories) {
+        if (data.success && data.categories) {
           categories.value = [
             { id: 'all', name: 'Tous' },
             ...data.categories.map(cat => ({
               id: cat.id,
-              name: cat.name
+              name: cat.name,
+              slug: cat.slug
             }))
           ]
         }
       } catch (error) {
-        console.error('Erreur lors du chargement des événements:', error)
-        events.value = []
+        console.error('Erreur lors du chargement des catégories:', error)
         categories.value = [{ id: 'all', name: 'Tous' }]
-      } finally {
-        loading.value = false
       }
     }
 
@@ -298,6 +318,7 @@ export default {
     // Lifecycle
     onMounted(() => {
       loadEvents()
+      loadCategories()
     })
 
     return {
@@ -311,6 +332,7 @@ export default {
       searchEvents,
       filterByCategory,
       loadEvents,
+      loadCategories,
       eventsStore
     }
   }
