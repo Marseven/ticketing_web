@@ -26,6 +26,17 @@ Route::prefix('client')->group(function () {
     });
 });
 
+// Routes publiques pour les achats invités
+Route::prefix('guest')->group(function () {
+    // Commandes invité (sans authentification)
+    Route::post('orders', [App\Http\Controllers\Guest\OrderController::class, 'store']);
+    Route::get('orders/{reference}', [App\Http\Controllers\Guest\OrderController::class, 'show']);
+    
+    // Billets invité
+    Route::get('tickets/{code}', [App\Http\Controllers\Guest\TicketController::class, 'show']);
+    Route::get('tickets/retrieve/{email}', [App\Http\Controllers\Guest\TicketController::class, 'retrieve']);
+});
+
 // Routes d'authentification (sans préfixe v1 pour correspondre aux annotations)
 Route::post('register', [App\Http\Controllers\Api\AuthController::class, 'register']);
 Route::post('login', [App\Http\Controllers\Api\AuthController::class, 'login']);

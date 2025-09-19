@@ -55,18 +55,30 @@
         </div>
 
         <!-- Message si aucun événement Desktop -->
-        <div v-if="filteredEvents.length === 0" class="text-center py-20">
+        <div v-if="filteredEvents.length === 0 && !loading" class="text-center py-20">
           <div class="bg-white rounded-primea-xl shadow-primea-lg p-12">
             <div class="mb-6">
               <ExclamationTriangleIcon class="w-16 h-16 text-primea-blue/40 mx-auto" />
             </div>
-            <p class="text-primea-blue mb-6 text-xl font-semibold">Aucun événement trouvé pour cette catégorie.</p>
-            <button 
-              @click="filterByCategory('all')"
-              class="bg-primea-yellow text-primea-blue px-8 py-3 rounded-primea-lg font-bold hover:bg-primea-blue hover:text-white transition-all duration-200 shadow-primea"
-            >
-              Voir tous les événements
-            </button>
+            <div v-if="eventsStore.error">
+              <p class="text-red-600 mb-4 text-xl font-semibold">⚠️ Erreur de connexion</p>
+              <p class="text-gray-600 mb-6">{{ eventsStore.error }}</p>
+              <button 
+                @click="loadEvents"
+                class="bg-primea-blue text-white px-8 py-3 rounded-primea-lg font-bold hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 shadow-primea"
+              >
+                Réessayer
+              </button>
+            </div>
+            <div v-else>
+              <p class="text-primea-blue mb-6 text-xl font-semibold">Aucun événement trouvé pour cette catégorie.</p>
+              <button 
+                @click="filterByCategory('all')"
+                class="bg-primea-yellow text-primea-blue px-8 py-3 rounded-primea-lg font-bold hover:bg-primea-blue hover:text-white transition-all duration-200 shadow-primea"
+              >
+                Voir tous les événements
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -161,9 +173,13 @@
           </div>
         </div>
 
-        <!-- Message si aucun événement Mobile -->
-        <div v-if="events.length === 0" class="text-center py-12">
-          <div class="text-white/80 mb-4">Aucun événement disponible pour le moment.</div>
+        <!-- Message si aucun événement ou erreur Mobile -->
+        <div v-if="events.length === 0 && !loading" class="text-center py-12">
+          <div v-if="eventsStore.error" class="text-red-400 mb-4">
+            <div class="text-lg font-semibold mb-2">⚠️ Erreur de connexion</div>
+            <div class="text-sm">{{ eventsStore.error }}</div>
+          </div>
+          <div v-else class="text-white/80 mb-4">Aucun événement disponible pour le moment.</div>
           <router-link 
             to="/"
             class="text-primea-yellow hover:text-white font-medium"
@@ -257,59 +273,16 @@ export default {
       )
     })
 
-    // Événements de démonstration selon la maquette
-    const demoEvents = [
-      {
-        id: 1,
-        title: "L'OISEAU RARE",
-        date: '2025-07-27T20:00:00',
-        venue: 'À ENTRE NOUS BAR',
-        image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400',
-        minPrice: 5000,
-        maxPrice: 10000,
-        organizer: 'MR GILLES',
-        category: 'concert'
-      },
-      {
-        id: 2,
-        title: "L'OISEAU RARE",
-        date: '2025-07-27T20:00:00',
-        venue: 'À ENTRE NOUS BAR',
-        image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400',
-        minPrice: 5000,
-        maxPrice: 10000,
-        organizer: 'MR GILLES',
-        category: 'concert'
-      },
-      {
-        id: 3,
-        title: "L'OISEAU RARE",
-        date: '2025-07-27T20:00:00',
-        venue: 'À ENTRE NOUS BAR',
-        image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400',
-        minPrice: 5000,
-        maxPrice: 10000,
-        organizer: 'MR GILLES',
-        category: 'concert'
-      }
-    ]
 
     // Méthodes
     const loadEvents = async () => {
       try {
         loading.value = true
-        // Essayer de charger depuis l'API
         const data = await eventsStore.fetchEvents()
-        if (data.events && data.events.length > 0) {
-          events.value = data.events
-        } else {
-          // Utiliser les événements de démo
-          events.value = demoEvents
-        }
+        events.value = data.events || []
       } catch (error) {
         console.error('Erreur lors du chargement des événements:', error)
-        // Utiliser les événements de démo en cas d'erreur
-        events.value = demoEvents
+        events.value = []
       } finally {
         loading.value = false
       }
@@ -354,7 +327,9 @@ export default {
       formatPrice,
       goToEvent,
       goBack,
-      filterByCategory
+      filterByCategory,
+      loadEvents,
+      eventsStore
     }
   }
 }

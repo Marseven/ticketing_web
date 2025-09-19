@@ -112,13 +112,25 @@
             <div class="mb-6">
               <ExclamationTriangleIcon class="w-16 h-16 text-gray-400 mx-auto" />
             </div>
-            <p class="text-gray-500 mb-4 font-primea text-lg">Aucun événement trouvé pour cette catégorie.</p>
-            <button 
-              @click="filterByCategory('all')"
-              class="bg-primea-blue text-white px-6 py-3 rounded-primea font-primea font-semibold hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200"
-            >
-              Voir tous les événements
-            </button>
+            <div v-if="eventsStore.error">
+              <p class="text-red-600 mb-4 font-primea text-lg font-semibold">⚠️ Erreur de connexion</p>
+              <p class="text-gray-500 mb-4 font-primea">{{ eventsStore.error }}</p>
+              <button 
+                @click="loadEvents"
+                class="bg-primea-blue text-white px-6 py-3 rounded-primea font-primea font-semibold hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200"
+              >
+                Réessayer
+              </button>
+            </div>
+            <div v-else>
+              <p class="text-gray-500 mb-4 font-primea text-lg">Aucun événement trouvé pour cette catégorie.</p>
+              <button 
+                @click="filterByCategory('all')"
+                class="bg-primea-blue text-white px-6 py-3 rounded-primea font-primea font-semibold hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200"
+              >
+                Voir tous les événements
+              </button>
+            </div>
           </div>
 
           <!-- Bouton voir plus -->
@@ -164,13 +176,25 @@
             <div class="mb-6">
               <ExclamationTriangleIcon class="w-16 h-16 text-gray-400 mx-auto" />
             </div>
-            <p class="text-gray-500 mb-4 font-primea text-lg">Aucun événement populaire pour le moment.</p>
-            <router-link 
-              to="/events"
-              class="bg-primea-blue text-white px-6 py-3 rounded-primea font-primea font-semibold hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200"
-            >
-              Voir tous les événements
-            </router-link>
+            <div v-if="eventsStore.error">
+              <p class="text-red-600 mb-4 font-primea text-lg font-semibold">⚠️ Erreur de connexion</p>
+              <p class="text-gray-500 mb-4 font-primea">{{ eventsStore.error }}</p>
+              <button 
+                @click="loadEvents"
+                class="bg-primea-blue text-white px-6 py-3 rounded-primea font-primea font-semibold hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200"
+              >
+                Réessayer
+              </button>
+            </div>
+            <div v-else>
+              <p class="text-gray-500 mb-4 font-primea text-lg">Aucun événement populaire pour le moment.</p>
+              <router-link 
+                to="/events"
+                class="bg-primea-blue text-white px-6 py-3 rounded-primea font-primea font-semibold hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200"
+              >
+                Voir tous les événements
+              </router-link>
+            </div>
           </div>
         </div>
         
@@ -251,6 +275,7 @@ export default {
         events.value = data.events || []
       } catch (error) {
         console.error('Erreur lors du chargement des événements:', error)
+        events.value = []
       } finally {
         loading.value = false
       }
@@ -285,7 +310,9 @@ export default {
       filteredEvents,
       featuredEvents,
       searchEvents,
-      filterByCategory
+      filterByCategory,
+      loadEvents,
+      eventsStore
     }
   }
 }

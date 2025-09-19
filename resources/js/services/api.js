@@ -216,5 +216,51 @@ export const qrCodeService = {
   }
 }
 
+export const guestService = {
+  // Créer une commande invité (sans authentification)
+  createGuestOrder(orderData) {
+    return axios.post('/api/guest/orders', orderData, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+  },
+
+  // Récupérer une commande invité par référence
+  getGuestOrder(reference) {
+    return axios.get(`/api/guest/orders/${reference}`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+  },
+
+  // Récupérer un billet invité par code
+  getGuestTicket(code) {
+    return axios.get(`/api/guest/tickets/${code}`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+  },
+
+  // Récupérer tous les billets d'un email invité
+  retrieveGuestTickets(email) {
+    return axios.get(`/api/guest/tickets/retrieve/${encodeURIComponent(email)}`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+  }
+}
+
 // Export par défaut de l'instance axios configurée
 export default api

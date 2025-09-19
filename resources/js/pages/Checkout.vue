@@ -167,6 +167,44 @@
                   </div>
                 </div>
 
+                <!-- Informations de l'acheteur -->
+                <div class="bg-primea-blue/5 rounded-primea-xl p-6 space-y-4">
+                  <h4 class="text-lg font-semibold text-primea-blue mb-4">Vos informations</h4>
+                  
+                  <div>
+                    <label class="block text-sm font-semibold text-primea-blue mb-2">Nom complet *</label>
+                    <input 
+                      type="text"
+                      v-model="orderForm.guestName"
+                      placeholder="Votre nom complet"
+                      class="w-full px-4 py-3 border-2 border-gray-200 rounded-primea-lg focus:border-primea-blue focus:outline-none transition-colors"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-semibold text-primea-blue mb-2">Email *</label>
+                    <input 
+                      type="email"
+                      v-model="orderForm.guestEmail"
+                      placeholder="votre.email@example.com"
+                      class="w-full px-4 py-3 border-2 border-gray-200 rounded-primea-lg focus:border-primea-blue focus:outline-none transition-colors"
+                      required
+                    />
+                    <p class="text-sm text-gray-500 mt-1">Vos billets vous seront envoyés par email</p>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-semibold text-primea-blue mb-2">Téléphone (optionnel)</label>
+                    <input 
+                      type="tel"
+                      v-model="orderForm.guestPhone"
+                      placeholder="+241 XX XX XX XX"
+                      class="w-full px-4 py-3 border-2 border-gray-200 rounded-primea-lg focus:border-primea-blue focus:outline-none transition-colors"
+                    />
+                  </div>
+                </div>
+
                 <!-- Total Desktop -->
                 <div v-if="orderForm.quantity && orderForm.ticketTypeId" class="bg-primea-blue/5 rounded-primea-xl p-6">
                   <div class="flex justify-between items-center">
@@ -364,6 +402,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useEventsStore } from '../stores/events'
+import { guestService } from '../services/api'
 import { 
   ExclamationCircleIcon,
   PhotoIcon,
@@ -415,7 +454,10 @@ export default {
       phoneNumber: '',
       cardNumber: '',
       expiryDate: '',
-      cvv: ''
+      cvv: '',
+      guestName: '',
+      guestEmail: '',
+      guestPhone: ''
     })
 
     // Computed properties
@@ -512,6 +554,11 @@ export default {
 
     const isFormValid = computed(() => {
       if (!orderForm.value.quantity || !orderForm.value.ticketTypeId || !orderForm.value.paymentMethod) {
+        return false
+      }
+
+      // Vérifier les informations de l'invité
+      if (!orderForm.value.guestName || !orderForm.value.guestEmail) {
         return false
       }
 
@@ -684,17 +731,38 @@ export default {
           throw new Error('Veuillez remplir tous les champs requis')
         }
 
-        // Simulation du traitement de commande
-        await new Promise(resolve => setTimeout(resolve, 2000))
+        // Préparer les données de la commande
+        const orderData = {
+          event_slug: event.value.slug,
+          ticket_type_id: orderForm.value.ticketTypeId,
+          quantity: orderForm.value.quantity,
+          guest_name: orderForm.value.guestName,
+          guest_email: orderForm.value.guestEmail,
+          guest_phone: orderForm.value.guestPhone || null
+        }
 
-        // Simulation de succès de paiement
-        const ticketId = Math.random().toString(36).substr(2, 9)
+        // Créer la commande via l'API guest
+        const response = await guestService.createGuestOrder(orderData)
         
-        // Rediriger vers la page de téléchargement
-        router.push(`/ticket/${ticketId}/download`)
+        if (response.data.success) {
+          const order = response.data.data.order
+          // Rediriger vers la page de paiement avec la référence de commande
+          router.push(`/payment/${order.reference}`)
+        } else {
+          throw new Error(response.data.message || 'Erreur lors de la création de la commande')
+        }
 
       } catch (err) {
-        error.value = err.message || 'Erreur lors du traitement de la commande'
+        console.error('Erreur lors du processus de commande:', err)
+        if (err.response?.data?.message) {
+          error.value = err.response.data.message
+        } else if (err.response?.data?.errors) {
+          // Afficher les erreurs de validation
+          const errors = Object.values(err.response.data.errors).flat()
+          error.value = errors.join(', ')
+        } else {
+          error.value = err.message || 'Erreur lors du traitement de la commande'
+        }
       } finally {
         loading.value = false
       }
