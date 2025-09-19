@@ -320,8 +320,116 @@
                   <p class="text-red-600 text-sm">{{ error }}</p>
                 </div>
 
+                <!-- USSD Push Section - Uniquement pour Mobile Money -->
+                <div v-if="ussdPushActive" class="bg-blue-50 border-2 border-blue-200 rounded-primea-xl p-6">
+                  <div class="text-center">
+                    <!-- En attente de validation -->
+                    <div v-if="paymentStatus === 'pending'" class="space-y-4">
+                      <div class="flex items-center justify-center mb-4">
+                        <div class="w-16 h-16 border-4 border-blue-300 border-t-blue-600 rounded-full animate-spin"></div>
+                      </div>
+                      
+                      <h4 class="text-xl font-bold text-blue-800 mb-2">Push envoyé !</h4>
+                      <p class="text-blue-700 mb-4">
+                        Un push USSD a été envoyé au numéro <span class="font-semibold">{{ formatPhoneForDisplay(currentPayment?.phone) }}</span>.
+                        Veuillez valider le paiement sur votre téléphone.
+                      </p>
+                      
+                      <!-- Décompte -->
+                      <div class="bg-white border border-blue-200 rounded-primea-lg p-4 mb-4">
+                        <div class="text-3xl font-bold text-blue-600 mb-2">{{ formatCountdown(ussdCountdown) }}</div>
+                        <div class="text-sm text-blue-500">Temps restant pour valider</div>
+                        
+                        <!-- Barre de progression -->
+                        <div class="w-full bg-blue-200 rounded-full h-2 mt-3">
+                          <div 
+                            class="bg-blue-600 h-2 rounded-full transition-all duration-1000"
+                            :style="{ width: (ussdCountdown / 90 * 100) + '%' }"
+                          ></div>
+                        </div>
+                      </div>
+                      
+                      <p class="text-blue-600 text-sm mb-4">
+                        Montant: <span class="font-semibold">{{ formatPrice(totalAmount) }} FCFA</span>
+                      </p>
+                      
+                      <!-- Boutons d'action -->
+                      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                        <button 
+                          @click="retryUSSDPush"
+                          :disabled="loading"
+                          class="bg-blue-600 text-white px-4 py-2 rounded-primea hover:bg-blue-700 transition-colors disabled:opacity-50"
+                        >
+                          <span v-if="loading">Envoi...</span>
+                          <span v-else>Renvoyer le push</span>
+                        </button>
+                        
+                        <button 
+                          @click="changeOperator"
+                          class="bg-gray-500 text-white px-4 py-2 rounded-primea hover:bg-gray-600 transition-colors"
+                        >
+                          Changer d'opérateur
+                        </button>
+                        
+                        <button 
+                          @click="cancelUSSDPush"
+                          class="bg-red-500 text-white px-4 py-2 rounded-primea hover:bg-red-600 transition-colors"
+                        >
+                          Annuler
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <!-- Paiement réussi -->
+                    <div v-else-if="paymentStatus === 'successful'" class="space-y-4">
+                      <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                      </div>
+                      
+                      <h4 class="text-xl font-bold text-green-800 mb-2">Paiement réussi !</h4>
+                      <p class="text-green-700 mb-4">Votre paiement a été validé avec succès.</p>
+                      <p class="text-green-600 text-sm">Redirection en cours vers votre billet...</p>
+                    </div>
+                    
+                    <!-- Paiement échoué -->
+                    <div v-else-if="paymentStatus === 'failed' || paymentStatus === 'cancelled' || paymentStatus === 'expired'" class="space-y-4">
+                      <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                      </div>
+                      
+                      <h4 class="text-xl font-bold text-red-800 mb-2">Paiement échoué</h4>
+                      <p class="text-red-700 mb-4">
+                        {{ paymentStatus === 'cancelled' ? 'Le paiement a été annulé.' :
+                           paymentStatus === 'expired' ? 'Le délai de paiement a expiré.' :
+                           'Le paiement a échoué. Veuillez réessayer.' }}
+                      </p>
+                      
+                      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                        <button 
+                          @click="retryUSSDPush"
+                          class="bg-blue-600 text-white px-4 py-2 rounded-primea hover:bg-blue-700 transition-colors"
+                        >
+                          Réessayer
+                        </button>
+                        
+                        <button 
+                          @click="changeOperator"
+                          class="bg-gray-500 text-white px-4 py-2 rounded-primea hover:bg-gray-600 transition-colors"
+                        >
+                          Changer d'opérateur
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Bouton de paiement Desktop -->
                 <button 
+                  v-if="!ussdPushActive"
                   type="submit"
                   :disabled="loading || !isFormValid"
                   class="w-full bg-primea-blue text-white py-4 px-6 rounded-primea-lg text-lg font-bold hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 shadow-primea-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
@@ -429,13 +537,21 @@ export default {
     const phoneError = ref('')
     const countdownTimer = ref(null)
 
-    // État du compte à rebours
+    // État du compte à rebours pour l'événement
     const countdown = ref({
       days: 0,
       hours: 0,
       minutes: 0,
       seconds: 0
     })
+
+    // État USSD Push
+    const ussdPushActive = ref(false)
+    const ussdCountdown = ref(90) // 90 secondes
+    const ussdTimer = ref(null)
+    const paymentPollingTimer = ref(null)
+    const paymentStatus = ref('')
+    const currentPayment = ref(null)
 
     // Formulaire de commande
     const orderForm = ref({
@@ -771,24 +887,16 @@ export default {
           throw new Error('Veuillez remplir tous les champs requis')
         }
 
-        // Préparer les données de la commande
-        const orderData = {
-          event_slug: event.value.slug,
-          ticket_type_id: orderForm.value.ticketTypeId,
-          quantity: orderForm.value.quantity,
-          guest_name: orderForm.value.guestName,
-          guest_phone: orderForm.value.guestPhone || null
+        // Pour Mobile Money (Airtel/Moov), utiliser E-Billing avec USSD push
+        if (orderForm.value.paymentMethod === 'airtel' || orderForm.value.paymentMethod === 'moov') {
+          await processEBillingPayment()
         }
-
-        // Créer la commande via l'API guest
-        const response = await guestService.createGuestOrder(orderData)
-        
-        if (response.data.success) {
-          const order = response.data.data.order
-          // Rediriger vers la page de paiement avec la référence de commande
-          router.push(`/payment/${order.reference}`)
-        } else {
-          throw new Error(response.data.message || 'Erreur lors de la création de la commande')
+        // Pour Visa/Mastercard, rediriger vers ORABANK_NG
+        else if (orderForm.value.paymentMethod === 'visa') {
+          await processOrabankPayment()
+        }
+        else {
+          throw new Error('Méthode de paiement non supportée')
         }
 
       } catch (err) {
@@ -807,8 +915,285 @@ export default {
       }
     }
 
+    const processEBillingPayment = async () => {
+      try {
+        // 1. Créer la commande
+        const orderData = {
+          event_slug: event.value.slug,
+          ticket_type_id: orderForm.value.ticketTypeId,
+          quantity: orderForm.value.quantity,
+          guest_name: orderForm.value.guestName,
+          guest_phone: orderForm.value.guestPhone || null
+        }
+
+        const orderResponse = await guestService.createGuestOrder(orderData)
+        
+        if (!orderResponse.data.success) {
+          throw new Error(orderResponse.data.message || 'Erreur lors de la création de la commande')
+        }
+
+        const order = orderResponse.data.data.order
+
+        // 2. Initier le paiement E-Billing
+        const paymentData = {
+          order_id: order.id,
+          gateway: orderForm.value.paymentMethod === 'airtel' ? 'airtelmoney' : 'moovmoney',
+          phone: orderForm.value.phoneNumber,
+          amount: totalAmount.value
+        }
+
+        const paymentResponse = await fetch('/api/v1/payments/initiate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+          },
+          body: JSON.stringify(paymentData)
+        })
+
+        const paymentResult = await paymentResponse.json()
+
+        if (!paymentResult.success) {
+          throw new Error(paymentResult.message || 'Erreur lors de l\'initiation du paiement')
+        }
+
+        // 3. Si E-Billing retourne une facture, envoyer le push USSD
+        if (paymentResult.data?.bill_id) {
+          const pushResponse = await fetch('/api/v1/payments/push-ussd', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+            },
+            body: JSON.stringify({
+              payment_id: paymentResult.data.payment.id,
+              bill_id: paymentResult.data.bill_id,
+              phone: orderForm.value.phoneNumber,
+              gateway: orderForm.value.paymentMethod === 'airtel' ? 'airtelmoney' : 'moovmoney'
+            })
+          })
+
+          const pushResult = await pushResponse.json()
+
+          if (pushResult.success) {
+            // Démarrer le processus USSD push
+            startUSSDPush({
+              payment_id: paymentResult.data.payment.id,
+              reference: order.reference,
+              phone: orderForm.value.phoneNumber,
+              gateway: orderForm.value.paymentMethod === 'airtel' ? 'airtelmoney' : 'moovmoney',
+              amount: totalAmount.value
+            })
+          } else {
+            throw new Error(pushResult.message || 'Erreur lors de l\'envoi du push USSD')
+          }
+        } else {
+          throw new Error('Erreur lors de la création de la facture E-Billing')
+        }
+
+      } catch (err) {
+        console.error('Erreur E-Billing:', err)
+        throw err
+      }
+    }
+
+    const processOrabankPayment = async () => {
+      try {
+        // 1. Créer la commande
+        const orderData = {
+          event_slug: event.value.slug,
+          ticket_type_id: orderForm.value.ticketTypeId,
+          quantity: orderForm.value.quantity,
+          guest_name: orderForm.value.guestName,
+          guest_phone: orderForm.value.guestPhone || null
+        }
+
+        const orderResponse = await guestService.createGuestOrder(orderData)
+        
+        if (!orderResponse.data.success) {
+          throw new Error(orderResponse.data.message || 'Erreur lors de la création de la commande')
+        }
+
+        const order = orderResponse.data.data.order
+
+        // 2. Initier le paiement ORABANK_NG pour Visa/Mastercard
+        const paymentData = {
+          order_id: order.id,
+          gateway: 'ORABANK_NG',
+          amount: totalAmount.value
+        }
+
+        const paymentResponse = await fetch('/api/v1/payments/initiate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+          },
+          body: JSON.stringify(paymentData)
+        })
+
+        const paymentResult = await paymentResponse.json()
+
+        if (paymentResult.success && paymentResult.data?.redirect_url) {
+          // Rediriger vers la page de paiement ORABANK
+          window.location.href = paymentResult.data.redirect_url
+        } else {
+          throw new Error(paymentResult.message || 'Erreur lors de l\'initiation du paiement Visa/Mastercard')
+        }
+
+      } catch (err) {
+        console.error('Erreur ORABANK:', err)
+        throw err
+      }
+    }
+
     const goBack = () => {
       router.back()
+    }
+
+    // Méthodes USSD Push
+    const startUSSDPush = (paymentData) => {
+      ussdPushActive.value = true
+      ussdCountdown.value = 90
+      paymentStatus.value = 'pending'
+      currentPayment.value = paymentData
+      
+      // Démarrer le décompte USSD
+      startUSSDCountdown()
+      
+      // Démarrer le polling du statut de paiement
+      startPaymentPolling(paymentData.payment_id)
+    }
+
+    const startUSSDCountdown = () => {
+      if (ussdTimer.value) {
+        clearInterval(ussdTimer.value)
+      }
+      
+      ussdTimer.value = setInterval(() => {
+        ussdCountdown.value--
+        
+        if (ussdCountdown.value <= 0) {
+          clearInterval(ussdTimer.value)
+        }
+      }, 1000)
+    }
+
+    const startPaymentPolling = (paymentId) => {
+      if (paymentPollingTimer.value) {
+        clearInterval(paymentPollingTimer.value)
+      }
+      
+      paymentPollingTimer.value = setInterval(async () => {
+        try {
+          const response = await fetch(`/api/payments/${paymentId}/status`, {
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+            }
+          })
+          
+          if (response.ok) {
+            const data = await response.json()
+            const status = data.data?.payment?.status
+            
+            if (status === 'successful') {
+              paymentStatus.value = 'successful'
+              clearInterval(paymentPollingTimer.value)
+              clearInterval(ussdTimer.value)
+              
+              // Rediriger vers la page de ticket après 2 secondes
+              setTimeout(() => {
+                router.push(`/ticket-success?reference=${currentPayment.value.reference}`)
+              }, 2000)
+            } else if (status === 'failed' || status === 'cancelled' || status === 'expired') {
+              paymentStatus.value = status
+              clearInterval(paymentPollingTimer.value)
+              clearInterval(ussdTimer.value)
+              
+              // Réinitialiser après 3 secondes
+              setTimeout(() => {
+                cancelUSSDPush()
+              }, 3000)
+            }
+          }
+        } catch (err) {
+          console.error('Erreur lors de la vérification du statut:', err)
+        }
+      }, 3000) // Vérifier toutes les 3 secondes
+    }
+
+    const cancelUSSDPush = () => {
+      ussdPushActive.value = false
+      ussdCountdown.value = 90
+      paymentStatus.value = ''
+      currentPayment.value = null
+      
+      // Nettoyer les timers
+      if (ussdTimer.value) {
+        clearInterval(ussdTimer.value)
+      }
+      if (paymentPollingTimer.value) {
+        clearInterval(paymentPollingTimer.value)
+      }
+    }
+
+    const retryUSSDPush = async () => {
+      if (!currentPayment.value) return
+      
+      try {
+        loading.value = true
+        
+        const response = await fetch('/api/payments/push-ussd', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+          },
+          body: JSON.stringify({
+            payment_id: currentPayment.value.payment_id,
+            phone: currentPayment.value.phone,
+            gateway: currentPayment.value.gateway
+          })
+        })
+        
+        if (response.ok) {
+          // Relancer le décompte
+          ussdCountdown.value = 90
+          paymentStatus.value = 'pending'
+          startUSSDCountdown()
+          startPaymentPolling(currentPayment.value.payment_id)
+        } else {
+          const errorData = await response.json()
+          error.value = errorData.message || 'Erreur lors du renvoi du push'
+        }
+      } catch (err) {
+        error.value = 'Erreur de connexion'
+      } finally {
+        loading.value = false
+      }
+    }
+
+    const changeOperator = () => {
+      cancelUSSDPush()
+      // Réinitialiser le formulaire pour permettre de choisir un autre opérateur
+      orderForm.value.paymentMethod = ''
+      orderForm.value.phoneNumber = ''
+    }
+
+    const formatCountdown = (seconds) => {
+      const mins = Math.floor(seconds / 60)
+      const secs = seconds % 60
+      return `${mins}:${secs.toString().padStart(2, '0')}`
+    }
+
+    const formatPhoneForDisplay = (phone) => {
+      if (!phone) return ''
+      return phone.replace(/(\d{3})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4')
     }
 
     // Lifecycle
@@ -820,6 +1205,12 @@ export default {
     onUnmounted(() => {
       if (countdownTimer.value) {
         clearInterval(countdownTimer.value)
+      }
+      if (ussdTimer.value) {
+        clearInterval(ussdTimer.value)
+      }
+      if (paymentPollingTimer.value) {
+        clearInterval(paymentPollingTimer.value)
       }
     })
 
@@ -849,7 +1240,24 @@ export default {
       selectPaymentMethod,
       redirectToVisaPayment,
       processOrder,
-      goBack
+      goBack,
+      // Variables USSD Push
+      ussdPushActive,
+      ussdCountdown,
+      paymentStatus,
+      currentPayment,
+      // Méthodes USSD Push
+      startUSSDPush,
+      startUSSDCountdown,
+      startPaymentPolling,
+      cancelUSSDPush,
+      retryUSSDPush,
+      changeOperator,
+      formatCountdown,
+      formatPhoneForDisplay,
+      // Méthodes de paiement
+      processEBillingPayment,
+      processOrabankPayment
     }
   }
 }

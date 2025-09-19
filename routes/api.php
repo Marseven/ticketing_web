@@ -41,6 +41,17 @@ Route::prefix('guest')->group(function () {
     Route::get('tickets/retrieve/{email}', [App\Http\Controllers\Guest\TicketController::class, 'retrieve']);
 });
 
+// Routes publiques pour les paiements
+Route::prefix('payment')->group(function () {
+    Route::get('success/{reference}', function ($reference) {
+        return redirect('/payment-success?reference=' . $reference);
+    })->name('payment.success');
+    
+    Route::get('cancel/{reference}', function ($reference) {
+        return redirect('/payment-cancel?reference=' . $reference);
+    })->name('payment.cancel');
+});
+
 // Routes d'authentification (sans préfixe v1 pour correspondre aux annotations)
 Route::post('register', [App\Http\Controllers\Api\AuthController::class, 'register']);
 Route::post('login', [App\Http\Controllers\Api\AuthController::class, 'login']);
@@ -75,10 +86,17 @@ Route::prefix('v1')->group(function () {
     });
 
     // Routes de paiement
-    Route::prefix('payments')->middleware('auth:sanctum')->group(function () {
-        Route::get('/', [App\Http\Controllers\Api\PaymentController::class, 'payments']);
-        Route::get('{id}', [App\Http\Controllers\Api\PaymentController::class, 'payment']);
-        Route::get('{id}/status', [App\Http\Controllers\Api\PaymentController::class, 'getPaymentStatus']);
+    Route::prefix('payments')->group(function () {
+        Route::middleware('auth:sanctum')->group(function () {
+            Route::get('/', [App\Http\Controllers\Api\PaymentController::class, 'payments']);
+            Route::get('{id}', [App\Http\Controllers\Api\PaymentController::class, 'payment']);
+            Route::get('{id}/status', [App\Http\Controllers\Api\PaymentController::class, 'getPaymentStatus']);
+        });
+        
+        // Routes publiques pour les paiements invités
+        Route::post('initiate', [App\Http\Controllers\Api\PaymentController::class, 'initiateGuestPayment']);
+        Route::post('push-ussd', [App\Http\Controllers\Api\PaymentController::class, 'pushUSSD']);
+        Route::post('kyc', [App\Http\Controllers\Api\PaymentController::class, 'checkKYC']);
     });
 
     // Routes des tickets
@@ -115,5 +133,26 @@ Route::prefix('v1')->group(function () {
         Route::post('airtel', [App\Http\Controllers\Api\WebhookController::class, 'airtel'])->name('webhook.airtel');
         Route::post('moov', [App\Http\Controllers\Api\WebhookController::class, 'moov'])->name('webhook.moov');
         Route::post('card', [App\Http\Controllers\Api\WebhookController::class, 'card'])->name('webhook.card');
+        Route::post('ebilling', [App\Http\Controllers\Api\WebhookController::class, 'ebilling'])->name('webhook.ebilling');
+        Route::post('shap-payout', [App\Http\Controllers\Api\WebhookController::class, 'shapPayout'])->name('webhook.shap-payout');
+    });
+
+    // Routes d'administration pour les payouts
+    Route::prefix('admin')->middleware(['auth:sanctum', 'admin.access'])->group(function () {
+        Route::prefix('payouts')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\PayoutController::class, 'index']);
+            Route::post('/', [App\Http\Controllers\Admin\PayoutController::class, 'store']);
+            Route::get('stats', [App\Http\Controllers\Admin\PayoutController::class, 'stats']);
+            Route::get('balances', [App\Http\Controllers\Admin\PayoutController::class, 'balances']);
+            Route::get('shap-balance', [App\Http\Controllers\Admin\PayoutController::class, 'shapBalance']);
+            Route::post('check-all-pending', [App\Http\Controllers\Admin\PayoutController::class, 'checkAllPending']);
+            Route::get('{payout}', [App\Http\Controllers\Admin\PayoutController::class, 'show']);
+            Route::post('{payout}/check-status', [App\Http\Controllers\Admin\PayoutController::class, 'checkStatus']);
+        });
+        
+        Route::prefix('organizers')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\PayoutController::class, 'organizers']);
+            Route::put('{organizer}/auto-payout-config', [App\Http\Controllers\Admin\PayoutController::class, 'updateAutoPayoutConfig']);
+        });
     });
 });

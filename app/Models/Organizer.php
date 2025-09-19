@@ -54,6 +54,16 @@ class Organizer extends Model
                     ->withTimestamps();
     }
 
+    public function balances(): HasMany
+    {
+        return $this->hasMany(OrganizerBalance::class);
+    }
+
+    public function payouts(): HasMany
+    {
+        return $this->hasMany(Payout::class);
+    }
+
     // Scopes
     public function scopeActive($query)
     {

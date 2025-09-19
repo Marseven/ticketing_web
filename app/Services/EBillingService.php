@@ -1,0 +1,213 @@
+<?php
+
+namespace App\Services;
+
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
+class EBillingService
+{
+    private string $username;
+    private string $sharedKey;
+    private string $serverUrl;
+    private string $postUrl;
+
+    public function __construct()
+    {
+        $this->username = env('EBILLING_USERNAME');
+        $this->sharedKey = env('EBILLING_SHARED_KEY');
+        $this->serverUrl = env('EBILLING_SERVER_URL');
+        $this->postUrl = env('EBILLING_POST_URL');
+    }
+
+    /**
+     * Créer une facture E-Billing
+     */
+    public function createBill(array $data): array
+    {
+        try {
+            $auth = $this->username . ':' . $this->sharedKey;
+            
+            Log::info('E-Billing createBill', ['data' => $data]);
+
+            $response = Http::withBasicAuth($this->username, $this->sharedKey)
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                ])
+                ->post($this->serverUrl, $data);
+
+            $status = $response->status();
+            $responseData = $response->json();
+
+            Log::info('E-Billing response', [
+                'status' => $status,
+                'data' => $responseData
+            ]);
+
+            if ($status >= 200 && $status <= 299) {
+                return [
+                    'success' => true,
+                    'bill_id' => $responseData['e_bill']['bill_id'] ?? null,
+                    'data' => $responseData,
+                    'post_url' => $this->postUrl
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => 'Erreur lors de la création de la facture E-Billing',
+                'error' => $responseData['message'] ?? 'Erreur inconnue',
+                'status' => $status
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('E-Billing createBill error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Erreur de connexion avec E-Billing',
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Envoyer un push USSD
+     */
+    public function pushUSSD(string $billId, string $paymentSystem, string $msisdn): array
+    {
+        try {
+            $url = rtrim($this->serverUrl, '/e_bills') . '/e_bills/' . $billId . '/ussd_push';
+            
+            $response = Http::withBasicAuth($this->username, $this->sharedKey)
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                ])
+                ->post($url, [
+                    'payment_system_name' => $paymentSystem,
+                    'payer_msisdn' => $msisdn
+                ]);
+
+            $status = $response->status();
+            $responseData = $response->json();
+
+            Log::info('E-Billing USSD Push response', [
+                'status' => $status,
+                'data' => $responseData
+            ]);
+
+            if ($status >= 200 && $status <= 299) {
+                return [
+                    'success' => true,
+                    'message' => $responseData['message'] ?? 'Push envoyé',
+                    'data' => $responseData
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => $responseData['message'] ?? 'Erreur lors du push USSD',
+                'status' => $status
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('E-Billing pushUSSD error', [
+                'error' => $e->getMessage(),
+                'bill_id' => $billId
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Erreur lors du push USSD',
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Vérifier KYC
+     */
+    public function checkKYC(string $paymentSystem, string $msisdn): array
+    {
+        try {
+            $url = rtrim($this->serverUrl, '/e_bills') . '/kyc';
+            
+            $response = Http::withBasicAuth($this->username, $this->sharedKey)
+                ->get($url, [
+                    'payment_system_name' => $paymentSystem,
+                    'msisdn' => $msisdn
+                ]);
+
+            $status = $response->status();
+            $responseData = $response->json();
+
+            Log::info('E-Billing KYC response', [
+                'status' => $status,
+                'data' => $responseData
+            ]);
+
+            if ($status === 200) {
+                return [
+                    'success' => true,
+                    'customer_name' => $responseData['key_data']['payer_name'] ?? null,
+                    'data' => $responseData
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => 'Client non trouvé',
+                'status' => $status
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('E-Billing KYC error', [
+                'error' => $e->getMessage(),
+                'msisdn' => $msisdn
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Erreur lors de la vérification KYC',
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Obtenir le nom du système de paiement à partir du gateway
+     */
+    public function getPaymentSystemName(string $gateway): string
+    {
+        return match($gateway) {
+            'airtelmoney', 'airtel' => 'AM',
+            'moovmoney', 'moov' => 'MM', // Moov Money 
+            'visa', 'card' => 'VISA',
+            default => strtoupper($gateway)
+        };
+    }
+
+    /**
+     * Formater le numéro de téléphone pour E-Billing
+     */
+    public function formatPhoneNumber(string $phone): string
+    {
+        // Retirer tous les espaces et caractères non numériques
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+        
+        // Si le numéro commence par +241, retirer le +241
+        if (strpos($phone, '241') === 0) {
+            $phone = substr($phone, 3);
+        }
+        
+        // S'assurer que le numéro fait 9 chiffres
+        if (strlen($phone) === 9) {
+            return $phone;
+        }
+        
+        return $phone;
+    }
+}

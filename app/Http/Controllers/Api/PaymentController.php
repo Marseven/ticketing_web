@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use App\Services\EBillingService;
 
 class PaymentController extends Controller
 {
@@ -303,19 +304,83 @@ class PaymentController extends Controller
     }
 
     /**
-     * Initier le paiement selon la passerelle
+     * Initier le paiement selon la passerelle via E-Billing
      */
     private function initiatePPayment(Payment $payment, Request $request): array
     {
+        $eBillingService = new EBillingService();
+        
+        // Préparer les données pour E-Billing
+        $eBillingData = [
+            'payer_email' => $payment->order->guest_email ?? 'customer@example.com',
+            'payer_msisdn' => $eBillingService->formatPhoneNumber($request->phone ?? '074808000'),
+            'amount' => (int) $payment->amount,
+            'short_description' => 'Achat billet - ' . $payment->order->event->title,
+            'external_reference' => $payment->reference,
+            'payer_name' => $payment->order->guest_name ?? 'Client',
+            'expiry_period' => 60, // 60 minutes
+            'notification_url' => route('webhook.ebilling')
+        ];
+
+        // Créer la facture E-Billing
+        $result = $eBillingService->createBill($eBillingData);
+
+        if (!$result['success']) {
+            return [
+                'success' => false,
+                'message' => $result['message'] ?? 'Erreur lors de la création de la facture'
+            ];
+        }
+
+        // Mettre à jour le paiement avec l'ID de facture E-Billing
+        $payment->update([
+            'transaction_id' => $result['bill_id'],
+            'gateway_response' => $result['data'],
+            'metadata' => array_merge($payment->metadata ?? [], [
+                'ebilling_bill_id' => $result['bill_id'],
+                'ebilling_post_url' => $result['post_url']
+            ])
+        ]);
+
+        // Selon le type de gateway, on peut soit rediriger vers E-Billing soit faire un push USSD
         switch ($payment->gateway) {
             case 'airtelmoney':
-                return $this->initiateAirtelPayment($payment, $request->phone);
-            
             case 'moovmoney':
-                return $this->initiateMoovPayment($payment, $request->phone);
+                // Pour mobile money, on propose le push USSD en plus de la redirection
+                return [
+                    'success' => true,
+                    'message' => 'Facture créée. Vous pouvez soit être redirigé vers la page de paiement, soit recevoir un push USSD.',
+                    'payment_id' => $payment->id,
+                    'reference' => $payment->reference,
+                    'bill_id' => $result['bill_id'],
+                    'payment_url' => $result['post_url'],
+                    'expires_at' => $payment->expired_at->format('Y-m-d H:i:s'),
+                    'ussd_available' => true,
+                    'redirect_data' => [
+                        'url' => $result['post_url'],
+                        'method' => 'POST',
+                        'data' => [
+                            'invoice_number' => $result['bill_id'],
+                            'merchant_redirect_url' => route('payment.success', ['reference' => $payment->reference])
+                        ]
+                    ]
+                ];
             
+            case 'ORABANK_NG':
+            case 'visa':
             case 'card':
-                return $this->initiateCardPayment($payment);
+                // Pour ORABANK_NG (Visa/Mastercard), redirection vers billing-easy.net
+                $redirectUrl = "https://test.billing-easy.net?invoice={$result['bill_id']}&operator=ORABANK_NG&redirect=1";
+                
+                return [
+                    'success' => true,
+                    'message' => 'Redirection vers la page de paiement sécurisée',
+                    'payment_id' => $payment->id,
+                    'reference' => $payment->reference,
+                    'bill_id' => $result['bill_id'],
+                    'redirect_url' => $redirectUrl,
+                    'expires_at' => $payment->expired_at->format('Y-m-d H:i:s')
+                ];
             
             default:
                 return [
@@ -535,6 +600,7 @@ class PaymentController extends Controller
         return match($gateway) {
             'airtelmoney' => 'Airtel Money',
             'moovmoney' => 'Moov Money',
+            'ORABANK_NG' => 'Visa/Mastercard',
             'card' => 'Carte bancaire',
             default => 'Inconnu',
         };
@@ -637,42 +703,33 @@ class PaymentController extends Controller
         }
 
         try {
-            // Authentification selon la passerelle
-            $auth = $request->gateway === 'airtelmoney' 
-                ? env('AIRTEL_USERNAME') . ':' . env('AIRTEL_SECRET')
-                : env('MOOV_USERNAME') . ':' . env('MOOV_SECRET');
+            $eBillingService = new EBillingService();
             
-            $base64 = base64_encode($auth);
+            // Récupérer l'ID de facture E-Billing
+            $billId = $payment->metadata['ebilling_bill_id'] ?? $payment->transaction_id;
+            
+            if (!$billId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'ID de facture E-Billing non trouvé'
+                ], 400);
+            }
 
-            // URL API selon la passerelle
-            $apiUrl = $request->gateway === 'airtelmoney' 
-                ? env('AIRTEL_PUSH_URL', 'https://api.airtel.ga/ussd_push')
-                : env('MOOV_PUSH_URL', 'https://api.moov.ga/ussd_push');
+            // Obtenir le nom du système de paiement pour E-Billing
+            $paymentSystem = $eBillingService->getPaymentSystemName($request->gateway);
+            
+            // Formater le numéro de téléphone
+            $formattedPhone = $eBillingService->formatPhoneNumber($request->phone);
 
-            $response = Http::withHeaders([
-                'Authorization' => 'Basic ' . $base64,
-                'Content-Type' => 'application/json'
-            ])->post($apiUrl, [
-                'reference' => $payment->reference,
-                'amount' => $payment->amount,
-                'phone' => $request->phone,
-                'currency' => 'XAF',
-                'description' => 'Achat billet - ' . $payment->order->event->title,
-                'callback_url' => $request->gateway === 'airtelmoney' 
-                    ? route('webhook.airtel') 
-                    : route('webhook.moov'),
-            ]);
+            // Envoyer le push USSD via E-Billing
+            $result = $eBillingService->pushUSSD($billId, $paymentSystem, $formattedPhone);
 
-            if ($response->successful()) {
-                $data = $response->json();
-                
-                // Mettre à jour le paiement avec les infos de la transaction
+            if ($result['success']) {
+                // Mettre à jour le paiement avec les infos du push
                 $payment->update([
-                    'transaction_id' => $data['transaction_id'] ?? $data['reference'] ?? null,
-                    'gateway_response' => $data,
                     'metadata' => array_merge($payment->metadata ?? [], [
                         'push_sent_at' => now()->toISOString(),
-                        'push_response' => $data
+                        'push_response' => $result['data'] ?? []
                     ])
                 ]);
 
@@ -682,7 +739,7 @@ class PaymentController extends Controller
                     'data' => [
                         'payment_id' => $payment->id,
                         'reference' => $payment->reference,
-                        'transaction_id' => $data['transaction_id'] ?? null,
+                        'bill_id' => $billId,
                         'expires_at' => $payment->expired_at->format('Y-m-d H:i:s'),
                         'instructions' => 'Vérifiez votre téléphone et confirmez la transaction en tapant 1.',
                     ]
@@ -691,11 +748,11 @@ class PaymentController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de l\'envoi du push USSD: ' . $response->body()
+                'message' => $result['message'] ?? 'Erreur lors de l\'envoi du push USSD'
             ], 400);
 
         } catch (\Exception $e) {
-            Log::error('Erreur push USSD', [
+            Log::error('Erreur push USSD E-Billing', [
                 'payment_id' => $payment->id,
                 'gateway' => $request->gateway,
                 'phone' => $request->phone,
@@ -773,40 +830,28 @@ class PaymentController extends Controller
         ]);
 
         try {
-            $auth = $request->gateway === 'airtelmoney' 
-                ? env('AIRTEL_USERNAME') . ':' . env('AIRTEL_SECRET')
-                : env('MOOV_USERNAME') . ':' . env('MOOV_SECRET');
+            $eBillingService = new EBillingService();
             
-            $base64 = base64_encode($auth);
+            // Obtenir le nom du système de paiement pour E-Billing
+            $paymentSystem = $eBillingService->getPaymentSystemName($request->gateway);
+            
+            // Formater le numéro de téléphone
+            $formattedPhone = $eBillingService->formatPhoneNumber($request->phone);
 
-            $apiUrl = $request->gateway === 'airtelmoney' 
-                ? env('AIRTEL_KYC_URL', 'https://api.airtel.ga/kyc')
-                : env('MOOV_KYC_URL', 'https://api.moov.ga/kyc');
+            // Vérifier KYC via E-Billing
+            $result = $eBillingService->checkKYC($paymentSystem, $formattedPhone);
 
-            $url = $apiUrl . '?' . http_build_query([
-                'operator' => $request->gateway,
-                'phone' => $request->phone
-            ]);
-
-            $response = Http::withHeaders([
-                'Authorization' => 'Basic ' . $base64
-            ])->get($url);
-
-            if ($response->successful()) {
-                $data = $response->json();
-                
-                if (isset($data['customer_name'])) {
-                    return response()->json([
-                        'success' => true,
-                        'data' => [
-                            'customer_name' => $data['customer_name'],
-                            'phone' => $request->phone,
-                            'gateway' => $request->gateway,
-                            'account_status' => $data['status'] ?? 'active'
-                        ],
-                        'message' => 'Informations client trouvées'
-                    ]);
-                }
+            if ($result['success']) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'customer_name' => $result['customer_name'],
+                        'phone' => $request->phone,
+                        'gateway' => $request->gateway,
+                        'account_status' => 'active'
+                    ],
+                    'message' => 'Informations client trouvées'
+                ]);
             }
 
             return response()->json([
@@ -815,7 +860,7 @@ class PaymentController extends Controller
             ], 404);
 
         } catch (\Exception $e) {
-            Log::error('Erreur KYC', [
+            Log::error('Erreur KYC E-Billing', [
                 'gateway' => $request->gateway,
                 'phone' => $request->phone,
                 'error' => $e->getMessage()
@@ -824,6 +869,200 @@ class PaymentController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur lors de la vérification KYC'
+            ], 500);
+        }
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/payments/initiate",
+     *     summary="Initiate payment for guest order",
+     *     tags={"Payments"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"order_id", "gateway", "amount"},
+     *             @OA\Property(property="order_id", type="integer", example=1),
+     *             @OA\Property(property="gateway", type="string", enum={"airtelmoney", "moovmoney", "ORABANK_NG"}, example="airtelmoney"),
+     *             @OA\Property(property="phone", type="string", example="074123456", description="Required for mobile money"),
+     *             @OA\Property(property="amount", type="number", example=15000)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Payment initiated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Paiement initié avec succès"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="payment", type="object",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="reference", type="string", example="PAY-123456")
+     *                 ),
+     *                 @OA\Property(property="bill_id", type="string", example="BILL-789"),
+     *                 @OA\Property(property="redirect_url", type="string", example="https://test.billing-easy.net?invoice=BILL-789&operator=ORABANK_NG&redirect=1")
+     *             )
+     *         )
+     *     )
+     * )
+     * 
+     * Initier un paiement pour une commande invité
+     */
+    public function initiateGuestPayment(Request $request): JsonResponse
+    {
+        $request->validate([
+            'order_id' => 'required|integer|exists:orders,id',
+            'gateway' => 'required|in:airtelmoney,moovmoney,ORABANK_NG',
+            'phone' => 'required_if:gateway,airtelmoney,moovmoney|string',
+            'amount' => 'required|numeric|min:100'
+        ]);
+
+        $order = Order::findOrFail($request->order_id);
+
+        // Vérifier que la commande n'est pas expirée
+        if ($order->isExpired()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cette commande a expiré'
+            ], 400);
+        }
+
+        // Vérifier si un paiement en cours existe déjà
+        $existingPayment = Payment::where('order_id', $order->id)
+            ->where('status', 'pending')
+            ->first();
+
+        if ($existingPayment) {
+            return $this->getPaymentStatus($existingPayment);
+        }
+
+        // Créer un nouveau paiement
+        $reference = $this->generateReference();
+        
+        $payment = Payment::create([
+            'order_id' => $order->id,
+            'reference' => $reference,
+            'gateway' => $request->gateway,
+            'amount' => $request->amount,
+            'status' => 'pending',
+            'expired_at' => now()->addMinutes(15), // 15 minutes pour payer
+            'metadata' => [
+                'phone' => $request->phone,
+                'user_agent' => $request->header('User-Agent'),
+                'ip_address' => $request->ip(),
+            ]
+        ]);
+
+        // Initier le paiement selon la passerelle
+        $result = $this->initiatePPayment($payment, $request);
+
+        if ($result['success']) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Paiement initié avec succès',
+                'data' => [
+                    'payment' => [
+                        'id' => $payment->id,
+                        'reference' => $payment->reference,
+                    ],
+                    'bill_id' => $result['bill_id'] ?? null,
+                    'redirect_url' => $result['redirect_url'] ?? null,
+                ]
+            ]);
+        }
+
+        return response()->json($result, 400);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/payments/push-ussd",
+     *     summary="Send USSD push for mobile money payment",
+     *     tags={"Payments"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"payment_id", "bill_id", "phone", "gateway"},
+     *             @OA\Property(property="payment_id", type="integer", example=1),
+     *             @OA\Property(property="bill_id", type="string", example="BILL-123"),
+     *             @OA\Property(property="phone", type="string", example="074123456"),
+     *             @OA\Property(property="gateway", type="string", enum={"airtelmoney", "moovmoney"}, example="airtelmoney")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="USSD push sent successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Push USSD envoyé avec succès")
+     *         )
+     *     )
+     * )
+     * 
+     * Envoyer un push USSD
+     */
+    public function pushUSSD(Request $request): JsonResponse
+    {
+        $request->validate([
+            'payment_id' => 'required|integer|exists:payments,id',
+            'bill_id' => 'required|string',
+            'phone' => 'required|string',
+            'gateway' => 'required|in:airtelmoney,moovmoney',
+        ]);
+
+        $payment = Payment::findOrFail($request->payment_id);
+        
+        // Vérifier que le paiement est en attente
+        if ($payment->status !== 'pending') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ce paiement n\'est plus en attente'
+            ], 400);
+        }
+
+        try {
+            $eBillingService = new EBillingService();
+            
+            // Obtenir le nom du système de paiement pour E-Billing
+            $paymentSystem = $eBillingService->getPaymentSystemName($request->gateway);
+            
+            // Formater le numéro de téléphone
+            $formattedPhone = $eBillingService->formatPhoneNumber($request->phone);
+
+            // Envoyer le push USSD via E-Billing
+            $result = $eBillingService->pushUSSD($request->bill_id, $paymentSystem, $formattedPhone);
+
+            if ($result['success']) {
+                // Mettre à jour le paiement avec les infos du push
+                $payment->update([
+                    'metadata' => array_merge($payment->metadata ?? [], [
+                        'push_sent_at' => now()->toISOString(),
+                        'push_response' => $result['data'] ?? []
+                    ])
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Push USSD envoyé avec succès'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => $result['message'] ?? 'Erreur lors de l\'envoi du push USSD'
+            ], 400);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur push USSD E-Billing', [
+                'payment_id' => $payment->id,
+                'gateway' => $request->gateway,
+                'phone' => $request->phone,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de l\'envoi du push USSD'
             ], 500);
         }
     }
