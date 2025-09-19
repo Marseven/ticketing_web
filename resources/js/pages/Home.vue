@@ -233,15 +233,8 @@ export default {
     const searchQuery = ref('')
     const selectedCategory = ref('all')
     const events = ref([])
+    const categories = ref([])
     const loading = ref(true)
-
-    // Catégories selon la maquette
-    const categories = ref([
-      { id: 'all', name: 'Tous' },
-      { id: 'concerts', name: 'Concerts/Shows' },
-      { id: 'cinema', name: 'Cinéma/Théâtre/Conférence/Expo' },
-      { id: 'sports', name: 'Sports' }
-    ])
 
     // Événements filtrés
     const filteredEvents = computed(() => {
@@ -249,17 +242,11 @@ export default {
         return events.value
       }
       
-      // Mapper les catégories de la maquette aux vraies catégories
-      const categoryMapping = {
-        'concerts': ['concert', 'festival'],
-        'cinema': ['theater', 'conference', 'cinema'],
-        'sports': ['sport']
-      }
-      
-      const realCategories = categoryMapping[selectedCategory.value] || []
-      return events.value.filter(event => 
-        realCategories.includes(event.category)
-      )
+      return events.value.filter(event => {
+        // Utiliser l'ID de la catégorie pour filtrer
+        const eventCategoryId = event.category?.id || event.category_id
+        return eventCategoryId === parseInt(selectedCategory.value)
+      })
     })
 
     // Événements populaires (featured)
@@ -273,9 +260,21 @@ export default {
         loading.value = true
         const data = await eventsStore.fetchEvents()
         events.value = data.events || []
+        
+        // Récupérer les catégories depuis l'API
+        if (data.categories) {
+          categories.value = [
+            { id: 'all', name: 'Tous' },
+            ...data.categories.map(cat => ({
+              id: cat.id,
+              name: cat.name
+            }))
+          ]
+        }
       } catch (error) {
         console.error('Erreur lors du chargement des événements:', error)
         events.value = []
+        categories.value = [{ id: 'all', name: 'Tous' }]
       } finally {
         loading.value = false
       }
@@ -293,7 +292,7 @@ export default {
     }
 
     const filterByCategory = (categoryId) => {
-      selectedCategory.value = categoryId
+      selectedCategory.value = categoryId.toString()
     }
 
     // Lifecycle

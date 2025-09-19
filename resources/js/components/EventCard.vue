@@ -201,14 +201,20 @@ export default {
 
     const minPrice = computed(() => {
       // Utiliser les prix pré-calculés par l'API si disponibles
-      if (props.event.min_price !== undefined && props.event.min_price !== null) {
+      if (props.event.min_price !== undefined && props.event.min_price !== null && props.event.min_price > 0) {
         return props.event.min_price;
       }
       
       // Sinon calculer à partir des types de tickets
       const ticketTypes = props.event.ticket_types || props.event.ticketTypes
       if (ticketTypes && ticketTypes.length > 0) {
-        const prices = ticketTypes.map(t => parseFloat(t.price) || 0).filter(price => price > 0);
+        const prices = ticketTypes
+          .map(t => {
+            const price = parseFloat(t.price);
+            return isNaN(price) ? 0 : price;
+          })
+          .filter(price => price > 0);
+        
         if (prices.length > 0) {
           return Math.min(...prices);
         }
@@ -228,18 +234,34 @@ export default {
       
       const ticketTypes = props.event.ticket_types || props.event.ticketTypes
       if (ticketTypes && ticketTypes.length > 0) {
-        return ticketTypes.reduce((total, ticketType) => {
+        const totalAvailable = ticketTypes.reduce((total, ticketType) => {
           // Utiliser remaining_quantity si disponible (calculé par l'API)
           if (ticketType.remaining_quantity !== undefined && ticketType.remaining_quantity !== null) {
-            return total + ticketType.remaining_quantity;
+            return total + Math.max(0, ticketType.remaining_quantity);
           }
-          // Sinon utiliser l'ancien calcul
-          const available = (ticketType.available_quantity || ticketType.quantity || 0);
+          // Utiliser available_quantity si disponible
+          if (ticketType.available_quantity !== undefined && ticketType.available_quantity !== null) {
+            const sold = ticketType.sold_quantity || 0;
+            return total + Math.max(0, ticketType.available_quantity - sold);
+          }
+          // Sinon utiliser l'ancien calcul avec quantity
+          const available = (ticketType.quantity || 0);
           const sold = (ticketType.sold_quantity || ticketType.sold || 0);
           return total + Math.max(0, available - sold);
-        }, 0)
+        }, 0);
+        
+        // Si tous les ticket types ont available_quantity à null (quantité illimitée), retourner une valeur élevée
+        const hasLimitedQuantity = ticketTypes.some(t => 
+          t.available_quantity !== null && t.available_quantity !== undefined
+        );
+        
+        if (!hasLimitedQuantity) {
+          return 1000; // Quantité illimitée - afficher "Réserver"
+        }
+        
+        return totalAvailable;
       }
-      return 100 // Valeur par défaut si pas d'info
+      return 1000 // Valeur par défaut si pas d'info - permettre la réservation
     })
 
     const buttonText = computed(() => {

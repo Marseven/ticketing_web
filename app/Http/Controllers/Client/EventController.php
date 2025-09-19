@@ -14,6 +14,7 @@ class EventController extends Controller
     public function index(Request $request)
     {
         $query = Event::where('status', 'published')
+            ->where('is_active', true)
             ->with([
                 'organizer:id,name,slug',
                 'schedules' => function($q) {
@@ -22,8 +23,7 @@ class EventController extends Controller
                 'ticketTypes' => function($q) {
                     $q->where('status', 'active')->orderBy('price');
                 },
-                'venue:id,name,city,address',
-                'category:id,name,slug'
+                'venue:id,name,city,address'
             ]);
 
         // Recherche par mot-clé
@@ -62,10 +62,15 @@ class EventController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        // Récupération des catégories
-        $categories = \App\Models\EventCategory::select('id', 'name', 'slug')
-            ->whereHas('events', function($q) {
-                $q->where('status', 'published');
+        // Récupération des catégories depuis event_categories
+        $categories = \DB::table('event_categories')
+            ->select('id', 'name', 'slug')
+            ->whereExists(function($query) {
+                $query->select(\DB::raw(1))
+                      ->from('events')
+                      ->whereColumn('events.category_id', 'event_categories.id')
+                      ->where('events.status', 'published')
+                      ->where('events.is_active', true);
             })
             ->get()
             ->toArray();
@@ -123,6 +128,17 @@ class EventController extends Controller
                     $eventArray['venue_name'] = $event->venue->name;
                     $eventArray['venue_city'] = $event->venue->city;
                     $eventArray['venue_address'] = $event->venue->address;
+                }
+
+                // Ajouter les informations de catégorie depuis event_categories
+                $category = \DB::table('event_categories')->where('id', $event->category_id)->first();
+                if ($category) {
+                    $eventArray['category'] = [
+                        'id' => $category->id,
+                        'name' => $category->name,
+                        'slug' => $category->slug
+                    ];
+                    $eventArray['category_name'] = $category->name;
                 }
 
                 // Marquer comme featured pour certains événements (logique à définir)
