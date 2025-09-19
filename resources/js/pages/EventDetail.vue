@@ -88,8 +88,8 @@
                       <div class="flex items-center gap-4 mt-2 text-sm">
                         <span class="text-gray-500">
                           Places disponibles: 
-                          <span class="font-semibold" :class="(ticketType.quantity - (ticketType.sold || 0)) > 10 ? 'text-green-600' : (ticketType.quantity - (ticketType.sold || 0)) > 0 ? 'text-orange-500' : 'text-red-600'">
-                            {{ ticketType.quantity - (ticketType.sold || 0) }}
+                          <span class="font-semibold" :class="getQuantityDisplayCount(ticketType) > 10 ? 'text-green-600' : getQuantityDisplayCount(ticketType) > 0 ? 'text-orange-500' : 'text-red-600'">
+                            {{ getQuantityDisplay(ticketType) }}
                           </span>
                         </span>
                       </div>
@@ -327,14 +327,18 @@ export default {
     // Computed properties
     const eventDate = computed(() => {
       if (event.value?.schedules && event.value.schedules.length > 0) {
-        return new Date(event.value.schedules[0].start_date)
+        const dateStr = event.value.schedules[0].starts_at
+        if (dateStr) {
+          return new Date(dateStr)
+        }
       }
       return null
     })
 
     const minPrice = computed(() => {
       if (event.value?.ticket_types && event.value.ticket_types.length > 0) {
-        return Math.min(...event.value.ticket_types.map(t => t.price))
+        const prices = event.value.ticket_types.map(t => parseFloat(t.price) || 0).filter(price => price > 0)
+        return prices.length > 0 ? Math.min(...prices) : 0
       }
       return 0
     })
@@ -350,10 +354,19 @@ export default {
       
       if (event.value?.ticket_types && event.value.ticket_types.length > 0) {
         return event.value.ticket_types.reduce((total, ticketType) => {
-          return total + (ticketType.quantity - (ticketType.sold || 0))
+          // Utiliser remaining_quantity si disponible, sinon calculer
+          if (ticketType.remaining_quantity !== undefined && ticketType.remaining_quantity !== null) {
+            return total + Math.max(0, ticketType.remaining_quantity)
+          }
+          // Utiliser available_quantity et sold_quantity
+          if (ticketType.available_quantity !== undefined && ticketType.available_quantity !== null) {
+            const sold = ticketType.sold_quantity || 0
+            return total + Math.max(0, ticketType.available_quantity - sold)
+          }
+          return total
         }, 0)
       }
-      return 100 // Valeur par défaut si pas d'info
+      return 1000 // Valeur par défaut élevée si pas d'info
     })
 
     const canPurchaseTickets = computed(() => {
@@ -440,6 +453,26 @@ export default {
       // Rediriger vers la page de confirmation ou afficher un message de succès
     }
 
+    // Méthodes pour l'affichage des quantités
+    const getQuantityDisplayCount = (ticketType) => {
+      if (ticketType.remaining_quantity !== undefined && ticketType.remaining_quantity !== null) {
+        return Math.max(0, ticketType.remaining_quantity)
+      }
+      if (ticketType.available_quantity !== undefined && ticketType.available_quantity !== null) {
+        const sold = ticketType.sold_quantity || 0
+        return Math.max(0, ticketType.available_quantity - sold)
+      }
+      return 0
+    }
+
+    const getQuantityDisplay = (ticketType) => {
+      const count = getQuantityDisplayCount(ticketType)
+      if (ticketType.available_quantity === null) {
+        return 'Illimitées'
+      }
+      return count > 0 ? count : 'Complet'
+    }
+
     // Méthodes du carrousel
     const nextSlide = () => {
       if (currentSlide.value < slidesData.value.length - 1) {
@@ -493,6 +526,8 @@ export default {
       goToBooking,
       loadEvent,
       handleTicketBooked,
+      getQuantityDisplayCount,
+      getQuantityDisplay,
       nextSlide,
       previousSlide
     }
