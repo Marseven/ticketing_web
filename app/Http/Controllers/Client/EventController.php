@@ -67,12 +67,42 @@ class EventController extends Controller
         if ($request->wantsJson() || $request->is('api/*')) {
             // Enrichir les données pour le frontend
             $enrichedEvents = collect($events->items())->map(function($event) {
-                // Assurer que les relations sont bien formatées
-                $eventArray = $event->toArray();
+                // Créer un tableau vide au lieu d'utiliser toArray() qui peut avoir des problèmes avec les accessors
+                $eventArray = [
+                    'id' => $event->id,
+                    'organizer_id' => $event->organizer_id,
+                    'category_id' => $event->category_id,
+                    'venue_id' => $event->venue_id,
+                    'title' => $event->title,
+                    'slug' => $event->slug,
+                    'description' => $event->description,
+                    'image_url' => $event->image_url,
+                    'status' => $event->status,
+                    'is_active' => $event->is_active,
+                    'published_at' => $event->published_at,
+                    'created_at' => $event->created_at,
+                    'updated_at' => $event->updated_at,
+                    'organizer' => $event->organizer ? [
+                        'id' => $event->organizer->id,
+                        'name' => $event->organizer->name,
+                        'slug' => $event->organizer->slug,
+                    ] : null,
+                    'venue' => $event->venue ? [
+                        'id' => $event->venue->id,
+                        'name' => $event->venue->name,
+                        'city' => $event->venue->city,
+                        'address' => $event->venue->address,
+                    ] : null,
+                ];
                 
                 // Ajouter des données calculées pour l'affichage
                 if ($event->ticketTypes && $event->ticketTypes->count() > 0) {
                     $ticketTypes = $event->ticketTypes->map(function($ticketType) {
+                        // Calculer sold_quantity directement sans utiliser l'accessor
+                        $soldQuantity = $ticketType->tickets()->whereIn('status', ['issued', 'used'])->count();
+                        $remainingQuantity = $ticketType->available_quantity ? 
+                            max(0, $ticketType->available_quantity - $soldQuantity) : null;
+                            
                         return [
                             'id' => $ticketType->id,
                             'name' => $ticketType->name,
@@ -80,8 +110,8 @@ class EventController extends Controller
                             'price' => (float) $ticketType->price,
                             'currency' => $ticketType->currency ?? 'XOF',
                             'available_quantity' => $ticketType->available_quantity,
-                            'sold_quantity' => $ticketType->sold_quantity,
-                            'remaining_quantity' => $ticketType->remaining_quantity,
+                            'sold_quantity' => $soldQuantity,
+                            'remaining_quantity' => $remainingQuantity,
                             'is_available' => $ticketType->isAvailable(),
                             'status' => $ticketType->status,
                         ];
