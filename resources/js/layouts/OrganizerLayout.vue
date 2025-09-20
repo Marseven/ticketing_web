@@ -1,10 +1,10 @@
 <template>
-  <div class="min-h-screen organizer-layout">
+  <div class="min-h-screen organizer-layout" style="background: blue !important;">
     <!-- Header spécifique organisateur -->
     <OrganizerHeader />
     
     <!-- Contenu principal -->
-    <main class="flex-1 organizer-main">
+    <main class="flex-1 organizer-main" style="background: green !important;">
       <slot />
     </main>
     
