@@ -346,7 +346,7 @@ const loadEvent = async () => {
         total_revenue: 2250000,
         is_public: true,
         sales_active: true,
-        image_url: '/images/concert-jazz.jpg',
+        image_url: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400',
         created_at: '2025-09-01T10:00:00Z',
         ticket_types: [
           {
@@ -384,7 +384,7 @@ const loadEvent = async () => {
         total_revenue: 850000,
         is_public: true,
         sales_active: true,
-        image_url: '/images/oiseau-rare.jpg',
+        image_url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400',
         created_at: '2025-06-15T10:00:00Z',
         ticket_types: [
           {
@@ -413,7 +413,7 @@ const loadEvent = async () => {
         total_revenue: 2430000,
         is_public: true,
         sales_active: true,
-        image_url: '/images/festival-culture.jpg',
+        image_url: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400',
         created_at: '2025-07-01T10:00:00Z',
         ticket_types: [
           {
@@ -442,7 +442,7 @@ const loadEvent = async () => {
         total_revenue: 1200000,
         is_public: true,
         sales_active: false,
-        image_url: '/images/hip-hop.jpg',
+        image_url: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400',
         created_at: '2025-05-01T10:00:00Z',
         ticket_types: [
           {
@@ -471,7 +471,7 @@ const loadEvent = async () => {
         total_revenue: 0,
         is_public: false,
         sales_active: false,
-        image_url: '/images/gastronomie.jpg',
+        image_url: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400',
         created_at: '2025-09-15T10:00:00Z',
         ticket_types: [
           {
@@ -524,10 +524,7 @@ const loadEvent = async () => {
 };
 
 const editEvent = () => {
-  // Pour l'instant, rediriger vers la page de création d'événement
-  // TODO: Créer une page d'édition spécifique
-  alert('Fonctionnalité d\'édition en cours de développement');
-  // router.push({ name: 'organizer-event-create' });
+  router.push({ name: 'organizer-event-edit', params: { slug: event.value.slug } });
 };
 
 const publishEvent = async () => {
