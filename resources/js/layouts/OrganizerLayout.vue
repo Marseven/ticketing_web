@@ -5,7 +5,7 @@
     
     <!-- Contenu principal -->
     <main class="flex-1 organizer-main" style="background: green !important;">
-      <slot />
+      <router-view />
     </main>
     
     <!-- Footer spécifique organisateur -->
