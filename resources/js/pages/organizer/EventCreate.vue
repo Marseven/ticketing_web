@@ -1,5 +1,6 @@
 <template>
-  <div class="event-create p-6 bg-gray-50 min-h-screen">
+  <OrganizerLayout>
+    <div class="event-create p-6">
     <!-- Header -->
     <div class="mb-8">
       <div class="flex items-center justify-between">
@@ -284,14 +285,19 @@
         </div>
       </div>
     </form>
-  </div>
+    </div>
+  </OrganizerLayout>
 </template>
 
 <script>
 import { ref, reactive, computed, onMounted } from 'vue'
+import OrganizerLayout from '../../layouts/OrganizerLayout.vue'
 
 export default {
   name: 'EventCreate',
+  components: {
+    OrganizerLayout
+  },
   setup() {
     // État réactif
     const creating = ref(false)

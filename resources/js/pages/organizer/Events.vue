@@ -1,31 +1,27 @@
 <template>
-  <div class="organizer-events min-h-screen bg-gray-100">
-    <!-- En-tête organisateur -->
-    <header class="bg-blue-600 text-white py-4 px-4 shadow-lg">
-      <div class="max-w-6xl mx-auto flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-          <router-link to="/organizer/dashboard" class="text-blue-200 hover:text-white">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-          </router-link>
-          <img src="/images/logo_white.png" alt="Primea" class="h-8" />
-          <div>
-            <h1 class="text-xl font-bold">Mes Événements</h1>
-            <p class="text-blue-200 text-sm">Gestion de vos événements</p>
+  <OrganizerLayout>
+    <div class="organizer-events">
+      <!-- En-tête de la page -->
+      <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-6xl mx-auto px-4 py-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-2xl font-bold text-primea-blue font-primea">Mes Événements</h1>
+              <p class="text-gray-600 mt-1 font-primea">Gérez tous vos événements en un seul endroit</p>
+            </div>
+        
+            <router-link 
+              :to="{ name: 'organizer-event-create' }" 
+              class="bg-primea-blue text-white px-4 py-2 rounded-primea hover:bg-primea-yellow hover:text-primea-blue font-semibold font-primea transition-all duration-200 shadow-primea"
+            >
+              <PlusIcon class="w-4 h-4 inline mr-2" />
+              Nouvel événement
+            </router-link>
           </div>
         </div>
-        
-        <router-link 
-          to="/organizer/events/create" 
-          class="bg-yellow-400 text-blue-900 px-6 py-2 rounded-lg font-semibold hover:bg-yellow-300 transition-colors"
-        >
-          + Nouvel événement
-        </router-link>
       </div>
-    </header>
 
-    <div class="max-w-6xl mx-auto py-8 px-4">
+      <div class="max-w-6xl mx-auto py-8 px-4">
       <!-- Filtres et statistiques -->
       <div class="bg-white rounded-lg shadow-md p-6 mb-8">
         <div class="flex flex-col md:flex-row gap-4 justify-between items-center mb-6">
@@ -265,16 +261,23 @@
           + Créer mon premier événement
         </router-link>
       </div>
+      </div>
     </div>
-  </div>
+  </OrganizerLayout>
 </template>
 
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { PlusIcon } from '@heroicons/vue/24/outline'
+import OrganizerLayout from '../../layouts/OrganizerLayout.vue'
 
 export default {
   name: 'OrganizerEvents',
+  components: {
+    OrganizerLayout,
+    PlusIcon
+  },
   setup() {
     const router = useRouter()
 
