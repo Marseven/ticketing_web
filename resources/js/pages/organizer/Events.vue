@@ -1,5 +1,5 @@
 <template>
-  <div class="organizer-events">
+  <div class="organizer-events min-h-screen" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)">
       <!-- En-tête de la page -->
       <div class="bg-white shadow-sm border-b border-gray-200">
         <div class="max-w-6xl mx-auto px-4 py-6">

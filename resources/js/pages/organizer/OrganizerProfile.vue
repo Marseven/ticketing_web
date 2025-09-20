@@ -1,5 +1,5 @@
 <template>
-  <div class="organizer-profile p-6">
+  <div class="organizer-profile p-6 min-h-screen" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)">
     <!-- Header -->
     <div class="mb-8">
       <h1 class="text-2xl font-bold text-primea-blue font-primea">Mon Profil Organisateur</h1>
