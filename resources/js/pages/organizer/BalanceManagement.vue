@@ -1,6 +1,5 @@
 <template>
-  <OrganizerLayout>
-    <div class="balance-management p-6">
+  <div class="balance-management p-6">
     <!-- Header -->
     <div class="mb-8">
       <div class="flex items-center justify-between">
@@ -304,18 +303,14 @@
         </form>
       </div>
     </div>
-  </OrganizerLayout>
+  </div>
 </template>
 
 <script>
 import { ref, reactive, onMounted, computed } from 'vue'
-import OrganizerLayout from '../../layouts/OrganizerLayout.vue'
 
 export default {
   name: 'BalanceManagement',
-  components: {
-    OrganizerLayout
-  },
   setup() {
     // État réactif
     const loading = ref(false)

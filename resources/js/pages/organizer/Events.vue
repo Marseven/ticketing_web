@@ -1,6 +1,5 @@
 <template>
-  <OrganizerLayout>
-    <div class="organizer-events">
+  <div class="organizer-events">
       <!-- En-tête de la page -->
       <div class="bg-white shadow-sm border-b border-gray-200">
         <div class="max-w-6xl mx-auto px-4 py-6">
@@ -263,19 +262,16 @@
       </div>
       </div>
     </div>
-  </OrganizerLayout>
 </template>
 
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { PlusIcon } from '@heroicons/vue/24/outline'
-import OrganizerLayout from '../../layouts/OrganizerLayout.vue'
 
 export default {
   name: 'OrganizerEvents',
   components: {
-    OrganizerLayout,
     PlusIcon
   },
   setup() {

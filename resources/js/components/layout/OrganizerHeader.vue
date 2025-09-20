@@ -45,6 +45,8 @@
             <span>Finances</span>
           </router-link>
 
+          <!-- Temporairement désactivé - Page en cours de développement -->
+          <!-- 
           <router-link 
             :to="{ name: 'organizer-physical-sales' }" 
             class="flex items-center space-x-2 text-primea-blue hover:text-primea-yellow font-medium font-primea transition-colors duration-200"
@@ -53,6 +55,7 @@
             <DevicePhoneMobileIcon class="w-5 h-5" />
             <span>Vente Physique</span>
           </router-link>
+          -->
         </div>
 
         <!-- Actions rapides et profil -->
@@ -214,6 +217,7 @@
               <span>Finances</span>
             </router-link>
 
+            <!-- Temporairement désactivé
             <router-link 
               :to="{ name: 'organizer-physical-sales' }" 
               class="flex items-center space-x-3 py-3 text-primea-blue hover:text-primea-yellow font-primea font-medium transition-colors duration-200"
@@ -222,6 +226,7 @@
               <DevicePhoneMobileIcon class="w-5 h-5" />
               <span>Vente Physique</span>
             </router-link>
+            -->
 
             <div class="border-t border-gray-200 my-3"></div>
 

@@ -1,6 +1,5 @@
 <template>
-  <OrganizerLayout>
-    <div class="organizer-dashboard p-6">
+  <div class="organizer-dashboard p-6">
     <!-- Header -->
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">Dashboard Organisateur</h1>
@@ -322,18 +321,13 @@
         </form>
       </div>
     </div>
-  </OrganizerLayout>
 </template>
 
 <script>
 import { ref, reactive, onMounted, computed } from 'vue'
-import OrganizerLayout from '../../layouts/OrganizerLayout.vue'
 
 export default {
   name: 'OrganizerDashboard',
-  components: {
-    OrganizerLayout
-  },
   setup() {
     // État réactif
     const loading = ref(false)

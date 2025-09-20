@@ -26,16 +26,18 @@ export default {
     // Masquer header/footer sur certaines pages
     const showHeader = computed(() => {
       const hiddenRoutes = ['scanner', 'checkout']
-      // Masquer aussi sur les routes admin
+      // Masquer aussi sur les routes admin et organisateur
       const isAdminRoute = route.path && route.path.startsWith('/admin')
-      return !hiddenRoutes.includes(route.name) && !isAdminRoute
+      const isOrganizerRoute = route.path && route.path.startsWith('/organizer')
+      return !hiddenRoutes.includes(route.name) && !isAdminRoute && !isOrganizerRoute
     })
     
     const showFooter = computed(() => {
       const hiddenRoutes = ['scanner', 'checkout']
-      // Masquer aussi sur les routes admin
+      // Masquer aussi sur les routes admin et organisateur
       const isAdminRoute = route.path && route.path.startsWith('/admin')
-      return !hiddenRoutes.includes(route.name) && !isAdminRoute
+      const isOrganizerRoute = route.path && route.path.startsWith('/organizer')
+      return !hiddenRoutes.includes(route.name) && !isAdminRoute && !isOrganizerRoute
     })
     
     return {

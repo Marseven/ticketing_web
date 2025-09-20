@@ -65,6 +65,7 @@
                 <span>Gestion financière</span>
               </router-link>
             </li>
+            <!-- Temporairement désactivé
             <li>
               <router-link 
                 :to="{ name: 'organizer-physical-sales' }" 
@@ -74,6 +75,7 @@
                 <span>Vente physique</span>
               </router-link>
             </li>
+            -->
           </ul>
         </div>
 

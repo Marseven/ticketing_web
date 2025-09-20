@@ -20,9 +20,13 @@ const MyOrders = () => import('./pages/account/MyOrders.vue');
 const Profile = () => import('./pages/account/Profile.vue');
 
 // Espace organisateur
+const OrganizerLayout = () => import('./layouts/OrganizerLayout.vue');
 const OrganizerDashboard = () => import('./pages/organizer/Dashboard.vue');
 const OrganizerEvents = () => import('./pages/organizer/Events.vue');
 const EventCreate = () => import('./pages/organizer/EventCreate.vue');
+const BalanceManagement = () => import('./pages/organizer/BalanceManagement.vue');
+// const PhysicalSales = () => import('./pages/organizer/PhysicalSales.vue');
+// const PaymentHistory = () => import('./pages/organizer/PaymentHistory.vue');
 
 // Layout et pages Admin avec chunk grouping
 const AdminLayout = () => import(/* webpackChunkName: "admin-layout" */ './layouts/AdminLayout.vue');
@@ -67,15 +71,20 @@ const routes = [
         meta: { requiresAuth: true }
     },
     
-    // Routes organisateur
+    // Routes organisateur avec layout
     { 
         path: '/organizer', 
+        component: OrganizerLayout,
+        meta: { requiresAuth: true, role: 'organizer' },
         children: [
+            { path: '', redirect: '/organizer/dashboard' },
             { path: 'dashboard', component: OrganizerDashboard, name: 'organizer-dashboard' },
             { path: 'events', component: OrganizerEvents, name: 'organizer-events' },
             { path: 'events/create', component: EventCreate, name: 'organizer-event-create' },
-        ],
-        meta: { requiresAuth: true, role: 'organizer' }
+            { path: 'balance', component: BalanceManagement, name: 'organizer-balance' },
+            // { path: 'physical-sales', component: PhysicalSales, name: 'organizer-physical-sales' },
+            // { path: 'payments', component: PaymentHistory, name: 'organizer-payments' },
+        ]
     },
     
     // Routes admin avec layout
