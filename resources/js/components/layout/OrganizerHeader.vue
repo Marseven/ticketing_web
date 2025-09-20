@@ -106,34 +106,6 @@
                 </div>
 
                 <!-- Menu items -->
-                <router-link 
-                  :to="{ name: 'organizer-dashboard' }" 
-                  class="flex items-center px-4 py-2 text-primea-blue hover:bg-primea-blue/10 font-primea transition-colors duration-200"
-                  @click="closeDropdown"
-                >
-                  <HomeIcon class="w-5 h-5 mr-3" />
-                  Tableau de bord
-                </router-link>
-
-                <router-link 
-                  :to="{ name: 'organizer-events' }" 
-                  class="flex items-center px-4 py-2 text-primea-blue hover:bg-primea-blue/10 font-primea transition-colors duration-200"
-                  @click="closeDropdown"
-                >
-                  <CalendarIcon class="w-5 h-5 mr-3" />
-                  Mes événements
-                </router-link>
-
-                <router-link 
-                  :to="{ name: 'organizer-balance' }" 
-                  class="flex items-center px-4 py-2 text-primea-blue hover:bg-primea-blue/10 font-primea transition-colors duration-200"
-                  @click="closeDropdown"
-                >
-                  <CurrencyDollarIcon class="w-5 h-5 mr-3" />
-                  Finances
-                </router-link>
-
-                <div class="border-t border-gray-200 my-2"></div>
 
                 <router-link 
                   :to="{ name: 'profile' }" 

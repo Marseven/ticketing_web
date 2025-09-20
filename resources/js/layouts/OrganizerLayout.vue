@@ -1,10 +1,10 @@
 <template>
-  <div class="min-h-screen bg-gray-50 organizer-layout">
+  <div class="min-h-screen organizer-layout">
     <!-- Header spécifique organisateur -->
     <OrganizerHeader />
     
-    <!-- Contenu principal -->
-    <main class="flex-1">
+    <!-- Contenu principal avec fond -->
+    <main class="flex-1 bg-gray-50">
       <slot />
     </main>
     
@@ -31,6 +31,11 @@ main {
 
 /* Background subtil pour différencier l'espace organisateur */
 .organizer-layout {
+  background-color: #f8fafc;
+}
+
+/* S'assurer que le main prend tout l'espace */
+main {
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
 }
 </style>
