@@ -107,21 +107,32 @@ const router = createRouter({
 
 // Navigation guards
 router.beforeEach((to, from, next) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
     const userRole = localStorage.getItem('userRole');
+    
+    console.log('Navigation Guard - To:', to.path, 'Role:', userRole, 'Token:', !!token);
     
     // Vérifier l'authentification
     if (to.matched.some(record => record.meta.requiresAuth)) {
         if (!token) {
+            console.log('No token, redirecting to login');
             next({ name: 'login', query: { redirect: to.fullPath } });
             return;
         }
     }
     
-    // Vérifier le rôle
+    // Vérifier le rôle pour les routes qui en nécessitent un
     if (to.matched.some(record => record.meta.role)) {
-        const requiredRole = to.meta.role;
+        const requiredRole = to.matched.find(record => record.meta.role)?.meta.role;
+        console.log('Required role:', requiredRole, 'User role:', userRole);
+        
         if (userRole !== requiredRole) {
+            console.log('Role mismatch, redirecting to home');
+            // Si l'utilisateur essaie d'accéder à une page admin sans être admin
+            if (requiredRole === 'admin' && userRole !== 'admin') {
+                next({ name: 'login', query: { redirect: to.fullPath } });
+                return;
+            }
             next('/');
             return;
         }

@@ -4,12 +4,13 @@ import axios from 'axios'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
-  const token = ref(localStorage.getItem('auth_token'))
+  const token = ref(localStorage.getItem('auth_token') || localStorage.getItem('token'))
+  const userRole = ref(localStorage.getItem('userRole'))
   const loading = ref(false)
   
-  const isAuthenticated = computed(() => !!token.value && !!user.value)
-  const isOrganizer = computed(() => user.value?.is_organizer || false)
-  const isAdmin = computed(() => user.value?.is_admin || false)
+  const isAuthenticated = computed(() => !!token.value)
+  const isOrganizer = computed(() => user.value?.is_organizer || userRole.value === 'organizer')
+  const isAdmin = computed(() => user.value?.is_admin || userRole.value === 'admin')
   const activeTicketsCount = computed(() => user.value?.active_tickets_count || 0)
   
   // Configuration axios
@@ -45,13 +46,25 @@ export const useAuthStore = defineStore('auth', () => {
         token.value = response.data.token
         user.value = response.data.user
         
+        // Déterminer le rôle et l'access level
+        const accessLevel = response.data.access_level || 
+                          (user.value?.is_admin ? 'admin' : 
+                           user.value?.is_organizer ? 'organizer' : 'client')
+        
+        // Stocker les informations
         localStorage.setItem('auth_token', token.value)
+        localStorage.setItem('token', token.value)
+        localStorage.setItem('userRole', accessLevel)
+        localStorage.setItem('userName', user.value?.name || '')
+        localStorage.setItem('userEmail', user.value?.email || '')
+        
+        userRole.value = accessLevel
         axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
         
         return { 
           success: true,
           user: response.data.user,
-          access_level: response.data.access_level
+          access_level: accessLevel
         }
       } else {
         return { 
@@ -95,7 +108,12 @@ export const useAuthStore = defineStore('auth', () => {
     } finally {
       token.value = null
       user.value = null
+      userRole.value = null
       localStorage.removeItem('auth_token')
+      localStorage.removeItem('token')
+      localStorage.removeItem('userRole')
+      localStorage.removeItem('userName')
+      localStorage.removeItem('userEmail')
       delete axios.defaults.headers.common['Authorization']
     }
   }

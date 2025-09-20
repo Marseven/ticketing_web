@@ -184,7 +184,7 @@
 
 <script>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../../stores/auth.js'
 import PhoneInput from '../../components/PhoneInput.vue'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline'
@@ -198,6 +198,7 @@ export default {
   },
   setup() {
     const router = useRouter()
+    const route = useRoute()
     const authStore = useAuthStore()
 
     // État réactif
@@ -240,18 +241,26 @@ export default {
           })
 
           if (result.success) {
-            // Redirection basée sur le niveau d'accès
-            const accessLevel = result.access_level || 'client'
+            // Vérifier s'il y a une URL de redirection dans les query params
+            const redirectUrl = route.query.redirect
             
-            switch (accessLevel) {
-              case 'admin':
-                router.push('/admin/dashboard')
-                break
-              case 'organizer':
-                router.push('/organizer/dashboard')
-                break
-              default:
-                router.push('/')
+            if (redirectUrl) {
+              // Si une URL de redirection existe, y aller directement
+              router.push(redirectUrl)
+            } else {
+              // Sinon, redirection basée sur le niveau d'accès
+              const accessLevel = result.access_level || 'client'
+              
+              switch (accessLevel) {
+                case 'admin':
+                  router.push('/admin/dashboard')
+                  break
+                case 'organizer':
+                  router.push('/organizer/dashboard')
+                  break
+                default:
+                  router.push('/')
+              }
             }
           } else {
             throw new Error(result.message || 'Identifiants incorrects')
@@ -278,16 +287,30 @@ export default {
           // Simuler la connexion
           await new Promise(resolve => setTimeout(resolve, 1000))
           
-          // Redirection selon le rôle
-          switch (account.role) {
-            case 'admin':
-              router.push('/admin/dashboard')
-              break
-            case 'organizer':
-              router.push('/organizer/dashboard')
-              break
-            default:
-              router.push('/')
+          // Stocker les informations d'authentification
+          localStorage.setItem('token', 'test-token-' + account.role)
+          localStorage.setItem('userRole', account.role)
+          localStorage.setItem('userName', account.name)
+          localStorage.setItem('userEmail', account.login)
+          
+          // Vérifier s'il y a une URL de redirection
+          const redirectUrl = route.query.redirect
+          
+          if (redirectUrl) {
+            // Si une URL de redirection existe, y aller directement
+            router.push(redirectUrl)
+          } else {
+            // Sinon, redirection selon le rôle
+            switch (account.role) {
+              case 'admin':
+                router.push('/admin/dashboard')
+                break
+              case 'organizer':
+                router.push('/organizer/dashboard')
+                break
+              default:
+                router.push('/')
+            }
           }
         }
 
