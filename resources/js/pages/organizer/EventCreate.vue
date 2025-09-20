@@ -3,502 +3,480 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <!-- Header -->
       <div class="mb-8">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">Créer un Événement</h1>
-          <p class="text-gray-600">Configurez tous les détails de votre événement</p>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <button 
+              @click="$router.go(-1)"
+              class="text-primea-blue hover:text-primea-yellow transition-colors"
+            >
+              <ArrowLeftIcon class="w-6 h-6" />
+            </button>
+            <div>
+              <h1 class="text-3xl font-bold text-primea-blue font-primea">Créer un événement</h1>
+              <p class="text-gray-600 font-primea mt-1">Configurez tous les détails de votre événement</p>
+            </div>
+          </div>
         </div>
-        <button @click="$router.go(-1)" class="text-gray-600 hover:text-gray-800">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-          </svg>
-        </button>
       </div>
-    </div>
 
-    <!-- Form -->
-    <form @submit.prevent="createEvent" class="max-w-4xl">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Main Content -->
-        <div class="lg:col-span-2 space-y-6">
-          <!-- Basic Information -->
-          <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-xl font-bold mb-4">Informations de Base</h2>
-            
-            <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Titre de l'événement *</label>
-                <input v-model="eventForm.title" type="text" required 
-                       class="w-full border rounded-lg px-3 py-2" 
-                       placeholder="Concert de Jazz, Spectacle de Théâtre...">
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                <textarea v-model="eventForm.description" rows="4" 
-                          class="w-full border rounded-lg px-3 py-2" 
-                          placeholder="Décrivez votre événement en détails..."></textarea>
-              </div>
-              
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Form -->
+      <form @submit.prevent="createEvent" class="space-y-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Main form content -->
+          <div class="lg:col-span-2 space-y-6">
+            <!-- Basic Information -->
+            <div class="bg-white rounded-primea shadow-primea p-6">
+              <h2 class="text-xl font-semibold text-primea-blue font-primea mb-6">Informations de base</h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Titre de l'événement</label>
+                  <input 
+                    v-model="form.title"
+                    type="text" 
+                    required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                    placeholder="Nom de votre événement"
+                  />
+                </div>
+
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Description</label>
+                  <textarea 
+                    v-model="form.description"
+                    rows="4"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea resize-none"
+                    placeholder="Décrivez votre événement..."
+                  ></textarea>
+                </div>
+
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Catégorie *</label>
-                  <select v-model="eventForm.category_id" required class="w-full border rounded-lg px-3 py-2">
+                  <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Date et heure</label>
+                  <input 
+                    v-model="form.event_date"
+                    type="datetime-local" 
+                    required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Catégorie</label>
+                  <select 
+                    v-model="form.category_name"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                  >
                     <option value="">Sélectionner une catégorie</option>
-                    <option v-for="category in categories" :key="category.id" :value="category.id">
-                      {{ category.name }}
-                    </option>
+                    <option value="Musique">Musique</option>
+                    <option value="Culture">Culture</option>
+                    <option value="Gastronomie">Gastronomie</option>
+                    <option value="Sport">Sport</option>
+                    <option value="Business">Business</option>
+                    <option value="Autres">Autres</option>
                   </select>
                 </div>
-                
+
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Lieu *</label>
-                  <select v-model="eventForm.venue_id" required class="w-full border rounded-lg px-3 py-2">
-                    <option value="">Sélectionner un lieu</option>
-                    <option v-for="venue in venues" :key="venue.id" :value="venue.id">
-                      {{ venue.name }} - {{ venue.city }}
-                    </option>
-                  </select>
+                  <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Lieu</label>
+                  <input 
+                    v-model="form.venue_name"
+                    type="text" 
+                    required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                    placeholder="Nom du lieu"
+                  />
                 </div>
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Image de couverture</label>
-                <input type="file" @change="handleImageUpload" accept="image/*" 
-                       class="w-full border rounded-lg px-3 py-2">
-                <p class="text-xs text-gray-500 mt-1">Formats acceptés: JPG, PNG, WebP. Taille max: 5MB</p>
-              </div>
-            </div>
-          </div>
 
-          <!-- Event Schedules -->
-          <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex justify-between items-center mb-4">
-              <h2 class="text-xl font-bold">Programmation</h2>
-              <button type="button" @click="addSchedule" 
-                      class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
-                Ajouter une séance
-              </button>
-            </div>
-            
-            <div v-if="eventForm.schedules.length === 0" class="text-center text-gray-500 py-8">
-              Aucune séance programmée. Cliquez sur "Ajouter une séance" pour commencer.
-            </div>
-            
-            <div v-else class="space-y-4">
-              <div v-for="(schedule, index) in eventForm.schedules" :key="index" 
-                   class="border rounded-lg p-4 bg-gray-50">
-                <div class="flex justify-between items-start mb-3">
-                  <h3 class="font-medium">Séance {{ index + 1 }}</h3>
-                  <button type="button" @click="removeSchedule(index)" 
-                          class="text-red-600 hover:text-red-800">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                  </button>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Adresse</label>
+                  <input 
+                    v-model="form.venue_address"
+                    type="text"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                    placeholder="Adresse complète"
+                  />
                 </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Date et heure de début *</label>
-                    <input v-model="schedule.starts_at" type="datetime-local" required 
-                           class="w-full border rounded-lg px-3 py-2">
-                  </div>
-                  
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Date et heure de fin *</label>
-                    <input v-model="schedule.ends_at" type="datetime-local" required 
-                           class="w-full border rounded-lg px-3 py-2">
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          <!-- Ticket Types -->
-          <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex justify-between items-center mb-4">
-              <h2 class="text-xl font-bold">Types de Billets</h2>
-              <button type="button" @click="addTicketType" 
-                      class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">
-                Ajouter un type
-              </button>
-            </div>
-            
-            <div v-if="eventForm.ticketTypes.length === 0" class="text-center text-gray-500 py-8">
-              Aucun type de billet défini. Cliquez sur "Ajouter un type" pour commencer.
-            </div>
-            
-            <div v-else class="space-y-4">
-              <div v-for="(ticketType, index) in eventForm.ticketTypes" :key="index" 
-                   class="border rounded-lg p-4 bg-gray-50">
-                <div class="flex justify-between items-start mb-3">
-                  <h3 class="font-medium">{{ ticketType.name || `Type ${index + 1}` }}</h3>
-                  <button type="button" @click="removeTicketType(index)" 
-                          class="text-red-600 hover:text-red-800">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                  </button>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Capacité maximale</label>
+                  <input 
+                    v-model="form.max_attendees"
+                    type="number" 
+                    min="1"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                    placeholder="Nombre de places (optionnel)"
+                  />
                 </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nom du type *</label>
-                    <input v-model="ticketType.name" type="text" required 
-                           placeholder="VIP, Standard, Étudiant..." 
-                           class="w-full border rounded-lg px-3 py-2">
-                  </div>
-                  
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Prix (XAF) *</label>
-                    <input v-model.number="ticketType.price" type="number" min="0" required 
-                           class="w-full border rounded-lg px-3 py-2">
-                  </div>
-                  
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Capacité *</label>
-                    <input v-model.number="ticketType.capacity" type="number" min="1" required 
-                           class="w-full border rounded-lg px-3 py-2">
-                  </div>
-                </div>
-                
-                <div class="mt-3">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                  <textarea v-model="ticketType.description" rows="2" 
-                            placeholder="Avantages inclus, restrictions..." 
-                            class="w-full border rounded-lg px-3 py-2"></textarea>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <!-- Sidebar -->
-        <div class="lg:col-span-1 space-y-6">
-          <!-- Preview -->
-          <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-xl font-bold mb-4">Aperçu</h2>
-            
-            <div class="space-y-3">
-              <div>
-                <h3 class="font-medium text-gray-900">{{ eventForm.title || 'Titre de l\'événement' }}</h3>
-                <p class="text-sm text-gray-600">{{ eventForm.description || 'Description...' }}</p>
-              </div>
-              
-              <div v-if="selectedCategory">
-                <span class="inline-flex px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
-                  {{ selectedCategory.name }}
-                </span>
-              </div>
-              
-              <div v-if="selectedVenue" class="flex items-center text-sm text-gray-600">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                </svg>
-                {{ selectedVenue.name }}
-              </div>
-              
-              <div v-if="eventForm.schedules.length > 0">
-                <h4 class="text-sm font-medium text-gray-700 mb-1">Prochaines séances:</h4>
-                <div class="space-y-1">
-                  <div v-for="(schedule, index) in eventForm.schedules.slice(0, 3)" :key="index" 
-                       class="text-xs text-gray-600">
-                    {{ formatDateTime(schedule.starts_at) }}
-                  </div>
-                  <div v-if="eventForm.schedules.length > 3" class="text-xs text-gray-500">
-                    +{{ eventForm.schedules.length - 3 }} autre(s) séance(s)
-                  </div>
-                </div>
-              </div>
-              
-              <div v-if="eventForm.ticketTypes.length > 0">
-                <h4 class="text-sm font-medium text-gray-700 mb-1">Tarifs:</h4>
-                <div class="space-y-1">
-                  <div v-for="type in eventForm.ticketTypes" :key="type.name" 
-                       class="flex justify-between text-xs">
-                    <span>{{ type.name }}</span>
-                    <span class="font-medium">{{ formatAmount(type.price) }} XAF</span>
-                  </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 font-primea mb-2">URL de l'image</label>
+                  <input 
+                    v-model="form.image_url"
+                    type="url"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                    placeholder="https://exemple.com/image.jpg"
+                  />
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Actions -->
-          <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-xl font-bold mb-4">Publication</h2>
-            
-            <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
-                <select v-model="eventForm.status" class="w-full border rounded-lg px-3 py-2">
-                  <option value="draft">Brouillon</option>
-                  <option value="published">Publié</option>
-                </select>
-                <p class="text-xs text-gray-500 mt-1">
-                  Les brouillons ne sont pas visibles par le public
-                </p>
-              </div>
-              
-              <div class="pt-4 border-t">
-                <button type="submit" :disabled="creating" 
-                        class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50">
-                  {{ creating ? 'Création en cours...' : 'Créer l\'événement' }}
+            <!-- Ticket Types -->
+            <div class="bg-white rounded-primea shadow-primea p-6">
+              <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-primea-blue font-primea">Types de billets</h2>
+                <button 
+                  type="button"
+                  @click="addTicketType"
+                  class="bg-primea-blue text-white px-4 py-2 rounded-primea hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 font-primea"
+                >
+                  <PlusIcon class="w-4 h-4 inline mr-2" />
+                  Ajouter un type
                 </button>
               </div>
+
+              <div v-if="form.ticket_types.length === 0" class="text-center py-8 text-gray-500">
+                <TicketIcon class="w-12 h-12 mx-auto text-gray-300 mb-2" />
+                <p class="font-primea">Aucun type de billet configuré</p>
+                <p class="text-sm font-primea mt-1">Cliquez sur "Ajouter un type" pour commencer</p>
+              </div>
+
+              <div v-else class="space-y-4">
+                <div v-for="(ticket, index) in form.ticket_types" :key="index" 
+                     class="border border-gray-200 rounded-primea p-4">
+                  <div class="flex justify-between items-start mb-4">
+                    <h3 class="font-semibold text-gray-900 font-primea">Type de billet {{ index + 1 }}</h3>
+                    <button 
+                      type="button"
+                      @click="removeTicketType(index)"
+                      class="text-red-600 hover:text-red-800"
+                    >
+                      <TrashIcon class="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Nom</label>
+                      <input 
+                        v-model="ticket.name"
+                        type="text" 
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                        placeholder="Ex: Billet Standard"
+                      />
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Prix (XAF)</label>
+                      <input 
+                        v-model="ticket.price"
+                        type="number" 
+                        min="0"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                        placeholder="25000"
+                      />
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Quantité</label>
+                      <input 
+                        v-model="ticket.quantity"
+                        type="number" 
+                        min="1"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                        placeholder="100 (optionnel)"
+                      />
+                    </div>
+
+                    <div class="flex items-center">
+                      <label class="flex items-center space-x-2">
+                        <input 
+                          v-model="ticket.is_active"
+                          type="checkbox" 
+                          class="rounded border-gray-300 text-primea-blue focus:ring-primea-blue"
+                        />
+                        <span class="text-sm font-medium text-gray-700 font-primea">Actif</span>
+                      </label>
+                    </div>
+
+                    <div class="md:col-span-2">
+                      <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Description</label>
+                      <textarea 
+                        v-model="ticket.description"
+                        rows="2"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea resize-none"
+                        placeholder="Description du billet..."
+                      ></textarea>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Summary -->
-          <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-xl font-bold mb-4">Résumé</h2>
-            
-            <div class="space-y-2 text-sm">
-              <div class="flex justify-between">
-                <span class="text-gray-600">Séances:</span>
-                <span class="font-medium">{{ eventForm.schedules.length }}</span>
+          <!-- Sidebar -->
+          <div class="space-y-6">
+            <!-- Settings -->
+            <div class="bg-white rounded-primea shadow-primea p-6">
+              <h3 class="text-lg font-semibold text-primea-blue font-primea mb-4">Paramètres</h3>
+              <div class="space-y-4">
+                <div>
+                  <label class="flex items-center space-x-2">
+                    <input 
+                      v-model="form.is_public"
+                      type="checkbox" 
+                      class="rounded border-gray-300 text-primea-blue focus:ring-primea-blue"
+                    />
+                    <span class="text-sm font-medium text-gray-700 font-primea">Événement public</span>
+                  </label>
+                  <p class="text-xs text-gray-500 mt-1 font-primea">Visible dans la liste publique des événements</p>
+                </div>
+
+                <div>
+                  <label class="flex items-center space-x-2">
+                    <input 
+                      v-model="form.sales_active"
+                      type="checkbox" 
+                      class="rounded border-gray-300 text-primea-blue focus:ring-primea-blue"
+                    />
+                    <span class="text-sm font-medium text-gray-700 font-primea">Ventes actives</span>
+                  </label>
+                  <p class="text-xs text-gray-500 mt-1 font-primea">Permettre l'achat de billets</p>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Statut</label>
+                  <select 
+                    v-model="form.status"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                  >
+                    <option value="draft">Brouillon</option>
+                    <option value="published">Publié</option>
+                  </select>
+                  <p class="text-xs text-gray-500 mt-1 font-primea">Les brouillons ne sont pas visibles par le public</p>
+                </div>
               </div>
-              
-              <div class="flex justify-between">
-                <span class="text-gray-600">Types de billets:</span>
-                <span class="font-medium">{{ eventForm.ticketTypes.length }}</span>
+            </div>
+
+            <!-- Actions -->
+            <div class="bg-white rounded-primea shadow-primea p-6">
+              <h3 class="text-lg font-semibold text-primea-blue font-primea mb-4">Actions</h3>
+              <div class="space-y-3">
+                <button 
+                  type="submit"
+                  :disabled="creating"
+                  class="w-full bg-primea-blue text-white px-4 py-2 rounded-primea hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 font-primea disabled:opacity-50"
+                >
+                  {{ creating ? 'Création en cours...' : 'Créer l\'événement' }}
+                </button>
+
+                <router-link 
+                  to="/organizer/dashboard"
+                  class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 rounded-primea hover:bg-gray-50 transition-all duration-200 font-primea"
+                >
+                  Annuler
+                </router-link>
               </div>
-              
-              <div class="flex justify-between">
-                <span class="text-gray-600">Capacité totale:</span>
-                <span class="font-medium">{{ totalCapacity }}</span>
-              </div>
-              
-              <div class="flex justify-between">
-                <span class="text-gray-600">Prix minimum:</span>
-                <span class="font-medium">{{ formatAmount(minPrice) }} XAF</span>
-              </div>
-              
-              <div class="flex justify-between">
-                <span class="text-gray-600">Prix maximum:</span>
-                <span class="font-medium">{{ formatAmount(maxPrice) }} XAF</span>
+            </div>
+
+            <!-- Preview -->
+            <div v-if="form.image_url" class="bg-white rounded-primea shadow-primea p-6">
+              <h3 class="text-lg font-semibold text-primea-blue font-primea mb-4">Aperçu de l'image</h3>
+              <img :src="form.image_url" :alt="form.title" class="w-full h-48 object-cover rounded-primea">
+            </div>
+
+            <!-- Summary -->
+            <div class="bg-white rounded-primea shadow-primea p-6">
+              <h3 class="text-lg font-semibold text-primea-blue font-primea mb-4">Résumé</h3>
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-gray-600 font-primea">Types de billets:</span>
+                  <span class="font-medium font-primea">{{ form.ticket_types.length }}</span>
+                </div>
+                
+                <div class="flex justify-between">
+                  <span class="text-gray-600 font-primea">Capacité totale:</span>
+                  <span class="font-medium font-primea">{{ totalCapacity || 'Illimitée' }}</span>
+                </div>
+                
+                <div v-if="minPrice > 0" class="flex justify-between">
+                  <span class="text-gray-600 font-primea">Prix minimum:</span>
+                  <span class="font-medium font-primea">{{ formatAmount(minPrice) }} XAF</span>
+                </div>
+                
+                <div v-if="maxPrice > 0" class="flex justify-between">
+                  <span class="text-gray-600 font-primea">Prix maximum:</span>
+                  <span class="font-medium font-primea">{{ formatAmount(maxPrice) }} XAF</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </form>
+      </form>
     </div>
   </div>
 </template>
 
-<script>
-import { ref, reactive, computed, onMounted } from 'vue'
+<script setup>
+import { ref, reactive, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { 
+  ArrowLeftIcon,
+  PlusIcon,
+  TrashIcon,
+  TicketIcon
+} from '@heroicons/vue/24/outline';
 
-export default {
-  name: 'EventCreate',
-  setup() {
-    // État réactif
-    const creating = ref(false)
-    const categories = ref([])
-    const venues = ref([])
-    
-    const eventForm = reactive({
-      title: '',
-      description: '',
-      category_id: '',
-      venue_id: '',
-      status: 'draft',
-      image_url: '',
-      schedules: [],
-      ticketTypes: []
-    })
+const router = useRouter();
 
-    // Computed
-    const selectedCategory = computed(() => {
-      return categories.value.find(cat => cat.id == eventForm.category_id)
-    })
+// État réactif
+const creating = ref(false);
 
-    const selectedVenue = computed(() => {
-      return venues.value.find(venue => venue.id == eventForm.venue_id)
-    })
+// Formulaire
+const form = reactive({
+  title: '',
+  description: '',
+  event_date: '',
+  category_name: '',
+  venue_name: '',
+  venue_address: '',
+  max_attendees: '',
+  image_url: '',
+  is_public: true,
+  sales_active: true,
+  status: 'draft',
+  ticket_types: []
+});
 
-    const totalCapacity = computed(() => {
-      return eventForm.ticketTypes.reduce((total, type) => total + (type.capacity || 0), 0)
-    })
+// Computed
+const totalCapacity = computed(() => {
+  return form.ticket_types.reduce((total, type) => total + (parseInt(type.quantity) || 0), 0);
+});
 
-    const minPrice = computed(() => {
-      if (eventForm.ticketTypes.length === 0) return 0
-      return Math.min(...eventForm.ticketTypes.map(type => type.price || 0))
-    })
+const minPrice = computed(() => {
+  if (form.ticket_types.length === 0) return 0;
+  const prices = form.ticket_types.map(type => parseInt(type.price) || 0).filter(p => p > 0);
+  return prices.length > 0 ? Math.min(...prices) : 0;
+});
 
-    const maxPrice = computed(() => {
-      if (eventForm.ticketTypes.length === 0) return 0
-      return Math.max(...eventForm.ticketTypes.map(type => type.price || 0))
-    })
+const maxPrice = computed(() => {
+  if (form.ticket_types.length === 0) return 0;
+  const prices = form.ticket_types.map(type => parseInt(type.price) || 0);
+  return prices.length > 0 ? Math.max(...prices) : 0;
+});
 
-    // Méthodes
-    const loadCategories = async () => {
-      try {
-        const response = await fetch('/api/client/categories', {
-          headers: {
-            'Accept': 'application/json'
-          }
-        })
-        
-        const data = await response.json()
-        if (response.ok) {
-          categories.value = data
-        }
-      } catch (error) {
-        console.error('Erreur chargement catégories:', error)
-      }
-    }
+// Méthodes
+const addTicketType = () => {
+  form.ticket_types.push({
+    name: '',
+    description: '',
+    price: '',
+    quantity: '',
+    is_active: true
+  });
+};
 
-    const loadVenues = async () => {
-      try {
-        // Cette route devrait exister ou être créée
-        const response = await fetch('/api/v1/venues', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json'
-          }
-        })
-        
-        const data = await response.json()
-        if (data.success) {
-          venues.value = data.data.venues
-        }
-      } catch (error) {
-        console.error('Erreur chargement lieux:', error)
-      }
-    }
-
-    const addSchedule = () => {
-      eventForm.schedules.push({
-        starts_at: '',
-        ends_at: ''
-      })
-    }
-
-    const removeSchedule = (index) => {
-      eventForm.schedules.splice(index, 1)
-    }
-
-    const addTicketType = () => {
-      eventForm.ticketTypes.push({
-        name: '',
-        price: '',
-        capacity: '',
-        description: ''
-      })
-    }
-
-    const removeTicketType = (index) => {
-      eventForm.ticketTypes.splice(index, 1)
-    }
-
-    const handleImageUpload = (event) => {
-      const file = event.target.files[0]
-      if (file) {
-        // Ici vous pouvez implémenter l'upload vers un service de stockage
-        // Pour l'instant, on simule juste une URL
-        eventForm.image_url = URL.createObjectURL(file)
-      }
-    }
-
-    const createEvent = async () => {
-      // Validation de base
-      if (eventForm.schedules.length === 0) {
-        alert('Veuillez ajouter au moins une séance')
-        return
-      }
-
-      if (eventForm.ticketTypes.length === 0) {
-        alert('Veuillez ajouter au moins un type de billet')
-        return
-      }
-
-      creating.value = true
-      try {
-        const response = await fetch('/api/v1/events', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(eventForm)
-        })
-        
-        const data = await response.json()
-        if (data.success) {
-          alert('Événement créé avec succès!')
-          this.$router.push(`/organizer/events/${data.data.event.id}/edit`)
-        } else {
-          alert(data.message || 'Erreur lors de la création')
-        }
-      } catch (error) {
-        console.error('Erreur création événement:', error)
-        alert('Erreur technique')
-      } finally {
-        creating.value = false
-      }
-    }
-
-    // Utilitaires
-    const formatAmount = (amount) => {
-      return new Intl.NumberFormat('fr-FR').format(amount)
-    }
-
-    const formatDateTime = (datetime) => {
-      if (!datetime) return ''
-      return new Date(datetime).toLocaleDateString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-    }
-
-    // Lifecycle
-    onMounted(() => {
-      loadCategories()
-      loadVenues()
-      
-      // Ajouter des éléments par défaut
-      addSchedule()
-      addTicketType()
-    })
-
-    return {
-      // État
-      creating,
-      categories,
-      venues,
-      eventForm,
-      selectedCategory,
-      selectedVenue,
-      totalCapacity,
-      minPrice,
-      maxPrice,
-      
-      // Méthodes
-      addSchedule,
-      removeSchedule,
-      addTicketType,
-      removeTicketType,
-      handleImageUpload,
-      createEvent,
-      
-      // Utilitaires
-      formatAmount,
-      formatDateTime,
-    }
+const removeTicketType = (index) => {
+  if (confirm('Êtes-vous sûr de vouloir supprimer ce type de billet ?')) {
+    form.ticket_types.splice(index, 1);
   }
-}
+};
+
+const createEvent = async () => {
+  // Validation de base
+  if (form.ticket_types.length === 0) {
+    alert('Veuillez ajouter au moins un type de billet');
+    return;
+  }
+
+  if (!form.title || !form.event_date || !form.venue_name) {
+    alert('Veuillez remplir tous les champs obligatoires');
+    return;
+  }
+
+  creating.value = true;
+  try {
+    // Simulation d'appel API
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Générer un slug basé sur le titre
+    const slug = form.title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/\s+/g, '-')
+      .slice(0, 50);
+    
+    alert('Événement créé avec succès !');
+    router.push(`/organizer/events/${slug}`);
+  } catch (err) {
+    alert('Erreur lors de la création de l\'événement');
+    console.error('Erreur:', err);
+  } finally {
+    creating.value = false;
+  }
+};
+
+// Utilitaires
+const formatAmount = (amount) => {
+  return new Intl.NumberFormat('fr-FR').format(amount);
+};
 </script>
 
 <style scoped>
+/* Style personnalisé pour la création d'événement */
 .event-create {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Couleurs Primea */
+.text-primea-blue {
+  color: #272d63;
+}
+
+.text-primea-yellow {
+  color: #fab511;
+}
+
+.bg-primea-blue {
+  background-color: #272d63;
+}
+
+.bg-primea-yellow {
+  background-color: #fab511;
+}
+
+.border-primea-blue {
+  border-color: #272d63;
+}
+
+.hover\:bg-primea-blue:hover {
+  background-color: #272d63;
+}
+
+.hover\:bg-primea-yellow:hover {
+  background-color: #fab511;
+}
+
+.hover\:text-primea-blue:hover {
+  color: #272d63;
+}
+
+.hover\:text-primea-yellow:hover {
+  color: #fab511;
+}
+
+/* Coins arrondis Primea */
+.rounded-primea {
+  border-radius: 12px;
+}
+
+/* Ombres Primea */
+.shadow-primea {
+  box-shadow: 0 2px 15px rgba(39, 45, 99, 0.08);
+}
+
+/* Police Primea */
+.font-primea {
+  font-family: 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 </style>
