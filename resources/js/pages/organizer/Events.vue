@@ -2,7 +2,7 @@
   <div class="organizer-events min-h-screen" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)">
       <!-- En-tête de la page -->
       <div class="bg-white shadow-sm border-b border-gray-200">
-        <div class="max-w-6xl mx-auto px-4 py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div class="flex items-center justify-between">
             <div>
               <h1 class="text-2xl font-bold text-primea-blue font-primea">Mes Événements</h1>
@@ -20,7 +20,7 @@
         </div>
       </div>
 
-      <div class="max-w-6xl mx-auto py-8 px-4">
+      <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <!-- Filtres et statistiques -->
       <div class="bg-white rounded-lg shadow-md p-6 mb-8">
         <div class="flex flex-col md:flex-row gap-4 justify-between items-center mb-6">

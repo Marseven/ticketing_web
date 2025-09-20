@@ -1,7 +1,8 @@
 <template>
-  <div class="event-create p-6 min-h-screen" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)">
-    <!-- Header -->
-    <div class="mb-8">
+  <div class="event-create min-h-screen" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <!-- Header -->
+      <div class="mb-8">
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-3xl font-bold text-gray-900 mb-2">Créer un Événement</h1>
@@ -284,6 +285,7 @@
         </div>
       </div>
     </form>
+    </div>
   </div>
 </template>
 

@@ -1,7 +1,8 @@
 <template>
-  <div class="organizer-dashboard p-6 min-h-screen">
-    <!-- Header du dashboard -->
-    <div class="mb-8">
+  <div class="organizer-dashboard min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <!-- Header du dashboard -->
+      <div class="mb-8">
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-3xl font-bold text-primea-blue font-primea mb-2">Tableau de Bord Organisateur</h1>
@@ -210,6 +211,7 @@
           </tbody>
         </table>
       </div>
+    </div>
     </div>
   </div>
 </template>
