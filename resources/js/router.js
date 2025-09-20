@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import authUtils from './utils/auth';
 
 // Composants chargés immédiatement (essentiels)
 import Home from './pages/Home.vue';
@@ -107,8 +108,9 @@ const router = createRouter({
 
 // Navigation guards
 router.beforeEach((to, from, next) => {
-    const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
-    const userRole = localStorage.getItem('userRole');
+    // Vérifier et migrer les données d'authentification si nécessaire
+    const userRole = authUtils.checkAndMigrateAuth();
+    const token = authUtils.getToken();
     
     console.log('Navigation Guard - To:', to.path, 'Role:', userRole, 'Token:', !!token);
     
@@ -127,7 +129,7 @@ router.beforeEach((to, from, next) => {
         console.log('Required role:', requiredRole, 'User role:', userRole);
         
         if (userRole !== requiredRole) {
-            console.log('Role mismatch, redirecting to home');
+            console.log('Role mismatch, redirecting based on role');
             // Si l'utilisateur essaie d'accéder à une page admin sans être admin
             if (requiredRole === 'admin' && userRole !== 'admin') {
                 next({ name: 'login', query: { redirect: to.fullPath } });

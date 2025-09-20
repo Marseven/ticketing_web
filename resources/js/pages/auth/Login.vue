@@ -188,6 +188,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../../stores/auth.js'
 import PhoneInput from '../../components/PhoneInput.vue'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline'
+import authUtils from '../../utils/auth'
 
 export default {
   name: 'Login',
@@ -287,11 +288,12 @@ export default {
           // Simuler la connexion
           await new Promise(resolve => setTimeout(resolve, 1000))
           
-          // Stocker les informations d'authentification
-          localStorage.setItem('token', 'test-token-' + account.role)
-          localStorage.setItem('userRole', account.role)
-          localStorage.setItem('userName', account.name)
-          localStorage.setItem('userEmail', account.login)
+          // Stocker les informations d'authentification avec authUtils
+          const token = 'test-token-' + account.role
+          authUtils.saveAuth(token, { 
+            name: account.name, 
+            email: account.login 
+          }, account.role)
           
           // Vérifier s'il y a une URL de redirection
           const redirectUrl = route.query.redirect

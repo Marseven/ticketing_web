@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from 'axios'
+import authUtils from '../utils/auth'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
@@ -51,12 +52,8 @@ export const useAuthStore = defineStore('auth', () => {
                           (user.value?.is_admin ? 'admin' : 
                            user.value?.is_organizer ? 'organizer' : 'client')
         
-        // Stocker les informations
-        localStorage.setItem('auth_token', token.value)
-        localStorage.setItem('token', token.value)
-        localStorage.setItem('userRole', accessLevel)
-        localStorage.setItem('userName', user.value?.name || '')
-        localStorage.setItem('userEmail', user.value?.email || '')
+        // Utiliser authUtils pour stocker les informations
+        authUtils.saveAuth(token.value, user.value, accessLevel)
         
         userRole.value = accessLevel
         axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
@@ -109,11 +106,7 @@ export const useAuthStore = defineStore('auth', () => {
       token.value = null
       user.value = null
       userRole.value = null
-      localStorage.removeItem('auth_token')
-      localStorage.removeItem('token')
-      localStorage.removeItem('userRole')
-      localStorage.removeItem('userName')
-      localStorage.removeItem('userEmail')
+      authUtils.clearAuth()
       delete axios.defaults.headers.common['Authorization']
     }
   }
