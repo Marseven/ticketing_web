@@ -21,7 +21,7 @@ const Profile = () => import('./pages/account/Profile.vue');
 
 // Espace organisateur
 const OrganizerLayout = () => import('./layouts/OrganizerLayout.vue');
-const OrganizerDashboard = () => import('./pages/organizer/Dashboard.vue');
+const OrganizerDashboard = () => import('./pages/organizer/OrganizerDashboard.vue');
 const OrganizerEvents = () => import('./pages/organizer/Events.vue');
 const EventCreate = () => import('./pages/organizer/EventCreate.vue');
 const BalanceManagement = () => import('./pages/organizer/BalanceManagement.vue');

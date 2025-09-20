@@ -39,12 +39,12 @@
       "_vendor-NIGUFBhG.js"
     ]
   },
-  "_organizer-B23SzQ-N.css": {
-    "file": "assets/css/organizer-B23SzQ-N.css",
-    "src": "_organizer-B23SzQ-N.css"
+  "_organizer-BSdj1RoO.css": {
+    "file": "assets/css/organizer-BSdj1RoO.css",
+    "src": "_organizer-BSdj1RoO.css"
   },
-  "_organizer-Bw9EQtA_.js": {
-    "file": "assets/js/organizer-Bw9EQtA_.js",
+  "_organizer-HZxiHOp-.js": {
+    "file": "assets/js/organizer-HZxiHOp-.js",
     "name": "organizer",
     "isDynamicEntry": true,
     "imports": [
@@ -52,7 +52,7 @@
       "_account-PcCmhRSK.js"
     ],
     "css": [
-      "assets/css/organizer-B23SzQ-N.css"
+      "assets/css/organizer-BSdj1RoO.css"
     ]
   },
   "_pinia-vendor-BjdGOUmS.js": {
@@ -79,7 +79,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-Bd5fsrgo.js",
+    "file": "assets/js/app-qrcc1ebc.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -101,11 +101,11 @@
       "_account-PcCmhRSK.js",
       "_account-PcCmhRSK.js",
       "resources/js/layouts/OrganizerLayout.vue",
-      "_organizer-Bw9EQtA_.js",
-      "_organizer-Bw9EQtA_.js",
-      "_organizer-Bw9EQtA_.js",
-      "_organizer-Bw9EQtA_.js",
-      "_organizer-Bw9EQtA_.js",
+      "_organizer-HZxiHOp-.js",
+      "_organizer-HZxiHOp-.js",
+      "_organizer-HZxiHOp-.js",
+      "_organizer-HZxiHOp-.js",
+      "_organizer-HZxiHOp-.js",
       "resources/js/layouts/AdminLayout.vue",
       "_admin-sZsqFQHK.js",
       "_admin-sZsqFQHK.js",
@@ -143,7 +143,7 @@
     ]
   },
   "resources/js/layouts/OrganizerLayout.vue": {
-    "file": "assets/js/OrganizerLayout-4v95rqHs.js",
+    "file": "assets/js/OrganizerLayout-Bpi3FWmk.js",
     "name": "OrganizerLayout",
     "src": "resources/js/layouts/OrganizerLayout.vue",
     "isDynamicEntry": true,
@@ -154,11 +154,11 @@
       "_vendor-NIGUFBhG.js"
     ],
     "css": [
-      "assets/css/OrganizerLayout-DkecrQjZ.css"
+      "assets/css/OrganizerLayout-75gzhuIC.css"
     ]
   },
   "resources/js/pages/Checkout.vue": {
-    "file": "assets/js/Checkout-DjZUUUOM.js",
+    "file": "assets/js/Checkout-B7C_WCE7.js",
     "name": "Checkout",
     "src": "resources/js/pages/Checkout.vue",
     "isDynamicEntry": true,
@@ -176,7 +176,7 @@
     ]
   },
   "resources/js/pages/EventDetail.vue": {
-    "file": "assets/js/EventDetail-FsmX_726.js",
+    "file": "assets/js/EventDetail-CIWLhuV2.js",
     "name": "EventDetail",
     "src": "resources/js/pages/EventDetail.vue",
     "isDynamicEntry": true,
@@ -193,7 +193,7 @@
     ]
   },
   "resources/js/pages/Events.vue": {
-    "file": "assets/js/Events-CzUZrnMf.js",
+    "file": "assets/js/Events-Cchckcca.js",
     "name": "Events",
     "src": "resources/js/pages/Events.vue",
     "isDynamicEntry": true,
@@ -242,7 +242,7 @@
     ]
   },
   "resources/js/pages/auth/Register.vue": {
-    "file": "assets/js/Register-nr34bCVr.js",
+    "file": "assets/js/Register-BtxuueNO.js",
     "name": "Register",
     "src": "resources/js/pages/auth/Register.vue",
     "isDynamicEntry": true,

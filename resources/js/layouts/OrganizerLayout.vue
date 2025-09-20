@@ -41,18 +41,18 @@ import OrganizerFooter from '../components/layout/OrganizerFooter.vue';
   min-height: inherit;
 }
 
-/* Forcer le fond sur tous les éléments enfants et leurs enfants */
-.organizer-content > *,
-.organizer-content > * > *,
-.organizer-content .bg-white {
+/* Conserver le fond transparent seulement pour le conteneur principal */
+.organizer-content {
   background: transparent !important;
 }
 
-/* Exception pour les cartes et modals qui doivent rester blanches */
-.organizer-content .bg-white.rounded-primea,
-.organizer-content .bg-white.shadow-primea,
-.organizer-content .modal,
-.organizer-content .dropdown-menu {
+/* Les cartes et éléments avec fond blanc restent blancs */
+.organizer-content .bg-white {
   background: white !important;
+}
+
+/* Les éléments sans classe de fond gardent leur transparence */
+.organizer-content > div:not([class*="bg-"]) {
+  background: transparent;
 }
 </style>
