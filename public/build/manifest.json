@@ -71,7 +71,7 @@
     "name": "vue-vendor"
   },
   "resources/css/app.css": {
-    "file": "assets/css/app-CEqn2bS8.css",
+    "file": "assets/css/app-VKioG8FV.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [
@@ -79,7 +79,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-ClA402IL.js",
+    "file": "assets/js/app-DXzQCwh1.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -125,8 +125,8 @@
       "resources/js/pages/scanner/ScannerApp.vue"
     ],
     "css": [
-      "assets/css/app-_mVWrY3X.css",
-      "assets/css/app-CEqn2bS8.css"
+      "assets/css/app-Q6de-MIM.css",
+      "assets/css/app-VKioG8FV.css"
     ]
   },
   "resources/js/layouts/AdminLayout.vue": {
@@ -160,7 +160,7 @@
     ]
   },
   "resources/js/pages/Checkout.vue": {
-    "file": "assets/js/Checkout-CNrhKVCU.js",
+    "file": "assets/js/Checkout-D_npygrp.js",
     "name": "Checkout",
     "src": "resources/js/pages/Checkout.vue",
     "isDynamicEntry": true,
@@ -174,11 +174,11 @@
     ],
     "css": [
       "assets/css/Checkout-BcwyhWdd.css",
-      "assets/css/app-CEqn2bS8.css"
+      "assets/css/app-VKioG8FV.css"
     ]
   },
   "resources/js/pages/EventDetail.vue": {
-    "file": "assets/js/EventDetail-EQhF21L1.js",
+    "file": "assets/js/EventDetail-BV1YmGRK.js",
     "name": "EventDetail",
     "src": "resources/js/pages/EventDetail.vue",
     "isDynamicEntry": true,
@@ -191,11 +191,11 @@
     ],
     "css": [
       "assets/css/EventDetail-DUpl0EyQ.css",
-      "assets/css/app-CEqn2bS8.css"
+      "assets/css/app-VKioG8FV.css"
     ]
   },
   "resources/js/pages/Events.vue": {
-    "file": "assets/js/Events-CCugUpAx.js",
+    "file": "assets/js/Events-CK-k9ED-.js",
     "name": "Events",
     "src": "resources/js/pages/Events.vue",
     "isDynamicEntry": true,
@@ -208,7 +208,7 @@
     ],
     "css": [
       "assets/css/Events-QFUnfH8c.css",
-      "assets/css/app-CEqn2bS8.css"
+      "assets/css/app-VKioG8FV.css"
     ]
   },
   "resources/js/pages/TicketDownload.vue": {
@@ -244,7 +244,7 @@
     ]
   },
   "resources/js/pages/auth/Register.vue": {
-    "file": "assets/js/Register-Dh8ZjxKc.js",
+    "file": "assets/js/Register-Cmg4Wen_.js",
     "name": "Register",
     "src": "resources/js/pages/auth/Register.vue",
     "isDynamicEntry": true,
@@ -257,7 +257,7 @@
     ],
     "css": [
       "assets/css/Register-DKJlwWVE.css",
-      "assets/css/app-CEqn2bS8.css"
+      "assets/css/app-VKioG8FV.css"
     ]
   },
   "resources/js/pages/scanner/ScannerApp.vue": {

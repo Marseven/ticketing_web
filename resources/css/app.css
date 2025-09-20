@@ -38,8 +38,23 @@
 }
 
 /* Styles globaux Primea */
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     font-family: var(--font-primea);
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+/* Fix pour les problèmes de défilement */
+* {
+    box-sizing: border-box;
+}
+
+.min-h-screen {
+    min-height: 100vh;
 }
 
 /* Classes utilitaires Primea */

@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <Header v-if="showHeader" />
-    <main class="min-h-screen">
+    <main>
       <router-view />
     </main>
     <Footer v-if="showFooter" />
@@ -49,7 +49,22 @@ export default {
 </script>
 
 <style>
-body {
+html, body {
   font-family: 'Inter', sans-serif;
+  height: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
 }
 </style>
