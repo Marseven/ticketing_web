@@ -246,14 +246,7 @@ export default {
     const events = ref([])
     const loading = ref(true)
     const selectedCategory = ref('all')
-
-    // Catégories
-    const categories = ref([
-      { id: 'all', name: 'Tous' },
-      { id: 'concerts', name: 'Concerts/Shows' },
-      { id: 'cinema', name: 'Cinéma/Théâtre/Conférence/Expo' },
-      { id: 'sports', name: 'Sports' }
-    ])
+    const categories = ref([])
 
     // Événements filtrés
     const filteredEvents = computed(() => {
@@ -261,16 +254,11 @@ export default {
         return events.value
       }
       
-      const categoryMapping = {
-        'concerts': ['concert', 'festival'],
-        'cinema': ['theater', 'conference', 'cinema'],
-        'sports': ['sport']
-      }
-      
-      const realCategories = categoryMapping[selectedCategory.value] || []
-      return events.value.filter(event => 
-        realCategories.includes(event.category)
-      )
+      return events.value.filter(event => {
+        // Utiliser l'ID de la catégorie pour filtrer
+        const eventCategoryId = event.category?.id || event.category_id
+        return eventCategoryId === parseInt(selectedCategory.value)
+      })
     })
 
 
@@ -285,6 +273,45 @@ export default {
         events.value = []
       } finally {
         loading.value = false
+      }
+    }
+
+    const loadCategories = async () => {
+      try {
+        const response = await fetch('/api/client/categories', {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const data = await response.json()
+        
+        if (data.success && data.categories) {
+          categories.value = [
+            { id: 'all', name: 'Tous' },
+            ...data.categories.map(cat => ({
+              id: cat.id,
+              name: cat.name,
+              slug: cat.slug
+            }))
+          ]
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des catégories:', error)
+        categories.value = [
+          { id: 'all', name: 'Tous' },
+          { id: 1, name: 'Musique' },
+          { id: 2, name: 'Culture' },
+          { id: 3, name: 'Gastronomie' },
+          { id: 4, name: 'Sport' },
+          { id: 5, name: 'Business' }
+        ]
       }
     }
 
@@ -309,12 +336,13 @@ export default {
     }
 
     const filterByCategory = (categoryId) => {
-      selectedCategory.value = categoryId
+      selectedCategory.value = categoryId.toString()
     }
 
     // Lifecycle
     onMounted(() => {
       loadEvents()
+      loadCategories()
     })
 
     return {
@@ -329,6 +357,7 @@ export default {
       goBack,
       filterByCategory,
       loadEvents,
+      loadCategories,
       eventsStore
     }
   }

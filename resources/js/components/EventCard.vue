@@ -307,6 +307,13 @@ export default {
     }
 
     const goToCheckout = () => {
+      console.log('goToCheckout called with event:', props.event)
+      console.log('Event slug:', props.event.slug)
+      if (!props.event.slug) {
+        console.error('Event slug is missing!', props.event)
+        alert('Erreur: Impossible de réserver - slug manquant')
+        return
+      }
       router.push(`/checkout/${props.event.slug}`)
     }
 

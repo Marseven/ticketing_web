@@ -79,7 +79,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-MwYPA7r-.js",
+    "file": "assets/js/app-CWOaIN91.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -125,7 +125,7 @@
       "resources/js/pages/scanner/ScannerApp.vue"
     ],
     "css": [
-      "assets/css/app-FlA8sTfL.css",
+      "assets/css/app-jYl8_OY6.css",
       "assets/css/app-CEqn2bS8.css"
     ]
   },
@@ -160,7 +160,7 @@
     ]
   },
   "resources/js/pages/Checkout.vue": {
-    "file": "assets/js/Checkout-BaT7mlvf.js",
+    "file": "assets/js/Checkout-BajeGj5R.js",
     "name": "Checkout",
     "src": "resources/js/pages/Checkout.vue",
     "isDynamicEntry": true,
@@ -178,7 +178,7 @@
     ]
   },
   "resources/js/pages/EventDetail.vue": {
-    "file": "assets/js/EventDetail-Bn6EF-lu.js",
+    "file": "assets/js/EventDetail-CYgu_IHQ.js",
     "name": "EventDetail",
     "src": "resources/js/pages/EventDetail.vue",
     "isDynamicEntry": true,
@@ -195,7 +195,7 @@
     ]
   },
   "resources/js/pages/Events.vue": {
-    "file": "assets/js/Events-wEoYjgWK.js",
+    "file": "assets/js/Events-dC8k6UlI.js",
     "name": "Events",
     "src": "resources/js/pages/Events.vue",
     "isDynamicEntry": true,
@@ -207,7 +207,7 @@
       "_pinia-vendor-CuG9KDda.js"
     ],
     "css": [
-      "assets/css/Events-ClBWGSNm.css",
+      "assets/css/Events-QFUnfH8c.css",
       "assets/css/app-CEqn2bS8.css"
     ]
   },
@@ -244,7 +244,7 @@
     ]
   },
   "resources/js/pages/auth/Register.vue": {
-    "file": "assets/js/Register-BIui7bLL.js",
+    "file": "assets/js/Register-CWKvi3Ls.js",
     "name": "Register",
     "src": "resources/js/pages/auth/Register.vue",
     "isDynamicEntry": true,
