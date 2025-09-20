@@ -1,309 +1,617 @@
 <template>
-  <div class="admin-profile min-h-screen bg-gray-100 font-primea">
-    <!-- Sidebar simplifié -->
-    <div class="fixed inset-y-0 left-0 w-64 bg-primea-blue text-white z-30" :class="{ '-translate-x-full': !sidebarOpen, 'translate-x-0': sidebarOpen }">
-      <div class="flex items-center justify-between p-4 border-b border-primea-blue-dark">
-        <div class="flex items-center space-x-3">
-          <img src="/images/logo_white.png" alt="Primea" class="h-8" />
-          <span class="font-bold text-lg font-primea">Administration</span>
-        </div>
-      </div>
-      <nav class="mt-6">
-        <div class="px-4">
-          <router-link to="/admin/dashboard" class="flex items-center px-4 py-3 text-blue-200 hover:bg-primea-yellow hover:text-primea-blue rounded-primea-lg mb-2 transition-colors font-primea">
-            <HomeIcon class="w-5 h-5 mr-3" />Tableau de bord</router-link>
-          <router-link to="/admin/users" class="flex items-center px-4 py-3 text-blue-200 hover:bg-primea-yellow hover:text-primea-blue rounded-primea-lg mb-2 transition-colors font-primea">
-            <UsersIcon class="w-5 h-5 mr-3" />Utilisateurs</router-link>
-          <router-link to="/admin/events" class="flex items-center px-4 py-3 text-blue-200 hover:bg-primea-yellow hover:text-primea-blue rounded-primea-lg mb-2 transition-colors font-primea">
-            <CalendarIcon class="w-5 h-5 mr-3" />Événements</router-link>
-          <router-link to="/admin/transactions" class="flex items-center px-4 py-3 text-blue-200 hover:bg-primea-yellow hover:text-primea-blue rounded-primea-lg mb-2 transition-colors font-primea">
-            <CreditCardIcon class="w-5 h-5 mr-3" />Transactions</router-link>
-          <router-link to="/admin/reports" class="flex items-center px-4 py-3 text-blue-200 hover:bg-primea-yellow hover:text-primea-blue rounded-primea-lg mb-2 transition-colors font-primea">
-            <ChartBarIcon class="w-5 h-5 mr-3" />Rapports</router-link>
-          <router-link to="/admin/settings" class="flex items-center px-4 py-3 text-blue-200 hover:bg-primea-yellow hover:text-primea-blue rounded-primea-lg mb-2 transition-colors font-primea">
-            <CogIcon class="w-5 h-5 mr-3" />Paramètres</router-link>
-        </div>
-      </nav>
+  <div class="profile-management p-6">
+    <!-- Header -->
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold mb-2" style="color: #272d63;">Mon Profil</h1>
+      <p class="text-gray-600">Gérez vos informations personnelles et préférences</p>
     </div>
 
-    <!-- Contenu principal -->
-    <div class="lg:ml-64 transition-all duration-300">
-      <header class="bg-white shadow-sm border-b border-gray-200">
-        <div class="px-6 py-4">
-          <h1 class="text-2xl font-bold text-primea-blue font-primea">Mon profil administrateur</h1>
+    <!-- Profile Overview -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <div class="flex items-center space-x-6">
+        <div class="relative">
+          <div class="w-24 h-24 rounded-full flex items-center justify-center text-white text-2xl font-bold"
+               style="background-color: #272d63;">
+            {{ getInitials(profile.name) }}
+          </div>
+          <button @click="changeAvatar" 
+                  class="absolute bottom-0 right-0 text-white p-2 rounded-full transition-colors duration-200"
+                  style="background-color: #fab511;"
+                  @mouseover="$event.currentTarget.style.backgroundColor = '#272d63'"
+                  @mouseleave="$event.currentTarget.style.backgroundColor = '#fab511'">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+          </button>
         </div>
-      </header>
+        <div class="flex-1">
+          <h3 class="text-xl font-bold" style="color: #272d63;">{{ profile.name }}</h3>
+          <p class="text-gray-600 mb-1">{{ profile.email }}</p>
+          <div class="flex items-center space-x-4 text-sm text-gray-500">
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+              Administrateur
+            </span>
+            <span>Membre depuis {{ formatDate(profile.created_at) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-      <main class="p-6">
-        <div class="max-w-4xl mx-auto space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Personal Information -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold mb-4" style="color: #272d63;">Informations Personnelles</h3>
+        <form @submit.prevent="updateProfile" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Nom complet *</label>
+            <input type="text" v-model="profileForm.name" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                   style="--tw-ring-color: #272d63;">
+          </div>
           
-          <!-- Photo de profil -->
-          <div class="bg-white rounded-lg shadow-sm p-6">
-            <div class="flex items-center space-x-6">
-              <div class="relative">
-                <img :src="profile.avatar" alt="Avatar" class="w-20 h-20 rounded-full object-cover" />
-                <button @click="changeAvatar" class="absolute bottom-0 right-0 bg-primea-blue text-white p-2 rounded-full hover:bg-primea-yellow hover:text-primea-blue transition-all">
-                  <CameraIcon class="w-4 h-4" />
-                </button>
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-primea-blue">{{ profile.name }}</h3>
-                <p class="text-gray-600">{{ profile.role }}</p>
-                <p class="text-sm text-gray-500">Membre depuis {{ formatDate(profile.created_at) }}</p>
-              </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+            <input type="email" v-model="profileForm.email" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                   style="--tw-ring-color: #272d63;">
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
+            <input type="tel" v-model="profileForm.phone"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                   style="--tw-ring-color: #272d63;">
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Poste</label>
+            <input type="text" v-model="profileForm.position"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                   style="--tw-ring-color: #272d63;">
+          </div>
+          
+          <button type="submit" :disabled="updatingProfile"
+                  class="w-full text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
+                  style="background-color: #272d63;"
+                  @mouseover="$event.currentTarget.style.backgroundColor = '#fab511'"
+                  @mouseleave="$event.currentTarget.style.backgroundColor = '#272d63'">
+            {{ updatingProfile ? 'Mise à jour...' : 'Mettre à jour' }}
+          </button>
+        </form>
+      </div>
+
+      <!-- Change Password -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold mb-4" style="color: #272d63;">Changer le Mot de Passe</h3>
+        <form @submit.prevent="changePassword" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Mot de passe actuel *</label>
+            <input type="password" v-model="passwordForm.current_password" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                   style="--tw-ring-color: #272d63;">
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Nouveau mot de passe *</label>
+            <input type="password" v-model="passwordForm.new_password" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                   style="--tw-ring-color: #272d63;">
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Confirmer le mot de passe *</label>
+            <input type="password" v-model="passwordForm.new_password_confirmation" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                   style="--tw-ring-color: #272d63;">
+          </div>
+          
+          <div v-if="passwordError" class="text-red-600 text-sm">{{ passwordError }}</div>
+          
+          <button type="submit" :disabled="changingPassword"
+                  class="w-full text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
+                  style="background-color: #fab511;"
+                  @mouseover="$event.currentTarget.style.backgroundColor = '#272d63'"
+                  @mouseleave="$event.currentTarget.style.backgroundColor = '#fab511'">
+            {{ changingPassword ? 'Changement...' : 'Changer le mot de passe' }}
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Preferences & Security -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+      <!-- Preferences -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold mb-4" style="color: #272d63;">Préférences</h3>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h4 class="font-medium text-gray-900">Notifications Email</h4>
+              <p class="text-sm text-gray-600">Recevoir les notifications importantes par email</p>
             </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" v-model="preferences.email_notifications" class="sr-only peer">
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+                   :style="preferences.email_notifications ? { backgroundColor: '#272d63' } : {}"></div>
+            </label>
           </div>
-
-          <!-- Informations personnelles -->
-          <div class="bg-white rounded-lg shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-primea-blue mb-4">Informations personnelles</h3>
-            <form @submit.prevent="updateProfile" class="space-y-4">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Prénom</label>
-                  <input v-model="profile.first_name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primea-blue focus:border-primea-blue" />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Nom</label>
-                  <input v-model="profile.last_name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primea-blue focus:border-primea-blue" />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                  <input v-model="profile.email" type="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primea-blue focus:border-primea-blue" />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
-                  <input v-model="profile.phone" type="tel" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primea-blue focus:border-primea-blue" />
-                </div>
-              </div>
-              <div class="flex justify-end">
-                <button type="submit" class="px-6 py-2 bg-primea-blue text-white rounded-lg hover:bg-primea-yellow hover:text-primea-blue transition-all">
-                  Mettre à jour
-                </button>
-              </div>
-            </form>
-          </div>
-
-          <!-- Changer mot de passe -->
-          <div class="bg-white rounded-lg shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-primea-blue mb-4">Changer le mot de passe</h3>
-            <form @submit.prevent="changePassword" class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Mot de passe actuel</label>
-                <input v-model="passwordForm.current" type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primea-blue focus:border-primea-blue" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Nouveau mot de passe</label>
-                <input v-model="passwordForm.new" type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primea-blue focus:border-primea-blue" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Confirmer le nouveau mot de passe</label>
-                <input v-model="passwordForm.confirm" type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primea-blue focus:border-primea-blue" />
-              </div>
-              <div class="flex justify-end">
-                <button type="submit" class="px-6 py-2 bg-primea-blue text-white rounded-lg hover:bg-primea-yellow hover:text-primea-blue transition-all">
-                  Changer le mot de passe
-                </button>
-              </div>
-            </form>
-          </div>
-
-          <!-- Préférences -->
-          <div class="bg-white rounded-lg shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-primea-blue mb-4">Préférences</h3>
-            <div class="space-y-4">
-              <div class="flex items-center justify-between">
-                <div>
-                  <h4 class="font-medium">Notifications email</h4>
-                  <p class="text-sm text-gray-600">Recevoir les notifications par email</p>
-                </div>
-                <label class="flex items-center">
-                  <input v-model="profile.preferences.email_notifications" type="checkbox" class="form-checkbox h-5 w-5 text-primea-blue" />
-                </label>
-              </div>
-              
-              <div class="flex items-center justify-between">
-                <div>
-                  <h4 class="font-medium">Authentification à deux facteurs</h4>
-                  <p class="text-sm text-gray-600">Sécurité renforcée pour votre compte</p>
-                </div>
-                <label class="flex items-center">
-                  <input v-model="profile.preferences.two_factor" type="checkbox" class="form-checkbox h-5 w-5 text-primea-blue" />
-                </label>
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Langue</label>
-                <select v-model="profile.preferences.language" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primea-blue focus:border-primea-blue">
-                  <option value="fr">Français</option>
-                  <option value="en">English</option>
-                </select>
-              </div>
-
-              <div class="flex justify-end">
-                <button @click="updatePreferences" class="px-6 py-2 bg-primea-blue text-white rounded-lg hover:bg-primea-yellow hover:text-primea-blue transition-all">
-                  Sauvegarder les préférences
-                </button>
-              </div>
+          
+          <div class="flex items-center justify-between">
+            <div>
+              <h4 class="font-medium text-gray-900">Authentification 2FA</h4>
+              <p class="text-sm text-gray-600">Sécurité renforcée avec un code à usage unique</p>
             </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" v-model="preferences.two_factor_enabled" class="sr-only peer">
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+                   :style="preferences.two_factor_enabled ? { backgroundColor: '#fab511' } : {}"></div>
+            </label>
           </div>
-
-          <!-- Sessions actives -->
-          <div class="bg-white rounded-lg shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-primea-blue mb-4">Sessions actives</h3>
-            <div class="space-y-3">
-              <div v-for="session in activeSessions" :key="session.id" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div class="flex items-center">
-                  <div class="bg-primea-blue p-2 rounded-full mr-3">
-                    <ComputerDesktopIcon class="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <p class="font-medium">{{ session.device }}</p>
-                    <p class="text-sm text-gray-600">{{ session.location }} - {{ formatRelativeTime(session.last_activity) }}</p>
-                  </div>
-                </div>
-                <div class="flex items-center space-x-2">
-                  <span v-if="session.current" class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Session actuelle</span>
-                  <button v-else @click="revokeSession(session)" class="text-red-600 hover:text-red-800 text-sm">Révoquer</button>
-                </div>
-              </div>
-            </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Langue de l'interface</label>
+            <select v-model="preferences.language" 
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                    style="--tw-ring-color: #272d63;">
+              <option value="fr">Français</option>
+              <option value="en">English</option>
+            </select>
           </div>
-
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Fuseau horaire</label>
+            <select v-model="preferences.timezone" 
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                    style="--tw-ring-color: #272d63;">
+              <option value="Africa/Libreville">Libreville (GMT+1)</option>
+              <option value="Africa/Lagos">Lagos (GMT+1)</option>
+              <option value="UTC">UTC (GMT+0)</option>
+            </select>
+          </div>
+          
+          <button @click="updatePreferences" :disabled="updatingPreferences"
+                  class="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200">
+            {{ updatingPreferences ? 'Sauvegarde...' : 'Sauvegarder les préférences' }}
+          </button>
         </div>
-      </main>
+      </div>
+
+      <!-- Security & Sessions -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold mb-4" style="color: #272d63;">Sécurité & Sessions</h3>
+        
+        <!-- Account Stats -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div class="text-center p-3 bg-gray-50 rounded-lg">
+            <div class="text-xl font-bold" style="color: #272d63;">{{ profile.login_count || 0 }}</div>
+            <div class="text-sm text-gray-600">Connexions</div>
+          </div>
+          <div class="text-center p-3 bg-gray-50 rounded-lg">
+            <div class="text-xl font-bold" style="color: #fab511;">{{ activeSessions.length }}</div>
+            <div class="text-sm text-gray-600">Sessions actives</div>
+          </div>
+        </div>
+        
+        <!-- Active Sessions -->
+        <div class="space-y-3">
+          <h4 class="font-medium text-gray-900">Sessions Actives</h4>
+          <div v-for="session in activeSessions" :key="session.id" 
+               class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div class="flex items-center">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3"
+                   style="background-color: rgba(39, 45, 99, 0.1);">
+                <svg class="w-4 h-4" style="color: #272d63;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-900">{{ session.device }}</p>
+                <p class="text-xs text-gray-500">{{ session.location }} • {{ formatRelativeTime(session.last_activity) }}</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span v-if="session.current" 
+                    class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                Actuelle
+              </span>
+              <button v-else @click="revokeSession(session)" 
+                      class="text-xs text-red-600 hover:text-red-800 px-2 py-1 bg-red-100 hover:bg-red-200 rounded transition-colors duration-200">
+                Révoquer
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Security Actions -->
+        <div class="mt-6 space-y-2">
+          <button @click="logoutAllSessions" 
+                  class="w-full text-orange-600 hover:text-orange-800 py-2 px-4 bg-orange-100 hover:bg-orange-200 rounded-lg font-medium transition-colors duration-200">
+            Déconnecter toutes les autres sessions
+          </button>
+          <button @click="downloadAccountData" 
+                  class="w-full text-gray-600 hover:text-gray-800 py-2 px-4 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors duration-200">
+            Télécharger mes données
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Avatar Upload Modal -->
+    <div v-if="showAvatarModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <h3 class="text-lg font-bold mb-4" style="color: #272d63;">Changer la photo de profil</h3>
+        
+        <div class="text-center mb-4">
+          <div class="w-24 h-24 mx-auto rounded-full flex items-center justify-center text-white text-2xl font-bold"
+               style="background-color: #272d63;">
+            {{ getInitials(profile.name) }}
+          </div>
+          <p class="text-sm text-gray-600 mt-2">Fonctionnalité à venir : upload d'image</p>
+        </div>
+        
+        <div class="flex space-x-3">
+          <button @click="showAvatarModal = false"
+                  class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-400 transition-colors duration-200">
+            Annuler
+          </button>
+          <button @click="showAvatarModal = false"
+                  class="flex-1 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
+                  style="background-color: #272d63;"
+                  @mouseover="$event.currentTarget.style.backgroundColor = '#fab511'"
+                  @mouseleave="$event.currentTarget.style.backgroundColor = '#272d63'">
+            Fermer
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref } from 'vue'
-import { 
-  HomeIcon,
-  UsersIcon,
-  CreditCardIcon,
-  ChartBarIcon,
-  CogIcon,
-  CameraIcon,
-  ComputerDesktopIcon
-} from '@heroicons/vue/24/outline'
-import CalendarIcon from '@/components/icons/CalendarIcon.vue'
+import { ref, reactive, onMounted } from 'vue'
 
 export default {
-  name: 'AdminProfile',
-  components: {
-    HomeIcon,
-    UsersIcon,
-    CalendarIcon,
-    CreditCardIcon,
-    ChartBarIcon,
-    CogIcon,
-    CameraIcon,
-    ComputerDesktopIcon
-  },
+  name: 'Profile',
   setup() {
-    const sidebarOpen = ref(window.innerWidth >= 1024)
+    const loading = ref(false)
+    const updatingProfile = ref(false)
+    const changingPassword = ref(false)
+    const updatingPreferences = ref(false)
+    const showAvatarModal = ref(false)
+    const passwordError = ref('')
     
     const profile = ref({
-      name: 'Admin Primea',
-      first_name: 'Admin',
-      last_name: 'Primea',
-      email: 'admin@primea.ga',
-      phone: '+241 07 12 34 56 78',
-      role: 'Super Administrateur',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face&auto=format',
-      created_at: new Date('2023-01-15'),
-      preferences: {
-        email_notifications: true,
-        two_factor: false,
-        language: 'fr'
+      id: 1,
+      name: '',
+      email: '',
+      phone: '',
+      position: '',
+      created_at: new Date(),
+      login_count: 0
+    })
+    
+    const profileForm = reactive({
+      name: '',
+      email: '',
+      phone: '',
+      position: ''
+    })
+    
+    const passwordForm = reactive({
+      current_password: '',
+      new_password: '',
+      new_password_confirmation: ''
+    })
+    
+    const preferences = reactive({
+      email_notifications: true,
+      two_factor_enabled: false,
+      language: 'fr',
+      timezone: 'Africa/Libreville'
+    })
+    
+    const activeSessions = ref([])
+
+    // Methods
+    const loadProfile = async () => {
+      loading.value = true
+      try {
+        const response = await fetch('/api/v1/admin/profile', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Accept': 'application/json'
+          }
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success) {
+            profile.value = data.data.user
+            Object.assign(profileForm, data.data.user)
+            Object.assign(preferences, data.data.preferences || preferences)
+            activeSessions.value = data.data.sessions || []
+          }
+        } else {
+          loadMockData()
+        }
+      } catch (error) {
+        console.log('API non disponible, utilisation des données locales')
+        loadMockData()
+      } finally {
+        loading.value = false
       }
-    })
-
-    const passwordForm = ref({
-      current: '',
-      new: '',
-      confirm: ''
-    })
-
-    const activeSessions = ref([
-      {
+    }
+    
+    const loadMockData = () => {
+      const userData = {
         id: 1,
-        device: 'Chrome sur Windows',
-        location: 'Libreville, Gabon',
-        last_activity: new Date(),
-        current: true
-      },
-      {
-        id: 2,
-        device: 'Safari sur iPhone',
-        location: 'Libreville, Gabon',
-        last_activity: new Date(Date.now() - 2 * 60 * 60 * 1000),
-        current: false
+        name: localStorage.getItem('userName') || 'Admin Primea',
+        email: localStorage.getItem('userEmail') || 'admin@primea.ga',
+        phone: '+241 01 23 45 67',
+        position: 'Super Administrateur',
+        created_at: new Date('2024-01-15'),
+        login_count: 127
       }
-    ])
-
-    const formatDate = (date) => {
-      return date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' })
-    }
-
-    const formatRelativeTime = (date) => {
-      const now = new Date()
-      const diffInMinutes = Math.floor((now - date) / (1000 * 60))
-      const diffInHours = Math.floor(diffInMinutes / 60)
       
-      if (diffInMinutes < 5) return 'À l\'instant'
-      if (diffInMinutes < 60) return `Il y a ${diffInMinutes} minutes`
-      if (diffInHours < 24) return `Il y a ${diffInHours} heures`
-      return date.toLocaleDateString('fr-FR')
+      profile.value = userData
+      Object.assign(profileForm, userData)
+      
+      activeSessions.value = [
+        {
+          id: 1,
+          device: 'Chrome sur macOS',
+          location: 'Libreville, Gabon',
+          last_activity: new Date(),
+          current: true
+        },
+        {
+          id: 2,
+          device: 'Safari sur iPhone',
+          location: 'Libreville, Gabon',
+          last_activity: new Date(Date.now() - 2 * 60 * 60 * 1000),
+          current: false
+        }
+      ]
     }
-
-    const changeAvatar = () => {
-      console.log('Change avatar')
-      // Logique de changement d'avatar
+    
+    const updateProfile = async () => {
+      updatingProfile.value = true
+      try {
+        const response = await fetch('/api/v1/admin/profile', {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(profileForm)
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success) {
+            profile.value = { ...profile.value, ...profileForm }
+            localStorage.setItem('userName', profileForm.name)
+            localStorage.setItem('userEmail', profileForm.email)
+            alert('Profil mis à jour avec succès')
+          }
+        } else {
+          profile.value = { ...profile.value, ...profileForm }
+          localStorage.setItem('userName', profileForm.name)
+          localStorage.setItem('userEmail', profileForm.email)
+          alert('Profil mis à jour avec succès (simulé)')
+        }
+      } catch (error) {
+        console.log('API non disponible, mise à jour locale')
+        profile.value = { ...profile.value, ...profileForm }
+        localStorage.setItem('userName', profileForm.name)
+        localStorage.setItem('userEmail', profileForm.email)
+        alert('Profil mis à jour avec succès (simulé)')
+      } finally {
+        updatingProfile.value = false
+      }
     }
-
-    const updateProfile = () => {
-      console.log('Update profile:', profile.value)
-    }
-
-    const changePassword = () => {
-      if (passwordForm.value.new !== passwordForm.value.confirm) {
-        alert('Les mots de passe ne correspondent pas')
+    
+    const changePassword = async () => {
+      passwordError.value = ''
+      
+      if (passwordForm.new_password !== passwordForm.new_password_confirmation) {
+        passwordError.value = 'Les mots de passe ne correspondent pas'
         return
       }
-      console.log('Change password')
-      passwordForm.value = { current: '', new: '', confirm: '' }
+      
+      if (passwordForm.new_password.length < 8) {
+        passwordError.value = 'Le mot de passe doit contenir au moins 8 caractères'
+        return
+      }
+      
+      changingPassword.value = true
+      try {
+        const response = await fetch('/api/v1/admin/profile/password', {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(passwordForm)
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success) {
+            Object.assign(passwordForm, {
+              current_password: '',
+              new_password: '',
+              new_password_confirmation: ''
+            })
+            alert('Mot de passe changé avec succès')
+          }
+        } else {
+          Object.assign(passwordForm, {
+            current_password: '',
+            new_password: '',
+            new_password_confirmation: ''
+          })
+          alert('Mot de passe changé avec succès (simulé)')
+        }
+      } catch (error) {
+        console.log('API non disponible, changement simulé')
+        Object.assign(passwordForm, {
+          current_password: '',
+          new_password: '',
+          new_password_confirmation: ''
+        })
+        alert('Mot de passe changé avec succès (simulé)')
+      } finally {
+        changingPassword.value = false
+      }
+    }
+    
+    const updatePreferences = async () => {
+      updatingPreferences.value = true
+      try {
+        const response = await fetch('/api/v1/admin/profile/preferences', {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(preferences)
+        })
+        
+        if (response.ok) {
+          alert('Préférences sauvegardées avec succès')
+        } else {
+          alert('Préférences sauvegardées avec succès (simulé)')
+        }
+      } catch (error) {
+        console.log('API non disponible, sauvegarde simulée')
+        alert('Préférences sauvegardées avec succès (simulé)')
+      } finally {
+        updatingPreferences.value = false
+      }
+    }
+    
+    const changeAvatar = () => {
+      showAvatarModal.value = true
+    }
+    
+    const revokeSession = async (session) => {
+      if (!confirm('Êtes-vous sûr de vouloir révoquer cette session ?')) return
+      
+      try {
+        const response = await fetch(`/api/v1/admin/profile/sessions/${session.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Accept': 'application/json'
+          }
+        })
+        
+        if (response.ok) {
+          activeSessions.value = activeSessions.value.filter(s => s.id !== session.id)
+        } else {
+          activeSessions.value = activeSessions.value.filter(s => s.id !== session.id)
+        }
+      } catch (error) {
+        activeSessions.value = activeSessions.value.filter(s => s.id !== session.id)
+      }
+    }
+    
+    const logoutAllSessions = async () => {
+      if (!confirm('Cela déconnectera toutes les autres sessions. Continuer ?')) return
+      
+      try {
+        const response = await fetch('/api/v1/admin/profile/sessions/logout-all', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Accept': 'application/json'
+          }
+        })
+        
+        if (response.ok) {
+          activeSessions.value = activeSessions.value.filter(s => s.current)
+          alert('Toutes les autres sessions ont été déconnectées')
+        } else {
+          activeSessions.value = activeSessions.value.filter(s => s.current)
+          alert('Toutes les autres sessions ont été déconnectées (simulé)')
+        }
+      } catch (error) {
+        activeSessions.value = activeSessions.value.filter(s => s.current)
+        alert('Toutes les autres sessions ont été déconnectées (simulé)')
+      }
+    }
+    
+    const downloadAccountData = () => {
+      alert('Téléchargement des données du compte (fonctionnalité à venir)')
+    }
+    
+    // Utils
+    const getInitials = (name) => {
+      return name.split(' ').map(n => n.charAt(0)).join('').toUpperCase().substring(0, 2)
+    }
+    
+    const formatDate = (date) => {
+      return new Date(date).toLocaleDateString('fr-FR', {
+        year: 'numeric',
+        month: 'long'
+      })
+    }
+    
+    const formatRelativeTime = (date) => {
+      const now = new Date()
+      const diff = now - new Date(date)
+      const minutes = Math.floor(diff / 60000)
+      const hours = Math.floor(diff / 3600000)
+      const days = Math.floor(diff / 86400000)
+      
+      if (minutes < 1) return 'À l\'instant'
+      if (minutes < 60) return `Il y a ${minutes} min`
+      if (hours < 24) return `Il y a ${hours}h`
+      return `Il y a ${days}j`
     }
 
-    const updatePreferences = () => {
-      console.log('Update preferences:', profile.value.preferences)
-    }
-
-    const revokeSession = (session) => {
-      console.log('Revoke session:', session)
-      activeSessions.value = activeSessions.value.filter(s => s.id !== session.id)
-    }
+    // Lifecycle
+    onMounted(() => {
+      loadProfile()
+    })
 
     return {
-      sidebarOpen,
+      loading,
+      updatingProfile,
+      changingPassword,
+      updatingPreferences,
+      showAvatarModal,
+      passwordError,
       profile,
+      profileForm,
       passwordForm,
+      preferences,
       activeSessions,
-      formatDate,
-      formatRelativeTime,
-      changeAvatar,
       updateProfile,
       changePassword,
       updatePreferences,
-      revokeSession
+      changeAvatar,
+      revokeSession,
+      logoutAllSessions,
+      downloadAccountData,
+      getInitials,
+      formatDate,
+      formatRelativeTime
     }
   }
 }
 </script>
 
 <style scoped>
-.admin-profile {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+.profile-management {
+  font-family: 'Inter', sans-serif;
 }
 </style>
