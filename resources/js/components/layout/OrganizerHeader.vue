@@ -108,7 +108,7 @@
                 <!-- Menu items -->
 
                 <router-link 
-                  :to="{ name: 'profile' }" 
+                  :to="{ name: 'organizer-profile' }" 
                   class="flex items-center px-4 py-2 text-primea-blue hover:bg-primea-blue/10 font-primea transition-colors duration-200"
                   @click="closeDropdown"
                 >
@@ -203,7 +203,7 @@
             <div class="border-t border-gray-200 my-3"></div>
 
             <router-link 
-              :to="{ name: 'profile' }" 
+              :to="{ name: 'organizer-profile' }" 
               class="flex items-center space-x-3 py-3 text-primea-blue hover:text-primea-yellow font-primea font-medium transition-colors duration-200"
               @click="closeMobileMenu"
             >

@@ -25,6 +25,7 @@ const OrganizerDashboard = () => import('./pages/organizer/Dashboard.vue');
 const OrganizerEvents = () => import('./pages/organizer/Events.vue');
 const EventCreate = () => import('./pages/organizer/EventCreate.vue');
 const BalanceManagement = () => import('./pages/organizer/BalanceManagement.vue');
+const OrganizerProfile = () => import('./pages/organizer/OrganizerProfile.vue');
 // const PhysicalSales = () => import('./pages/organizer/PhysicalSales.vue');
 // const PaymentHistory = () => import('./pages/organizer/PaymentHistory.vue');
 
@@ -82,6 +83,7 @@ const routes = [
             { path: 'events', component: OrganizerEvents, name: 'organizer-events' },
             { path: 'events/create', component: EventCreate, name: 'organizer-event-create' },
             { path: 'balance', component: BalanceManagement, name: 'organizer-balance' },
+            { path: 'profile', component: OrganizerProfile, name: 'organizer-profile' },
             // { path: 'physical-sales', component: PhysicalSales, name: 'organizer-physical-sales' },
             // { path: 'payments', component: PaymentHistory, name: 'organizer-payments' },
         ]
