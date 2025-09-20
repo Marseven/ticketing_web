@@ -84,21 +84,6 @@ const routes = [
             { path: 'events', component: OrganizerEvents, name: 'organizer-events' },
             { path: 'events/create', component: EventCreate, name: 'organizer-event-create' },
             { path: 'events/:slug', component: OrganizerEventDetail, name: 'organizer-event-detail' },
-            { 
-              path: 'events/:id(\\d+)', 
-              redirect: (to) => {
-                // Mapping ID -> slug pour redirection
-                const idToSlug = {
-                  '1': 'concert-jazz-etoiles',
-                  '2': 'oiseau-rare', 
-                  '3': 'festival-arts-culture',
-                  '4': 'soiree-hip-hop',
-                  '5': 'festival-gastronomique'
-                };
-                const slug = idToSlug[to.params.id];
-                return slug ? { name: 'organizer-event-detail', params: { slug } } : { name: 'organizer-events' };
-              }
-            },
             { path: 'balance', component: BalanceManagement, name: 'organizer-balance' },
             { path: 'profile', component: OrganizerProfile, name: 'organizer-profile' },
             // { path: 'physical-sales', component: PhysicalSales, name: 'organizer-physical-sales' },

@@ -232,7 +232,9 @@
                   @click="exportData"
                   class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 rounded-primea hover:bg-gray-50 transition-all duration-200 font-primea"
                 >
-                  <ArrowDownTrayIcon class="w-4 h-4 mr-2" />
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
                   Exporter les données
                 </button>
               </div>
@@ -287,7 +289,6 @@ import {
   CalendarIcon,
   ShareIcon,
   EyeIcon,
-  ArrowDownTrayIcon,
   ShoppingCartIcon
 } from '@heroicons/vue/24/outline';
 
@@ -306,7 +307,24 @@ const loadEvent = async () => {
   error.value = null;
   
   try {
-    const slug = route.params.slug;
+    let slug = route.params.slug;
+    
+    // Gestion des anciens liens avec des IDs numériques
+    if (/^\d+$/.test(slug)) {
+      const idToSlug = {
+        '1': 'concert-jazz-etoiles',
+        '2': 'oiseau-rare', 
+        '3': 'festival-arts-culture',
+        '4': 'soiree-hip-hop',
+        '5': 'festival-gastronomique'
+      };
+      
+      if (idToSlug[slug]) {
+        // Rediriger vers l'URL avec le slug
+        router.replace({ name: 'organizer-event-detail', params: { slug: idToSlug[slug] } });
+        return;
+      }
+    }
     
     // Simulation d'appel API
     await new Promise(resolve => setTimeout(resolve, 800));
@@ -506,7 +524,10 @@ const loadEvent = async () => {
 };
 
 const editEvent = () => {
-  router.push({ name: 'organizer-event-edit', params: { slug: event.value.slug } });
+  // Pour l'instant, rediriger vers la page de création d'événement
+  // TODO: Créer une page d'édition spécifique
+  alert('Fonctionnalité d\'édition en cours de développement');
+  // router.push({ name: 'organizer-event-create' });
 };
 
 const publishEvent = async () => {
