@@ -37,6 +37,8 @@ const OrganizerBalanceConfig = () => import(/* webpackChunkName: "admin-payouts"
 const AdminReports = () => import(/* webpackChunkName: "admin-reports" */ './pages/admin/Reports.vue');
 const AdminSettings = () => import(/* webpackChunkName: "admin-settings" */ './pages/admin/Settings.vue');
 const AdminProfile = () => import(/* webpackChunkName: "admin-settings" */ './pages/admin/Profile.vue');
+const CategoryManagement = () => import(/* webpackChunkName: "admin-categories" */ './pages/admin/CategoryManagement.vue');
+const VenueManagement = () => import(/* webpackChunkName: "admin-venues" */ './pages/admin/VenueManagement.vue');
 
 // Scanner
 const ScannerApp = () => import('./pages/scanner/ScannerApp.vue');
@@ -91,6 +93,8 @@ const routes = [
             { path: 'payments', component: PaymentTracking, name: 'admin-payments' },
             { path: 'payouts', component: PayoutDashboard, name: 'admin-payouts' },
             { path: 'balance-config', component: OrganizerBalanceConfig, name: 'admin-balance-config' },
+            { path: 'categories', component: CategoryManagement, name: 'admin-categories' },
+            { path: 'venues', component: VenueManagement, name: 'admin-venues' },
             { path: 'reports', component: AdminReports, name: 'admin-reports' },
             { path: 'settings', component: AdminSettings, name: 'admin-settings' },
             { path: 'profile', component: AdminProfile, name: 'admin-profile' },
