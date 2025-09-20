@@ -399,8 +399,107 @@ const loadEvent = async () => {
             is_active: true
           }
         ]
+      },
+      'oiseau-rare': {
+        id: 2,
+        title: "L'OISEAU RARE",
+        slug: 'oiseau-rare',
+        description: 'Concert intimiste dans un cadre exceptionnel',
+        venue_name: 'Entre Nous Bar',
+        venue_address: '456 Rue des Arts, Abidjan',
+        event_date: '2025-07-27T20:00:00',
+        status: 'published',
+        category_name: 'Musique',
+        max_attendees: 150,
+        is_public: true,
+        sales_active: true,
+        image_url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400',
+        ticket_types: [
+          {
+            id: 3,
+            name: 'Entrée Standard',
+            description: 'Accès à la soirée',
+            price: 10000,
+            quantity: 150,
+            is_active: true
+          }
+        ]
+      },
+      'festival-arts-culture': {
+        id: 3,
+        title: 'Festival Arts & Culture',
+        slug: 'festival-arts-culture',
+        description: 'Un festival célébrant la richesse culturelle ivoirienne',
+        venue_name: 'Amphithéâtre National',
+        venue_address: '789 Boulevard de la Culture, Abidjan',
+        event_date: '2025-09-10T14:00:00',
+        status: 'published',
+        category_name: 'Culture',
+        max_attendees: 300,
+        is_public: true,
+        sales_active: true,
+        image_url: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400',
+        ticket_types: [
+          {
+            id: 4,
+            name: 'Pass Journée',
+            description: 'Accès toute la journée',
+            price: 15000,
+            quantity: 300,
+            is_active: true
+          }
+        ]
+      },
+      'soiree-hip-hop': {
+        id: 4,
+        title: 'Soirée Hip-Hop',
+        slug: 'soiree-hip-hop',
+        description: 'Soirée hip-hop avec les meilleurs artistes locaux',
+        venue_name: 'Club Central',
+        venue_address: '321 Avenue Central, Abidjan',
+        event_date: '2025-06-20T21:00:00',
+        status: 'completed',
+        category_name: 'Musique',
+        max_attendees: 120,
+        is_public: true,
+        sales_active: false,
+        image_url: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400',
+        ticket_types: [
+          {
+            id: 5,
+            name: 'Entrée VIP',
+            description: 'Accès VIP avec bar',
+            price: 10000,
+            quantity: 120,
+            is_active: false
+          }
+        ]
+      },
+      'festival-gastronomique': {
+        id: 5,
+        title: 'Festival Gastronomique',
+        slug: 'festival-gastronomique',
+        description: 'Découverte de la gastronomie ivoirienne et internationale',
+        venue_name: 'Centre des Expositions',
+        venue_address: '654 Zone Industrielle, Abidjan',
+        event_date: '2025-11-02T12:00:00',
+        status: 'draft',
+        category_name: 'Gastronomie',
+        max_attendees: 400,
+        is_public: false,
+        sales_active: false,
+        image_url: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400',
+        ticket_types: [
+          {
+            id: 6,
+            name: 'Pass Dégustation',
+            description: 'Accès aux stands de dégustation',
+            price: 20000,
+            quantity: 400,
+            is_active: false
+          }
+        ]
       }
-      // Ajouter d'autres événements si nécessaire
     };
 
     if (events[slug]) {
