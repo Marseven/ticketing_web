@@ -1,0 +1,133 @@
+import { createRouter, createWebHistory } from 'vue-router';
+
+// Composants chargés immédiatement (essentiels)
+import Home from './pages/Home.vue';
+import Login from './pages/auth/Login.vue';
+
+// Lazy loading pour toutes les autres pages
+const Events = () => import('./pages/Events.vue');
+const EventDetail = () => import('./pages/EventDetail.vue');
+const Checkout = () => import('./pages/Checkout.vue');
+const Register = () => import('./pages/auth/Register.vue');
+const TicketRetrieve = () => import('./pages/TicketRetrieve.vue');
+const TicketDownload = () => import('./pages/TicketDownload.vue');
+
+// Espace client
+const Account = () => import('./pages/account/Account.vue');
+const MyTickets = () => import('./pages/account/MyTickets.vue');
+const MyOrders = () => import('./pages/account/MyOrders.vue');
+const Profile = () => import('./pages/account/Profile.vue');
+
+// Espace organisateur
+const OrganizerDashboard = () => import('./pages/organizer/Dashboard.vue');
+const OrganizerEvents = () => import('./pages/organizer/Events.vue');
+const EventCreate = () => import('./pages/organizer/EventCreate.vue');
+
+// Layout et pages Admin avec chunk grouping
+const AdminLayout = () => import(/* webpackChunkName: "admin-layout" */ './layouts/AdminLayout.vue');
+const AdminDashboard = () => import(/* webpackChunkName: "admin-core" */ './pages/admin/AdminDashboard.vue');
+const UserManagement = () => import(/* webpackChunkName: "admin-users" */ './pages/admin/UserManagement.vue');
+const OrganizerManagement = () => import(/* webpackChunkName: "admin-organizers" */ './pages/admin/OrganizerManagement.vue');
+const EventManagement = () => import(/* webpackChunkName: "admin-events" */ './pages/admin/EventManagement.vue');
+const OrderManagement = () => import(/* webpackChunkName: "admin-orders" */ './pages/admin/OrderManagement.vue');
+const PaymentTracking = () => import(/* webpackChunkName: "admin-payments" */ './pages/admin/PaymentTracking.vue');
+const PayoutDashboard = () => import(/* webpackChunkName: "admin-payouts" */ './pages/admin/PayoutDashboard.vue');
+const OrganizerBalanceConfig = () => import(/* webpackChunkName: "admin-payouts" */ './pages/admin/OrganizerBalanceConfig.vue');
+const AdminReports = () => import(/* webpackChunkName: "admin-reports" */ './pages/admin/Reports.vue');
+const AdminSettings = () => import(/* webpackChunkName: "admin-settings" */ './pages/admin/Settings.vue');
+const AdminProfile = () => import(/* webpackChunkName: "admin-settings" */ './pages/admin/Profile.vue');
+
+// Scanner
+const ScannerApp = () => import('./pages/scanner/ScannerApp.vue');
+
+const routes = [
+    { path: '/', component: Home, name: 'home' },
+    { path: '/events', component: Events, name: 'events' },
+    { path: '/events/:slug', component: EventDetail, name: 'event-detail' },
+    { path: '/checkout/:eventSlug', component: Checkout, name: 'checkout' },
+    { path: '/login', component: Login, name: 'login' },
+    { path: '/register', component: Register, name: 'register' },
+    { path: '/retrieve-ticket', component: TicketRetrieve, name: 'ticket-retrieve' },
+    { path: '/ticket/:id/download', component: TicketDownload, name: 'ticket-download' },
+    { path: '/ticket/:id', component: TicketDownload, name: 'ticket-view' },
+    
+    // Routes espace client
+    { 
+        path: '/account',
+        component: Account,
+        children: [
+            { path: '', redirect: '/account/tickets' },
+            { path: 'tickets', component: MyTickets, name: 'my-tickets' },
+            { path: 'orders', component: MyOrders, name: 'my-orders' },
+            { path: 'profile', component: Profile, name: 'profile' },
+        ],
+        meta: { requiresAuth: true }
+    },
+    
+    // Routes organisateur
+    { 
+        path: '/organizer', 
+        children: [
+            { path: 'dashboard', component: OrganizerDashboard, name: 'organizer-dashboard' },
+            { path: 'events', component: OrganizerEvents, name: 'organizer-events' },
+            { path: 'events/create', component: EventCreate, name: 'organizer-event-create' },
+        ],
+        meta: { requiresAuth: true, role: 'organizer' }
+    },
+    
+    // Routes admin avec layout
+    { 
+        path: '/admin', 
+        component: AdminLayout,
+        meta: { requiresAuth: true, role: 'admin' },
+        children: [
+            { path: '', redirect: '/admin/dashboard' },
+            { path: 'dashboard', component: AdminDashboard, name: 'admin-dashboard' },
+            { path: 'users', component: UserManagement, name: 'admin-users' },
+            { path: 'organizers', component: OrganizerManagement, name: 'admin-organizers' },
+            { path: 'events', component: EventManagement, name: 'admin-events' },
+            { path: 'orders', component: OrderManagement, name: 'admin-orders' },
+            { path: 'payments', component: PaymentTracking, name: 'admin-payments' },
+            { path: 'payouts', component: PayoutDashboard, name: 'admin-payouts' },
+            { path: 'balance-config', component: OrganizerBalanceConfig, name: 'admin-balance-config' },
+            { path: 'reports', component: AdminReports, name: 'admin-reports' },
+            { path: 'settings', component: AdminSettings, name: 'admin-settings' },
+            { path: 'profile', component: AdminProfile, name: 'admin-profile' },
+        ]
+    },
+    
+    // Scanner
+    { path: '/scanner', component: ScannerApp, name: 'scanner' },
+];
+
+const router = createRouter({
+    history: createWebHistory(),
+    routes,
+});
+
+// Navigation guards
+router.beforeEach((to, from, next) => {
+    const token = localStorage.getItem('token');
+    const userRole = localStorage.getItem('userRole');
+    
+    // Vérifier l'authentification
+    if (to.matched.some(record => record.meta.requiresAuth)) {
+        if (!token) {
+            next({ name: 'login', query: { redirect: to.fullPath } });
+            return;
+        }
+    }
+    
+    // Vérifier le rôle
+    if (to.matched.some(record => record.meta.role)) {
+        const requiredRole = to.meta.role;
+        if (userRole !== requiredRole) {
+            next('/');
+            return;
+        }
+    }
+    
+    next();
+});
+
+export default router;

@@ -1,9 +1,11 @@
 <template>
-  <div class="admin-dashboard p-6 bg-gray-50 min-h-screen">
-    <!-- Header -->
+  <div class="admin-dashboard p-6">
+    <!-- Welcome Section -->
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Dashboard Administrateur</h1>
-      <p class="text-gray-600">Gestion complète de la plateforme de billetterie</p>
+      <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg p-6">
+        <h2 class="text-2xl font-bold mb-2">Bienvenue sur Primea Admin</h2>
+        <p class="text-blue-100">Gérez efficacement votre plateforme de billetterie</p>
+      </div>
     </div>
 
     <!-- Loading state -->
