@@ -203,9 +203,12 @@
               </td>
               <td class="px-6 py-4 text-sm text-gray-900 font-primea">{{ event.tickets_sold || 0 }}</td>
               <td class="px-6 py-4 text-sm">
-                <button class="text-primea-blue hover:text-primea-yellow font-primea">
+                <router-link 
+                  :to="{ name: 'organizer-event-detail', params: { slug: event.slug } }"
+                  class="text-primea-blue hover:text-primea-yellow font-primea"
+                >
                   Gérer
-                </button>
+                </router-link>
               </td>
             </tr>
           </tbody>
@@ -268,6 +271,7 @@ const loadDashboardData = async () => {
       {
         id: 1,
         title: 'Concert Jazz sous les étoiles',
+        slug: 'concert-jazz-etoiles',
         venue_name: 'Palais de la Culture',
         event_date: '2025-10-15',
         status: 'active',
@@ -276,6 +280,7 @@ const loadDashboardData = async () => {
       {
         id: 2,
         title: 'Festival Gastronomique',
+        slug: 'festival-gastronomique',
         venue_name: 'Centre des Expositions',
         event_date: '2025-11-02',
         status: 'draft',

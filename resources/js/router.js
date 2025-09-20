@@ -23,6 +23,7 @@ const Profile = () => import('./pages/account/Profile.vue');
 const OrganizerLayout = () => import('./layouts/OrganizerLayout.vue');
 const OrganizerDashboard = () => import('./pages/organizer/OrganizerDashboard.vue');
 const OrganizerEvents = () => import('./pages/organizer/Events.vue');
+const OrganizerEventDetail = () => import('./pages/organizer/EventDetail.vue');
 const EventCreate = () => import('./pages/organizer/EventCreate.vue');
 const BalanceManagement = () => import('./pages/organizer/BalanceManagement.vue');
 const OrganizerProfile = () => import('./pages/organizer/OrganizerProfile.vue');
@@ -82,6 +83,7 @@ const routes = [
             { path: 'dashboard', component: OrganizerDashboard, name: 'organizer-dashboard' },
             { path: 'events', component: OrganizerEvents, name: 'organizer-events' },
             { path: 'events/create', component: EventCreate, name: 'organizer-event-create' },
+            { path: 'events/:slug', component: OrganizerEventDetail, name: 'organizer-event-detail' },
             { path: 'balance', component: BalanceManagement, name: 'organizer-balance' },
             { path: 'profile', component: OrganizerProfile, name: 'organizer-profile' },
             // { path: 'physical-sales', component: PhysicalSales, name: 'organizer-physical-sales' },
