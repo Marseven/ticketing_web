@@ -309,11 +309,11 @@ const loadEvent = async () => {
     const slug = route.params.slug;
     
     // Simulation d'appel API
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 800));
     
-    // Données simulées
-    if (slug === 'concert-jazz-etoiles') {
-      event.value = {
+    // Base de données simulée d'événements
+    const events = {
+      'concert-jazz-etoiles': {
         id: 1,
         title: 'Concert Jazz sous les étoiles',
         slug: 'concert-jazz-etoiles',
@@ -350,26 +350,152 @@ const loadEvent = async () => {
             is_active: true
           }
         ]
-      };
+      },
+      'oiseau-rare': {
+        id: 2,
+        title: "L'OISEAU RARE",
+        slug: 'oiseau-rare',
+        description: 'Concert intimiste dans un cadre exceptionnel',
+        venue_name: 'Entre Nous Bar',
+        venue_address: '456 Rue des Arts, Abidjan',
+        event_date: '2025-07-27T20:00:00Z',
+        status: 'published',
+        category_name: 'Musique',
+        max_attendees: 150,
+        tickets_sold: 85,
+        total_revenue: 850000,
+        is_public: true,
+        sales_active: true,
+        image_url: '/images/oiseau-rare.jpg',
+        created_at: '2025-06-15T10:00:00Z',
+        ticket_types: [
+          {
+            id: 3,
+            name: 'Entrée Standard',
+            description: 'Accès à la soirée',
+            price: 10000,
+            quantity: 150,
+            sold: 85,
+            is_active: true
+          }
+        ]
+      },
+      'festival-arts-culture': {
+        id: 3,
+        title: 'Festival Arts & Culture',
+        slug: 'festival-arts-culture',
+        description: 'Un festival célébrant la richesse culturelle ivoirienne',
+        venue_name: 'Amphithéâtre National',
+        venue_address: '789 Boulevard de la Culture, Abidjan',
+        event_date: '2025-09-10T14:00:00Z',
+        status: 'published',
+        category_name: 'Culture',
+        max_attendees: 300,
+        tickets_sold: 162,
+        total_revenue: 2430000,
+        is_public: true,
+        sales_active: true,
+        image_url: '/images/festival-culture.jpg',
+        created_at: '2025-07-01T10:00:00Z',
+        ticket_types: [
+          {
+            id: 4,
+            name: 'Pass Journée',
+            description: 'Accès toute la journée',
+            price: 15000,
+            quantity: 300,
+            sold: 162,
+            is_active: true
+          }
+        ]
+      },
+      'soiree-hip-hop': {
+        id: 4,
+        title: 'Soirée Hip-Hop',
+        slug: 'soiree-hip-hop',
+        description: 'Soirée hip-hop avec les meilleurs artistes locaux',
+        venue_name: 'Club Central',
+        venue_address: '321 Avenue Central, Abidjan',
+        event_date: '2025-06-20T21:00:00Z',
+        status: 'completed',
+        category_name: 'Musique',
+        max_attendees: 120,
+        tickets_sold: 120,
+        total_revenue: 1200000,
+        is_public: true,
+        sales_active: false,
+        image_url: '/images/hip-hop.jpg',
+        created_at: '2025-05-01T10:00:00Z',
+        ticket_types: [
+          {
+            id: 5,
+            name: 'Entrée VIP',
+            description: 'Accès VIP avec bar',
+            price: 10000,
+            quantity: 120,
+            sold: 120,
+            is_active: false
+          }
+        ]
+      },
+      'festival-gastronomique': {
+        id: 5,
+        title: 'Festival Gastronomique',
+        slug: 'festival-gastronomique',
+        description: 'Découverte de la gastronomie ivoirienne et internationale',
+        venue_name: 'Centre des Expositions',
+        venue_address: '654 Zone Industrielle, Abidjan',
+        event_date: '2025-11-02T12:00:00Z',
+        status: 'draft',
+        category_name: 'Gastronomie',
+        max_attendees: 400,
+        tickets_sold: 0,
+        total_revenue: 0,
+        is_public: false,
+        sales_active: false,
+        image_url: '/images/gastronomie.jpg',
+        created_at: '2025-09-15T10:00:00Z',
+        ticket_types: [
+          {
+            id: 6,
+            name: 'Pass Dégustation',
+            description: 'Accès aux stands de dégustation',
+            price: 20000,
+            quantity: 400,
+            sold: 0,
+            is_active: false
+          }
+        ]
+      }
+    };
 
-      recentOrders.value = [
-        {
-          id: 1,
-          customer_name: 'Kofi Asante',
-          ticket_quantity: 2,
-          total_amount: 50000,
-          created_at: '2025-09-19T14:30:00Z'
-        },
-        {
-          id: 2,
-          customer_name: 'Aminata Traore',
-          ticket_quantity: 1,
-          total_amount: 50000,
-          created_at: '2025-09-18T09:15:00Z'
-        }
-      ];
+    // Vérifier si l'événement existe
+    if (events[slug]) {
+      event.value = events[slug];
+
+      // Commandes récentes simulées basées sur l'événement
+      if (event.value.tickets_sold > 0) {
+        recentOrders.value = [
+          {
+            id: 1,
+            customer_name: 'Kofi Asante',
+            ticket_quantity: 2,
+            total_amount: event.value.ticket_types[0].price * 2,
+            created_at: '2025-09-19T14:30:00Z'
+          },
+          {
+            id: 2,
+            customer_name: 'Aminata Traore',
+            ticket_quantity: 1,
+            total_amount: event.value.ticket_types[0].price,
+            created_at: '2025-09-18T09:15:00Z'
+          }
+        ];
+      } else {
+        recentOrders.value = [];
+      }
     } else {
-      error.value = 'Événement non trouvé';
+      error.value = `Événement avec le slug "${slug}" non trouvé`;
     }
   } catch (err) {
     error.value = 'Erreur lors du chargement de l\'événement';
