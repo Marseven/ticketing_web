@@ -169,7 +169,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
               <input ref="phoneInput" v-model="organizerForm.contact_phone" type="tel" 
                      class="w-full border rounded-lg px-3 py-2"
-                     placeholder="+241 XX XX XX XX">
+                     placeholder="Téléphone">
             </div>
             
             <div>
@@ -430,8 +430,8 @@ export default {
 
     const loadAvailableUsers = async () => {
       try {
-        // Charger tous les utilisateurs qui peuvent être associés à un organisateur
-        const response = await fetch('/api/v1/admin/users', {
+        // Charger uniquement les utilisateurs avec le rôle organisateur
+        const response = await fetch('/api/v1/admin/users?role=organizer', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Accept': 'application/json',
@@ -443,10 +443,9 @@ export default {
         const data = await response.json()
         if (data.success) {
           const users = data.data.users.data || data.data.users || []
-          // Montrer tous les utilisateurs sauf les admins
-          // Les clients et organisateurs peuvent être associés à un organisateur
+          // Filtrer pour ne garder que les utilisateurs avec le rôle organisateur
           availableUsers.value = users.filter(user => 
-            !user.roles || !user.roles.some(role => role.slug === 'admin')
+            user.roles && user.roles.some(role => role.slug === 'organizer')
           )
         }
       } catch (error) {
