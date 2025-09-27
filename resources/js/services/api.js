@@ -9,13 +9,24 @@ const api = axios.create({
   },
 })
 
-// Intercepteur pour ajouter le token d'authentification
+// Intercepteur pour ajouter le token d'authentification et le CSRF token
 api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('auth_token')
+  async (config) => {
+    // Récupérer le token d'authentification
+    const token = localStorage.getItem('auth_token') || localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    
+    // Ajouter le token CSRF pour Laravel Sanctum
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+    if (csrfToken) {
+      config.headers['X-CSRF-TOKEN'] = csrfToken
+    }
+    
+    // Ajouter les headers requis pour Laravel
+    config.headers['X-Requested-With'] = 'XMLHttpRequest'
+    
     return config
   },
   (error) => {

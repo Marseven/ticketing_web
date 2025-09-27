@@ -318,7 +318,9 @@ export default {
         const response = await fetch(`/api/v1/admin/users?${queryParams}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
           }
         })
         
@@ -386,29 +388,48 @@ export default {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
           },
           body: JSON.stringify(payload)
         })
         
         const data = await response.json()
         if (data.success) {
-          alert(data.message || (editingUser.value ? 'Utilisateur mis à jour avec succès' : 'Utilisateur créé avec succès'))
+          Toast.fire({
+            icon: 'success',
+            title: data.message || (editingUser.value ? 'Utilisateur mis à jour avec succès' : 'Utilisateur créé avec succès')
+          })
           showModal.value = false
           loadUsers()
         } else {
-          alert(data.message || 'Erreur lors de la sauvegarde')
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: data.message || 'Erreur lors de la sauvegarde'
+          })
         }
       } catch (error) {
         console.error('Erreur sauvegarde utilisateur:', error)
-        alert('Erreur technique')
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur technique',
+          text: 'Une erreur est survenue lors de la sauvegarde'
+        })
       } finally {
         saving.value = false
       }
     }
 
     const toggleUserStatus = async (user) => {
-      if (!confirm(`Êtes-vous sûr de vouloir ${user.deleted_at ? 'activer' : 'désactiver'} cet utilisateur ?`)) {
+      const result = await confirmAction(
+        'Changer le statut de l\'utilisateur',
+        `Êtes-vous sûr de vouloir ${user.deleted_at ? 'activer' : 'désactiver'} cet utilisateur ?`,
+        user.deleted_at ? 'Activer' : 'Désactiver'
+      )
+      
+      if (!result.isConfirmed) {
         return
       }
 
@@ -417,19 +438,33 @@ export default {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
           }
         })
         
         const data = await response.json()
         if (data.success) {
+          Toast.fire({
+            icon: 'success',
+            title: data.message || 'Statut mis à jour avec succès'
+          })
           loadUsers()
         } else {
-          alert(data.message || 'Erreur lors du changement de statut')
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: data.message || 'Erreur lors du changement de statut'
+          })
         }
       } catch (error) {
         console.error('Erreur toggle statut:', error)
-        alert('Erreur technique')
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur technique',
+          text: 'Une erreur est survenue lors du changement de statut'
+        })
       }
     }
 
