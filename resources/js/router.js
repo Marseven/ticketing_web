@@ -10,6 +10,7 @@ const Events = () => import('./pages/Events.vue');
 const EventDetail = () => import('./pages/EventDetail.vue');
 const Checkout = () => import('./pages/Checkout.vue');
 const Register = () => import('./pages/auth/Register.vue');
+const ResetPassword = () => import('./pages/auth/ResetPassword.vue');
 const TicketRetrieve = () => import('./pages/TicketRetrieve.vue');
 const TicketDownload = () => import('./pages/TicketDownload.vue');
 
@@ -57,6 +58,7 @@ const routes = [
     { path: '/checkout/:eventSlug', component: Checkout, name: 'checkout' },
     { path: '/login', component: Login, name: 'login' },
     { path: '/register', component: Register, name: 'register' },
+    { path: '/reset-password', component: ResetPassword, name: 'reset-password' },
     { path: '/retrieve-ticket', component: TicketRetrieve, name: 'ticket-retrieve' },
     { path: '/ticket/:id/download', component: TicketDownload, name: 'ticket-download' },
     { path: '/ticket/:id', component: TicketDownload, name: 'ticket-view' },

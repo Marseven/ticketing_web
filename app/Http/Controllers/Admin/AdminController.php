@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
@@ -195,7 +196,6 @@ class AdminController extends Controller
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
             'is_admin' => 'boolean',
             'is_organizer' => 'boolean',
         ]);
@@ -209,22 +209,41 @@ class AdminController extends Controller
         }
 
         try {
+            DB::beginTransaction();
+
+            // Créer l'utilisateur sans mot de passe
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
-                'password' => bcrypt($request->password),
+                'password' => bcrypt(\Str::random(32)), // Mot de passe temporaire aléatoire
                 'is_admin' => $request->boolean('is_admin'),
                 'is_organizer' => $request->boolean('is_organizer'),
                 'email_verified_at' => now(),
             ]);
 
+            // Générer un token de réinitialisation
+            $token = \Str::random(64);
+            
+            // Enregistrer le token
+            DB::table('password_reset_tokens')->insert([
+                'email' => $user->email,
+                'token' => hash('sha256', $token),
+                'created_at' => now(),
+            ]);
+
+            // Envoyer l'email de bienvenue avec lien de réinitialisation
+            $user->notify(new \App\Notifications\PasswordResetNotification($token, true));
+
+            DB::commit();
+
             return response()->json([
                 'success' => true,
-                'message' => 'Utilisateur créé avec succès',
+                'message' => 'Utilisateur créé avec succès. Un email lui a été envoyé pour définir son mot de passe.',
                 'data' => ['user' => $user]
             ]);
 
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('Erreur création utilisateur admin', [
                 'error' => $e->getMessage()
             ]);

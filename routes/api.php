@@ -58,6 +58,11 @@ Route::post('login', [App\Http\Controllers\Api\AuthController::class, 'login']);
 Route::post('logout', [App\Http\Controllers\Api\AuthController::class, 'logout'])->middleware('auth:sanctum');
 Route::get('me', [App\Http\Controllers\Api\AuthController::class, 'me'])->middleware('auth:sanctum');
 
+// Routes de réinitialisation de mot de passe
+Route::post('forgot-password', [App\Http\Controllers\Auth\PasswordResetController::class, 'forgotPassword']);
+Route::post('reset-password', [App\Http\Controllers\Auth\PasswordResetController::class, 'resetPassword']);
+Route::post('verify-reset-token', [App\Http\Controllers\Auth\PasswordResetController::class, 'verifyToken']);
+
 // Routes des événements (sans préfixe v1 pour correspondre aux annotations)
 Route::prefix('events')->middleware('auth:sanctum')->group(function () {
     Route::get('/', [App\Http\Controllers\Api\EventController::class, 'index']);
