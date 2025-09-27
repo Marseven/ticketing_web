@@ -75,6 +75,9 @@ Route::prefix('v1')->group(function () {
     // Catégories (accès public)
     Route::get('categories', [App\Http\Controllers\Client\CategoryController::class, 'index']);
     
+    // Lieux (accès public pour la lecture)
+    Route::get('venues', [App\Http\Controllers\Api\VenueController::class, 'index']);
+    
     // Routes d'authentification
     Route::prefix('auth')->group(function () {
         Route::post('register', [App\Http\Controllers\Api\AuthController::class, 'register']);

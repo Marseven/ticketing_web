@@ -266,12 +266,28 @@
               
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Lieu *</label>
-                <select v-model="eventForm.venue_id" required class="w-full border rounded-lg px-3 py-2">
-                  <option value="">Sélectionner un lieu</option>
-                  <option v-for="venue in venues" :key="venue.id" :value="venue.id">
-                    {{ venue.name }} - {{ venue.city }}
-                  </option>
-                </select>
+                <div v-if="!showNewVenue">
+                  <select v-model="eventForm.venue_id" class="w-full border rounded-lg px-3 py-2">
+                    <option value="">Sélectionner un lieu</option>
+                    <option v-for="venue in venues" :key="venue.id" :value="venue.id">
+                      {{ venue.name }} - {{ venue.city }}
+                    </option>
+                    <option value="new">+ Ajouter un nouveau lieu</option>
+                  </select>
+                </div>
+                
+                <div v-if="showNewVenue || eventForm.venue_id === 'new'" class="space-y-2">
+                  <input v-model="eventForm.new_venue_name" type="text" 
+                         placeholder="Nom du lieu" class="w-full border rounded-lg px-3 py-2" required>
+                  <input v-model="eventForm.new_venue_city" type="text" 
+                         placeholder="Ville" class="w-full border rounded-lg px-3 py-2" required>
+                  <input v-model="eventForm.new_venue_address" type="text" 
+                         placeholder="Adresse" class="w-full border rounded-lg px-3 py-2">
+                  <button type="button" @click="cancelNewVenue" 
+                          class="text-sm text-blue-600 hover:text-blue-800">
+                    Utiliser un lieu existant
+                  </button>
+                </div>
               </div>
               
               <div>
@@ -475,7 +491,7 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 
 export default {
   name: 'EventManagement',
@@ -517,8 +533,14 @@ export default {
       venue_id: '',
       status: 'draft',
       schedules: [],
-      ticket_types: []
+      ticket_types: [],
+      // Pour un nouveau lieu
+      new_venue_name: '',
+      new_venue_city: '',
+      new_venue_address: ''
     })
+    
+    const showNewVenue = ref(false)
 
     let searchTimeout = null
 
@@ -611,11 +633,24 @@ export default {
 
     const loadVenues = async () => {
       try {
-        // TODO: Implémenter la route venues
-        // Pour l'instant, on utilise des données vides
-        venues.value = []
+        const response = await fetch('/api/v1/venues', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+          }
+        })
+        
+        const data = await response.json()
+        console.log('Venues response:', data)
+        if (data.success) {
+          venues.value = data.venues || data.data
+          console.log('Venues loaded:', venues.value)
+        }
       } catch (error) {
         console.error('Erreur chargement lieux:', error)
+        venues.value = []
       }
     }
 
@@ -820,6 +855,21 @@ export default {
       return classes[status] || 'bg-gray-100 text-gray-800'
     }
 
+    // Watcher pour gérer la sélection de nouveau lieu
+    watch(() => eventForm.venue_id, (newValue) => {
+      if (newValue === 'new') {
+        showNewVenue.value = true
+      }
+    })
+
+    const cancelNewVenue = () => {
+      showNewVenue.value = false
+      eventForm.venue_id = ''
+      eventForm.new_venue_name = ''
+      eventForm.new_venue_city = ''
+      eventForm.new_venue_address = ''
+    }
+
     // Lifecycle
     onMounted(() => {
       loadEvents()
@@ -844,6 +894,7 @@ export default {
       stats,
       filters,
       eventForm,
+      showNewVenue,
       
       // Méthodes
       loadEvents,
@@ -862,6 +913,7 @@ export default {
       removeSchedule,
       addTicketType,
       removeTicketType,
+      cancelNewVenue,
       
       // Utilitaires
       formatAmount,
