@@ -505,6 +505,18 @@ export default {
           body: JSON.stringify(formData)
         })
         
+        if (response.status === 404 && editingOrganizer.value) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Organisateur introuvable',
+            text: 'Cet organisateur n\'existe plus. La liste va être actualisée.'
+          })
+          showModal.value = false
+          destroyPhoneInput()
+          loadOrganizers()
+          return
+        }
+        
         const data = await response.json()
         if (data.success) {
           Toast.fire({
@@ -559,6 +571,17 @@ export default {
           },
           body: JSON.stringify(userManagementForm)
         })
+        
+        if (response.status === 404) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Organisateur introuvable',
+            text: 'Cet organisateur n\'existe plus. La liste va être actualisée.'
+          })
+          showUserModal.value = false
+          loadOrganizers()
+          return
+        }
         
         const data = await response.json()
         if (data.success) {

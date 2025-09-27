@@ -16,12 +16,8 @@
     "file": "assets/css/account-DauwJ9ql.css",
     "src": "_account-DauwJ9ql.css"
   },
-  "_admin-Dc5YL_aJ.css": {
-    "file": "assets/css/admin-Dc5YL_aJ.css",
-    "src": "_admin-Dc5YL_aJ.css"
-  },
-  "_admin-GdpcjJvW.js": {
-    "file": "assets/js/admin-GdpcjJvW.js",
+  "_admin-BWQJdn4L.js": {
+    "file": "assets/js/admin-BWQJdn4L.js",
     "name": "admin",
     "isDynamicEntry": true,
     "imports": [
@@ -30,8 +26,12 @@
       "_vendor-BvANJOFB.js"
     ],
     "css": [
-      "assets/css/admin-Dc5YL_aJ.css"
+      "assets/css/admin-BuYFmnI7.css"
     ]
+  },
+  "_admin-BuYFmnI7.css": {
+    "file": "assets/css/admin-BuYFmnI7.css",
+    "src": "_admin-BuYFmnI7.css"
   },
   "_api-Y80mSSeX.js": {
     "file": "assets/js/api-Y80mSSeX.js",
@@ -109,7 +109,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-BGVUurRU.js",
+    "file": "assets/js/app-BPSY2W2o.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -140,19 +140,19 @@
       "_organizer-DUmFbx3p.js",
       "_organizer-DUmFbx3p.js",
       "resources/js/layouts/AdminLayout.vue",
-      "_admin-GdpcjJvW.js",
-      "_admin-GdpcjJvW.js",
-      "_admin-GdpcjJvW.js",
-      "_admin-GdpcjJvW.js",
-      "_admin-GdpcjJvW.js",
-      "_admin-GdpcjJvW.js",
-      "_admin-GdpcjJvW.js",
-      "_admin-GdpcjJvW.js",
-      "_admin-GdpcjJvW.js",
-      "_admin-GdpcjJvW.js",
-      "_admin-GdpcjJvW.js",
-      "_admin-GdpcjJvW.js",
-      "_admin-GdpcjJvW.js",
+      "_admin-BWQJdn4L.js",
+      "_admin-BWQJdn4L.js",
+      "_admin-BWQJdn4L.js",
+      "_admin-BWQJdn4L.js",
+      "_admin-BWQJdn4L.js",
+      "_admin-BWQJdn4L.js",
+      "_admin-BWQJdn4L.js",
+      "_admin-BWQJdn4L.js",
+      "_admin-BWQJdn4L.js",
+      "_admin-BWQJdn4L.js",
+      "_admin-BWQJdn4L.js",
+      "_admin-BWQJdn4L.js",
+      "_admin-BWQJdn4L.js",
       "resources/js/pages/scanner/ScannerApp.vue"
     ],
     "css": [
@@ -191,7 +191,7 @@
     ]
   },
   "resources/js/pages/Checkout.vue": {
-    "file": "assets/js/Checkout-B4QX9Suw.js",
+    "file": "assets/js/Checkout-CR5POtQi.js",
     "name": "Checkout",
     "src": "resources/js/pages/Checkout.vue",
     "isDynamicEntry": true,
@@ -209,7 +209,7 @@
     ]
   },
   "resources/js/pages/EventDetail.vue": {
-    "file": "assets/js/EventDetail-C_KbK-OE.js",
+    "file": "assets/js/EventDetail-CuPaowDn.js",
     "name": "EventDetail",
     "src": "resources/js/pages/EventDetail.vue",
     "isDynamicEntry": true,
@@ -226,7 +226,7 @@
     ]
   },
   "resources/js/pages/Events.vue": {
-    "file": "assets/js/Events-DlUFOmRm.js",
+    "file": "assets/js/Events-B7uMfJfT.js",
     "name": "Events",
     "src": "resources/js/pages/Events.vue",
     "isDynamicEntry": true,
@@ -275,7 +275,7 @@
     ]
   },
   "resources/js/pages/auth/Register.vue": {
-    "file": "assets/js/Register-iBhUQARo.js",
+    "file": "assets/js/Register-C3qw5ARO.js",
     "name": "Register",
     "src": "resources/js/pages/auth/Register.vue",
     "isDynamicEntry": true,
