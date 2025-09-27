@@ -459,29 +459,42 @@
           </div>
 
           <!-- Ticket Types -->
-          <div v-if="selectedEvent.ticketTypes && selectedEvent.ticketTypes.length > 0">
+          <div v-if="(selectedEvent.ticketTypes || selectedEvent.ticket_types) && (selectedEvent.ticketTypes?.length > 0 || selectedEvent.ticket_types?.length > 0)">
             <label class="block text-sm font-medium text-gray-700 mb-2">Types de billets</label>
             <div class="overflow-x-auto">
-              <table class="w-full text-sm">
+              <table class="w-full text-sm border border-gray-200 rounded-lg">
                 <thead class="bg-gray-50">
                   <tr>
-                    <th class="px-4 py-2 text-left">Nom</th>
-                    <th class="px-4 py-2 text-left">Prix</th>
-                    <th class="px-4 py-2 text-left">Capacité</th>
-                    <th class="px-4 py-2 text-left">Vendus</th>
-                    <th class="px-4 py-2 text-left">Description</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Capacité</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200">
-                  <tr v-for="ticketType in selectedEvent.ticketTypes" :key="ticketType.id">
-                    <td class="px-4 py-2 font-medium">{{ ticketType.name }}</td>
-                    <td class="px-4 py-2">{{ formatAmount(ticketType.price) }} XAF</td>
-                    <td class="px-4 py-2">{{ ticketType.capacity }}</td>
-                    <td class="px-4 py-2">{{ ticketType.sold || 0 }}</td>
-                    <td class="px-4 py-2">{{ ticketType.description || '-' }}</td>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr v-for="ticketType in (selectedEvent.ticketTypes || selectedEvent.ticket_types)" :key="ticketType.id" class="hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium text-gray-900">{{ ticketType.name }}</td>
+                    <td class="px-4 py-3 text-gray-900">{{ formatAmount(ticketType.price) }} XAF</td>
+                    <td class="px-4 py-3 text-gray-900">{{ ticketType.available_quantity || ticketType.max_quantity || ticketType.capacity || 0 }}</td>
+                    <td class="px-4 py-3">
+                      <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full" 
+                            :class="ticketType.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+                        {{ ticketType.status === 'active' ? 'Actif' : 'Inactif' }}
+                      </span>
+                    </td>
+                    <td class="px-4 py-3 text-gray-600">{{ ticketType.description || '-' }}</td>
                   </tr>
                 </tbody>
               </table>
+            </div>
+          </div>
+          
+          <!-- No Ticket Types Message -->
+          <div v-else>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Types de billets</label>
+            <div class="bg-gray-50 p-4 rounded-lg text-center">
+              <p class="text-gray-500">Aucun type de billet défini pour cet événement</p>
             </div>
           </div>
         </div>
@@ -709,8 +722,6 @@ export default {
         const data = await response.json()
         if (data.success) {
           editingEvent.value = data.data.event
-          console.log('Event data:', data.data.event)
-          console.log('TicketTypes:', data.data.event.ticket_types)
           
           Object.assign(eventForm, {
             title: data.data.event.title,
