@@ -15,23 +15,16 @@ class Organizer extends Model
     protected $fillable = [
         'name',
         'slug',
-        'description',
+        'bio',
         'logo_url',
-        'website_url',
         'contact_email',
         'contact_phone',
         'status',
         'is_active',
-        'verified_at',
-        'social_media',
-        'settings',
     ];
 
     protected $casts = [
-        'verified_at' => 'datetime',
         'is_active' => 'boolean',
-        'social_media' => 'array',
-        'settings' => 'array',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -70,10 +63,6 @@ class Organizer extends Model
         return $query->where('status', 'active');
     }
 
-    public function scopeVerified($query)
-    {
-        return $query->whereNotNull('verified_at');
-    }
 
     public function scopeBySlug($query, $slug)
     {
@@ -86,10 +75,6 @@ class Organizer extends Model
         return $this->status === 'active';
     }
 
-    public function isVerified(): bool
-    {
-        return !is_null($this->verified_at);
-    }
 
     public function getUrlAttribute(): string
     {
