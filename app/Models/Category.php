@@ -7,18 +7,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Category extends Model
 {
+    protected $table = 'event_categories';
+    
     protected $fillable = [
         'name',
         'slug', 
-        'description',
-        'icon',
-        'color',
-        'is_active',
+        'parent_id',
     ];
 
-    protected $casts = [
-        'is_active' => 'boolean',
-    ];
+    protected $casts = [];
 
     /**
      * Get the events for the category.
@@ -28,11 +25,4 @@ class Category extends Model
         return $this->hasMany(Event::class);
     }
 
-    /**
-     * Scope a query to only include active categories.
-     */
-    public function scopeActive($query)
-    {
-        return $query->where('is_active', true);
-    }
 }

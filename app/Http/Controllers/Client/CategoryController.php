@@ -12,18 +12,23 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
-        // Récupération des catégories qui ont des événements publiés
-        $categories = \DB::table('event_categories')
-            ->select('id', 'name', 'slug')
-            ->whereExists(function($query) {
-                $query->select(\DB::raw(1))
-                      ->from('events')
-                      ->whereColumn('events.category_id', 'event_categories.id')
-                      ->where('events.status', 'published')
-                      ->where('events.is_active', true);
-            })
-            ->orderBy('name')
-            ->get();
+        // Si c'est une requête admin, récupérer toutes les catégories
+        if ($request->user() && $request->user()->hasRole(\App\Models\Role::ADMIN)) {
+            $categories = \App\Models\Category::orderBy('name')->get();
+        } else {
+            // Récupération des catégories qui ont des événements publiés
+            $categories = \DB::table('event_categories')
+                ->select('id', 'name', 'slug')
+                ->whereExists(function($query) {
+                    $query->select(\DB::raw(1))
+                          ->from('events')
+                          ->whereColumn('events.category_id', 'event_categories.id')
+                          ->where('events.status', 'published')
+                          ->where('events.is_active', true);
+                })
+                ->orderBy('name')
+                ->get();
+        }
 
         // Si c'est une requête API (JSON)
         if ($request->wantsJson() || $request->is('api/*')) {

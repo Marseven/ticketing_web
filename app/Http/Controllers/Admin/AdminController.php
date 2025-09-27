@@ -10,6 +10,8 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Payout;
 use App\Models\OrganizerBalance;
+use App\Models\Category;
+use App\Models\Venue;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -639,6 +641,58 @@ class AdminController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur technique lors de la mise à jour'
+            ], 500);
+        }
+    }
+
+    /**
+     * Gestion des événements - Liste avec filtres
+     */
+    public function events(Request $request): JsonResponse
+    {
+        try {
+            $query = Event::with(['organizer', 'category', 'venue', 'ticketTypes']);
+
+            // Filtres
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%");
+                });
+            }
+
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
+            if ($request->filled('organizer_id')) {
+                $query->where('organizer_id', $request->organizer_id);
+            }
+
+            if ($request->filled('category_id')) {
+                $query->where('category_id', $request->category_id);
+            }
+
+            $events = $query->withCount(['tickets as tickets_sold' => function ($q) {
+                    $q->whereIn('status', ['issued', 'used']);
+                }])
+                ->orderBy('created_at', 'desc')
+                ->paginate(20);
+
+            return response()->json([
+                'success' => true,
+                'data' => ['events' => $events]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur liste événements admin', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors du chargement des événements'
             ], 500);
         }
     }

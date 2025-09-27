@@ -72,6 +72,9 @@ Route::prefix('events')->middleware('auth:sanctum')->group(function () {
 
 Route::prefix('v1')->group(function () {
     
+    // Catégories (accès public)
+    Route::get('categories', [App\Http\Controllers\Client\CategoryController::class, 'index']);
+    
     // Routes d'authentification
     Route::prefix('auth')->group(function () {
         Route::post('register', [App\Http\Controllers\Api\AuthController::class, 'register']);
@@ -168,6 +171,14 @@ Route::prefix('v1')->group(function () {
             Route::post('/', [App\Http\Controllers\Admin\AdminController::class, 'createOrganizer']);
             Route::put('{organizer}', [App\Http\Controllers\Admin\AdminController::class, 'updateOrganizer']);
             Route::put('{organizer}/auto-payout-config', [App\Http\Controllers\Admin\PayoutController::class, 'updateAutoPayoutConfig']);
+        });
+        
+        // Gestion des événements
+        Route::prefix('events')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'events']);
+            Route::post('/', [App\Http\Controllers\Admin\AdminController::class, 'createEvent']);
+            Route::put('{event}', [App\Http\Controllers\Admin\AdminController::class, 'updateEvent']);
+            Route::post('{event}/toggle-status', [App\Http\Controllers\Admin\AdminController::class, 'toggleEventStatus']);
         });
         
         // Gestion des payouts
