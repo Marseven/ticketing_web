@@ -45,9 +45,12 @@
           </select>
         </div>
         
-        <div class="flex items-end">
+        <div class="flex items-end space-x-2">
           <button @click="resetFilters" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
             Réinitialiser
+          </button>
+          <button @click="forceRefresh" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+            Actualiser
           </button>
         </div>
       </div>
@@ -680,9 +683,27 @@ export default {
       return classes[status] || 'bg-gray-100 text-gray-800'
     }
 
+    // Nettoyage des données obsolètes
+    const forceRefresh = () => {
+      // Nettoyer toutes les références locales
+      organizers.value = []
+      availableUsers.value = []
+      selectedOrganizer.value = null
+      managingOrganizer.value = null
+      editingOrganizer.value = null
+      
+      // Fermer tous les modals
+      showModal.value = false
+      showDetailsModal.value = false
+      showUserModal.value = false
+      
+      // Recharger les données
+      loadOrganizers()
+    }
+
     // Lifecycle
     onMounted(() => {
-      loadOrganizers()
+      forceRefresh()
     })
 
     return {
@@ -717,6 +738,7 @@ export default {
       initPhoneInput,
       destroyPhoneInput,
       closeModal,
+      forceRefresh,
       
       // Utilitaires
       formatDate,

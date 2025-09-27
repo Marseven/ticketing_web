@@ -562,7 +562,7 @@ class AdminController extends Controller
     /**
      * Mettre à jour un organisateur
      */
-    public function updateOrganizer(Request $request, Organizer $organizer): JsonResponse
+    public function updateOrganizer(Request $request, $organizerId): JsonResponse
     {
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'name' => 'sometimes|string|max:255',
@@ -584,6 +584,15 @@ class AdminController extends Controller
 
         try {
             DB::beginTransaction();
+
+            // Trouver l'organisateur avec gestion d'erreur
+            $organizer = Organizer::find($organizerId);
+            if (!$organizer) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Organisateur introuvable'
+                ], 404);
+            }
 
             $updateData = $request->only([
                 'name', 'bio', 'contact_email', 
