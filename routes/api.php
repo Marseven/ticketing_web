@@ -180,6 +180,7 @@ Route::prefix('v1')->group(function () {
         Route::prefix('events')->group(function () {
             Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'events']);
             Route::post('/', [App\Http\Controllers\Admin\AdminController::class, 'createEvent']);
+            Route::get('{event}', [App\Http\Controllers\Admin\AdminController::class, 'showEvent']);
             Route::put('{event}', [App\Http\Controllers\Admin\AdminController::class, 'updateEvent']);
             Route::post('{event}/toggle-status', [App\Http\Controllers\Admin\AdminController::class, 'toggleEventStatus']);
         });
