@@ -536,7 +536,9 @@ export default {
         const response = await fetch(`/api/v1/admin/events?${queryParams}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
           }
         })
         
@@ -570,7 +572,9 @@ export default {
         const response = await fetch('/api/v1/admin/organizers', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
           }
         })
         
@@ -588,13 +592,17 @@ export default {
         const response = await fetch('/api/v1/categories', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
           }
         })
         
         const data = await response.json()
+        console.log('Categories response:', data)
         if (data.success) {
-          categories.value = data.data
+          categories.value = data.categories || data.data
+          console.log('Categories loaded:', categories.value)
         }
       } catch (error) {
         console.error('Erreur chargement catégories:', error)
@@ -603,17 +611,9 @@ export default {
 
     const loadVenues = async () => {
       try {
-        const response = await fetch('/api/v1/venues', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json'
-          }
-        })
-        
-        const data = await response.json()
-        if (data.success) {
-          venues.value = data.data
-        }
+        // TODO: Implémenter la route venues
+        // Pour l'instant, on utilise des données vides
+        venues.value = []
       } catch (error) {
         console.error('Erreur chargement lieux:', error)
       }
