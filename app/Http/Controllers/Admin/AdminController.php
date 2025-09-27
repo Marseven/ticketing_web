@@ -696,4 +696,111 @@ class AdminController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Créer un événement
+     */
+    public function createEvent(Request $request): JsonResponse
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'organizer_id' => 'required|exists:organizers,id',
+            'category_id' => 'required|exists:event_categories,id',
+            'venue_id' => 'nullable|exists:venues,id',
+            'new_venue_name' => 'nullable|string|max:255',
+            'new_venue_city' => 'nullable|string|max:255',
+            'new_venue_address' => 'nullable|string|max:255',
+            'status' => 'required|in:draft,published,cancelled',
+            'is_active' => 'boolean',
+            'schedules' => 'nullable|array',
+            'schedules.*.starts_at' => 'required|date',
+            'schedules.*.ends_at' => 'required|date|after:schedules.*.starts_at',
+            'ticket_types' => 'nullable|array',
+            'ticket_types.*.name' => 'required|string|max:255',
+            'ticket_types.*.price' => 'required|numeric|min:0',
+            'ticket_types.*.capacity' => 'required|integer|min:1',
+            'ticket_types.*.description' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $venueId = $request->venue_id;
+
+            // Créer un nouveau lieu si nécessaire
+            if ($request->venue_id === 'new' && $request->filled('new_venue_name')) {
+                $venue = Venue::create([
+                    'name' => $request->new_venue_name,
+                    'city' => $request->new_venue_city,
+                    'address' => $request->new_venue_address,
+                ]);
+                $venueId = $venue->id;
+            }
+
+            // Créer l'événement
+            $event = Event::create([
+                'title' => $request->title,
+                'slug' => Str::slug($request->title),
+                'description' => $request->description,
+                'organizer_id' => $request->organizer_id,
+                'category_id' => $request->category_id,
+                'venue_id' => $venueId,
+                'status' => $request->status,
+                'is_active' => $request->boolean('is_active', true),
+            ]);
+
+            // Créer les horaires
+            if ($request->filled('schedules')) {
+                foreach ($request->schedules as $schedule) {
+                    $event->schedules()->create([
+                        'starts_at' => $schedule['starts_at'],
+                        'ends_at' => $schedule['ends_at'],
+                        'status' => 'active',
+                    ]);
+                }
+            }
+
+            // Créer les types de billets
+            if ($request->filled('ticket_types')) {
+                foreach ($request->ticket_types as $ticketType) {
+                    $event->ticketTypes()->create([
+                        'name' => $ticketType['name'],
+                        'price' => $ticketType['price'],
+                        'capacity' => $ticketType['capacity'],
+                        'description' => $ticketType['description'] ?? null,
+                        'status' => 'active',
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Événement créé avec succès',
+                'data' => ['event' => $event->load(['organizer', 'category', 'venue', 'schedules', 'ticketTypes'])]
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Erreur création événement admin', [
+                'error' => $e->getMessage(),
+                'request_data' => $request->all()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de la création'
+            ], 500);
+        }
+    }
 }
