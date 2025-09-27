@@ -454,9 +454,9 @@ class AdminController extends Controller
 
             if ($request->filled('verified')) {
                 if ($request->boolean('verified')) {
-                    $query->whereNotNull('verified_at');
+                    $query->where('is_active', true);
                 } else {
-                    $query->whereNull('verified_at');
+                    $query->where('is_active', false);
                 }
             }
 
@@ -488,11 +488,10 @@ class AdminController extends Controller
     {
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'bio' => 'nullable|string',
             'contact_email' => 'required|email|max:255',
             'contact_phone' => 'nullable|string|max:20',
-            'website_url' => 'nullable|url|max:255',
-            'status' => 'required|in:active,inactive,suspended',
+            'status' => 'required|in:active,inactive',
             'user_ids' => 'nullable|array',
             'user_ids.*' => 'exists:users,id',
         ]);
@@ -510,12 +509,11 @@ class AdminController extends Controller
 
             $organizer = Organizer::create([
                 'name' => $request->name,
-                'description' => $request->description,
+                'bio' => $request->bio,
                 'contact_email' => $request->contact_email,
                 'contact_phone' => $request->contact_phone,
-                'website_url' => $request->website_url,
                 'status' => $request->status,
-                'verified_at' => $request->status === 'active' ? now() : null,
+                'is_active' => $request->status === 'active',
             ]);
 
             // Associer les utilisateurs
@@ -568,11 +566,10 @@ class AdminController extends Controller
     {
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'name' => 'sometimes|string|max:255',
-            'description' => 'nullable|string',
+            'bio' => 'nullable|string',
             'contact_email' => 'sometimes|email|max:255',
             'contact_phone' => 'nullable|string|max:20',
-            'website_url' => 'nullable|url|max:255',
-            'status' => 'sometimes|in:active,inactive,suspended',
+            'status' => 'sometimes|in:active,inactive',
             'user_ids' => 'nullable|array',
             'user_ids.*' => 'exists:users,id',
         ]);
@@ -589,15 +586,13 @@ class AdminController extends Controller
             DB::beginTransaction();
 
             $updateData = $request->only([
-                'name', 'description', 'contact_email', 
-                'contact_phone', 'website_url', 'status'
+                'name', 'bio', 'contact_email', 
+                'contact_phone', 'status'
             ]);
 
-            // Gérer la vérification
-            if ($request->filled('status') && $request->status === 'active' && !$organizer->verified_at) {
-                $updateData['verified_at'] = now();
-            } elseif ($request->filled('status') && $request->status !== 'active') {
-                $updateData['verified_at'] = null;
+            // Gérer le statut actif
+            if ($request->filled('status')) {
+                $updateData['is_active'] = $request->status === 'active';
             }
 
             $organizer->update($updateData);

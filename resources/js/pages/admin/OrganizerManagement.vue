@@ -33,16 +33,15 @@
             <option value="">Tous les statuts</option>
             <option value="active">Actif</option>
             <option value="inactive">Inactif</option>
-            <option value="suspended">Suspendu</option>
           </select>
         </div>
         
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Vérification</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Statut actif</label>
           <select v-model="filters.verified" @change="loadOrganizers" class="w-full border rounded-lg px-3 py-2">
             <option value="">Tous</option>
-            <option value="true">Vérifié</option>
-            <option value="false">Non vérifié</option>
+            <option value="true">Actif</option>
+            <option value="false">Inactif</option>
           </select>
         </div>
         
@@ -78,7 +77,7 @@
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Utilisateurs</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Événements</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vérification</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actif</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
           </thead>
@@ -119,8 +118,8 @@
               </td>
               <td class="px-6 py-4 text-sm">
                 <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full" 
-                      :class="organizer.verified_at ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'">
-                  {{ organizer.verified_at ? 'Vérifié' : 'En attente' }}
+                      :class="organizer.is_active ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'">
+                  {{ organizer.is_active ? 'Actif' : 'Inactif' }}
                 </span>
               </td>
               <td class="px-6 py-4 text-sm space-x-2">
@@ -154,8 +153,8 @@
             </div>
             
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-              <textarea v-model="organizerForm.description" rows="3" 
+              <label class="block text-sm font-medium text-gray-700 mb-2">Biographie</label>
+              <textarea v-model="organizerForm.bio" rows="3" 
                         class="w-full border rounded-lg px-3 py-2"></textarea>
             </div>
             
@@ -173,18 +172,10 @@
             </div>
             
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Site web (optionnel)</label>
-              <input v-model="organizerForm.website_url" type="url" 
-                     class="w-full border rounded-lg px-3 py-2"
-                     placeholder="https://exemple.com">
-            </div>
-            
-            <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Statut *</label>
               <select v-model="organizerForm.status" required class="w-full border rounded-lg px-3 py-2">
                 <option value="active">Actif</option>
                 <option value="inactive">Inactif</option>
-                <option value="suspended">Suspendu</option>
               </select>
             </div>
             
@@ -262,11 +253,11 @@
             </div>
             
             <div>
-              <label class="block text-sm font-medium text-gray-700">Vérification</label>
+              <label class="block text-sm font-medium text-gray-700">Statut actif</label>
               <p class="text-sm">
                 <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                      :class="selectedOrganizer.verified_at ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'">
-                  {{ selectedOrganizer.verified_at ? 'Vérifié' : 'En attente' }}
+                      :class="selectedOrganizer.is_active ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'">
+                  {{ selectedOrganizer.is_active ? 'Actif' : 'Inactif' }}
                 </span>
               </p>
             </div>
@@ -282,17 +273,9 @@
             </div>
           </div>
           
-          <div v-if="selectedOrganizer.description">
-            <label class="block text-sm font-medium text-gray-700">Description</label>
-            <p class="text-sm text-gray-900">{{ selectedOrganizer.description }}</p>
-          </div>
-          
-          <div v-if="selectedOrganizer.website_url">
-            <label class="block text-sm font-medium text-gray-700">Site web</label>
-            <a :href="selectedOrganizer.website_url" target="_blank" 
-               class="text-sm text-blue-600 hover:text-blue-800">
-              {{ selectedOrganizer.website_url }}
-            </a>
+          <div v-if="selectedOrganizer.bio">
+            <label class="block text-sm font-medium text-gray-700">Biographie</label>
+            <p class="text-sm text-gray-900">{{ selectedOrganizer.bio }}</p>
           </div>
           
           <div v-if="selectedOrganizer.users && selectedOrganizer.users.length > 0">
@@ -385,10 +368,9 @@ export default {
     
     const organizerForm = reactive({
       name: '',
-      description: '',
+      bio: '',
       contact_email: '',
       contact_phone: '',
-      website_url: '',
       status: 'active',
       user_ids: [],
     })
@@ -464,10 +446,9 @@ export default {
       editingOrganizer.value = null
       Object.assign(organizerForm, {
         name: '',
-        description: '',
+        bio: '',
         contact_email: '',
         contact_phone: '',
-        website_url: '',
         status: 'active',
         user_ids: [],
       })
@@ -483,10 +464,9 @@ export default {
       editingOrganizer.value = organizer
       Object.assign(organizerForm, {
         name: organizer.name,
-        description: organizer.description || '',
+        bio: organizer.bio || '',
         contact_email: organizer.contact_email,
         contact_phone: organizer.contact_phone || '',
-        website_url: organizer.website_url || '',
         status: organizer.status,
         user_ids: organizer.users ? organizer.users.map(u => u.id) : [],
       })
@@ -664,8 +644,7 @@ export default {
     const getStatusName = (status) => {
       const names = {
         active: 'Actif',
-        inactive: 'Inactif',
-        suspended: 'Suspendu'
+        inactive: 'Inactif'
       }
       return names[status] || status
     }
@@ -673,8 +652,7 @@ export default {
     const getStatusBadgeClass = (status) => {
       const classes = {
         active: 'bg-green-100 text-green-800',
-        inactive: 'bg-gray-100 text-gray-800',
-        suspended: 'bg-red-100 text-red-800'
+        inactive: 'bg-gray-100 text-gray-800'
       }
       return classes[status] || 'bg-gray-100 text-gray-800'
     }
