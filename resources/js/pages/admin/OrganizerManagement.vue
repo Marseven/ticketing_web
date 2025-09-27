@@ -167,11 +167,9 @@
             
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
-              <input v-model="organizerForm.contact_phone" type="tel" 
+              <input ref="phoneInput" v-model="organizerForm.contact_phone" type="tel" 
                      class="w-full border rounded-lg px-3 py-2"
-                     placeholder="+225 XX XX XX XX XX"
-                     pattern="[+]?[0-9\s\-\(\)]+"
-                     title="Format: +225 XX XX XX XX XX">
+                     placeholder="+241 XX XX XX XX">
             </div>
             
             <div>
@@ -206,7 +204,7 @@
           </div>
           
           <div class="flex justify-end space-x-3 mt-6">
-            <button type="button" @click="showModal = false" 
+            <button type="button" @click="closeModal" 
                     class="px-4 py-2 text-gray-600 hover:text-gray-800">
               Annuler
             </button>
@@ -356,7 +354,9 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
+import intlTelInput from 'intl-tel-input'
+import 'intl-tel-input/styles'
 
 export default {
   name: 'OrganizerManagement',
@@ -374,6 +374,8 @@ export default {
     
     const organizers = ref([])
     const availableUsers = ref([])
+    const phoneInput = ref(null)
+    let iti = null
     
     const filters = reactive({
       search: '',
@@ -428,8 +430,8 @@ export default {
 
     const loadAvailableUsers = async () => {
       try {
-        // Charger uniquement les utilisateurs avec le rôle client
-        const response = await fetch('/api/v1/admin/users?role=client', {
+        // Charger tous les utilisateurs qui peuvent être associés à un organisateur
+        const response = await fetch('/api/v1/admin/users', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Accept': 'application/json',
@@ -441,9 +443,10 @@ export default {
         const data = await response.json()
         if (data.success) {
           const users = data.data.users.data || data.data.users || []
-          // Filtrer côté client aussi pour s'assurer qu'on n'a que des clients
+          // Montrer tous les utilisateurs sauf les admins
+          // Les clients et organisateurs peuvent être associés à un organisateur
           availableUsers.value = users.filter(user => 
-            !user.roles || user.roles.every(role => role.slug === 'client')
+            !user.roles || !user.roles.some(role => role.slug === 'admin')
           )
         }
       } catch (error) {
@@ -471,6 +474,10 @@ export default {
       })
       await loadAvailableUsers()
       showModal.value = true
+      
+      // Initialiser intl-tel-input après l'ouverture du modal
+      await nextTick()
+      initPhoneInput()
     }
 
     const editOrganizer = async (organizer) => {
@@ -486,6 +493,10 @@ export default {
       })
       await loadAvailableUsers()
       showModal.value = true
+      
+      // Initialiser intl-tel-input après l'ouverture du modal
+      await nextTick()
+      initPhoneInput()
     }
 
     const saveOrganizer = async () => {
@@ -497,6 +508,12 @@ export default {
         
         const method = editingOrganizer.value ? 'PUT' : 'POST'
         
+        // Récupérer le numéro formaté si intl-tel-input est initialisé
+        const formData = { ...organizerForm }
+        if (iti && iti.isValidNumber()) {
+          formData.contact_phone = iti.getNumber()
+        }
+        
         const response = await fetch(url, {
           method,
           headers: {
@@ -506,7 +523,7 @@ export default {
             'X-Requested-With': 'XMLHttpRequest',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
           },
-          body: JSON.stringify(organizerForm)
+          body: JSON.stringify(formData)
         })
         
         const data = await response.json()
@@ -516,6 +533,7 @@ export default {
             title: data.message || (editingOrganizer.value ? 'Organisateur mis à jour avec succès' : 'Organisateur créé avec succès')
           })
           showModal.value = false
+          destroyPhoneInput()
           loadOrganizers()
         } else {
           Swal.fire({
@@ -599,6 +617,40 @@ export default {
       loadOrganizers()
     }
 
+    const initPhoneInput = () => {
+      if (phoneInput.value && !iti) {
+        iti = intlTelInput(phoneInput.value, {
+          initialCountry: 'ga', // Gabon
+          preferredCountries: ['ga', 'cm', 'cg', 'ci', 'sn'], // Pays de la région
+          separateDialCode: true,
+          utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@25.11.1/build/js/utils.js'
+        })
+        
+        // Écouter les changements
+        phoneInput.value.addEventListener('input', () => {
+          if (iti.isValidNumber()) {
+            organizerForm.contact_phone = iti.getNumber()
+          }
+        })
+        
+        phoneInput.value.addEventListener('countrychange', () => {
+          organizerForm.contact_phone = iti.getNumber()
+        })
+      }
+    }
+
+    const destroyPhoneInput = () => {
+      if (iti) {
+        iti.destroy()
+        iti = null
+      }
+    }
+
+    const closeModal = () => {
+      destroyPhoneInput()
+      showModal.value = false
+    }
+
     // Utilitaires
     const formatDate = (date) => {
       return new Date(date).toLocaleDateString('fr-FR', {
@@ -649,6 +701,7 @@ export default {
       filters,
       organizerForm,
       userManagementForm,
+      phoneInput,
       
       // Méthodes
       loadOrganizers,
@@ -661,6 +714,9 @@ export default {
       manageUsers,
       updateOrganizerUsers,
       resetFilters,
+      initPhoneInput,
+      destroyPhoneInput,
+      closeModal,
       
       // Utilitaires
       formatDate,
