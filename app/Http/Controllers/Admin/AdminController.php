@@ -775,7 +775,8 @@ class AdminController extends Controller
                     $event->ticketTypes()->create([
                         'name' => $ticketType['name'],
                         'price' => $ticketType['price'],
-                        'capacity' => $ticketType['capacity'],
+                        'available_quantity' => $ticketType['capacity'],
+                        'max_quantity' => $ticketType['capacity'],
                         'description' => $ticketType['description'] ?? null,
                         'status' => 'active',
                     ]);
@@ -933,7 +934,8 @@ class AdminController extends Controller
                         $event->ticketTypes()->create([
                             'name' => $ticketType['name'],
                             'price' => $ticketType['price'],
-                            'capacity' => $ticketType['capacity'],
+                            'available_quantity' => $ticketType['capacity'],
+                            'max_quantity' => $ticketType['capacity'],
                             'description' => $ticketType['description'] ?? null,
                             'status' => 'active',
                         ]);

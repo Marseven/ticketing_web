@@ -709,6 +709,9 @@ export default {
         const data = await response.json()
         if (data.success) {
           editingEvent.value = data.data.event
+          console.log('Event data:', data.data.event)
+          console.log('TicketTypes:', data.data.event.ticket_types)
+          
           Object.assign(eventForm, {
             title: data.data.event.title,
             description: data.data.event.description,
@@ -720,13 +723,19 @@ export default {
               starts_at: s.starts_at ? s.starts_at.slice(0, 16) : '',
               ends_at: s.ends_at ? s.ends_at.slice(0, 16) : ''
             })) || [{ starts_at: '', ends_at: '' }],
-            ticket_types: data.data.event.ticketTypes?.map(t => ({
+            ticket_types: (data.data.event.ticket_types || data.data.event.ticketTypes || []).map(t => ({
               name: t.name,
               price: t.price,
-              capacity: t.capacity,
+              capacity: t.available_quantity || t.capacity || 0,
               description: t.description || ''
-            })) || [{ name: '', price: 0, capacity: 0, description: '' }]
+            }))
           })
+          
+          // Assurer qu'il y a au moins un type de billet vide si aucun n'existe
+          if (!eventForm.ticket_types || eventForm.ticket_types.length === 0) {
+            eventForm.ticket_types = [{ name: '', price: 0, capacity: 0, description: '' }]
+          }
+          
           showModal.value = true
         }
       } catch (error) {
@@ -757,15 +766,27 @@ export default {
         
         const data = await response.json()
         if (data.success) {
-          alert(editingEvent.value ? 'Événement mis à jour avec succès' : 'Événement créé avec succès')
+          Swal.fire({
+            icon: 'success',
+            title: 'Succès',
+            text: editingEvent.value ? 'Événement mis à jour avec succès' : 'Événement créé avec succès'
+          })
           showModal.value = false
           loadEvents()
         } else {
-          alert(data.message || 'Erreur lors de la sauvegarde')
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: data.message || 'Erreur lors de la sauvegarde'
+          })
         }
       } catch (error) {
         console.error('Erreur sauvegarde événement:', error)
-        alert('Erreur technique')
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur technique',
+          text: 'Une erreur est survenue lors de la sauvegarde'
+        })
       } finally {
         saving.value = false
       }
@@ -805,7 +826,7 @@ export default {
         ticket_types: event.ticketTypes?.map(t => ({
           name: t.name,
           price: t.price,
-          capacity: t.capacity,
+          capacity: t.available_quantity || t.capacity || 0,
           description: t.description || ''
         })) || [{ name: '', price: 0, capacity: 0, description: '' }]
       })
