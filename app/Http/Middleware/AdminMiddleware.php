@@ -50,12 +50,12 @@ class AdminMiddleware
             return true;
         }
 
-        // Option 2: Vérifier par role si vous avez un système de rôles
-        if (isset($user->role) && $user->role === 'admin') {
+        // Option 2: Vérifier par le système de rôles
+        if (method_exists($user, 'hasRole') && $user->hasRole(\App\Models\Role::ADMIN)) {
             return true;
         }
 
-        // Option 3: Vérifier par une colonne is_admin
+        // Option 3: Vérifier par une colonne is_admin (fallback)
         if (isset($user->is_admin) && $user->is_admin) {
             return true;
         }

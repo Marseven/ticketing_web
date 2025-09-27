@@ -138,7 +138,7 @@ class AdminController extends Controller
     public function users(Request $request): JsonResponse
     {
         try {
-            $query = User::query();
+            $query = User::with(['roles']);
 
             // Filtres
             if ($request->filled('search')) {
@@ -151,19 +151,25 @@ class AdminController extends Controller
 
             if ($request->filled('role')) {
                 if ($request->role === 'admin') {
-                    $query->where('is_admin', true);
+                    $query->whereHas('roles', function ($q) {
+                        $q->where('slug', \App\Models\Role::ADMIN);
+                    });
                 } elseif ($request->role === 'organizer') {
-                    $query->where('is_organizer', true);
+                    $query->whereHas('roles', function ($q) {
+                        $q->where('slug', \App\Models\Role::ORGANIZER);
+                    });
                 } elseif ($request->role === 'client') {
-                    $query->where('is_admin', false)->where('is_organizer', false);
+                    $query->whereHas('roles', function ($q) {
+                        $q->where('slug', \App\Models\Role::CLIENT);
+                    });
                 }
             }
 
             if ($request->filled('status')) {
                 if ($request->status === 'active') {
-                    $query->whereNull('deleted_at');
+                    $query->where('status', 'active');
                 } elseif ($request->status === 'inactive') {
-                    $query->whereNotNull('deleted_at');
+                    $query->where('status', '!=', 'active');
                 }
             }
 
@@ -216,10 +222,23 @@ class AdminController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => bcrypt(\Str::random(32)), // Mot de passe temporaire aléatoire
-                'is_admin' => $request->boolean('is_admin'),
                 'is_organizer' => $request->boolean('is_organizer'),
                 'email_verified_at' => now(),
             ]);
+
+            // Assigner les rôles
+            if ($request->boolean('is_admin')) {
+                $user->assignRole(\App\Models\Role::ADMIN);
+            }
+            
+            if ($request->boolean('is_organizer')) {
+                $user->assignRole(\App\Models\Role::ORGANIZER);
+            }
+            
+            // Si aucun rôle spécifique, assigner le rôle client
+            if (!$request->boolean('is_admin') && !$request->boolean('is_organizer')) {
+                $user->assignRole(\App\Models\Role::CLIENT);
+            }
 
             // Générer un token de réinitialisation
             $token = \Str::random(64);
@@ -239,7 +258,7 @@ class AdminController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Utilisateur créé avec succès. Un email lui a été envoyé pour définir son mot de passe.',
-                'data' => ['user' => $user]
+                'data' => ['user' => $user->load('roles')]
             ]);
 
         } catch (\Exception $e) {
@@ -278,30 +297,51 @@ class AdminController extends Controller
         }
 
         try {
-            $updateData = $request->only(['name', 'email', 'is_admin', 'is_organizer']);
+            DB::beginTransaction();
+
+            $updateData = $request->only(['name', 'email', 'is_organizer']);
 
             if ($request->filled('password')) {
                 $updateData['password'] = bcrypt($request->password);
             }
 
-            $user->update($updateData);
-
             // Gestion activation/désactivation
             if ($request->has('is_active')) {
-                if ($request->boolean('is_active')) {
-                    $user->restore();
-                } else {
-                    $user->delete();
+                $updateData['status'] = $request->boolean('is_active') ? 'active' : 'inactive';
+            }
+
+            $user->update($updateData);
+
+            // Gestion des rôles
+            if ($request->has('is_admin') || $request->has('is_organizer')) {
+                // Supprimer tous les rôles existants
+                $user->roles()->detach();
+                
+                // Assigner les nouveaux rôles
+                if ($request->boolean('is_admin')) {
+                    $user->assignRole(\App\Models\Role::ADMIN);
+                }
+                
+                if ($request->boolean('is_organizer')) {
+                    $user->assignRole(\App\Models\Role::ORGANIZER);
+                }
+                
+                // Si aucun rôle spécifique, assigner le rôle client
+                if (!$request->boolean('is_admin') && !$request->boolean('is_organizer')) {
+                    $user->assignRole(\App\Models\Role::CLIENT);
                 }
             }
+
+            DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Utilisateur mis à jour avec succès',
-                'data' => ['user' => $user->fresh()]
+                'data' => ['user' => $user->fresh()->load('roles')]
             ]);
 
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('Erreur mise à jour utilisateur admin', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage()
@@ -320,18 +360,20 @@ class AdminController extends Controller
     public function toggleUserStatus(User $user): JsonResponse
     {
         try {
-            if ($user->trashed()) {
-                $user->restore();
-                $message = 'Utilisateur activé avec succès';
-            } else {
-                $user->delete();
+            if ($user->status === 'active') {
+                $user->status = 'inactive';
                 $message = 'Utilisateur désactivé avec succès';
+            } else {
+                $user->status = 'active';
+                $message = 'Utilisateur activé avec succès';
             }
+            
+            $user->save();
 
             return response()->json([
                 'success' => true,
                 'message' => $message,
-                'data' => ['user' => $user->fresh()]
+                'data' => ['user' => $user->fresh()->load('roles')]
             ]);
 
         } catch (\Exception $e) {

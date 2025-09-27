@@ -97,22 +97,27 @@
               <td class="px-6 py-4 text-sm text-gray-900">{{ user.email }}</td>
               <td class="px-6 py-4 text-sm">
                 <div class="space-y-1">
-                  <span v-if="user.is_admin" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                    Admin
-                  </span>
-                  <span v-if="user.is_organizer" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                    Organisateur
-                  </span>
-                  <span v-if="!user.is_admin && !user.is_organizer" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
-                    Client
+                  <template v-if="user.roles && user.roles.length > 0">
+                    <span v-for="role in user.roles" :key="role.id" 
+                          class="inline-flex px-2 py-1 text-xs font-semibold rounded-full mr-1"
+                          :class="{
+                            'bg-red-100 text-red-800': role.slug === 'admin',
+                            'bg-green-100 text-green-800': role.slug === 'organizer',
+                            'bg-gray-100 text-gray-800': role.slug === 'client'
+                          }">
+                      {{ getRoleName(role.slug) }}
+                    </span>
+                  </template>
+                  <span v-else class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                    Aucun rôle
                   </span>
                 </div>
               </td>
               <td class="px-6 py-4 text-sm">
                 <button @click="toggleUserStatus(user)" 
                         class="inline-flex px-2 py-1 text-xs font-semibold rounded-full cursor-pointer"
-                        :class="user.deleted_at ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'">
-                  {{ user.deleted_at ? 'Inactif' : 'Actif' }}
+                        :class="user.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+                  {{ user.status === 'active' ? 'Actif' : 'Inactif' }}
                 </button>
               </td>
               <td class="px-6 py-4 text-sm text-gray-500">{{ formatDate(user.created_at) }}</td>
@@ -238,14 +243,19 @@
             <div>
               <label class="block text-sm font-medium text-gray-700">Rôles</label>
               <div class="space-y-1">
-                <span v-if="selectedUser.is_admin" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                  Admin
-                </span>
-                <span v-if="selectedUser.is_organizer" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                  Organisateur
-                </span>
-                <span v-if="!selectedUser.is_admin && !selectedUser.is_organizer" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
-                  Client
+                <template v-if="selectedUser.roles && selectedUser.roles.length > 0">
+                  <span v-for="role in selectedUser.roles" :key="role.id" 
+                        class="inline-flex px-2 py-1 text-xs font-semibold rounded-full mr-1"
+                        :class="{
+                          'bg-red-100 text-red-800': role.slug === 'admin',
+                          'bg-green-100 text-green-800': role.slug === 'organizer',
+                          'bg-gray-100 text-gray-800': role.slug === 'client'
+                        }">
+                    {{ getRoleName(role.slug) }}
+                  </span>
+                </template>
+                <span v-else class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                  Aucun rôle
                 </span>
               </div>
             </div>
@@ -361,9 +371,9 @@ export default {
         name: user.name,
         email: user.email,
         password: '',
-        is_admin: user.is_admin,
-        is_organizer: user.is_organizer,
-        is_active: !user.deleted_at,
+        is_admin: user.roles?.some(role => role.slug === 'admin') || false,
+        is_organizer: user.roles?.some(role => role.slug === 'organizer') || false,
+        is_active: user.status === 'active',
       })
       showModal.value = true
     }
@@ -425,8 +435,8 @@ export default {
     const toggleUserStatus = async (user) => {
       const result = await confirmAction(
         'Changer le statut de l\'utilisateur',
-        `Êtes-vous sûr de vouloir ${user.deleted_at ? 'activer' : 'désactiver'} cet utilisateur ?`,
-        user.deleted_at ? 'Activer' : 'Désactiver'
+        `Êtes-vous sûr de vouloir ${user.status === 'active' ? 'désactiver' : 'activer'} cet utilisateur ?`,
+        user.status === 'active' ? 'Désactiver' : 'Activer'
       )
       
       if (!result.isConfirmed) {
@@ -493,6 +503,15 @@ export default {
       })
     }
 
+    const getRoleName = (slug) => {
+      const roleNames = {
+        'admin': 'Administrateur',
+        'organizer': 'Organisateur',
+        'client': 'Client'
+      }
+      return roleNames[slug] || slug
+    }
+
     // Lifecycle
     onMounted(() => {
       loadUsers()
@@ -522,6 +541,7 @@ export default {
       
       // Utilitaires
       formatDate,
+      getRoleName,
     }
   }
 }
