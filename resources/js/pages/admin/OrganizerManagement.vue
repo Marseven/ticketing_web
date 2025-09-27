@@ -168,13 +168,17 @@
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
               <input v-model="organizerForm.contact_phone" type="tel" 
-                     class="w-full border rounded-lg px-3 py-2">
+                     class="w-full border rounded-lg px-3 py-2"
+                     placeholder="+225 XX XX XX XX XX"
+                     pattern="[+]?[0-9\s\-\(\)]+"
+                     title="Format: +225 XX XX XX XX XX">
             </div>
             
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Site web</label>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Site web (optionnel)</label>
               <input v-model="organizerForm.website_url" type="url" 
-                     class="w-full border rounded-lg px-3 py-2">
+                     class="w-full border rounded-lg px-3 py-2"
+                     placeholder="https://exemple.com">
             </div>
             
             <div>
@@ -405,7 +409,9 @@ export default {
         const response = await fetch(`/api/v1/admin/organizers?${queryParams}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
           }
         })
         
@@ -422,16 +428,23 @@ export default {
 
     const loadAvailableUsers = async () => {
       try {
-        const response = await fetch('/api/v1/admin/users', {
+        // Charger uniquement les utilisateurs avec le rôle client
+        const response = await fetch('/api/v1/admin/users?role=client', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
           }
         })
         
         const data = await response.json()
         if (data.success) {
-          availableUsers.value = data.data.users.data || data.data.users || []
+          const users = data.data.users.data || data.data.users || []
+          // Filtrer côté client aussi pour s'assurer qu'on n'a que des clients
+          availableUsers.value = users.filter(user => 
+            !user.roles || user.roles.every(role => role.slug === 'client')
+          )
         }
       } catch (error) {
         console.error('Erreur chargement utilisateurs:', error)
@@ -489,22 +502,35 @@ export default {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
           },
           body: JSON.stringify(organizerForm)
         })
         
         const data = await response.json()
         if (data.success) {
-          alert(editingOrganizer.value ? 'Organisateur mis à jour avec succès' : 'Organisateur créé avec succès')
+          Toast.fire({
+            icon: 'success',
+            title: data.message || (editingOrganizer.value ? 'Organisateur mis à jour avec succès' : 'Organisateur créé avec succès')
+          })
           showModal.value = false
           loadOrganizers()
         } else {
-          alert(data.message || 'Erreur lors de la sauvegarde')
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: data.message || 'Erreur lors de la sauvegarde'
+          })
         }
       } catch (error) {
         console.error('Erreur sauvegarde organisateur:', error)
-        alert('Erreur technique')
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur technique',
+          text: 'Une erreur est survenue lors de la sauvegarde'
+        })
       } finally {
         saving.value = false
       }
@@ -530,22 +556,35 @@ export default {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
           },
           body: JSON.stringify(userManagementForm)
         })
         
         const data = await response.json()
         if (data.success) {
-          alert('Utilisateurs mis à jour avec succès')
+          Toast.fire({
+            icon: 'success',
+            title: 'Utilisateurs mis à jour avec succès'
+          })
           showUserModal.value = false
           loadOrganizers()
         } else {
-          alert(data.message || 'Erreur lors de la mise à jour')
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: data.message || 'Erreur lors de la mise à jour'
+          })
         }
       } catch (error) {
         console.error('Erreur mise à jour utilisateurs:', error)
-        alert('Erreur technique')
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur technique',
+          text: 'Une erreur est survenue lors de la mise à jour'
+        })
       } finally {
         updatingUsers.value = false
       }

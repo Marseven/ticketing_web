@@ -282,7 +282,6 @@ class AdminController extends Controller
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'name' => 'sometimes|string|max:255',
             'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'sometimes|string|min:8',
             'is_admin' => 'sometimes|boolean',
             'is_organizer' => 'sometimes|boolean',
             'is_active' => 'sometimes|boolean',
@@ -300,10 +299,6 @@ class AdminController extends Controller
             DB::beginTransaction();
 
             $updateData = $request->only(['name', 'email', 'is_organizer']);
-
-            if ($request->filled('password')) {
-                $updateData['password'] = bcrypt($request->password);
-            }
 
             // Gestion activation/désactivation
             if ($request->has('is_active')) {
@@ -385,6 +380,53 @@ class AdminController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur technique lors du changement de statut'
+            ], 500);
+        }
+    }
+
+    /**
+     * Réinitialiser le mot de passe d'un utilisateur
+     */
+    public function resetUserPassword(User $user): JsonResponse
+    {
+        try {
+            DB::beginTransaction();
+
+            // Générer un nouveau token de réinitialisation
+            $token = \Str::random(64);
+            
+            // Supprimer les anciens tokens pour cet email
+            DB::table('password_reset_tokens')
+                ->where('email', $user->email)
+                ->delete();
+            
+            // Enregistrer le nouveau token
+            DB::table('password_reset_tokens')->insert([
+                'email' => $user->email,
+                'token' => hash('sha256', $token),
+                'created_at' => now(),
+            ]);
+
+            // Envoyer l'email de réinitialisation
+            $user->notify(new \App\Notifications\PasswordResetNotification($token, false));
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Email de réinitialisation envoyé à l\'utilisateur.',
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Erreur réinitialisation mot de passe admin', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de l\'envoi de l\'email'
             ], 500);
         }
     }

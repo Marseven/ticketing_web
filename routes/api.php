@@ -159,6 +159,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/', [App\Http\Controllers\Admin\AdminController::class, 'createUser']);
             Route::put('{user}', [App\Http\Controllers\Admin\AdminController::class, 'updateUser']);
             Route::post('{user}/toggle-status', [App\Http\Controllers\Admin\AdminController::class, 'toggleUserStatus']);
+            Route::post('{user}/reset-password', [App\Http\Controllers\Admin\AdminController::class, 'resetUserPassword']);
         });
         
         // Gestion des organisateurs

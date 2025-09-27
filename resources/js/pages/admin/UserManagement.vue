@@ -128,6 +128,9 @@
                 <button @click="viewUserDetails(user)" class="text-green-600 hover:text-green-900">
                   Détails
                 </button>
+                <button @click="resetUserPassword(user)" class="text-orange-600 hover:text-orange-900">
+                  Reset mot de passe
+                </button>
               </td>
             </tr>
           </tbody>
@@ -163,12 +166,6 @@
               </p>
             </div>
             
-            <div v-if="editingUser">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Nouveau mot de passe</label>
-              <input v-model="userForm.password" type="password" 
-                     placeholder="Laisser vide pour ne pas changer"
-                     class="w-full border rounded-lg px-3 py-2">
-            </div>
             
             <div class="space-y-2">
               <label class="block text-sm font-medium text-gray-700">Rôles</label>
@@ -388,10 +385,9 @@ export default {
         const method = editingUser.value ? 'PUT' : 'POST'
         
         // Pour la création, on n'envoie pas de mot de passe
+        // Pour la modification, on ne gère plus les mots de passe dans ce formulaire
         const payload = {...userForm}
-        if (!editingUser.value) {
-          delete payload.password
-        }
+        delete payload.password
         
         const response = await fetch(url, {
           method,
@@ -483,6 +479,51 @@ export default {
       showDetailsModal.value = true
     }
 
+    const resetUserPassword = async (user) => {
+      const result = await confirmAction(
+        'Réinitialiser le mot de passe',
+        `Envoyer un email de réinitialisation à ${user.name} (${user.email}) ?`,
+        'Envoyer l\'email'
+      )
+      
+      if (!result.isConfirmed) {
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/v1/admin/users/${user.id}/reset-password`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+          }
+        })
+        
+        const data = await response.json()
+        if (data.success) {
+          Toast.fire({
+            icon: 'success',
+            title: data.message || 'Email de réinitialisation envoyé avec succès'
+          })
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: data.message || 'Erreur lors de l\'envoi de l\'email'
+          })
+        }
+      } catch (error) {
+        console.error('Erreur reset mot de passe:', error)
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur technique',
+          text: 'Une erreur est survenue lors de l\'envoi de l\'email'
+        })
+      }
+    }
+
     const resetFilters = () => {
       Object.assign(filters, {
         search: '',
@@ -537,6 +578,7 @@ export default {
       saveUser,
       toggleUserStatus,
       viewUserDetails,
+      resetUserPassword,
       resetFilters,
       
       // Utilitaires
