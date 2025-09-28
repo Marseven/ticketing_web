@@ -239,6 +239,10 @@ export default {
 
     // Computed
     const filteredCategories = computed(() => {
+      if (!Array.isArray(categories.value)) {
+        return []
+      }
+      
       let filtered = categories.value
       
       if (filters.search) {
@@ -257,6 +261,9 @@ export default {
     
     const paginationPages = computed(() => {
       const pages = []
+      if (!pagination.total || !pagination.per_page) {
+        return [1]
+      }
       const totalPages = Math.ceil(pagination.total / pagination.per_page)
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i)
@@ -287,8 +294,21 @@ export default {
         if (response.ok) {
           const data = await response.json()
           if (data.success) {
-            categories.value = data.data.categories
-            Object.assign(pagination, data.data.pagination)
+            // Handle paginated data structure
+            const categoriesData = data.data?.data || data.categories?.data || data.data || []
+            categories.value = categoriesData
+            
+            // Extract pagination info
+            if (data.data?.total) {
+              Object.assign(pagination, {
+                current_page: data.data.current_page || 1,
+                per_page: data.data.per_page || 20,
+                total: data.data.total || 0,
+                from: data.data.from || 0,
+                to: data.data.to || 0,
+                last_page: data.data.last_page || 1
+              })
+            }
           }
         } else {
           // Données simulées si API non disponible
