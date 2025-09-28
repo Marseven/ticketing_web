@@ -243,6 +243,17 @@
                 <textarea v-model="eventForm.description" rows="4" required 
                           class="w-full border rounded-lg px-3 py-2"></textarea>
               </div>
+
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Image de l'événement</label>
+                <ImageUpload 
+                  v-model="eventForm.image"
+                  entity-type="events"
+                  size="medium"
+                  alt-text="Image de l'événement"
+                  @change="handleImageChange"
+                />
+              </div>
               
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Organisateur *</label>
@@ -506,8 +517,13 @@
 <script>
 import { ref, reactive, onMounted, watch } from 'vue'
 
+import ImageUpload from '../../components/ImageUpload.vue'
+
 export default {
   name: 'EventManagement',
+  components: {
+    ImageUpload
+  },
   setup() {
     // État réactif
     const loading = ref(false)
@@ -545,6 +561,7 @@ export default {
       category_id: '',
       venue_id: '',
       status: 'draft',
+      image: {},
       schedules: [],
       ticket_types: [],
       // Pour un nouveau lieu
@@ -700,6 +717,7 @@ export default {
         category_id: '',
         venue_id: '',
         status: 'draft',
+        image: {},
         new_venue_name: '',
         new_venue_city: '',
         new_venue_address: '',
@@ -725,6 +743,14 @@ export default {
         if (data.success) {
           editingEvent.value = data.data.event
           
+          // Préparer les données d'image
+          let imageData = {}
+          if (data.data.event.image_url) {
+            imageData.url = data.data.event.image_url
+          } else if (data.data.event.image_file) {
+            imageData.filename = data.data.event.image_file
+          }
+
           Object.assign(eventForm, {
             title: data.data.event.title,
             description: data.data.event.description,
@@ -732,6 +758,7 @@ export default {
             category_id: data.data.event.category_id,
             venue_id: data.data.event.venue_id,
             status: data.data.event.status,
+            image: imageData,
             schedules: data.data.event.schedules?.map(s => ({
               starts_at: s.starts_at ? s.starts_at.slice(0, 16) : '',
               ends_at: s.ends_at ? s.ends_at.slice(0, 16) : ''
@@ -765,6 +792,21 @@ export default {
         
         const method = editingEvent.value ? 'PUT' : 'POST'
         
+        // Préparer les données avec les images
+        const formData = { ...eventForm }
+        
+        // Gérer les données d'image
+        if (eventForm.image.url) {
+          formData.image_url = eventForm.image.url
+          formData.image_file = null
+        } else if (eventForm.image.filename) {
+          formData.image_file = eventForm.image.filename
+          formData.image_url = null
+        }
+        
+        // Nettoyer les données
+        delete formData.image
+        
         const response = await fetch(url, {
           method,
           headers: {
@@ -774,7 +816,7 @@ export default {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
             'X-Requested-With': 'XMLHttpRequest'
           },
-          body: JSON.stringify(eventForm)
+          body: JSON.stringify(formData)
         })
         
         const data = await response.json()
@@ -958,6 +1000,10 @@ export default {
       eventForm.new_venue_address = ''
     }
 
+    const handleImageChange = (imageData) => {
+      eventForm.image = imageData
+    }
+
     // Lifecycle
     onMounted(() => {
       loadEvents()
@@ -1002,6 +1048,7 @@ export default {
       addTicketType,
       removeTicketType,
       cancelNewVenue,
+      handleImageChange,
       
       // Utilitaires
       formatAmount,

@@ -80,14 +80,23 @@ class ReportController extends Controller
             $startDate = Carbon::parse($request->start_date);
             $endDate = Carbon::parse($request->end_date);
 
+            Log::info('Starting report generation', [
+                'type' => $type,
+                'start_date' => $startDate->toDateString(),
+                'end_date' => $endDate->toDateString()
+            ]);
+
             // Générer les données du rapport selon le type
             $reportData = $this->generateReportData($type, $startDate, $endDate);
+            Log::info('Report data generated successfully', ['data_keys' => array_keys($reportData)]);
 
             // Simuler la génération de fichier
             $fileName = $this->generateFileName($type, $startDate, $endDate);
             $fileSize = $this->calculateFileSize($reportData);
+            Log::info('File details generated', ['file_name' => $fileName, 'file_size' => $fileSize]);
 
             // Créer l'entrée du rapport en base
+            Log::info('Creating report record in database');
             $report = Report::create([
                 'type' => $type,
                 'period' => $this->formatPeriod($startDate, $endDate),
@@ -99,6 +108,7 @@ class ReportController extends Controller
                 'status' => 'ready',
                 'data' => $reportData,
             ]);
+            Log::info('Report record created successfully', ['report_id' => $report->id]);
 
             // Préparer la réponse
             $reportResponse = [
@@ -120,13 +130,14 @@ class ReportController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Erreur génération rapport', [
-                'type' => $request->type,
-                'error' => $e->getMessage()
+                'type' => $request->type ?? 'unknown',
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur technique lors de la génération du rapport'
+                'message' => 'Erreur technique lors de la génération du rapport: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -357,13 +368,38 @@ class ReportController extends Controller
      */
     private function generateUsersReport(Carbon $startDate, Carbon $endDate): array
     {
-        return [
-            'new_users' => User::whereBetween('created_at', [$startDate, $endDate])->count(),
-            'active_users' => User::where('status', 'active')->count(),
-            'organizers' => User::whereHas('roles', function($q) {
-                $q->where('slug', 'organizer');
-            })->count()
-        ];
+        try {
+            $newUsers = User::whereBetween('created_at', [$startDate, $endDate])->count();
+            $activeUsers = User::where('status', 'active')->count();
+            
+            // Try the organizers query with error handling
+            try {
+                $organizers = User::whereHas('roles', function($q) {
+                    $q->where('slug', 'organizer');
+                })->count();
+            } catch (\Exception $e) {
+                Log::error('Error counting organizers', ['error' => $e->getMessage()]);
+                // Fallback: try to count using role_user table directly
+                $organizers = \DB::table('role_user')
+                    ->join('roles', 'role_user.role_id', '=', 'roles.id')
+                    ->where('roles.slug', 'organizer')
+                    ->distinct('role_user.user_id')
+                    ->count();
+            }
+            
+            return [
+                'new_users' => $newUsers,
+                'active_users' => $activeUsers,
+                'organizers' => $organizers
+            ];
+        } catch (\Exception $e) {
+            Log::error('Error generating users report', ['error' => $e->getMessage()]);
+            return [
+                'new_users' => 0,
+                'active_users' => 0,
+                'organizers' => 0
+            ];
+        }
     }
 
     /**

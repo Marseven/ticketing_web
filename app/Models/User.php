@@ -9,11 +9,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Traits\HasImages;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens, HasImages;
 
     /**
      * The attributes that are mass assignable.
@@ -29,9 +30,8 @@ class User extends Authenticatable
         'status',
         'email_verified_at',
         'phone_verified_at',
-        'last_login_at',
-        'preferences',
-        'metadata',
+        'avatar_url',
+        'avatar_file',
     ];
 
     /**
@@ -339,5 +339,33 @@ class User extends Authenticatable
         $this->roles()->detach($role->id);
         
         return true;
+    }
+
+    /**
+     * Méthodes pour le trait HasImages
+     */
+    protected function getImageType(): string
+    {
+        return 'users';
+    }
+
+    protected function getImageUrlAttribute(): ?string
+    {
+        return $this->attributes['avatar_url'] ?? null;
+    }
+
+    protected function getImageFileAttribute(): ?string
+    {
+        return $this->attributes['avatar_file'] ?? null;
+    }
+
+    protected function setImageUrl(?string $url): void
+    {
+        $this->attributes['avatar_url'] = $url;
+    }
+
+    protected function setImageFile(?string $filename): void
+    {
+        $this->attributes['avatar_file'] = $filename;
     }
 }

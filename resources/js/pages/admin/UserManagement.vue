@@ -156,6 +156,17 @@
               <input v-model="userForm.email" type="email" required 
                      class="w-full border rounded-lg px-3 py-2">
             </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Photo de profil</label>
+              <ImageUpload 
+                v-model="userForm.avatar"
+                entity-type="users"
+                size="medium"
+                alt-text="Photo de profil"
+                @change="handleImageChange"
+              />
+            </div>
             
             <div v-if="!editingUser" class="bg-blue-50 p-4 rounded-lg">
               <p class="text-sm text-blue-800">
@@ -282,9 +293,13 @@
 
 <script>
 import { ref, reactive, onMounted } from 'vue'
+import ImageUpload from '../../components/ImageUpload.vue'
 
 export default {
   name: 'UserManagement',
+  components: {
+    ImageUpload
+  },
   setup() {
     // État réactif
     const loading = ref(false)
@@ -309,6 +324,7 @@ export default {
       is_admin: false,
       is_organizer: false,
       is_active: true,
+      avatar: {},
     })
 
     let searchTimeout = null
@@ -358,12 +374,22 @@ export default {
         is_admin: false,
         is_organizer: false,
         is_active: true,
+        avatar: {},
       })
       showModal.value = true
     }
 
     const editUser = (user) => {
       editingUser.value = user
+      
+      // Préparer les données d'avatar
+      let avatarData = {}
+      if (user.avatar_url) {
+        avatarData.url = user.avatar_url
+      } else if (user.avatar_file) {
+        avatarData.filename = user.avatar_file
+      }
+      
       Object.assign(userForm, {
         name: user.name,
         email: user.email,
@@ -371,6 +397,7 @@ export default {
         is_admin: user.roles?.some(role => role.slug === 'admin') || false,
         is_organizer: user.roles?.some(role => role.slug === 'organizer') || false,
         is_active: user.status === 'active',
+        avatar: avatarData,
       })
       showModal.value = true
     }
@@ -384,10 +411,21 @@ export default {
         
         const method = editingUser.value ? 'PUT' : 'POST'
         
-        // Pour la création, on n'envoie pas de mot de passe
-        // Pour la modification, on ne gère plus les mots de passe dans ce formulaire
+        // Préparer les données avec les images
         const payload = {...userForm}
         delete payload.password
+        
+        // Gérer les données d'avatar
+        if (userForm.avatar.url) {
+          payload.avatar_url = userForm.avatar.url
+          payload.avatar_file = null
+        } else if (userForm.avatar.filename) {
+          payload.avatar_file = userForm.avatar.filename
+          payload.avatar_url = null
+        }
+        
+        // Nettoyer les données
+        delete payload.avatar
         
         const response = await fetch(url, {
           method,
@@ -533,6 +571,10 @@ export default {
       loadUsers()
     }
 
+    const handleImageChange = (imageData) => {
+      userForm.avatar = imageData
+    }
+
     // Utilitaires
     const formatDate = (date) => {
       return new Date(date).toLocaleDateString('fr-FR', {
@@ -580,6 +622,7 @@ export default {
       viewUserDetails,
       resetUserPassword,
       resetFilters,
+      handleImageChange,
       
       // Utilitaires
       formatDate,

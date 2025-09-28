@@ -145,6 +145,13 @@ Route::prefix('v1')->group(function () {
         Route::get('/', [App\Http\Controllers\Api\ScanController::class, 'index']);
     });
 
+    // Routes de gestion des images
+    Route::prefix('images')->middleware('auth:sanctum')->group(function () {
+        Route::post('upload', [App\Http\Controllers\Api\ImageController::class, 'upload']);
+        Route::post('validate-url', [App\Http\Controllers\Api\ImageController::class, 'validateUrl']);
+        Route::delete('delete', [App\Http\Controllers\Api\ImageController::class, 'delete']);
+    });
+
     // Webhooks pour les paiements
     Route::prefix('webhooks')->group(function () {
         Route::post('airtel', [App\Http\Controllers\Api\WebhookController::class, 'airtel'])->name('webhook.airtel');

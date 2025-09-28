@@ -206,6 +206,8 @@ class AdminController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'is_admin' => 'boolean',
             'is_organizer' => 'boolean',
+            'avatar_url' => 'nullable|url',
+            'avatar_file' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -226,6 +228,8 @@ class AdminController extends Controller
                 'password' => bcrypt(\Str::random(32)), // Mot de passe temporaire aléatoire
                 'is_organizer' => $request->boolean('is_organizer'),
                 'email_verified_at' => now(),
+                'avatar_url' => $request->avatar_url,
+                'avatar_file' => $request->avatar_file,
             ]);
 
             // Assigner les rôles
@@ -287,6 +291,8 @@ class AdminController extends Controller
             'is_admin' => 'sometimes|boolean',
             'is_organizer' => 'sometimes|boolean',
             'is_active' => 'sometimes|boolean',
+            'avatar_url' => 'nullable|url',
+            'avatar_file' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -300,7 +306,7 @@ class AdminController extends Controller
         try {
             DB::beginTransaction();
 
-            $updateData = $request->only(['name', 'email', 'is_organizer']);
+            $updateData = $request->only(['name', 'email', 'is_organizer', 'avatar_url', 'avatar_file']);
 
             // Gestion activation/désactivation
             if ($request->has('is_active')) {
@@ -713,6 +719,8 @@ class AdminController extends Controller
             'new_venue_address' => 'nullable|string|max:255',
             'status' => 'required|in:draft,published,cancelled',
             'is_active' => 'boolean',
+            'image_url' => 'nullable|url',
+            'image_file' => 'nullable|string',
             'schedules' => 'nullable|array',
             'schedules.*.starts_at' => 'required|date',
             'schedules.*.ends_at' => 'required|date|after:schedules.*.starts_at',
@@ -756,6 +764,8 @@ class AdminController extends Controller
                 'venue_id' => $venueId,
                 'status' => $request->status,
                 'is_active' => $request->boolean('is_active', true),
+                'image_url' => $request->image_url,
+                'image_file' => $request->image_file,
             ]);
 
             // Créer les horaires
@@ -855,6 +865,8 @@ class AdminController extends Controller
             'new_venue_address' => 'nullable|string|max:255',
             'status' => 'sometimes|in:draft,published,cancelled',
             'is_active' => 'sometimes|boolean',
+            'image_url' => 'nullable|url',
+            'image_file' => 'nullable|string',
             'schedules' => 'nullable|array',
             'schedules.*.starts_at' => 'required|date',
             'schedules.*.ends_at' => 'required|date|after:schedules.*.starts_at',
@@ -899,7 +911,8 @@ class AdminController extends Controller
             // Mettre à jour l'événement
             $updateData = $request->only([
                 'title', 'description', 'organizer_id', 
-                'category_id', 'status', 'is_active'
+                'category_id', 'status', 'is_active',
+                'image_url', 'image_file'
             ]);
             
             if ($request->filled('title')) {
@@ -1225,6 +1238,8 @@ class AdminController extends Controller
             'phone' => 'nullable|string|max:30',
             'email' => 'nullable|email|max:255',
             'image' => 'nullable|string',
+            'image_url' => 'nullable|url',
+            'image_file' => 'nullable|string',
             'status' => 'nullable|string|in:active,inactive',
             'geo_lat' => 'nullable|numeric|between:-90,90',
             'geo_lng' => 'nullable|numeric|between:-180,180',
@@ -1267,6 +1282,8 @@ class AdminController extends Controller
                 'phone' => $request->phone,
                 'email' => $request->email,
                 'image' => $request->image,
+                'image_url' => $request->image_url,
+                'image_file' => $request->image_file,
                 'status' => $request->status ?? 'active',
                 'geo_lat' => $request->geo_lat,
                 'geo_lng' => $request->geo_lng,
@@ -1314,6 +1331,8 @@ class AdminController extends Controller
             'phone' => 'nullable|string|max:30',
             'email' => 'nullable|email|max:255',
             'image' => 'nullable|string',
+            'image_url' => 'nullable|url',
+            'image_file' => 'nullable|string',
             'status' => 'nullable|string|in:active,inactive',
             'geo_lat' => 'nullable|numeric|between:-90,90',
             'geo_lng' => 'nullable|numeric|between:-180,180',
@@ -1331,6 +1350,7 @@ class AdminController extends Controller
             $venue->update($request->only([
                 'name', 'description', 'address', 'city', 'postal_code',
                 'country', 'capacity', 'phone', 'email', 'image', 'status',
+                'image_url', 'image_file',
                 'geo_lat', 'geo_lng'
             ]));
 

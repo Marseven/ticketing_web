@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use App\Traits\HasImages;
 
 class Event extends Model
 {
-    use HasFactory;
+    use HasFactory, HasImages;
 
     protected $fillable = [
         'organizer_id',
@@ -20,6 +21,7 @@ class Event extends Model
         'slug',
         'description',
         'image_url',
+        'image_file',
         'status',
         'published_at',
         'created_by',
@@ -167,5 +169,33 @@ class Event extends Model
     public function getRouteKeyName()
     {
         return 'slug';
+    }
+
+    /**
+     * Méthodes pour le trait HasImages
+     */
+    protected function getImageType(): string
+    {
+        return 'events';
+    }
+
+    protected function getImageUrlAttribute(): ?string
+    {
+        return $this->attributes['image_url'] ?? null;
+    }
+
+    protected function getImageFileAttribute(): ?string
+    {
+        return $this->attributes['image_file'] ?? null;
+    }
+
+    protected function setImageUrl(?string $url): void
+    {
+        $this->attributes['image_url'] = $url;
+    }
+
+    protected function setImageFile(?string $filename): void
+    {
+        $this->attributes['image_file'] = $filename;
     }
 }
