@@ -702,9 +702,13 @@ export default {
         category_id: '',
         venue_id: '',
         status: 'draft',
+        new_venue_name: '',
+        new_venue_city: '',
+        new_venue_address: '',
         schedules: [{ starts_at: '', ends_at: '' }],
         ticket_types: [{ name: '', price: 0, capacity: 0, description: '' }]
       })
+      showNewVenue.value = false
       showModal.value = true
     }
 
@@ -824,24 +828,72 @@ export default {
       }
     }
 
-    const duplicateEvent = (event) => {
-      editingEvent.value = null
-      Object.assign(eventForm, {
-        title: `${event.title} (Copie)`,
-        description: event.description,
-        organizer_id: event.organizer_id,
-        category_id: event.category_id,
-        venue_id: event.venue_id,
-        status: 'draft',
-        schedules: [{ starts_at: '', ends_at: '' }],
-        ticket_types: event.ticketTypes?.map(t => ({
-          name: t.name,
-          price: t.price,
-          capacity: t.available_quantity || t.capacity || 0,
-          description: t.description || ''
-        })) || [{ name: '', price: 0, capacity: 0, description: '' }]
-      })
-      showModal.value = true
+    const duplicateEvent = async (event) => {
+      try {
+        // D'abord récupérer les détails complets de l'événement
+        const response = await fetch(`/api/v1/admin/events/${event.id}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        
+        const data = await response.json()
+        if (data.success) {
+          const eventData = data.data.event
+          editingEvent.value = null
+          
+          // Remplir le formulaire avec toutes les données de l'événement
+          Object.assign(eventForm, {
+            title: `${eventData.title} (Copie)`,
+            description: eventData.description || '',
+            organizer_id: eventData.organizer_id,
+            category_id: eventData.category_id,
+            venue_id: eventData.venue_id,
+            status: 'draft',
+            new_venue_name: '',
+            new_venue_city: '',
+            new_venue_address: '',
+            schedules: eventData.schedules?.map(s => ({
+              starts_at: s.starts_at ? s.starts_at.slice(0, 16) : '',
+              ends_at: s.ends_at ? s.ends_at.slice(0, 16) : ''
+            })) || [{ starts_at: '', ends_at: '' }],
+            ticket_types: (eventData.ticket_types || eventData.ticketTypes || []).map(t => ({
+              name: t.name,
+              price: t.price,
+              capacity: t.available_quantity || t.max_quantity || t.capacity || 0,
+              description: t.description || ''
+            }))
+          })
+          
+          // Assurer qu'il y a au moins un horaire et un type de billet vide
+          if (!eventForm.schedules || eventForm.schedules.length === 0) {
+            eventForm.schedules = [{ starts_at: '', ends_at: '' }]
+          }
+          
+          if (!eventForm.ticket_types || eventForm.ticket_types.length === 0) {
+            eventForm.ticket_types = [{ name: '', price: 0, capacity: 0, description: '' }]
+          }
+          
+          showNewVenue.value = false
+          showModal.value = true
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: 'Impossible de récupérer les détails de l\'événement'
+          })
+        }
+      } catch (error) {
+        console.error('Erreur duplication événement:', error)
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur technique',
+          text: 'Une erreur est survenue lors de la duplication'
+        })
+      }
     }
 
     const addSchedule = () => {
