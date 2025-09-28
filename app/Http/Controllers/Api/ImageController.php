@@ -71,11 +71,29 @@ class ImageController extends Controller
             $uploadPath = "images/{$type}";
             Storage::disk('public')->makeDirectory($uploadPath);
             
-            // Convertir et sauvegarder l'image originale en JPEG
+            // Convertir et sauvegarder l'image originale
             $originalPath = "{$uploadPath}/{$filename}";
             try {
                 $manager = new ImageManager(new Driver());
-                $convertedImage = $manager->read($image)->toJpeg(85);
+                $imageObj = $manager->read($image);
+                
+                // Convertir selon l'extension
+                $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                switch ($extension) {
+                    case 'png':
+                        $convertedImage = $imageObj->toPng();
+                        break;
+                    case 'gif':
+                        $convertedImage = $imageObj->toGif();
+                        break;
+                    case 'webp':
+                        $convertedImage = $imageObj->toWebp(85);
+                        break;
+                    default:
+                        $convertedImage = $imageObj->toJpeg(85);
+                        break;
+                }
+                
                 Storage::disk('public')->put($originalPath, $convertedImage);
             } catch (\Exception $e) {
                 // Fallback: sauvegarder tel quel
@@ -222,8 +240,8 @@ class ImageController extends Controller
      */
     private function generateFilename(string $extension): string
     {
-        // Toujours utiliser .jpg car nous convertissons tout en JPEG
-        return Str::random(40) . '.jpg';
+        // Préserver l'extension d'origine pour éviter les problèmes d'URL
+        return Str::random(40) . '.' . strtolower($extension);
     }
 
     /**
@@ -239,9 +257,24 @@ class ImageController extends Controller
                 // Créer une copie redimensionnée avec Intervention Image v3
                 $manager = new ImageManager(new Driver());
                 $fullPath = storage_path('app/public/' . $originalPath);
-                $resizedImage = $manager->read($fullPath)
-                    ->cover($width, $height)
-                    ->toJpeg(85);
+                $imageObj = $manager->read($fullPath)->cover($width, $height);
+                
+                // Convertir selon l'extension d'origine
+                $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                switch ($extension) {
+                    case 'png':
+                        $resizedImage = $imageObj->toPng();
+                        break;
+                    case 'gif':
+                        $resizedImage = $imageObj->toGif();
+                        break;
+                    case 'webp':
+                        $resizedImage = $imageObj->toWebp(85);
+                        break;
+                    default:
+                        $resizedImage = $imageObj->toJpeg(85);
+                        break;
+                }
                 
                 $sizePath = "{$uploadPath}/{$sizeName}_{$filename}";
                 Storage::disk('public')->put($sizePath, $resizedImage);
@@ -316,9 +349,17 @@ class ImageController extends Controller
         // Construire le chemin du fichier
         $path = "images/{$type}/{$filename}";
         
-        // Vérifier que le fichier existe
+        // Si le fichier n'existe pas, essayer avec l'extension .jpg
         if (!Storage::disk('public')->exists($path)) {
-            abort(404);
+            $pathInfo = pathinfo($filename);
+            $filenameWithoutExt = $pathInfo['filename'];
+            $jpgPath = "images/{$type}/{$filenameWithoutExt}.jpg";
+            
+            if (Storage::disk('public')->exists($jpgPath)) {
+                $path = $jpgPath;
+            } else {
+                abort(404);
+            }
         }
 
         // Obtenir le contenu du fichier
