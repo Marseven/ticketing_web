@@ -8,7 +8,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Intervention\Image\Facades\Image;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class ImageController extends Controller
 {
@@ -75,7 +76,7 @@ class ImageController extends Controller
             Storage::disk('public')->put($originalPath, file_get_contents($image));
             
             // Générer les différentes tailles
-            $imagePaths = $this->generateImageSizes($image, $type, $uploadPath, $filename);
+            $imagePaths = $this->generateImageSizes($originalPath, $type, $uploadPath, $filename);
             
             // Ajouter l'image originale
             $imagePaths['original'] = $originalPath;
@@ -220,19 +221,19 @@ class ImageController extends Controller
     /**
      * Générer les différentes tailles d'images
      */
-    private function generateImageSizes($image, string $type, string $uploadPath, string $filename): array
+    private function generateImageSizes(string $originalPath, string $type, string $uploadPath, string $filename): array
     {
         $imagePaths = [];
         $sizes = self::IMAGE_SIZES[$type] ?? [];
         
         foreach ($sizes as $sizeName => [$width, $height]) {
             try {
-                // Créer une copie redimensionnée avec Intervention Image
-                $resizedImage = Image::make($image)
-                    ->fit($width, $height, function ($constraint) {
-                        $constraint->upsize();
-                    })
-                    ->encode('jpg', 85);
+                // Créer une copie redimensionnée avec Intervention Image v3
+                $manager = new ImageManager(new Driver());
+                $fullPath = storage_path('app/public/' . $originalPath);
+                $resizedImage = $manager->read($fullPath)
+                    ->cover($width, $height)
+                    ->toJpeg(85);
                 
                 $sizePath = "{$uploadPath}/{$sizeName}_{$filename}";
                 Storage::disk('public')->put($sizePath, $resizedImage);
