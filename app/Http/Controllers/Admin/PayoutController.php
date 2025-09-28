@@ -177,41 +177,6 @@ class PayoutController extends Controller
         }
     }
 
-    /**
-     * Liste des soldes des organisateurs
-     */
-    public function balances(Request $request): JsonResponse
-    {
-        $query = OrganizerBalance::with(['organizer'])
-            ->orderBy('balance', 'desc');
-
-        if ($request->filled('organizer_id')) {
-            $query->where('organizer_id', $request->organizer_id);
-        }
-
-        if ($request->filled('gateway')) {
-            $query->where('gateway', $request->gateway);
-        }
-
-        if ($request->filled('min_balance')) {
-            $query->where('balance', '>=', $request->min_balance);
-        }
-
-        $balances = $query->paginate($request->get('per_page', 15));
-
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'balances' => $balances->items(),
-                'pagination' => [
-                    'current_page' => $balances->currentPage(),
-                    'last_page' => $balances->lastPage(),
-                    'per_page' => $balances->perPage(),
-                    'total' => $balances->total(),
-                ]
-            ]
-        ]);
-    }
 
     /**
      * Mettre à jour la configuration de payout automatique d'un organisateur
@@ -222,7 +187,7 @@ class PayoutController extends Controller
             'gateway' => 'required|in:airtelmoney,moovmoney',
             'auto_payout_enabled' => 'required|boolean',
             'auto_payout_threshold' => 'nullable|numeric|min:1000',
-            'phone_number' => 'nullable|string|size:9',
+            'payout_phone_number' => 'nullable|string|size:9',
         ]);
 
         if ($validator->fails()) {
@@ -245,7 +210,7 @@ class PayoutController extends Controller
             $organizerBalance->update([
                 'auto_payout_enabled' => $request->auto_payout_enabled,
                 'auto_payout_threshold' => $request->auto_payout_threshold ?? 0,
-                'phone_number' => $request->phone_number,
+                'phone_number' => $request->payout_phone_number,
             ]);
 
             return response()->json([
@@ -422,7 +387,7 @@ class PayoutController extends Controller
                 'auto_payout_enabled' => OrganizerBalance::where('auto_payout_enabled', true)->count(),
                 'total_balance' => OrganizerBalance::sum('balance'),
                 'active_configs' => OrganizerBalance::where('auto_payout_enabled', true)
-                    ->whereNotNull('payout_phone_number')
+                    ->whereNotNull('phone_number')
                     ->count(),
             ];
 

@@ -140,7 +140,7 @@
                 </span>
               </td>
               <td class="px-6 py-4 text-sm text-gray-900">{{ formatAmount(balance.auto_payout_threshold) }} XAF</td>
-              <td class="px-6 py-4 text-sm text-gray-900">{{ balance.payout_phone_number || '-' }}</td>
+              <td class="px-6 py-4 text-sm text-gray-900">{{ balance.phone_number || '-' }}</td>
               <td class="px-6 py-4 text-sm space-x-2">
                 <button @click="editBalance(balance)" class="text-blue-600 hover:text-blue-900">
                   Modifier
@@ -249,10 +249,12 @@ export default {
         if (filters.gateway) queryParams.append('gateway', filters.gateway)
         if (filters.auto_payout_enabled) queryParams.append('auto_payout_enabled', filters.auto_payout_enabled)
         
-        const response = await fetch(`/api/v1/admin/organizers/balances?${queryParams}`, {
+        const response = await fetch(`/api/v1/admin/payouts/balances?${queryParams}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+            'X-Requested-With': 'XMLHttpRequest'
           }
         })
         
@@ -260,7 +262,9 @@ export default {
           const data = await response.json()
           if (data.success) {
             balances.value = data.data.balances
-            Object.assign(stats, data.data.stats)
+            if (data.data.stats) {
+              Object.assign(stats, data.data.stats)
+            }
           }
         } else {
           // Utiliser des données simulées si l'API échoue
@@ -279,29 +283,29 @@ export default {
         {
           organizer_id: 1,
           organizer: { name: 'EventMaster Pro' },
-          gateway: 'shap',
+          gateway: 'airtelmoney',
           balance: 250000,
           auto_payout_enabled: true,
           auto_payout_threshold: 100000,
-          payout_phone_number: '+241066123456'
+          phone_number: '066123456'
         },
         {
           organizer_id: 2,
           organizer: { name: 'Gabon Events' },
-          gateway: 'shap',
+          gateway: 'moovmoney',
           balance: 180000,
           auto_payout_enabled: false,
           auto_payout_threshold: 50000,
-          payout_phone_number: '+241065987654'
+          phone_number: '065987654'
         },
         {
           organizer_id: 3,
           organizer: { name: 'Culture & Spectacles' },
-          gateway: 'shap',
+          gateway: 'airtelmoney',
           balance: 420000,
           auto_payout_enabled: true,
           auto_payout_threshold: 200000,
-          payout_phone_number: '+241067789012'
+          phone_number: '067789012'
         }
       ]
       
@@ -318,7 +322,7 @@ export default {
       Object.assign(configForm, {
         auto_payout_enabled: balance.auto_payout_enabled,
         auto_payout_threshold: balance.auto_payout_threshold,
-        payout_phone_number: balance.payout_phone_number || '',
+        payout_phone_number: balance.phone_number || '',
       })
       showConfigModal.value = true
     }
@@ -331,11 +335,15 @@ export default {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+            'X-Requested-With': 'XMLHttpRequest'
           },
           body: JSON.stringify({
             gateway: editingBalance.value.gateway,
-            ...configForm
+            auto_payout_enabled: configForm.auto_payout_enabled,
+            auto_payout_threshold: configForm.auto_payout_threshold,
+            payout_phone_number: configForm.payout_phone_number
           })
         })
         
