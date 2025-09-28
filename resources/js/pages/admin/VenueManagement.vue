@@ -257,6 +257,7 @@ export default {
     const showEditModal = ref(false)
     const venues = ref([])
     const editingVenue = ref(null)
+    const pagination = ref(null)
     
     const filters = reactive({
       search: '',
@@ -301,6 +302,9 @@ export default {
     })
     
     const cities = computed(() => {
+      if (!Array.isArray(venues.value) || venues.value.length === 0) {
+        return []
+      }
       return [...new Set(venues.value.map(venue => venue.city))].sort()
     })
 
@@ -326,7 +330,19 @@ export default {
         if (response.ok) {
           const data = await response.json()
           if (data.success) {
-            venues.value = data.data.venues
+            // Handle paginated data structure
+            const venuesData = data.data?.data || data.venues?.data || data.data || []
+            venues.value = venuesData
+            
+            // Store pagination info if needed
+            if (data.data?.total) {
+              pagination.value = {
+                total: data.data.total,
+                per_page: data.data.per_page,
+                current_page: data.data.current_page,
+                last_page: data.data.last_page
+              }
+            }
           }
         } else {
           loadMockData()
@@ -340,6 +356,9 @@ export default {
     }
     
     const loadMockData = () => {
+      if (!venues.value) {
+        venues.value = []
+      }
       venues.value = [
         {
           id: 1,
