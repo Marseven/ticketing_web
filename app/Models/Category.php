@@ -12,10 +12,15 @@ class Category extends Model
     protected $fillable = [
         'name',
         'slug', 
+        'description',
+        'color',
         'parent_id',
+        'is_active',
     ];
 
-    protected $casts = [];
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
 
     /**
      * Get the events for the category.

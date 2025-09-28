@@ -14,8 +14,16 @@ class Venue extends Model
     protected $fillable = [
         'organizer_id',
         'name',
+        'description',
         'city',
         'address',
+        'postal_code',
+        'country',
+        'capacity',
+        'phone',
+        'email',
+        'image',
+        'status',
         'geo_lat',
         'geo_lng',
     ];
@@ -23,6 +31,7 @@ class Venue extends Model
     protected $casts = [
         'geo_lat' => 'decimal:8',
         'geo_lng' => 'decimal:8',
+        'capacity' => 'integer',
     ];
 
     /**

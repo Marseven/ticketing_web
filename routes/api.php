@@ -196,5 +196,30 @@ Route::prefix('v1')->group(function () {
             Route::get('{payout}', [App\Http\Controllers\Admin\PayoutController::class, 'show']);
             Route::post('{payout}/check-status', [App\Http\Controllers\Admin\PayoutController::class, 'checkStatus']);
         });
+        
+        // Gestion des catégories
+        Route::prefix('categories')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'categories']);
+            Route::post('/', [App\Http\Controllers\Admin\AdminController::class, 'createCategory']);
+            Route::put('{category}', [App\Http\Controllers\Admin\AdminController::class, 'updateCategory']);
+            Route::delete('{category}', [App\Http\Controllers\Admin\AdminController::class, 'deleteCategory']);
+        });
+        
+        // Gestion des lieux
+        Route::prefix('venues')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'venues']);
+            Route::post('/', [App\Http\Controllers\Admin\AdminController::class, 'createVenue']);
+            Route::put('{venue}', [App\Http\Controllers\Admin\AdminController::class, 'updateVenue']);
+            Route::delete('{venue}', [App\Http\Controllers\Admin\AdminController::class, 'deleteVenue']);
+        });
+        
+        // Gestion des rapports
+        Route::prefix('reports')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\ReportController::class, 'index']);
+            Route::post('/generate', [App\Http\Controllers\Admin\ReportController::class, 'generate']);
+            Route::get('{report}/download', [App\Http\Controllers\Admin\ReportController::class, 'download']);
+            Route::delete('{report}', [App\Http\Controllers\Admin\ReportController::class, 'destroy']);
+            Route::delete('/', [App\Http\Controllers\Admin\ReportController::class, 'clear']);
+        });
     });
 });

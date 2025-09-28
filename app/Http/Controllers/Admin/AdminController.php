@@ -965,4 +965,434 @@ class AdminController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Gestion des catégories - Liste avec filtres
+     */
+    public function categories(Request $request): JsonResponse
+    {
+        try {
+            $query = Category::withCount(['events' => function ($query) {
+                $query->where('status', 'published');
+            }]);
+
+            // Filtres
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%");
+                });
+            }
+
+            if ($request->filled('status')) {
+                $query->where('is_active', $request->status === 'active');
+            }
+
+            $categories = $query->orderBy('name')
+                ->paginate($request->per_page ?? 20);
+
+            return response()->json([
+                'success' => true,
+                'data' => $categories,
+                'categories' => $categories // Pour compatibilité
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur liste catégories admin', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors du chargement des catégories'
+            ], 500);
+        }
+    }
+
+    /**
+     * Créer une catégorie
+     */
+    public function createCategory(Request $request): JsonResponse
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'name' => 'required|string|max:255|unique:event_categories,name',
+            'description' => 'nullable|string',
+            'color' => 'nullable|string|max:7',
+            'is_active' => 'boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $category = Category::create([
+                'name' => $request->name,
+                'slug' => Str::slug($request->name),
+                'description' => $request->description,
+                'color' => $request->color ?? '#272d63',
+                'is_active' => $request->boolean('is_active', true),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Catégorie créée avec succès',
+                'data' => ['category' => $category]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur création catégorie admin', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de la création'
+            ], 500);
+        }
+    }
+
+    /**
+     * Mettre à jour une catégorie
+     */
+    public function updateCategory(Request $request, $categoryId): JsonResponse
+    {
+        $category = Category::find($categoryId);
+        if (!$category) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Catégorie introuvable'
+            ], 404);
+        }
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'name' => 'sometimes|string|max:255|unique:event_categories,name,' . $category->id,
+            'description' => 'nullable|string',
+            'color' => 'nullable|string|max:7',
+            'is_active' => 'sometimes|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $updateData = $request->only(['name', 'description', 'color']);
+            
+            if ($request->filled('name')) {
+                $updateData['slug'] = Str::slug($request->name);
+            }
+            
+            if ($request->has('is_active')) {
+                $updateData['is_active'] = $request->boolean('is_active');
+            }
+
+            $category->update($updateData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Catégorie mise à jour avec succès',
+                'data' => ['category' => $category->fresh()->loadCount('events')]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur mise à jour catégorie admin', [
+                'category_id' => $categoryId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de la mise à jour'
+            ], 500);
+        }
+    }
+
+    /**
+     * Supprimer une catégorie
+     */
+    public function deleteCategory($categoryId): JsonResponse
+    {
+        try {
+            $category = Category::withCount('events')->find($categoryId);
+            
+            if (!$category) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Catégorie introuvable'
+                ], 404);
+            }
+
+            // Vérifier s'il y a des événements associés
+            if ($category->events_count > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Impossible de supprimer cette catégorie car elle contient des événements'
+                ], 400);
+            }
+
+            $category->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Catégorie supprimée avec succès'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur suppression catégorie admin', [
+                'category_id' => $categoryId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de la suppression'
+            ], 500);
+        }
+    }
+
+    /**
+     * Gestion des lieux - Liste avec filtres
+     */
+    public function venues(Request $request): JsonResponse
+    {
+        try {
+            $query = Venue::with(['organizer'])
+                ->withCount('events');
+
+            // Filtres
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('address', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%");
+                });
+            }
+
+            if ($request->filled('city')) {
+                $query->where('city', $request->city);
+            }
+
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
+            $venues = $query->orderBy('city')
+                ->orderBy('name')
+                ->paginate($request->per_page ?? 20);
+
+            return response()->json([
+                'success' => true,
+                'data' => $venues,
+                'venues' => $venues // Pour compatibilité
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur liste lieux admin', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors du chargement des lieux'
+            ], 500);
+        }
+    }
+
+    /**
+     * Créer un lieu
+     */
+    public function createVenue(Request $request): JsonResponse
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'address' => 'required|string',
+            'city' => 'required|string|max:255',
+            'postal_code' => 'nullable|string|max:20',
+            'country' => 'nullable|string|max:255',
+            'capacity' => 'nullable|integer|min:1',
+            'phone' => 'nullable|string|max:30',
+            'email' => 'nullable|email|max:255',
+            'image' => 'nullable|string',
+            'status' => 'nullable|string|in:active,inactive',
+            'geo_lat' => 'nullable|numeric|between:-90,90',
+            'geo_lng' => 'nullable|numeric|between:-180,180',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // Récupérer le premier organisateur par défaut
+            $organizerId = $request->organizer_id ?? Organizer::first()?->id;
+            
+            if (!$organizerId) {
+                // Créer un organisateur par défaut si aucun n'existe
+                $defaultOrganizer = Organizer::create([
+                    'name' => 'Organisateur Principal',
+                    'slug' => 'organisateur-principal',
+                    'contact_email' => 'contact@primea.ga',
+                    'contact_phone' => '+24100000000',
+                    'status' => 'active',
+                    'is_active' => true,
+                ]);
+                $organizerId = $defaultOrganizer->id;
+            }
+
+            $venue = Venue::create([
+                'organizer_id' => $organizerId,
+                'name' => $request->name,
+                'description' => $request->description,
+                'address' => $request->address,
+                'city' => $request->city,
+                'postal_code' => $request->postal_code,
+                'country' => $request->country ?? 'Gabon',
+                'capacity' => $request->capacity,
+                'phone' => $request->phone,
+                'email' => $request->email,
+                'image' => $request->image,
+                'status' => $request->status ?? 'active',
+                'geo_lat' => $request->geo_lat,
+                'geo_lng' => $request->geo_lng,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Lieu créé avec succès',
+                'data' => ['venue' => $venue->load('organizer')]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur création lieu admin', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de la création'
+            ], 500);
+        }
+    }
+
+    /**
+     * Mettre à jour un lieu
+     */
+    public function updateVenue(Request $request, $venueId): JsonResponse
+    {
+        $venue = Venue::find($venueId);
+        if (!$venue) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lieu introuvable'
+            ], 404);
+        }
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'name' => 'sometimes|string|max:255',
+            'description' => 'nullable|string',
+            'address' => 'sometimes|string',
+            'city' => 'sometimes|string|max:255',
+            'postal_code' => 'nullable|string|max:20',
+            'country' => 'nullable|string|max:255',
+            'capacity' => 'nullable|integer|min:1',
+            'phone' => 'nullable|string|max:30',
+            'email' => 'nullable|email|max:255',
+            'image' => 'nullable|string',
+            'status' => 'nullable|string|in:active,inactive',
+            'geo_lat' => 'nullable|numeric|between:-90,90',
+            'geo_lng' => 'nullable|numeric|between:-180,180',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $venue->update($request->only([
+                'name', 'description', 'address', 'city', 'postal_code',
+                'country', 'capacity', 'phone', 'email', 'image', 'status',
+                'geo_lat', 'geo_lng'
+            ]));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Lieu mis à jour avec succès',
+                'data' => ['venue' => $venue->fresh()->load('organizer')->loadCount('events')]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur mise à jour lieu admin', [
+                'venue_id' => $venueId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de la mise à jour'
+            ], 500);
+        }
+    }
+
+    /**
+     * Supprimer un lieu
+     */
+    public function deleteVenue($venueId): JsonResponse
+    {
+        try {
+            $venue = Venue::withCount('events')->find($venueId);
+            
+            if (!$venue) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Lieu introuvable'
+                ], 404);
+            }
+
+            // Vérifier s'il y a des événements associés
+            if ($venue->events_count > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Impossible de supprimer ce lieu car il contient des événements'
+                ], 400);
+            }
+
+            $venue->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Lieu supprimé avec succès'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur suppression lieu admin', [
+                'venue_id' => $venueId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de la suppression'
+            ], 500);
+        }
+    }
 }

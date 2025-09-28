@@ -656,10 +656,8 @@ export default {
         })
         
         const data = await response.json()
-        console.log('Venues response:', data)
         if (data.success) {
           venues.value = data.venues || data.data
-          console.log('Venues loaded:', venues.value)
         }
       } catch (error) {
         console.error('Erreur chargement lieux:', error)

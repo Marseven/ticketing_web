@@ -40,12 +40,22 @@ class TicketType extends Model
         'updated_at' => 'datetime',
     ];
 
+    protected $appends = ['capacity'];
+
     /**
      * Get the event that owns the ticket type.
      */
     public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class, 'event_id');
+    }
+
+    /**
+     * Get capacity attribute for frontend compatibility.
+     */
+    public function getCapacityAttribute()
+    {
+        return $this->available_quantity ?? $this->max_quantity ?? 0;
     }
 
     /**
