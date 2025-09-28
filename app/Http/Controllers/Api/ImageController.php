@@ -71,9 +71,16 @@ class ImageController extends Controller
             $uploadPath = "images/{$type}";
             Storage::disk('public')->makeDirectory($uploadPath);
             
-            // Sauvegarder l'image originale
+            // Convertir et sauvegarder l'image originale en JPEG
             $originalPath = "{$uploadPath}/{$filename}";
-            Storage::disk('public')->put($originalPath, file_get_contents($image));
+            try {
+                $manager = new ImageManager(new Driver());
+                $convertedImage = $manager->read($image)->toJpeg(85);
+                Storage::disk('public')->put($originalPath, $convertedImage);
+            } catch (\Exception $e) {
+                // Fallback: sauvegarder tel quel
+                Storage::disk('public')->put($originalPath, file_get_contents($image));
+            }
             
             // Générer les différentes tailles
             $imagePaths = $this->generateImageSizes($originalPath, $type, $uploadPath, $filename);
@@ -215,7 +222,8 @@ class ImageController extends Controller
      */
     private function generateFilename(string $extension): string
     {
-        return Str::random(40) . '.' . strtolower($extension);
+        // Toujours utiliser .jpg car nous convertissons tout en JPEG
+        return Str::random(40) . '.jpg';
     }
 
     /**
@@ -260,5 +268,67 @@ class ImageController extends Controller
             $urls[$size] = Storage::disk('public')->url($path);
         }
         return $urls;
+    }
+
+    /**
+     * Debug des images (pour développement)
+     */
+    public function debug(Request $request, string $type): JsonResponse
+    {
+        if (!in_array($type, self::SUPPORTED_TYPES)) {
+            return response()->json(['error' => 'Type non supporté'], 400);
+        }
+
+        $path = "images/{$type}";
+        $files = [];
+        
+        if (Storage::disk('public')->exists($path)) {
+            $allFiles = Storage::disk('public')->files($path);
+            foreach ($allFiles as $file) {
+                $files[] = [
+                    'path' => $file,
+                    'url' => Storage::disk('public')->url($file),
+                    'size' => Storage::disk('public')->size($file),
+                    'exists' => Storage::disk('public')->exists($file)
+                ];
+            }
+        }
+
+        return response()->json([
+            'type' => $type,
+            'path' => $path,
+            'files' => $files,
+            'storage_path' => storage_path('app/public/' . $path),
+            'public_path' => public_path('storage/' . $path)
+        ]);
+    }
+
+    /**
+     * Servir une image (fallback pour les serveurs qui ne servent pas les fichiers statiques)
+     */
+    public function serve(Request $request, string $type, string $filename)
+    {
+        // Vérifier que le type est supporté
+        if (!in_array($type, self::SUPPORTED_TYPES)) {
+            abort(404);
+        }
+
+        // Construire le chemin du fichier
+        $path = "images/{$type}/{$filename}";
+        
+        // Vérifier que le fichier existe
+        if (!Storage::disk('public')->exists($path)) {
+            abort(404);
+        }
+
+        // Obtenir le contenu du fichier
+        $file = Storage::disk('public')->get($path);
+        $mimeType = Storage::disk('public')->mimeType($path);
+
+        // Retourner la réponse avec les bons headers
+        return response($file, 200)
+            ->header('Content-Type', $mimeType)
+            ->header('Cache-Control', 'public, max-age=31536000') // Cache 1 an
+            ->header('Expires', gmdate('D, d M Y H:i:s', time() + 31536000) . ' GMT');
     }
 }

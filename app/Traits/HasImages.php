@@ -20,7 +20,17 @@ trait HasImages
         if ($this->getImageFileAttribute()) {
             $imagePath = $this->getImagePath($size);
             if (Storage::disk('public')->exists($imagePath)) {
-                return Storage::disk('public')->url($imagePath);
+                // Essayer d'abord l'URL directe du storage
+                $storageUrl = Storage::disk('public')->url($imagePath);
+                
+                // En fallback, utiliser la route API
+                if (app()->environment('production')) {
+                    $type = $this->getImageType();
+                    $filename = basename($imagePath);
+                    return url("api/v1/images/{$type}/{$filename}");
+                }
+                
+                return $storageUrl;
             }
         }
         

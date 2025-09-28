@@ -63,6 +63,12 @@ Route::post('forgot-password', [App\Http\Controllers\Auth\PasswordResetControlle
 Route::post('reset-password', [App\Http\Controllers\Auth\PasswordResetController::class, 'resetPassword']);
 Route::post('verify-reset-token', [App\Http\Controllers\Auth\PasswordResetController::class, 'verifyToken']);
 
+// Route publique pour servir les images (fallback)
+Route::get('storage/images/{type}/{filename}', [App\Http\Controllers\Api\ImageController::class, 'serve'])
+    ->where('type', 'events|venues|users|organizers')
+    ->where('filename', '.*')
+    ->middleware('throttle:1000,1'); // Rate limiting pour les images
+
 // Routes des événements (sans préfixe v1 pour correspondre aux annotations)
 Route::prefix('events')->middleware('auth:sanctum')->group(function () {
     Route::get('/', [App\Http\Controllers\Api\EventController::class, 'index']);
@@ -150,8 +156,9 @@ Route::prefix('v1')->group(function () {
         Route::post('upload', [App\Http\Controllers\Api\ImageController::class, 'upload']);
         Route::post('validate-url', [App\Http\Controllers\Api\ImageController::class, 'validateUrl']);
         Route::delete('delete', [App\Http\Controllers\Api\ImageController::class, 'delete']);
+        Route::get('debug/{type}', [App\Http\Controllers\Api\ImageController::class, 'debug']);
     });
-
+    
     // Webhooks pour les paiements
     Route::prefix('webhooks')->group(function () {
         Route::post('airtel', [App\Http\Controllers\Api\WebhookController::class, 'airtel'])->name('webhook.airtel');
