@@ -911,6 +911,14 @@ class OrganizerController extends Controller
             ->with(['venue', 'category', 'schedules', 'ticketTypes', 'tickets'])
             ->findOrFail($id);
 
+        // S'assurer que les ticket_types ont leurs attributs calculés
+        $event->ticketTypes->each(function ($ticketType) {
+            // Force le calcul des attributs calculés
+            $ticketType->capacity;
+            $ticketType->sold_quantity;
+            $ticketType->remaining_quantity;
+        });
+
         return response()->json([
             'success' => true,
             'data' => $event

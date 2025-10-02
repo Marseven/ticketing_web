@@ -280,9 +280,15 @@
             </div>
 
             <!-- Event image -->
-            <div v-if="event.image_url" class="bg-white rounded-primea shadow-primea p-6">
+            <div v-if="event && event.image_url" class="bg-white rounded-primea shadow-primea p-6">
               <h3 class="text-lg font-semibold text-primea-blue font-primea mb-4">Image de l'événement</h3>
-              <img :src="event.image_url" :alt="event.title" class="w-full h-48 object-cover rounded-primea">
+              <img 
+                :src="event.image_url" 
+                :alt="event.title" 
+                class="w-full h-48 object-cover rounded-primea"
+                @error="handleImageError"
+                @load="handleImageLoad"
+              >
             </div>
 
             <!-- Event settings -->
@@ -387,12 +393,15 @@ const loadEvent = async () => {
       total_revenue: eventData.tickets?.filter(t => ['issued', 'used'].includes(t.status))
         .reduce((sum, ticket) => sum + (ticket.ticket_type?.price || 0), 0) || 0,
       is_public: eventData.is_active || false,
-      sales_active: eventData.is_active || false
+      sales_active: eventData.is_active || false,
+      // Assurer que ticket_types est accessible
+      ticket_types: eventData.ticket_types || eventData.ticketTypes || []
     };
     
     // Calculer les statistiques des types de billets si disponibles
-    if (eventData.ticket_types) {
-      event.value.ticket_types = eventData.ticket_types.map(ticketType => ({
+    const ticketTypes = eventData.ticket_types || eventData.ticketTypes || [];
+    if (ticketTypes.length > 0) {
+      event.value.ticket_types = ticketTypes.map(ticketType => ({
         ...ticketType,
         sold: eventData.tickets?.filter(t => 
           t.ticket_type_id === ticketType.id && ['issued', 'used'].includes(t.status)
@@ -558,7 +567,8 @@ const getEventStatusClass = (status) => {
 
 const getTicketCapacity = (ticket) => {
   // Priorité: capacity -> available_quantity -> max_quantity -> quantity
-  return ticket.capacity || ticket.available_quantity || ticket.max_quantity || ticket.quantity || 'Illimité';
+  const capacity = ticket.capacity || ticket.available_quantity || ticket.max_quantity || ticket.quantity;
+  return capacity || 'Illimité';
 };
 
 const getTicketSalesPercentage = (ticket) => {
@@ -570,6 +580,15 @@ const getTicketSalesPercentage = (ticket) => {
   }
   
   return Math.round((sold / capacity) * 100);
+};
+
+const handleImageError = (event) => {
+  console.log('Erreur de chargement d\'image:', event.target.src);
+  // Optionnel: masquer l'image ou afficher une image par défaut
+};
+
+const handleImageLoad = (event) => {
+  console.log('Image chargée avec succès:', event.target.src);
 };
 
 onMounted(() => {

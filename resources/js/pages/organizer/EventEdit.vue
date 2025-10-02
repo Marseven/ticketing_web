@@ -142,7 +142,13 @@
                     <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Image de l'événement</label>
                     <div class="border-2 border-dashed border-gray-300 rounded-primea p-4 text-center">
                       <div v-if="form.image_preview" class="mb-4">
-                        <img :src="form.image_preview" alt="Aperçu" class="max-h-32 mx-auto rounded-primea">
+                        <img 
+                          :src="form.image_preview" 
+                          alt="Aperçu" 
+                          class="max-h-32 mx-auto rounded-primea"
+                          @error="handleImageError"
+                          @load="handleImageLoad"
+                        >
                         <button 
                           type="button" 
                           @click="removeImage" 
@@ -386,7 +392,13 @@
               <!-- Current image preview -->
               <div v-if="event && event.image_url" class="bg-white rounded-primea shadow-primea p-6">
                 <h3 class="text-lg font-semibold text-primea-blue font-primea mb-4">Image actuelle</h3>
-                <img :src="event.image_url" :alt="event.title" class="w-full h-48 object-cover rounded-primea">
+                <img 
+                  :src="event.image_url" 
+                  :alt="event.title" 
+                  class="w-full h-48 object-cover rounded-primea"
+                  @error="handleImageError"
+                  @load="handleImageLoad"
+                >
               </div>
             </div>
           </div>
@@ -517,7 +529,7 @@ const loadEvent = async () => {
             door_time: s.door_time ? new Date(s.door_time).toISOString().slice(0, 16) : ''
           }))
         : [{ starts_at: '', ends_at: '', door_time: '' }],
-      ticket_types: (event.value.ticket_types || []).map(tt => ({
+      ticket_types: (event.value.ticket_types || event.value.ticketTypes || []).map(tt => ({
         id: tt.id,
         name: tt.name || '',
         description: tt.description || '',
@@ -708,6 +720,14 @@ const removeImage = () => {
   if (imageInput.value) {
     imageInput.value.value = '';
   }
+};
+
+const handleImageError = (event) => {
+  console.log('Erreur de chargement d\'image:', event.target.src);
+};
+
+const handleImageLoad = (event) => {
+  console.log('Image chargée avec succès:', event.target.src);
 };
 
 // Utilitaires
