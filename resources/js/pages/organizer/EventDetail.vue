@@ -132,10 +132,6 @@
                   <p class="mt-1 text-gray-900 font-primea">{{ event.venue_name }}</p>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 font-primea">Date et heure</label>
-                  <p class="mt-1 text-gray-900 font-primea">{{ formatDateTime(event.event_date) }}</p>
-                </div>
-                <div>
                   <label class="block text-sm font-medium text-gray-700 font-primea">Catégorie</label>
                   <p class="mt-1 text-gray-900 font-primea">{{ event.category_name || 'Non spécifiée' }}</p>
                 </div>
@@ -146,29 +142,72 @@
               </div>
             </div>
 
+            <!-- Programmation -->
+            <div class="bg-white rounded-primea shadow-primea p-6">
+              <h2 class="text-xl font-semibold text-primea-blue font-primea mb-6">Programmation</h2>
+              <div v-if="event.schedules && event.schedules.length > 0" class="space-y-4">
+                <div v-for="schedule in event.schedules" :key="schedule.id" 
+                     class="border border-gray-200 rounded-primea p-4">
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 font-primea">Début</label>
+                      <p class="mt-1 text-gray-900 font-primea">{{ formatDateTime(schedule.starts_at) }}</p>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 font-primea">Fin</label>
+                      <p class="mt-1 text-gray-900 font-primea">{{ formatDateTime(schedule.ends_at) }}</p>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 font-primea">Ouverture des portes</label>
+                      <p class="mt-1 text-gray-900 font-primea">
+                        {{ schedule.door_time ? formatDateTime(schedule.door_time) : 'Non spécifiée' }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="text-center py-8 text-gray-500">
+                <CalendarIcon class="w-12 h-12 mx-auto text-gray-300 mb-2" />
+                <p class="font-primea">Aucune programmation définie</p>
+              </div>
+            </div>
+
             <!-- Ticket types -->
             <div class="bg-white rounded-primea shadow-primea p-6">
               <h2 class="text-xl font-semibold text-primea-blue font-primea mb-6">Types de billets</h2>
               <div v-if="event.ticket_types && event.ticket_types.length > 0" class="space-y-4">
                 <div v-for="ticket in event.ticket_types" :key="ticket.id" 
                      class="border border-gray-200 rounded-primea p-4">
-                  <div class="flex justify-between items-start">
-                    <div>
-                      <h3 class="font-semibold text-gray-900 font-primea">{{ ticket.name }}</h3>
-                      <p class="text-gray-600 text-sm font-primea mt-1">{{ ticket.description }}</p>
-                      <div class="flex items-center space-x-4 mt-2">
-                        <span class="text-lg font-bold text-primea-blue font-primea">
-                          {{ formatAmount(ticket.price) }} XAF
-                        </span>
-                        <span class="text-sm text-gray-500 font-primea">
-                          {{ ticket.sold || 0 }} / {{ ticket.quantity || 'Illimité' }} vendus
+                  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
+                    <div class="md:col-span-2">
+                      <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-semibold text-gray-900 font-primea">{{ ticket.name }}</h3>
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                              :class="ticket.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
+                          {{ ticket.is_active ? 'Actif' : 'Inactif' }}
                         </span>
                       </div>
+                      <p class="text-gray-600 text-sm font-primea">{{ ticket.description || 'Aucune description' }}</p>
                     </div>
-                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                          :class="ticket.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
-                      {{ ticket.is_active ? 'Actif' : 'Inactif' }}
-                    </span>
+                    
+                    <div class="text-center">
+                      <label class="block text-xs text-gray-500 font-primea mb-1">Prix</label>
+                      <span class="text-lg font-bold text-primea-blue font-primea">
+                        {{ formatAmount(ticket.price) }} XAF
+                      </span>
+                    </div>
+                    
+                    <div class="text-center">
+                      <label class="block text-xs text-gray-500 font-primea mb-1">Disponibilité</label>
+                      <div class="text-sm font-primea">
+                        <span class="font-medium text-gray-900">{{ ticket.sold || 0 }}</span>
+                        <span class="text-gray-500"> / </span>
+                        <span class="font-medium text-gray-900">{{ ticket.capacity || ticket.quantity || 'Illimité' }}</span>
+                      </div>
+                      <div class="text-xs text-gray-500 mt-1">
+                        {{ ((ticket.sold || 0) / (ticket.capacity || ticket.quantity || 1) * 100).toFixed(0) }}% vendus
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
