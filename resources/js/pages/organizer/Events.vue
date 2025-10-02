@@ -103,12 +103,19 @@
           >
             <div class="relative">
               <img 
+                v-if="hasEventImage(event)"
                 :src="getEventImageUrl(event)" 
                 :alt="event.title"
                 class="w-full h-48 object-cover"
                 @error="handleImageError"
                 @load="handleImageLoad"
               />
+              <div 
+                v-else 
+                class="w-full h-48 bg-gradient-to-br from-blue-100 to-yellow-100 flex items-center justify-center"
+              >
+                <CalendarIcon class="w-16 h-16 text-gray-400" />
+              </div>
               <div class="absolute top-4 left-4">
                 <span 
                   class="px-3 py-1 rounded-full text-xs font-semibold"
@@ -186,12 +193,19 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <img 
+                      v-if="hasEventImage(event)"
                       :src="getEventImageUrl(event, '60')" 
                       :alt="event.title"
                       class="w-12 h-12 object-cover rounded-lg mr-4"
                       @error="handleImageError"
                       @load="handleImageLoad"
                     />
+                    <div 
+                      v-else 
+                      class="w-12 h-12 bg-gradient-to-br from-blue-100 to-yellow-100 flex items-center justify-center rounded-lg mr-4"
+                    >
+                      <CalendarIcon class="w-6 h-6 text-gray-400" />
+                    </div>
                     <div>
                       <div class="text-sm font-medium text-gray-900">{{ event.title }}</div>
                       <div class="text-sm text-gray-500">{{ event.venue }}</div>
@@ -314,13 +328,14 @@
 import { ref, computed, onMounted, reactive, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { organizerService } from '../../services/api'
-import { PlusIcon } from '@heroicons/vue/24/outline'
+import { PlusIcon, CalendarIcon } from '@heroicons/vue/24/outline'
 import Swal from 'sweetalert2'
 
 export default {
   name: 'OrganizerEvents',
   components: {
-    PlusIcon
+    PlusIcon,
+    CalendarIcon
   },
   setup() {
     const router = useRouter()
@@ -532,8 +547,14 @@ export default {
     }
 
     // Gestion des images
+    const hasEventImage = (event) => {
+      if (!event) return false
+      const imageUrl = event.image_url || event.image
+      return imageUrl && imageUrl.trim() !== ''
+    }
+
     const getEventImageUrl = (event, size = '400') => {
-      // Priorité: image_url puis image, puis placeholder
+      // Priorité: image_url puis image
       const imageUrl = event.image_url || event.image
       
       if (imageUrl) {
@@ -548,14 +569,13 @@ export default {
         }
       }
       
-      // Image placeholder par défaut comme sur la page d'accueil
-      return `https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=${size}&h=${size}&fit=crop&crop=center`
+      return ''
     }
 
     const handleImageError = (event) => {
       console.log('Erreur de chargement d\'image:', event.target.src)
-      // Remplacer par l'image placeholder en cas d'erreur
-      event.target.src = 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop&crop=center'
+      // L'image sera masquée et remplacée par le placeholder avec CalendarIcon
+      event.target.style.display = 'none'
     }
 
     const handleImageLoad = (event) => {
@@ -586,6 +606,7 @@ export default {
       deleteEvent,
       loadEvents,
       changePage,
+      hasEventImage,
       getEventImageUrl,
       handleImageError,
       handleImageLoad

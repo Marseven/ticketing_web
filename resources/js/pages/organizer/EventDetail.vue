@@ -282,13 +282,22 @@
             <!-- Event image -->
             <div v-if="event" class="bg-white rounded-primea shadow-primea p-6">
               <h3 class="text-lg font-semibold text-primea-blue font-primea mb-4">Image de l'événement</h3>
-              <img 
-                :src="getEventImageUrl()" 
-                :alt="event.title" 
-                class="w-full h-48 object-cover rounded-primea"
-                @error="handleImageError"
-                @load="handleImageLoad"
-              >
+              <div class="w-full h-48 rounded-primea overflow-hidden">
+                <img 
+                  v-if="hasEventImage()"
+                  :src="getEventImageUrl()" 
+                  :alt="event.title" 
+                  class="w-full h-full object-cover"
+                  @error="handleImageError"
+                  @load="handleImageLoad"
+                >
+                <div 
+                  v-else 
+                  class="w-full h-full bg-gradient-to-br from-blue-100 to-yellow-100 flex items-center justify-center"
+                >
+                  <CalendarIcon class="w-16 h-16 text-gray-400" />
+                </div>
+              </div>
             </div>
 
             <!-- Event settings -->
@@ -626,10 +635,16 @@ const getEventDate = () => {
   return 'Non définie';
 };
 
+const hasEventImage = () => {
+  if (!event.value) return false;
+  const imageUrl = event.value.image_url || event.value.image;
+  return imageUrl && imageUrl.trim() !== '';
+};
+
 const getEventImageUrl = () => {
-  if (!event.value) return 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop&crop=center';
+  if (!event.value) return '';
   
-  // Priorité: image_url puis image, puis placeholder
+  // Priorité: image_url puis image
   const imageUrl = event.value.image_url || event.value.image;
   
   if (imageUrl) {
@@ -644,8 +659,7 @@ const getEventImageUrl = () => {
     }
   }
   
-  // Image placeholder par défaut comme sur la page d'accueil
-  return 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop&crop=center';
+  return '';
 };
 
 onMounted(() => {

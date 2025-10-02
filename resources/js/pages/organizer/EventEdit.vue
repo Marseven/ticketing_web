@@ -392,13 +392,22 @@
               <!-- Current image preview -->
               <div v-if="event" class="bg-white rounded-primea shadow-primea p-6">
                 <h3 class="text-lg font-semibold text-primea-blue font-primea mb-4">Image actuelle</h3>
-                <img 
-                  :src="getCurrentImageUrl()" 
-                  :alt="event.title" 
-                  class="w-full h-48 object-cover rounded-primea"
-                  @error="handleImageError"
-                  @load="handleImageLoad"
-                >
+                <div class="w-full h-48 rounded-primea overflow-hidden">
+                  <img 
+                    v-if="hasCurrentImage()"
+                    :src="getCurrentImageUrl()" 
+                    :alt="event.title" 
+                    class="w-full h-full object-cover"
+                    @error="handleImageError"
+                    @load="handleImageLoad"
+                  >
+                  <div 
+                    v-else 
+                    class="w-full h-full bg-gradient-to-br from-blue-100 to-yellow-100 flex items-center justify-center"
+                  >
+                    <CalendarIcon class="w-16 h-16 text-gray-400" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -419,7 +428,8 @@ import {
   PlusIcon,
   TrashIcon,
   TicketIcon,
-  CheckIcon
+  CheckIcon,
+  CalendarIcon
 } from '@heroicons/vue/24/outline';
 
 const route = useRoute();
@@ -722,13 +732,25 @@ const removeImage = () => {
   }
 };
 
+const hasCurrentImage = () => {
+  // Vérifier s'il y a une image en cours d'édition
+  if (form.image_preview && form.image_preview.trim() !== '') {
+    return true;
+  }
+  
+  // Vérifier s'il y a une image actuelle
+  if (!event.value) return false;
+  const imageUrl = event.value.image_url || event.value.image;
+  return imageUrl && imageUrl.trim() !== '';
+};
+
 const getCurrentImageUrl = () => {
-  // Priorité: image en cours d'édition, puis image actuelle, puis placeholder
+  // Priorité: image en cours d'édition, puis image actuelle
   if (form.image_preview) {
     return form.image_preview;
   }
   
-  if (!event.value) return 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop&crop=center';
+  if (!event.value) return '';
   
   const imageUrl = event.value.image_url || event.value.image;
   
@@ -744,8 +766,7 @@ const getCurrentImageUrl = () => {
     }
   }
   
-  // Image placeholder par défaut
-  return 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop&crop=center';
+  return '';
 };
 
 const handleImageError = (event) => {
