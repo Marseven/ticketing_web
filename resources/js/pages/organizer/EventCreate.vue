@@ -49,15 +49,6 @@
                   ></textarea>
                 </div>
 
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Date et heure</label>
-                  <input 
-                    v-model="form.event_date"
-                    type="datetime-local" 
-                    required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
-                  />
-                </div>
 
                 <div>
                   <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Catégorie *</label>
@@ -566,10 +557,10 @@ const createEvent = async () => {
     return;
   }
 
-  if (!form.title || !form.event_date || !form.venue_name) {
+  if (!form.title) {
     Swal.fire({
       title: 'Erreur',
-      text: 'Veuillez remplir tous les champs obligatoires',
+      text: 'Veuillez remplir le titre de l\'événement',
       icon: 'error',
       confirmButtonColor: '#272d63'
     });
