@@ -731,7 +731,7 @@ class OrganizerController extends Controller
             'new_venue_city' => 'required_if:venue_id,new|nullable|string|max:255',
             'new_venue_address' => 'required_if:venue_id,new|nullable|string|max:500',
             'max_attendees' => 'nullable|integer|min:1',
-            'image_url' => 'nullable|url',
+            'image_url' => 'nullable|string',
             'is_active' => 'boolean',
             'schedules' => 'required|array|min:1',
             'schedules.*.starts_at' => 'required|date',
@@ -766,15 +766,17 @@ class OrganizerController extends Controller
 
             // Créer le lieu si nécessaire
             $venueId = $request->venue_id;
-            if (!$venueId) {
+            if ($venueId === 'new' && $request->new_venue_name) {
                 $venue = \App\Models\Venue::create([
-                    'name' => $request->venue_name,
-                    'city' => $request->venue_city,
-                    'address' => $request->venue_address,
+                    'name' => $request->new_venue_name,
+                    'city' => $request->new_venue_city,
+                    'address' => $request->new_venue_address,
                     'capacity' => $request->max_attendees,
                     'is_active' => true
                 ]);
                 $venueId = $venue->id;
+            } elseif ($venueId === 'new') {
+                $venueId = null; // Si pas de données pour nouveau lieu
             }
 
             // Créer l'événement
@@ -861,8 +863,25 @@ class OrganizerController extends Controller
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'title' => 'sometimes|string|max:255',
             'description' => 'sometimes|nullable|string',
+            'category_id' => 'sometimes|exists:event_categories,id',
+            'venue_id' => 'sometimes|nullable|exists:venues,id',
+            'new_venue_name' => 'required_if:venue_id,new|nullable|string|max:255',
+            'new_venue_city' => 'required_if:venue_id,new|nullable|string|max:255',
+            'new_venue_address' => 'required_if:venue_id,new|nullable|string|max:500',
+            'image_url' => 'sometimes|nullable|string',
             'is_active' => 'sometimes|boolean',
-            'status' => 'sometimes|in:draft,published,cancelled'
+            'status' => 'sometimes|in:draft,published,cancelled',
+            'schedules' => 'sometimes|array',
+            'schedules.*.starts_at' => 'required_with:schedules|date',
+            'schedules.*.ends_at' => 'required_with:schedules|date|after:schedules.*.starts_at',
+            'schedules.*.door_time' => 'nullable|date',
+            'ticket_types' => 'sometimes|array',
+            'ticket_types.*.id' => 'nullable|integer',
+            'ticket_types.*.name' => 'required_with:ticket_types|string|max:255',
+            'ticket_types.*.description' => 'nullable|string',
+            'ticket_types.*.price' => 'required_with:ticket_types|numeric|min:0',
+            'ticket_types.*.capacity' => 'required_with:ticket_types|integer|min:1',
+            'ticket_types.*.is_active' => 'boolean'
         ]);
 
         if ($validator->fails()) {
@@ -874,17 +893,93 @@ class OrganizerController extends Controller
         }
 
         try {
+            DB::beginTransaction();
+
+            // Créer le lieu si nécessaire
+            if ($request->venue_id === 'new' && $request->new_venue_name) {
+                $venue = \App\Models\Venue::create([
+                    'name' => $request->new_venue_name,
+                    'city' => $request->new_venue_city,
+                    'address' => $request->new_venue_address,
+                    'is_active' => true
+                ]);
+                $request->merge(['venue_id' => $venue->id]);
+            }
+
+            // Mettre à jour l'événement principal
             $event->update($request->only([
-                'title', 'description', 'is_active', 'status'
+                'title', 'description', 'category_id', 'venue_id', 'image_url', 'is_active', 'status'
             ]));
+
+            // Mettre à jour les horaires
+            if ($request->has('schedules')) {
+                // Supprimer les anciens horaires
+                $event->schedules()->delete();
+                
+                // Créer les nouveaux horaires
+                foreach ($request->schedules as $scheduleData) {
+                    \App\Models\Schedule::create([
+                        'event_id' => $event->id,
+                        'starts_at' => $scheduleData['starts_at'],
+                        'ends_at' => $scheduleData['ends_at'],
+                        'door_time' => $scheduleData['door_time'] ?? null
+                    ]);
+                }
+            }
+
+            // Mettre à jour les types de billets
+            if ($request->has('ticket_types')) {
+                $submittedIds = collect($request->ticket_types)->pluck('id')->filter()->toArray();
+                
+                // Supprimer les types de billets qui ne sont plus dans la liste
+                $event->ticketTypes()->whereNotIn('id', $submittedIds)->delete();
+                
+                // Créer ou mettre à jour les types de billets
+                foreach ($request->ticket_types as $ticketTypeData) {
+                    if (isset($ticketTypeData['id']) && $ticketTypeData['id']) {
+                        // Mettre à jour le type existant
+                        \App\Models\TicketType::where('id', $ticketTypeData['id'])
+                            ->where('event_id', $event->id)
+                            ->update([
+                                'name' => $ticketTypeData['name'],
+                                'description' => $ticketTypeData['description'],
+                                'price' => $ticketTypeData['price'],
+                                'available_quantity' => $ticketTypeData['capacity'],
+                                'status' => ($ticketTypeData['is_active'] ?? true) ? 'active' : 'inactive'
+                            ]);
+                    } else {
+                        // Créer un nouveau type
+                        \App\Models\TicketType::create([
+                            'event_id' => $event->id,
+                            'name' => $ticketTypeData['name'],
+                            'description' => $ticketTypeData['description'],
+                            'price' => $ticketTypeData['price'],
+                            'available_quantity' => $ticketTypeData['capacity'],
+                            'status' => ($ticketTypeData['is_active'] ?? true) ? 'active' : 'inactive'
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+
+            // Recharger l'événement avec ses relations
+            $event->load(['venue', 'category', 'schedules', 'ticketTypes']);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Événement mis à jour avec succès',
-                'data' => $event->fresh()
+                'data' => $event
             ]);
 
         } catch (\Exception $e) {
+            DB::rollback();
+            \Illuminate\Support\Facades\Log::error('Erreur mise à jour événement', [
+                'event_id' => $event->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur lors de la mise à jour'
