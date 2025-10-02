@@ -129,12 +129,23 @@ Route::prefix('v1')->group(function () {
     // Routes de l'espace organisateur
     Route::prefix('organizer')->middleware('auth:sanctum')->group(function () {
         Route::get('dashboard', [App\Http\Controllers\Api\OrganizerController::class, 'dashboard']);
+        Route::get('dashboard/stats', [App\Http\Controllers\Api\OrganizerController::class, 'dashboardStats']);
+        Route::get('events/recent', [App\Http\Controllers\Api\OrganizerController::class, 'recentEvents']);
+        Route::get('notifications', [App\Http\Controllers\Api\OrganizerController::class, 'notifications']);
+        Route::get('profile', [App\Http\Controllers\Api\OrganizerController::class, 'profile']);
+        Route::put('profile', [App\Http\Controllers\Api\OrganizerController::class, 'updateProfile']);
+        Route::post('profile/avatar', [App\Http\Controllers\Api\OrganizerController::class, 'uploadAvatar']);
         Route::get('balances', [App\Http\Controllers\Api\OrganizerController::class, 'balances']);
         Route::post('payouts', [App\Http\Controllers\Api\OrganizerController::class, 'requestPayout']);
         Route::get('payouts', [App\Http\Controllers\Api\OrganizerController::class, 'payouts']);
         Route::get('events', [App\Http\Controllers\Api\OrganizerController::class, 'events']);
+        Route::post('events', [App\Http\Controllers\Api\OrganizerController::class, 'createEvent']);
+        Route::put('events/{id}', [App\Http\Controllers\Api\OrganizerController::class, 'updateEvent']);
+        Route::get('events/{id}', [App\Http\Controllers\Api\OrganizerController::class, 'getEvent']);
+        Route::get('events/{id}/stats', [App\Http\Controllers\Api\OrganizerController::class, 'getEventStats']);
         Route::get('events/{eventId}/sales', [App\Http\Controllers\Api\OrganizerController::class, 'eventSales']);
         Route::get('payments', [App\Http\Controllers\Api\OrganizerController::class, 'payments']);
+        Route::get('balance', [App\Http\Controllers\Api\OrganizerController::class, 'getBalance']);
         Route::get('/', [App\Http\Controllers\Api\OrganizerController::class, 'index']);
         Route::get('{organizer:slug}', [App\Http\Controllers\Api\OrganizerController::class, 'show']);
         Route::get('{organizer:slug}/stats', [App\Http\Controllers\Api\OrganizerController::class, 'stats']);

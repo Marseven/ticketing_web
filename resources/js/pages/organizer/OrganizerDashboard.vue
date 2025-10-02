@@ -13,7 +13,10 @@
             <p class="text-sm text-gray-500 font-primea">Dernière connexion</p>
             <p class="text-sm font-semibold text-primea-blue font-primea">{{ formatDate(new Date()) }}</p>
           </div>
-          <div class="w-12 h-12 bg-primea-blue text-white rounded-full flex items-center justify-center">
+          <div v-if="userAvatar" class="w-12 h-12 rounded-full overflow-hidden">
+            <img :src="userAvatar" :alt="authStore.user?.name" class="w-full h-full object-cover">
+          </div>
+          <div v-else class="w-12 h-12 bg-primea-blue text-white rounded-full flex items-center justify-center">
             <span class="text-lg font-bold font-primea">{{ userInitials }}</span>
           </div>
         </div>
@@ -99,19 +102,19 @@
             >
               <EyeIcon class="w-6 h-6 mr-3 group-hover:scale-110 transition-transform" />
               <div>
-                <p class="font-semibold font-primea">Gérer les Événements</p>
-                <p class="text-sm opacity-70">Voir et modifier</p>
+                <p class="font-semibold font-primea group-hover:text-white">Gérer les Événements</p>
+                <p class="text-sm opacity-70 group-hover:text-white group-hover:opacity-90">Voir et modifier</p>
               </div>
             </router-link>
 
             <router-link 
               :to="{ name: 'organizer-balance' }"
-              class="flex items-center p-4 border-2 border-primea-yellow text-primea-yellow rounded-primea hover:bg-primea-yellow hover:text-white transition-all duration-200 group"
+              class="flex items-center p-4 border-2 border-primea-yellow text-primea-yellow rounded-primea hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 group"
             >
               <CreditCardIcon class="w-6 h-6 mr-3 group-hover:scale-110 transition-transform" />
               <div>
-                <p class="font-semibold font-primea">Gestion Financière</p>
-                <p class="text-sm opacity-70">Soldes et payouts</p>
+                <p class="font-semibold font-primea group-hover:text-primea-blue">Gestion Financière</p>
+                <p class="text-sm opacity-70 group-hover:text-primea-blue group-hover:opacity-90">Soldes et payouts</p>
               </div>
             </router-link>
 
@@ -222,6 +225,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue';
 import { useAuthStore } from '../../stores/auth';
+import { organizerService } from '../../services/api';
 import { 
   CalendarIcon,
   PlayIcon,
@@ -255,51 +259,46 @@ const userInitials = computed(() => {
   return user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 });
 
+const userAvatar = computed(() => {
+  return authStore.user?.avatar_url || null;
+});
+
 // Méthodes
 const loadDashboardData = async () => {
   loading.value = true;
   try {
-    // Simulation de données
-    Object.assign(stats, {
-      total_events: 5,
-      active_events: 3,
-      tickets_sold: 127,
-      total_revenue: 2540000
+    // Charger les statistiques depuis l'API
+    const [statsResponse, eventsResponse, notificationsResponse] = await Promise.all([
+      organizerService.getDashboardStats(),
+      organizerService.getRecentEvents(),
+      organizerService.getNotifications()
+    ]);
+
+    // Mettre à jour les statistiques
+    Object.assign(stats, statsResponse.data.data || {
+      total_events: 0,
+      active_events: 0,
+      tickets_sold: 0,
+      total_revenue: 0
     });
 
-    recentEvents.value = [
-      {
-        id: 1,
-        title: 'Concert Jazz sous les étoiles',
-        slug: 'concert-jazz-etoiles',
-        venue_name: 'Palais de la Culture',
-        event_date: '2025-10-15',
-        status: 'active',
-        tickets_sold: 45
-      },
-      {
-        id: 2,
-        title: 'Festival Gastronomique',
-        slug: 'festival-gastronomique',
-        venue_name: 'Centre des Expositions',
-        event_date: '2025-11-02',
-        status: 'draft',
-        tickets_sold: 0
-      }
-    ];
+    // Mettre à jour les événements récents
+    recentEvents.value = eventsResponse.data.data || [];
 
-    notifications.value = [
-      {
-        id: 1,
-        type: 'success',
-        title: 'Nouveau billet vendu',
-        message: 'Concert Jazz sous les étoiles',
-        created_at: new Date().toISOString()
-      }
-    ];
+    // Mettre à jour les notifications
+    notifications.value = notificationsResponse.data.data || [];
 
   } catch (error) {
     console.error('Erreur lors du chargement du dashboard:', error);
+    // En cas d'erreur, utiliser des données par défaut
+    Object.assign(stats, {
+      total_events: 0,
+      active_events: 0,
+      tickets_sold: 0,
+      total_revenue: 0
+    });
+    recentEvents.value = [];
+    notifications.value = [];
   } finally {
     loading.value = false;
   }

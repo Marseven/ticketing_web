@@ -463,4 +463,248 @@ class OrganizerController extends Controller
             'data' => ['payouts' => $payouts]
         ]);
     }
-}
+
+    /**
+     * Get dashboard stats for organizer
+     */
+    public function dashboardStats(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        if (!$user->is_organizer) {
+            return response()->json([
+                'message' => 'Accès refusé. Seuls les organisateurs peuvent accéder au dashboard.',
+            ], 403);
+        }
+
+        $organizerIds = $user->organizers->pluck('id');
+        
+        $totalEvents = Event::whereIn('organizer_id', $organizerIds)->count();
+        $activeEvents = Event::whereIn('organizer_id', $organizerIds)->active()->count();
+        
+        $ticketsSold = Ticket::whereHas('event', function ($query) use ($organizerIds) {
+            $query->whereIn('organizer_id', $organizerIds);
+        })->whereIn('status', ['issued', 'used'])->count();
+        
+        $totalRevenue = DB::table('tickets')
+            ->join('ticket_types', 'tickets.ticket_type_id', '=', 'ticket_types.id')
+            ->join('events', 'tickets.event_id', '=', 'events.id')
+            ->whereIn('events.organizer_id', $organizerIds)
+            ->whereIn('tickets.status', ['issued', 'used'])
+            ->sum('ticket_types.price');
+
+        return response()->json([
+            'data' => [
+                'total_events' => $totalEvents,
+                'active_events' => $activeEvents,
+                'tickets_sold' => $ticketsSold,
+                'total_revenue' => round($totalRevenue, 2)
+            ]
+        ]);
+    }
+
+    /**
+     * Get recent events for organizer
+     */
+    public function recentEvents(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        if (!$user->is_organizer) {
+            return response()->json([
+                'message' => 'Accès refusé.',
+            ], 403);
+        }
+
+        $organizerIds = $user->organizers->pluck('id');
+
+        $recentEvents = Event::whereIn('organizer_id', $organizerIds)
+            ->with(['venue:id,name', 'ticketTypes'])
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(function ($event) {
+                return [
+                    'id' => $event->id,
+                    'title' => $event->title,
+                    'slug' => $event->slug,
+                    'venue_name' => $event->venue->name ?? '',
+                    'event_date' => $event->event_date,
+                    'status' => $event->is_active ? 'active' : 'draft',
+                    'tickets_sold' => $event->tickets()->whereIn('status', ['issued', 'used'])->count()
+                ];
+            });
+
+        return response()->json([
+            'data' => $recentEvents
+        ]);
+    }
+
+    /**
+     * Get notifications for organizer
+     */
+    public function notifications(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        if (!$user->is_organizer) {
+            return response()->json([
+                'message' => 'Accès refusé.',
+            ], 403);
+        }
+
+        // Pour l'instant, on retourne des notifications simulées
+        // TODO: Implémenter un système de notifications réel
+        $notifications = collect([
+            [
+                'id' => 1,
+                'type' => 'success',
+                'title' => 'Nouvelle vente',
+                'message' => 'Un nouveau billet a été vendu',
+                'created_at' => now()->subHours(2)->toIso8601String()
+            ]
+        ]);
+
+        return response()->json([
+            'data' => $notifications
+        ]);
+    }
+
+    /**
+     * Get organizer profile
+     */
+    public function profile(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        if (!$user->is_organizer) {
+            return response()->json([
+                'message' => 'Accès refusé.',
+            ], 403);
+        }
+
+        $organizer = $user->organizers->first();
+
+        return response()->json([
+            'data' => [
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                    'avatar_url' => $user->avatar_url
+                ],
+                'organizer' => $organizer
+            ]
+        ]);
+    }
+
+    /**
+     * Update organizer profile
+     */
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        if (!$user->is_organizer) {
+            return response()->json([
+                'message' => 'Accès refusé.',
+            ], 403);
+        }
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:users,email,' . $user->id,
+            'phone' => 'sometimes|string|max:20',
+            'organizer_name' => 'sometimes|string|max:255',
+            'organizer_description' => 'sometimes|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Mise à jour des infos utilisateur
+        if ($request->has('name')) $user->name = $request->name;
+        if ($request->has('email')) $user->email = $request->email;
+        if ($request->has('phone')) $user->phone = $request->phone;
+        $user->save();
+
+        // Mise à jour des infos organisateur
+        if ($request->has('organizer_name') || $request->has('organizer_description')) {
+            $organizer = $user->organizers->first();
+            if ($organizer) {
+                if ($request->has('organizer_name')) $organizer->name = $request->organizer_name;
+                if ($request->has('organizer_description')) $organizer->bio = $request->organizer_description;
+                $organizer->save();
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profil mis à jour avec succès',
+            'data' => [
+                'user' => $user,
+                'organizer' => $user->organizers->first()
+            ]
+        ]);
+    }
+
+    /**
+     * Upload organizer avatar
+     */
+    public function uploadAvatar(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        if (!$user->is_organizer) {
+            return response()->json([
+                'message' => 'Accès refusé.',
+            ], 403);
+        }
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Fichier invalide',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            if ($request->hasFile('avatar')) {
+                $path = $request->file('avatar')->store('avatars', 'public');
+                $user->avatar_url = '/storage/' . $path;
+                $user->save();
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Avatar uploadé avec succès',
+                'data' => [
+                    'avatar_url' => $user->avatar_url
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de l\'upload'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get balance details
+     */
+    public function getBalance(Request $request): JsonResponse
+    {
+        return $this->balances($request);
+    }

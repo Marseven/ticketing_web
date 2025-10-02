@@ -273,5 +273,76 @@ export const guestService = {
   }
 }
 
+export const organizerService = {
+  // Récupérer les statistiques du tableau de bord
+  getDashboardStats() {
+    return api.get('/organizer/dashboard/stats')
+  },
+
+  // Récupérer les événements récents de l'organisateur
+  getRecentEvents() {
+    return api.get('/organizer/events/recent')
+  },
+
+  // Récupérer les notifications de l'organisateur
+  getNotifications() {
+    return api.get('/organizer/notifications')
+  },
+
+  // Récupérer tous les événements de l'organisateur
+  getEvents(filters = {}) {
+    return api.get('/organizer/events', { params: filters })
+  },
+
+  // Créer un nouvel événement
+  createEvent(eventData) {
+    return api.post('/organizer/events', eventData)
+  },
+
+  // Mettre à jour un événement
+  updateEvent(id, eventData) {
+    return api.put(`/organizer/events/${id}`, eventData)
+  },
+
+  // Récupérer les détails d'un événement
+  getEvent(id) {
+    return api.get(`/organizer/events/${id}`)
+  },
+
+  // Récupérer les statistiques d'un événement
+  getEventStats(id) {
+    return api.get(`/organizer/events/${id}/stats`)
+  },
+
+  // Récupérer le solde et les transactions
+  getBalance() {
+    return api.get('/organizer/balance')
+  },
+
+  // Récupérer l'historique des paiements
+  getPaymentHistory() {
+    return api.get('/organizer/payments')
+  },
+
+  // Récupérer le profil de l'organisateur
+  getProfile() {
+    return api.get('/organizer/profile')
+  },
+
+  // Mettre à jour le profil de l'organisateur
+  updateProfile(profileData) {
+    return api.put('/organizer/profile', profileData)
+  },
+
+  // Uploader un logo/avatar
+  uploadAvatar(formData) {
+    return api.post('/organizer/profile/avatar', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  }
+}
+
 // Export par défaut de l'instance axios configurée
 export default api
