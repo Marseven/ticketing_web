@@ -318,8 +318,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { organizerService } from '../../services/api';
+import Swal from 'sweetalert2';
 import { 
   ArrowLeftIcon,
   PlusIcon,
@@ -331,6 +333,9 @@ const router = useRouter();
 
 // État réactif
 const creating = ref(false);
+const categories = ref([]);
+const venues = ref([]);
+const loading = ref(false);
 
 // Formulaire
 const form = reactive({

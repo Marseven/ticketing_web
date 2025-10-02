@@ -708,3 +708,212 @@ class OrganizerController extends Controller
     {
         return $this->balances($request);
     }
+
+    /**
+     * Create a new event
+     */
+    public function createEvent(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        if (!$user->is_organizer) {
+            return response()->json([
+                'message' => 'Accès refusé.',
+            ], 403);
+        }
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'event_date' => 'required|date|after:now',
+            'category_id' => 'required|exists:categories,id',
+            'venue_id' => 'nullable|exists:venues,id',
+            'venue_name' => 'required_if:venue_id,null|string|max:255',
+            'venue_city' => 'required_if:venue_id,null|string|max:255',
+            'venue_address' => 'required_if:venue_id,null|string|max:500',
+            'max_attendees' => 'nullable|integer|min:1',
+            'image_url' => 'nullable|url',
+            'is_active' => 'boolean',
+            'schedules' => 'required|array|min:1',
+            'schedules.*.starts_at' => 'required|date',
+            'schedules.*.ends_at' => 'required|date|after:schedules.*.starts_at',
+            'schedules.*.door_time' => 'nullable|date',
+            'ticket_types' => 'required|array|min:1',
+            'ticket_types.*.name' => 'required|string|max:255',
+            'ticket_types.*.description' => 'nullable|string',
+            'ticket_types.*.price' => 'required|numeric|min:0',
+            'ticket_types.*.capacity' => 'required|integer|min:1',
+            'ticket_types.*.is_active' => 'boolean'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $organizer = $user->organizers->first();
+            if (!$organizer) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Aucun organisateur associé à cet utilisateur'
+                ], 400);
+            }
+
+            // Créer le lieu si nécessaire
+            $venueId = $request->venue_id;
+            if (!$venueId) {
+                $venue = \App\Models\Venue::create([
+                    'name' => $request->venue_name,
+                    'city' => $request->venue_city,
+                    'address' => $request->venue_address,
+                    'capacity' => $request->max_attendees,
+                    'is_active' => true
+                ]);
+                $venueId = $venue->id;
+            }
+
+            // Créer l'événement
+            $event = Event::create([
+                'title' => $request->title,
+                'description' => $request->description,
+                'slug' => \Illuminate\Support\Str::slug($request->title . '-' . time()),
+                'event_date' => $request->event_date,
+                'organizer_id' => $organizer->id,
+                'category_id' => $request->category_id,
+                'venue_id' => $venueId,
+                'max_attendees' => $request->max_attendees,
+                'image_url' => $request->image_url,
+                'is_active' => $request->is_active ?? false,
+                'status' => $request->is_active ? 'published' : 'draft'
+            ]);
+
+            // Créer les horaires
+            foreach ($request->schedules as $scheduleData) {
+                \App\Models\Schedule::create([
+                    'event_id' => $event->id,
+                    'starts_at' => $scheduleData['starts_at'],
+                    'ends_at' => $scheduleData['ends_at'],
+                    'door_time' => $scheduleData['door_time'] ?? null
+                ]);
+            }
+
+            // Créer les types de billets
+            foreach ($request->ticket_types as $ticketTypeData) {
+                \App\Models\TicketType::create([
+                    'event_id' => $event->id,
+                    'name' => $ticketTypeData['name'],
+                    'description' => $ticketTypeData['description'],
+                    'price' => $ticketTypeData['price'],
+                    'capacity' => $ticketTypeData['capacity'],
+                    'is_active' => $ticketTypeData['is_active'] ?? true
+                ]);
+            }
+
+            DB::commit();
+
+            // Recharger l'événement avec ses relations
+            $event->load(['venue', 'category', 'schedules', 'ticketTypes']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Événement créé avec succès',
+                'data' => $event
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            \Illuminate\Support\Facades\Log::error('Erreur création événement', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la création de l\'événement'
+            ], 500);
+        }
+    }
+
+    /**
+     * Update an event
+     */
+    public function updateEvent(Request $request, $id): JsonResponse
+    {
+        $user = $request->user();
+        
+        if (!$user->is_organizer) {
+            return response()->json([
+                'message' => 'Accès refusé.',
+            ], 403);
+        }
+
+        $organizerIds = $user->organizers->pluck('id');
+        
+        $event = Event::whereIn('organizer_id', $organizerIds)
+            ->findOrFail($id);
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'title' => 'sometimes|string|max:255',
+            'description' => 'sometimes|nullable|string',
+            'is_active' => 'sometimes|boolean',
+            'status' => 'sometimes|in:draft,published,cancelled'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $event->update($request->only([
+                'title', 'description', 'is_active', 'status'
+            ]));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Événement mis à jour avec succès',
+                'data' => $event->fresh()
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la mise à jour'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get a specific event
+     */
+    public function getEvent(Request $request, $id): JsonResponse
+    {
+        $user = $request->user();
+        
+        if (!$user->is_organizer) {
+            return response()->json([
+                'message' => 'Accès refusé.',
+            ], 403);
+        }
+
+        $organizerIds = $user->organizers->pluck('id');
+        
+        $event = Event::whereIn('organizer_id', $organizerIds)
+            ->with(['venue', 'category', 'schedules', 'ticketTypes', 'tickets'])
+            ->findOrFail($id);
+
+        return response()->json([
+            'success' => true,
+            'data' => $event
+        ]);
+    }

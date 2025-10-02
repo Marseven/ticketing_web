@@ -86,7 +86,7 @@
             <p class="text-sm text-gray-600">Tickets vendus</p>
           </div>
           <div class="text-center">
-            <p class="text-2xl font-bold text-purple-600">{{ formatPrice(stats.totalRevenue) }} FCFA</p>
+            <p class="text-2xl font-bold text-purple-600">{{ formatPrice(stats.totalRevenue) }} XAF</p>
             <p class="text-sm text-gray-600">Revenus</p>
           </div>
         </div>
@@ -132,11 +132,11 @@
               <p class="text-gray-600 text-sm mb-4">{{ formatEventDate(event.date) }}</p>
               
               <div class="flex items-center justify-between mb-4">
-                <div class="text-sm text-gray-600">
-                  <span class="font-medium">{{ event.ticketsSold || 0 }}</span> / {{ event.totalTickets || 100 }} tickets vendus
+                <div class="text-sm text-gray-600 font-primea">
+                  <span class="font-medium font-primea">{{ event.tickets_sold || 0 }}</span> / {{ event.total_tickets || 0 }} tickets vendus
                 </div>
-                <div class="text-sm font-bold text-green-600">
-                  {{ formatPrice(event.revenue || 0) }} FCFA
+                <div class="text-sm font-bold text-green-600 font-primea">
+                  {{ formatPrice(event.revenue || 0) }} XAF
                 </div>
               </div>
               
@@ -194,22 +194,22 @@
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-primea">
                   {{ formatEventDate(event.date, 'short') }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span 
-                    class="px-2 py-1 rounded-full text-xs font-medium"
-                    :class="getStatusClass(event.status)"
+                    class="px-2 py-1 rounded-full text-xs font-medium font-primea"
+                    :class="getStatusClass(event)"
                   >
-                    {{ getStatusText(event.status) }}
+                    {{ getStatusText(event) }}
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ event.ticketsSold || 0 }} / {{ event.totalTickets || 100 }}
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-primea">
+                  {{ event.tickets_sold || 0 }} / {{ event.total_tickets || 0 }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
-                  {{ formatPrice(event.revenue || 0) }} FCFA
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600 font-primea">
+                  {{ formatPrice(event.revenue || 0) }} XAF
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                   <router-link 
@@ -260,14 +260,58 @@
           + Créer mon premier événement
         </router-link>
       </div>
+
+      <!-- Pagination -->
+      <div v-if="events.length > 0 && pagination.total > 1" class="mt-8 flex justify-center">
+        <nav class="flex items-center space-x-2">
+          <button
+            @click="changePage(pagination.current - 1)"
+            :disabled="pagination.current === 1"
+            class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed font-primea"
+          >
+            Précédent
+          </button>
+          
+          <template v-for="page in pagination.total" :key="page">
+            <button
+              v-if="page === 1 || page === pagination.total || (page >= pagination.current - 1 && page <= pagination.current + 1)"
+              @click="changePage(page)"
+              :class="[
+                'px-3 py-2 text-sm font-medium rounded-lg font-primea',
+                page === pagination.current
+                  ? 'bg-primea-blue text-white'
+                  : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+              ]"
+            >
+              {{ page }}
+            </button>
+            <span
+              v-else-if="page === pagination.current - 2 || page === pagination.current + 2"
+              class="px-2 text-gray-500"
+            >
+              ...
+            </span>
+          </template>
+          
+          <button
+            @click="changePage(pagination.current + 1)"
+            :disabled="pagination.current === pagination.total"
+            class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed font-primea"
+          >
+            Suivant
+          </button>
+        </nav>
+      </div>
       </div>
     </div>
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, reactive, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { organizerService } from '../../services/api'
 import { PlusIcon } from '@heroicons/vue/24/outline'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'OrganizerEvents',
@@ -281,61 +325,51 @@ export default {
     const searchQuery = ref('')
     const statusFilter = ref('')
     const viewMode = ref('grid')
+    const loading = ref(false)
+    const events = ref([])
+    const pagination = reactive({
+      current: 1,
+      total: 1,
+      perPage: 15
+    })
 
-    const events = ref([
-      {
-        id: 1,
-        title: "L'OISEAU RARE",
-        slug: 'oiseau-rare',
-        date: '2025-07-27T20:00:00',
-        venue: 'Entre Nous Bar',
-        image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400',
-        status: 'published',
-        ticketsSold: 85,
-        totalTickets: 150,
-        revenue: 850000,
-        isFavorite: true
-      },
-      {
-        id: 2,
-        title: 'Concert Jazz Night',
-        slug: 'concert-jazz-etoiles',
-        date: '2025-08-15T19:30:00',
-        venue: 'Palais de la Culture',
-        image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400',
-        status: 'draft',
-        ticketsSold: 0,
-        totalTickets: 200,
-        revenue: 0,
-        isFavorite: false
-      },
-      {
-        id: 3,
-        title: 'Festival Arts & Culture',
-        slug: 'festival-arts-culture',
-        date: '2025-09-10T14:00:00',
-        venue: 'Amphithéâtre National',
-        image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400',
-        status: 'published',
-        ticketsSold: 162,
-        totalTickets: 300,
-        revenue: 2430000,
-        isFavorite: false
-      },
-      {
-        id: 4,
-        title: 'Soirée Hip-Hop',
-        slug: 'soiree-hip-hop',
-        date: '2025-06-20T21:00:00',
-        venue: 'Club Central',
-        image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400',
-        status: 'completed',
-        ticketsSold: 120,
-        totalTickets: 120,
-        revenue: 1200000,
-        isFavorite: true
+    // Charger les événements depuis l'API
+    const loadEvents = async () => {
+      loading.value = true
+      try {
+        const response = await organizerService.getEvents({
+          page: pagination.current,
+          status: statusFilter.value,
+          search: searchQuery.value
+        })
+        
+        const data = response.data.data.events
+        events.value = data.data.map(event => ({
+          ...event,
+          tickets_sold: event.tickets?.filter(t => ['issued', 'used'].includes(t.status)).length || 0,
+          total_tickets: event.ticket_types?.reduce((sum, tt) => sum + tt.capacity, 0) || 0,
+          revenue: event.tickets?.filter(t => ['issued', 'used'].includes(t.status))
+            .reduce((sum, t) => sum + (t.ticket_type?.price || 0), 0) || 0,
+          venue: event.venue?.name || '',
+          image: event.image_url || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400',
+          date: event.event_date || event.schedules?.[0]?.starts_at,
+          isFavorite: false
+        }))
+        
+        pagination.current = data.current_page
+        pagination.total = data.last_page
+        pagination.perPage = data.per_page
+      } catch (error) {
+        console.error('Erreur chargement événements:', error)
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: 'Impossible de charger les événements'
+        })
+      } finally {
+        loading.value = false
       }
-    ])
+    }
 
     // Computed properties
     const filteredEvents = computed(() => {
@@ -359,9 +393,9 @@ export default {
     })
 
     const stats = computed(() => {
-      const published = events.value.filter(e => e.status === 'published').length
-      const draft = events.value.filter(e => e.status === 'draft').length
-      const totalTicketsSold = events.value.reduce((sum, e) => sum + (e.ticketsSold || 0), 0)
+      const published = events.value.filter(e => e.is_active && e.status !== 'cancelled').length
+      const draft = events.value.filter(e => !e.is_active).length
+      const totalTicketsSold = events.value.reduce((sum, e) => sum + (e.tickets_sold || 0), 0)
       const totalRevenue = events.value.reduce((sum, e) => sum + (e.revenue || 0), 0)
 
       return {
@@ -398,63 +432,116 @@ export default {
       })
     }
 
-    const getStatusClass = (status) => {
-      const classes = {
-        published: 'bg-green-100 text-green-800',
-        draft: 'bg-yellow-100 text-yellow-800',
-        cancelled: 'bg-red-100 text-red-800',
-        completed: 'bg-gray-100 text-gray-800'
-      }
-      return classes[status] || 'bg-gray-100 text-gray-800'
+    const getStatusClass = (event) => {
+      if (!event.is_active) return 'bg-yellow-100 text-yellow-800'
+      if (event.status === 'cancelled') return 'bg-red-100 text-red-800'
+      if (new Date(event.date) < new Date()) return 'bg-gray-100 text-gray-800'
+      return 'bg-green-100 text-green-800'
     }
 
-    const getStatusText = (status) => {
-      const texts = {
-        published: 'Publié',
-        draft: 'Brouillon',
-        cancelled: 'Annulé',
-        completed: 'Terminé'
-      }
-      return texts[status] || 'Inconnu'
+    const getStatusText = (event) => {
+      if (!event.is_active) return 'Brouillon'
+      if (event.status === 'cancelled') return 'Annulé'
+      if (new Date(event.date) < new Date()) return 'Terminé'
+      return 'Actif'
     }
 
     const toggleFavorite = (event) => {
       event.isFavorite = !event.isFavorite
+      // TODO: Sauvegarder en base
     }
 
-    const duplicateEvent = (event) => {
-      const newEvent = {
-        ...event,
-        id: Math.max(...events.value.map(e => e.id)) + 1,
-        title: `${event.title} (Copie)`,
-        status: 'draft',
-        ticketsSold: 0,
-        revenue: 0,
-        isFavorite: false
+    const duplicateEvent = async (event) => {
+      try {
+        const newEvent = {
+          title: `${event.title} (Copie)`,
+          description: event.description,
+          event_date: event.date,
+          venue_id: event.venue_id,
+          category_id: event.category_id,
+          is_active: false
+        }
+        
+        await organizerService.createEvent(newEvent)
+        await loadEvents()
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'Succès',
+          text: 'Événement dupliqué avec succès'
+        })
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: 'Impossible de dupliquer l\'événement'
+        })
       }
-      events.value.unshift(newEvent)
     }
 
     const editEvent = (event) => {
-      router.push(`/organizer/events/${event.id}/edit`)
+      router.push({ name: 'organizer-event-edit', params: { slug: event.slug } })
     }
 
-    const deleteEvent = (event) => {
-      if (confirm(`Êtes-vous sûr de vouloir supprimer l'événement "${event.title}" ?`)) {
-        const index = events.value.findIndex(e => e.id === event.id)
-        if (index > -1) {
-          events.value.splice(index, 1)
+    const deleteEvent = async (event) => {
+      const result = await Swal.fire({
+        title: 'Êtes-vous sûr ?',
+        text: `Voulez-vous vraiment supprimer l'événement "${event.title}" ?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Oui, supprimer',
+        cancelButtonText: 'Annuler'
+      })
+
+      if (result.isConfirmed) {
+        try {
+          // TODO: Implémenter la suppression via API
+          // await organizerService.deleteEvent(event.id)
+          await loadEvents()
+          
+          Swal.fire(
+            'Supprimé !',
+            'L\'événement a été supprimé.',
+            'success'
+          )
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: 'Impossible de supprimer l\'événement'
+          })
         }
       }
     }
+
+    // Watchers pour les filtres
+    watch([searchQuery, statusFilter], () => {
+      pagination.current = 1
+      loadEvents()
+    }, { debounce: 300 })
+
+    // Changer de page
+    const changePage = (page) => {
+      pagination.current = page
+      loadEvents()
+    }
+
+    // Charger les données au montage
+    onMounted(() => {
+      loadEvents()
+    })
 
     return {
       searchQuery,
       statusFilter,
       viewMode,
+      loading,
       events,
       filteredEvents,
       stats,
+      pagination,
       formatPrice,
       formatEventDate,
       getStatusClass,
@@ -462,7 +549,9 @@ export default {
       toggleFavorite,
       duplicateEvent,
       editEvent,
-      deleteEvent
+      deleteEvent,
+      loadEvents,
+      changePage
     }
   }
 }
@@ -524,5 +613,42 @@ export default {
 
 .transition-shadow {
   transition: box-shadow 0.2s ease-in-out;
+}
+
+/* Ajout des styles Primea */
+.text-primea-blue {
+  color: #272d63;
+}
+
+.bg-primea-blue {
+  background-color: #272d63;
+}
+
+.bg-primea-yellow {
+  background-color: #fab511;
+}
+
+.text-primea-yellow {
+  color: #fab511;
+}
+
+.hover\:bg-primea-yellow:hover {
+  background-color: #fab511;
+}
+
+.hover\:text-primea-blue:hover {
+  color: #272d63;
+}
+
+.rounded-primea {
+  border-radius: 12px;
+}
+
+.shadow-primea {
+  box-shadow: 0 2px 15px rgba(39, 45, 99, 0.08);
+}
+
+.font-primea {
+  font-family: 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 </style>
