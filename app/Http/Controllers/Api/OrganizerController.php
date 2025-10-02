@@ -917,3 +917,4 @@ class OrganizerController extends Controller
             'data' => $event
         ]);
     }
+}
