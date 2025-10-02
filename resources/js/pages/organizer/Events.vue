@@ -103,7 +103,7 @@
           >
             <div class="relative">
               <img 
-                :src="event.image || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400'" 
+                :src="event.image_url || event.image || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400'" 
                 :alt="event.title"
                 class="w-full h-48 object-cover"
               />
@@ -184,7 +184,7 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <img 
-                      :src="event.image || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=60'" 
+                      :src="event.image_url || event.image || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=60'" 
                       :alt="event.title"
                       class="w-12 h-12 object-cover rounded-lg mr-4"
                     />
@@ -351,7 +351,6 @@ export default {
           revenue: event.tickets?.filter(t => ['issued', 'used'].includes(t.status))
             .reduce((sum, t) => sum + (t.ticket_type?.price || 0), 0) || 0,
           venue: event.venue?.name || '',
-          image: event.image_url || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400',
           date: event.event_date || event.schedules?.[0]?.starts_at,
           isFavorite: false
         }))
