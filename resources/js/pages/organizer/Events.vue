@@ -557,18 +557,34 @@ export default {
       // Priorité: image_url puis image
       const imageUrl = event.image_url || event.image
       
-      if (imageUrl) {
-        // Vérifier si c'est déjà une URL complète ou si c'est juste un nom de fichier
-        if (imageUrl.startsWith('http')) {
-          return imageUrl
-        } else if (imageUrl.startsWith('/')) {
-          return imageUrl
-        } else {
-          // Construire l'URL complète si c'est juste un nom de fichier
-          return `/storage/events/${imageUrl}`
+      console.log('Image URL pour événement:', event.title, 'URL brute:', imageUrl)
+      
+      if (imageUrl && imageUrl.trim() !== '') {
+        let finalUrl = ''
+        
+        // Vérifier si c'est déjà une URL complète (commence par http:// ou https://)
+        if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+          finalUrl = imageUrl
+        } 
+        // Vérifier si c'est un chemin absolu (commence par /)
+        else if (imageUrl.startsWith('/')) {
+          finalUrl = imageUrl
+        } 
+        // Si c'est juste un nom de fichier, on essaie plusieurs endroits
+        else if (!imageUrl.includes('/')) {
+          // D'abord essayer dans /storage/events/
+          finalUrl = `/storage/events/${imageUrl}`
         }
+        // Sinon, utiliser tel quel (chemin relatif)
+        else {
+          finalUrl = imageUrl
+        }
+        
+        console.log('URL finale générée:', finalUrl)
+        return finalUrl
       }
       
+      console.log('Aucune image trouvée pour:', event.title)
       return ''
     }
 
