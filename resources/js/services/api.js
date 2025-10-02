@@ -341,6 +341,16 @@ export const organizerService = {
         'Content-Type': 'multipart/form-data'
       }
     })
+  },
+
+  // Récupérer les catégories
+  getCategories() {
+    return api.get('/categories')
+  },
+
+  // Récupérer les lieux/venues
+  getVenues() {
+    return api.get('/venues')
   }
 }
 
