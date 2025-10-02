@@ -9,19 +9,13 @@ const api = axios.create({
   },
 })
 
-// Intercepteur pour ajouter le token d'authentification et le CSRF token
+// Intercepteur pour ajouter le token d'authentification
 api.interceptors.request.use(
-  async (config) => {
+  (config) => {
     // Récupérer le token d'authentification
     const token = localStorage.getItem('auth_token') || localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
-    }
-    
-    // Ajouter le token CSRF pour Laravel Sanctum
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-    if (csrfToken) {
-      config.headers['X-CSRF-TOKEN'] = csrfToken
     }
     
     // Ajouter les headers requis pour Laravel
@@ -38,11 +32,15 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.log('Erreur API:', error.response?.status, error.response?.data)
+    
     if (error.response?.status === 401) {
       // Token expiré ou invalide
       localStorage.removeItem('auth_token')
       localStorage.removeItem('user')
       window.location.href = '/login'
+    } else if (error.response?.status === 419) {
+      console.error('CSRF token mismatch. Vérifiez la configuration Sanctum.')
     }
     return Promise.reject(error)
   }

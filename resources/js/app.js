@@ -13,6 +13,7 @@ app.use(pinia);
 
 // Initialiser le store d'authentification
 import { useAuthStore } from './stores/auth.js';
+
 app.mount('#app');
 
 // Initialiser l'authentification après le montage
