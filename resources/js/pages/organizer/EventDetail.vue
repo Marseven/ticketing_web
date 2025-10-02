@@ -202,10 +202,10 @@
                       <div class="text-sm font-primea">
                         <span class="font-medium text-gray-900">{{ ticket.sold || 0 }}</span>
                         <span class="text-gray-500"> / </span>
-                        <span class="font-medium text-gray-900">{{ ticket.capacity || ticket.quantity || 'Illimité' }}</span>
+                        <span class="font-medium text-gray-900">{{ getTicketCapacity(ticket) }}</span>
                       </div>
                       <div class="text-xs text-gray-500 mt-1">
-                        {{ ((ticket.sold || 0) / (ticket.capacity || ticket.quantity || 1) * 100).toFixed(0) }}% vendus
+                        {{ getTicketSalesPercentage(ticket) }}% vendus
                       </div>
                     </div>
                   </div>
@@ -554,6 +554,22 @@ const getEventStatusClass = (status) => {
     completed: 'bg-purple-100 text-purple-800'
   };
   return classes[status] || 'bg-gray-100 text-gray-800';
+};
+
+const getTicketCapacity = (ticket) => {
+  // Priorité: capacity -> available_quantity -> max_quantity -> quantity
+  return ticket.capacity || ticket.available_quantity || ticket.max_quantity || ticket.quantity || 'Illimité';
+};
+
+const getTicketSalesPercentage = (ticket) => {
+  const sold = ticket.sold || 0;
+  const capacity = ticket.capacity || ticket.available_quantity || ticket.max_quantity || ticket.quantity;
+  
+  if (!capacity || capacity === 'Illimité' || capacity <= 0) {
+    return 0;
+  }
+  
+  return Math.round((sold / capacity) * 100);
 };
 
 onMounted(() => {

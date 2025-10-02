@@ -487,7 +487,7 @@
                   <tr v-for="ticketType in (selectedEvent.ticketTypes || selectedEvent.ticket_types)" :key="ticketType.id" class="hover:bg-gray-50">
                     <td class="px-4 py-3 font-medium text-gray-900">{{ ticketType.name }}</td>
                     <td class="px-4 py-3 text-gray-900">{{ formatAmount(ticketType.price) }} XAF</td>
-                    <td class="px-4 py-3 text-gray-900">{{ ticketType.available_quantity || ticketType.max_quantity || ticketType.capacity || 0 }}</td>
+                    <td class="px-4 py-3 text-gray-900">{{ getTicketCapacity(ticketType) }}</td>
                     <td class="px-4 py-3">
                       <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full" 
                             :class="ticketType.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
@@ -766,7 +766,7 @@ export default {
             ticket_types: (data.data.event.ticket_types || data.data.event.ticketTypes || []).map(t => ({
               name: t.name,
               price: t.price,
-              capacity: t.available_quantity || t.capacity || 0,
+              capacity: t.capacity || t.available_quantity || t.max_quantity || t.quantity || 0,
               description: t.description || ''
             }))
           })
@@ -903,7 +903,7 @@ export default {
             ticket_types: (eventData.ticket_types || eventData.ticketTypes || []).map(t => ({
               name: t.name,
               price: t.price,
-              capacity: t.available_quantity || t.max_quantity || t.capacity || 0,
+              capacity: t.capacity || t.available_quantity || t.max_quantity || t.quantity || 0,
               description: t.description || ''
             }))
           })
@@ -1055,6 +1055,9 @@ export default {
       formatDateTime,
       getStatusName,
       getStatusBadgeClass,
+      getTicketCapacity: (ticket) => {
+        return ticket.capacity || ticket.available_quantity || ticket.max_quantity || ticket.quantity || 0;
+      },
     }
   }
 }

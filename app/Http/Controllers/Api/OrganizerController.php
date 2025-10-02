@@ -809,8 +809,8 @@ class OrganizerController extends Controller
                     'name' => $ticketTypeData['name'],
                     'description' => $ticketTypeData['description'],
                     'price' => $ticketTypeData['price'],
-                    'capacity' => $ticketTypeData['capacity'],
-                    'is_active' => $ticketTypeData['is_active'] ?? true
+                    'available_quantity' => $ticketTypeData['capacity'],
+                    'status' => ($ticketTypeData['is_active'] ?? true) ? 'active' : 'inactive'
                 ]);
             }
 
