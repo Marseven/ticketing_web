@@ -390,10 +390,10 @@
               </div>
 
               <!-- Current image preview -->
-              <div v-if="event && event.image_url" class="bg-white rounded-primea shadow-primea p-6">
+              <div v-if="event" class="bg-white rounded-primea shadow-primea p-6">
                 <h3 class="text-lg font-semibold text-primea-blue font-primea mb-4">Image actuelle</h3>
                 <img 
-                  :src="event.image_url" 
+                  :src="getCurrentImageUrl()" 
                   :alt="event.title" 
                   class="w-full h-48 object-cover rounded-primea"
                   @error="handleImageError"
@@ -722,8 +722,36 @@ const removeImage = () => {
   }
 };
 
+const getCurrentImageUrl = () => {
+  // Priorité: image en cours d'édition, puis image actuelle, puis placeholder
+  if (form.image_preview) {
+    return form.image_preview;
+  }
+  
+  if (!event.value) return 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop&crop=center';
+  
+  const imageUrl = event.value.image_url || event.value.image;
+  
+  if (imageUrl) {
+    // Vérifier si c'est déjà une URL complète ou si c'est juste un nom de fichier
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    } else if (imageUrl.startsWith('/')) {
+      return imageUrl;
+    } else {
+      // Construire l'URL complète si c'est juste un nom de fichier
+      return `/storage/events/${imageUrl}`;
+    }
+  }
+  
+  // Image placeholder par défaut
+  return 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop&crop=center';
+};
+
 const handleImageError = (event) => {
   console.log('Erreur de chargement d\'image:', event.target.src);
+  // Remplacer par l'image placeholder en cas d'erreur
+  event.target.src = 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop&crop=center';
 };
 
 const handleImageLoad = (event) => {
