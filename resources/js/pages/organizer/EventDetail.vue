@@ -278,6 +278,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { organizerService } from '../../services/api';
+import Swal from 'sweetalert2';
 import { 
   ArrowLeftIcon,
   ExclamationTriangleIcon,
@@ -307,217 +309,89 @@ const loadEvent = async () => {
   error.value = null;
   
   try {
-    let slug = route.params.slug;
+    let identifier = route.params.slug;
     
-    // Gestion des anciens liens avec des IDs numériques
-    if (/^\d+$/.test(slug)) {
-      const idToSlug = {
-        '1': 'concert-jazz-etoiles',
-        '2': 'oiseau-rare', 
-        '3': 'festival-arts-culture',
-        '4': 'soiree-hip-hop',
-        '5': 'festival-gastronomique'
-      };
-      
-      if (idToSlug[slug]) {
-        // Rediriger vers l'URL avec le slug
-        router.replace({ name: 'organizer-event-detail', params: { slug: idToSlug[slug] } });
-        return;
-      }
-    }
-    
-    // Simulation d'appel API
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Base de données simulée d'événements
-    const events = {
-      'concert-jazz-etoiles': {
-        id: 1,
-        title: 'Concert Jazz sous les étoiles',
-        slug: 'concert-jazz-etoiles',
-        description: 'Une soirée musicale exceptionnelle sous un ciel étoilé avec les plus grands artistes de jazz de la région.',
-        venue_name: 'Palais de la Culture',
-        venue_address: '123 Avenue de la République, Abidjan',
-        event_date: '2025-10-15T20:00:00Z',
-        status: 'active',
-        category_name: 'Musique',
-        max_attendees: 500,
-        tickets_sold: 45,
-        total_revenue: 2250000,
-        is_public: true,
-        sales_active: true,
-        image_url: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400',
-        created_at: '2025-09-01T10:00:00Z',
-        ticket_types: [
-          {
-            id: 1,
-            name: 'Billet Standard',
-            description: 'Accès général à l\'événement',
-            price: 25000,
-            quantity: 300,
-            sold: 32,
-            is_active: true
-          },
-          {
-            id: 2,
-            name: 'Billet VIP',
-            description: 'Accès VIP avec boissons incluses',
-            price: 50000,
-            quantity: 100,
-            sold: 13,
-            is_active: true
-          }
-        ]
-      },
-      'oiseau-rare': {
-        id: 2,
-        title: "L'OISEAU RARE",
-        slug: 'oiseau-rare',
-        description: 'Concert intimiste dans un cadre exceptionnel',
-        venue_name: 'Entre Nous Bar',
-        venue_address: '456 Rue des Arts, Abidjan',
-        event_date: '2025-07-27T20:00:00Z',
-        status: 'published',
-        category_name: 'Musique',
-        max_attendees: 150,
-        tickets_sold: 85,
-        total_revenue: 850000,
-        is_public: true,
-        sales_active: true,
-        image_url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400',
-        created_at: '2025-06-15T10:00:00Z',
-        ticket_types: [
-          {
-            id: 3,
-            name: 'Entrée Standard',
-            description: 'Accès à la soirée',
-            price: 10000,
-            quantity: 150,
-            sold: 85,
-            is_active: true
-          }
-        ]
-      },
-      'festival-arts-culture': {
-        id: 3,
-        title: 'Festival Arts & Culture',
-        slug: 'festival-arts-culture',
-        description: 'Un festival célébrant la richesse culturelle ivoirienne',
-        venue_name: 'Amphithéâtre National',
-        venue_address: '789 Boulevard de la Culture, Abidjan',
-        event_date: '2025-09-10T14:00:00Z',
-        status: 'published',
-        category_name: 'Culture',
-        max_attendees: 300,
-        tickets_sold: 162,
-        total_revenue: 2430000,
-        is_public: true,
-        sales_active: true,
-        image_url: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400',
-        created_at: '2025-07-01T10:00:00Z',
-        ticket_types: [
-          {
-            id: 4,
-            name: 'Pass Journée',
-            description: 'Accès toute la journée',
-            price: 15000,
-            quantity: 300,
-            sold: 162,
-            is_active: true
-          }
-        ]
-      },
-      'soiree-hip-hop': {
-        id: 4,
-        title: 'Soirée Hip-Hop',
-        slug: 'soiree-hip-hop',
-        description: 'Soirée hip-hop avec les meilleurs artistes locaux',
-        venue_name: 'Club Central',
-        venue_address: '321 Avenue Central, Abidjan',
-        event_date: '2025-06-20T21:00:00Z',
-        status: 'completed',
-        category_name: 'Musique',
-        max_attendees: 120,
-        tickets_sold: 120,
-        total_revenue: 1200000,
-        is_public: true,
-        sales_active: false,
-        image_url: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400',
-        created_at: '2025-05-01T10:00:00Z',
-        ticket_types: [
-          {
-            id: 5,
-            name: 'Entrée VIP',
-            description: 'Accès VIP avec bar',
-            price: 10000,
-            quantity: 120,
-            sold: 120,
-            is_active: false
-          }
-        ]
-      },
-      'festival-gastronomique': {
-        id: 5,
-        title: 'Festival Gastronomique',
-        slug: 'festival-gastronomique',
-        description: 'Découverte de la gastronomie ivoirienne et internationale',
-        venue_name: 'Centre des Expositions',
-        venue_address: '654 Zone Industrielle, Abidjan',
-        event_date: '2025-11-02T12:00:00Z',
-        status: 'draft',
-        category_name: 'Gastronomie',
-        max_attendees: 400,
-        tickets_sold: 0,
-        total_revenue: 0,
-        is_public: false,
-        sales_active: false,
-        image_url: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400',
-        created_at: '2025-09-15T10:00:00Z',
-        ticket_types: [
-          {
-            id: 6,
-            name: 'Pass Dégustation',
-            description: 'Accès aux stands de dégustation',
-            price: 20000,
-            quantity: 400,
-            sold: 0,
-            is_active: false
-          }
-        ]
-      }
-    };
-
-    // Vérifier si l'événement existe
-    if (events[slug]) {
-      event.value = events[slug];
-
-      // Commandes récentes simulées basées sur l'événement
-      if (event.value.tickets_sold > 0) {
-        recentOrders.value = [
-          {
-            id: 1,
-            customer_name: 'Kofi Asante',
-            ticket_quantity: 2,
-            total_amount: event.value.ticket_types[0].price * 2,
-            created_at: '2025-09-19T14:30:00Z'
-          },
-          {
-            id: 2,
-            customer_name: 'Aminata Traore',
-            ticket_quantity: 1,
-            total_amount: event.value.ticket_types[0].price,
-            created_at: '2025-09-18T09:15:00Z'
-          }
-        ];
-      } else {
-        recentOrders.value = [];
-      }
+    // Déterminer si c'est un ID numérique ou un slug
+    let eventData;
+    if (/^\d+$/.test(identifier)) {
+      // C'est un ID numérique
+      const response = await organizerService.getEvent(identifier);
+      eventData = response.data.data;
     } else {
-      error.value = `Événement avec le slug "${slug}" non trouvé`;
+      // C'est un slug, on doit chercher par slug
+      // Pour l'instant, on va essayer de récupérer tous les événements et chercher par slug
+      try {
+        const eventsResponse = await organizerService.getEvents();
+        const events = eventsResponse.data.data.events.data || eventsResponse.data.data.events;
+        eventData = events.find(e => e.slug === identifier);
+        
+        if (!eventData) {
+          throw new Error(`Événement avec le slug "${identifier}" non trouvé`);
+        }
+      } catch (eventsError) {
+        // Si la recherche par slug échoue, essayons directement avec l'ID si c'est un slug qui ressemble à un ID
+        throw new Error(`Événement avec le slug "${identifier}" non trouvé`);
+      }
     }
+    
+    if (!eventData) {
+      throw new Error(`Événement introuvable`);
+    }
+    
+    // Transformer les données pour correspondre au format attendu
+    event.value = {
+      ...eventData,
+      venue_name: eventData.venue?.name || 'Lieu non spécifié',
+      venue_address: eventData.venue?.address || '',
+      category_name: eventData.category?.name || 'Non spécifiée',
+      tickets_sold: eventData.tickets?.filter(t => ['issued', 'used'].includes(t.status)).length || 0,
+      total_revenue: eventData.tickets?.filter(t => ['issued', 'used'].includes(t.status))
+        .reduce((sum, ticket) => sum + (ticket.ticket_type?.price || 0), 0) || 0,
+      is_public: eventData.is_active || false,
+      sales_active: eventData.is_active || false
+    };
+    
+    // Calculer les statistiques des types de billets si disponibles
+    if (eventData.ticket_types) {
+      event.value.ticket_types = eventData.ticket_types.map(ticketType => ({
+        ...ticketType,
+        sold: eventData.tickets?.filter(t => 
+          t.ticket_type_id === ticketType.id && ['issued', 'used'].includes(t.status)
+        ).length || 0
+      }));
+    }
+    
+    // Charger les commandes récentes (simulation pour l'instant)
+    if (event.value.tickets_sold > 0) {
+      recentOrders.value = [
+        {
+          id: 1,
+          customer_name: 'Kofi Asante',
+          ticket_quantity: 2,
+          total_amount: event.value.ticket_types?.[0]?.price * 2 || 50000,
+          created_at: new Date(Date.now() - 86400000).toISOString() // 1 jour avant
+        },
+        {
+          id: 2,
+          customer_name: 'Aminata Traore',
+          ticket_quantity: 1,
+          total_amount: event.value.ticket_types?.[0]?.price || 25000,
+          created_at: new Date(Date.now() - 172800000).toISOString() // 2 jours avant
+        }
+      ];
+    } else {
+      recentOrders.value = [];
+    }
+    
   } catch (err) {
-    error.value = 'Erreur lors du chargement de l\'événement';
-    console.error('Erreur:', err);
+    console.error('Erreur lors du chargement de l\'événement:', err);
+    if (err.response?.status === 404) {
+      error.value = `Événement avec l'identifiant "${route.params.slug}" non trouvé`;
+    } else if (err.message) {
+      error.value = err.message;
+    } else {
+      error.value = 'Erreur lors du chargement de l\'événement';
+    }
   } finally {
     loading.value = false;
   }
@@ -528,17 +402,64 @@ const editEvent = () => {
 };
 
 const publishEvent = async () => {
-  if (confirm('Êtes-vous sûr de vouloir publier cet événement ?')) {
-    // Simulation d'appel API
-    event.value.status = 'active';
-    alert('Événement publié avec succès !');
+  const result = await Swal.fire({
+    title: 'Publier l\'événement',
+    text: 'Êtes-vous sûr de vouloir publier cet événement ?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#272d63',
+    cancelButtonColor: '#6b7280',
+    confirmButtonText: 'Oui, publier',
+    cancelButtonText: 'Annuler'
+  });
+  
+  if (result.isConfirmed) {
+    try {
+      await organizerService.updateEvent(event.value.id, {
+        status: 'published',
+        is_active: true
+      });
+      
+      event.value.status = 'published';
+      event.value.is_active = true;
+      
+      Swal.fire({
+        title: 'Succès !',
+        text: 'Événement publié avec succès !',
+        icon: 'success',
+        confirmButtonColor: '#272d63'
+      });
+    } catch (err) {
+      console.error('Erreur publication:', err);
+      Swal.fire({
+        title: 'Erreur',
+        text: 'Erreur lors de la publication de l\'événement',
+        icon: 'error',
+        confirmButtonColor: '#272d63'
+      });
+    }
   }
 };
 
-const shareEvent = () => {
+const shareEvent = async () => {
   const url = `${window.location.origin}/events/${event.value.slug}`;
-  navigator.clipboard.writeText(url);
-  alert('Lien copié dans le presse-papiers !');
+  try {
+    await navigator.clipboard.writeText(url);
+    Swal.fire({
+      title: 'Lien copié !',
+      text: 'Le lien de l\'événement a été copié dans le presse-papiers',
+      icon: 'success',
+      timer: 2000,
+      showConfirmButton: false
+    });
+  } catch (err) {
+    Swal.fire({
+      title: 'Lien de l\'événement',
+      html: `<input type="text" value="${url}" class="w-full p-2 border rounded" readonly onclick="this.select()">`,
+      showConfirmButton: false,
+      showCloseButton: true
+    });
+  }
 };
 
 const viewPublicPage = () => {
@@ -547,7 +468,12 @@ const viewPublicPage = () => {
 };
 
 const exportData = () => {
-  alert('Fonctionnalité d\'export en cours de développement');
+  Swal.fire({
+    title: 'Export des données',
+    text: 'Fonctionnalité d\'export en cours de développement',
+    icon: 'info',
+    confirmButtonColor: '#272d63'
+  });
 };
 
 // Utilitaires

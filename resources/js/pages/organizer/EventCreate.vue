@@ -63,6 +63,7 @@
                   <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Catégorie</label>
                   <select 
                     v-model="form.category_name"
+                    required
                     class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
                   >
                     <option value="">Sélectionner une catégorie</option>
@@ -178,13 +179,14 @@
                     </div>
 
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Quantité</label>
+                      <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Capacité</label>
                       <input 
-                        v-model="ticket.quantity"
+                        v-model="ticket.capacity"
                         type="number" 
                         min="1"
+                        required
                         class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
-                        placeholder="100 (optionnel)"
+                        placeholder="100"
                       />
                     </div>
 
@@ -355,7 +357,7 @@ const form = reactive({
 
 // Computed
 const totalCapacity = computed(() => {
-  return form.ticket_types.reduce((total, type) => total + (parseInt(type.quantity) || 0), 0);
+  return form.ticket_types.reduce((total, type) => total + (parseInt(type.capacity) || 0), 0);
 });
 
 const minPrice = computed(() => {
@@ -376,7 +378,7 @@ const addTicketType = () => {
     name: '',
     description: '',
     price: '',
-    quantity: '',
+    capacity: '',
     is_active: true
   });
 };
@@ -390,35 +392,91 @@ const removeTicketType = (index) => {
 const createEvent = async () => {
   // Validation de base
   if (form.ticket_types.length === 0) {
-    alert('Veuillez ajouter au moins un type de billet');
+    Swal.fire({
+      title: 'Erreur',
+      text: 'Veuillez ajouter au moins un type de billet',
+      icon: 'error',
+      confirmButtonColor: '#272d63'
+    });
     return;
   }
 
   if (!form.title || !form.event_date || !form.venue_name) {
-    alert('Veuillez remplir tous les champs obligatoires');
+    Swal.fire({
+      title: 'Erreur',
+      text: 'Veuillez remplir tous les champs obligatoires',
+      icon: 'error',
+      confirmButtonColor: '#272d63'
+    });
     return;
   }
 
   creating.value = true;
   try {
-    // Simulation d'appel API
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    // Préparer les données pour l'API
+    const eventData = {
+      title: form.title,
+      description: form.description,
+      event_date: form.event_date,
+      category_id: getCategoryId(form.category_name), // On devra implémenter cette fonction
+      venue_name: form.venue_name,
+      venue_city: 'Abidjan', // Valeur par défaut
+      venue_address: form.venue_address || form.venue_name,
+      max_attendees: form.max_attendees ? parseInt(form.max_attendees) : null,
+      image_url: form.image_url,
+      is_active: form.status === 'published',
+      schedules: [{
+        starts_at: form.event_date,
+        ends_at: new Date(new Date(form.event_date).getTime() + 3 * 60 * 60 * 1000).toISOString(), // +3h par défaut
+        door_time: new Date(new Date(form.event_date).getTime() - 30 * 60 * 1000).toISOString() // -30min par défaut
+      }],
+      ticket_types: form.ticket_types.map(ticket => ({
+        name: ticket.name,
+        description: ticket.description,
+        price: parseFloat(ticket.price),
+        capacity: parseInt(ticket.capacity),
+        is_active: ticket.is_active
+      }))
+    };
     
-    // Générer un slug basé sur le titre
-    const slug = form.title
-      .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, '')
-      .replace(/\s+/g, '-')
-      .slice(0, 50);
+    const response = await organizerService.createEvent(eventData);
     
-    alert('Événement créé avec succès !');
-    router.push(`/organizer/events/${slug}`);
+    if (response.data.success) {
+      Swal.fire({
+        title: 'Succès !',
+        text: 'Événement créé avec succès !',
+        icon: 'success',
+        confirmButtonColor: '#272d63'
+      }).then(() => {
+        router.push(`/organizer/events/${response.data.data.id}`);
+      });
+    } else {
+      throw new Error(response.data.message || 'Erreur lors de la création');
+    }
   } catch (err) {
-    alert('Erreur lors de la création de l\'événement');
-    console.error('Erreur:', err);
+    console.error('Erreur création événement:', err);
+    Swal.fire({
+      title: 'Erreur',
+      text: err.response?.data?.message || 'Erreur lors de la création de l\'événement',
+      icon: 'error',
+      confirmButtonColor: '#272d63'
+    });
   } finally {
     creating.value = false;
   }
+};
+
+// Fonction utilitaire pour obtenir l'ID de catégorie
+const getCategoryId = (categoryName) => {
+  const categoryMap = {
+    'Musique': 1,
+    'Culture': 2,
+    'Gastronomie': 3,
+    'Sport': 4,
+    'Business': 5,
+    'Autres': 6
+  };
+  return categoryMap[categoryName] || 6; // Par défaut "Autres"
 };
 
 // Utilitaires
