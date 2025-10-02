@@ -111,26 +111,6 @@
                   </div>
                 </div>
 
-                <div v-if="!showNewVenue && form.venue_id !== 'new'">
-                  <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Ville</label>
-                  <input 
-                    v-model="form.venue_city"
-                    type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
-                    placeholder="Ville du lieu"
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Capacité maximale</label>
-                  <input 
-                    v-model="form.max_attendees"
-                    type="number" 
-                    min="1"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
-                    placeholder="Nombre de places (optionnel)"
-                  />
-                </div>
 
                 <div class="md:col-span-2">
                   <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Image de l'événement</label>
@@ -441,8 +421,6 @@ const form = reactive({
   description: '',
   category_id: '',
   venue_id: '',
-  venue_city: '',
-  max_attendees: '',
   image_url: '',
   image_preview: '',
   image_file: null,
@@ -607,9 +585,8 @@ const createEvent = async () => {
       category_id: form.category_id,
       venue_id: form.venue_id !== 'new' ? form.venue_id : null,
       venue_name: form.venue_id === 'new' ? form.new_venue_name : null,
-      venue_city: form.venue_id === 'new' ? form.new_venue_city : form.venue_city,
+      venue_city: form.venue_id === 'new' ? form.new_venue_city : 'Abidjan',
       venue_address: form.venue_id === 'new' ? form.new_venue_address : null,
-      max_attendees: form.max_attendees ? parseInt(form.max_attendees) : null,
       image_url: form.image_url,
       is_active: form.status === 'published',
       schedules: form.schedules.map(schedule => ({
