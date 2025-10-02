@@ -244,3 +244,7 @@ Route::prefix('v1')->group(function () {
         });
     });
 });
+
+// Routes générales pour les ressources partagées
+Route::get('categories', [App\Http\Controllers\Api\CategoryController::class, 'index']);
+Route::get('venues', [App\Http\Controllers\Api\VenueController::class, 'index']);
