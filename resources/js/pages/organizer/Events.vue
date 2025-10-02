@@ -103,9 +103,11 @@
           >
             <div class="relative">
               <img 
-                :src="event.image_url || event.image || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400'" 
+                :src="getEventImageUrl(event)" 
                 :alt="event.title"
                 class="w-full h-48 object-cover"
+                @error="handleImageError"
+                @load="handleImageLoad"
               />
               <div class="absolute top-4 left-4">
                 <span 
@@ -184,9 +186,11 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <img 
-                      :src="event.image_url || event.image || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=60'" 
+                      :src="getEventImageUrl(event, '60')" 
                       :alt="event.title"
                       class="w-12 h-12 object-cover rounded-lg mr-4"
+                      @error="handleImageError"
+                      @load="handleImageLoad"
                     />
                     <div>
                       <div class="text-sm font-medium text-gray-900">{{ event.title }}</div>
@@ -527,6 +531,37 @@ export default {
       loadEvents()
     }
 
+    // Gestion des images
+    const getEventImageUrl = (event, size = '400') => {
+      // Priorité: image_url puis image, puis placeholder
+      const imageUrl = event.image_url || event.image
+      
+      if (imageUrl) {
+        // Vérifier si c'est déjà une URL complète ou si c'est juste un nom de fichier
+        if (imageUrl.startsWith('http')) {
+          return imageUrl
+        } else if (imageUrl.startsWith('/')) {
+          return imageUrl
+        } else {
+          // Construire l'URL complète si c'est juste un nom de fichier
+          return `/storage/events/${imageUrl}`
+        }
+      }
+      
+      // Image placeholder par défaut comme sur la page d'accueil
+      return `https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=${size}&h=${size}&fit=crop&crop=center`
+    }
+
+    const handleImageError = (event) => {
+      console.log('Erreur de chargement d\'image:', event.target.src)
+      // Remplacer par l'image placeholder en cas d'erreur
+      event.target.src = 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop&crop=center'
+    }
+
+    const handleImageLoad = (event) => {
+      console.log('Image chargée avec succès:', event.target.src)
+    }
+
     // Charger les données au montage
     onMounted(() => {
       loadEvents()
@@ -550,7 +585,10 @@ export default {
       editEvent,
       deleteEvent,
       loadEvents,
-      changePage
+      changePage,
+      getEventImageUrl,
+      handleImageError,
+      handleImageLoad
     }
   }
 }

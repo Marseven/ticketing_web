@@ -97,7 +97,7 @@
               </div>
               <div class="ml-4">
                 <p class="text-sm text-gray-600 font-primea">Capacité</p>
-                <p class="text-2xl font-bold text-yellow-600 font-primea">{{ event.max_attendees || 'Illimitée' }}</p>
+                <p class="text-2xl font-bold text-yellow-600 font-primea">{{ getTotalCapacity() }}</p>
               </div>
             </div>
           </div>
@@ -109,7 +109,7 @@
               </div>
               <div class="ml-4">
                 <p class="text-sm text-gray-600 font-primea">Date</p>
-                <p class="text-lg font-bold text-purple-600 font-primea">{{ formatDate(event.event_date) }}</p>
+                <p class="text-lg font-bold text-purple-600 font-primea">{{ getEventDate() }}</p>
               </div>
             </div>
           </div>
@@ -567,15 +567,20 @@ const getEventStatusClass = (status) => {
 
 const getTicketCapacity = (ticket) => {
   // Priorité: capacity -> available_quantity -> max_quantity -> quantity
-  const capacity = ticket.capacity || ticket.available_quantity || ticket.max_quantity || ticket.quantity;
-  return capacity || 'Illimité';
+  const capacity = ticket.capacity ?? ticket.available_quantity ?? ticket.max_quantity ?? ticket.quantity;
+  
+  if (capacity === null || capacity === undefined) {
+    return 'Illimité';
+  }
+  
+  return typeof capacity === 'number' ? new Intl.NumberFormat('fr-FR').format(capacity) : capacity;
 };
 
 const getTicketSalesPercentage = (ticket) => {
   const sold = ticket.sold || 0;
-  const capacity = ticket.capacity || ticket.available_quantity || ticket.max_quantity || ticket.quantity;
+  const capacity = ticket.capacity ?? ticket.available_quantity ?? ticket.max_quantity ?? ticket.quantity;
   
-  if (!capacity || capacity === 'Illimité' || capacity <= 0) {
+  if (capacity === null || capacity === undefined || capacity <= 0) {
     return 0;
   }
   
@@ -589,6 +594,35 @@ const handleImageError = (event) => {
 
 const handleImageLoad = (event) => {
   console.log('Image chargée avec succès:', event.target.src);
+};
+
+const getTotalCapacity = () => {
+  if (!event.value || !event.value.ticket_types) return 'Non définie';
+  
+  const total = event.value.ticket_types.reduce((sum, ticket) => {
+    const capacity = ticket.capacity || ticket.available_quantity || ticket.max_quantity || ticket.quantity || 0;
+    return sum + (typeof capacity === 'number' ? capacity : 0);
+  }, 0);
+  
+  return total > 0 ? new Intl.NumberFormat('fr-FR').format(total) : 'Non définie';
+};
+
+const getEventDate = () => {
+  if (!event.value) return 'Non définie';
+  
+  // Priorité : event_date, puis première programmation
+  if (event.value.event_date && event.value.event_date !== 'Invalid Date') {
+    return formatDate(event.value.event_date);
+  }
+  
+  if (event.value.schedules && event.value.schedules.length > 0) {
+    const firstSchedule = event.value.schedules[0];
+    if (firstSchedule.starts_at) {
+      return formatDate(firstSchedule.starts_at);
+    }
+  }
+  
+  return 'Non définie';
 };
 
 onMounted(() => {
