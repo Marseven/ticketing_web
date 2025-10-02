@@ -725,8 +725,7 @@ class OrganizerController extends Controller
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'event_date' => 'required|date|after:now',
-            'category_id' => 'required|exists:categories,id',
+            'category_id' => 'required|exists:event_categories,id',
             'venue_id' => 'nullable|exists:venues,id',
             'venue_name' => 'required_if:venue_id,null|string|max:255',
             'venue_city' => 'required_if:venue_id,null|string|max:255',

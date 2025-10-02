@@ -13,9 +13,8 @@ class CategoryController extends Controller
      */
     public function index(): JsonResponse
     {
-        $categories = Category::where('is_active', true)
-            ->orderBy('name')
-            ->get(['id', 'name', 'slug', 'description', 'color']);
+        $categories = Category::orderBy('name')
+            ->get(['id', 'name', 'slug']);
 
         return response()->json([
             'success' => true,
