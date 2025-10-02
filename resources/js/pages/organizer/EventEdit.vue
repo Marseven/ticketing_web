@@ -206,9 +206,9 @@
                       </div>
 
                       <div>
-                        <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Quantité</label>
+                        <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Capacité</label>
                         <input 
-                          v-model="ticket.quantity"
+                          v-model="ticket.capacity"
                           type="number" 
                           min="1"
                           class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
@@ -321,6 +321,8 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { organizerService } from '../../services/api';
+import Swal from 'sweetalert2';
 import { 
   ArrowLeftIcon,
   ExclamationTriangleIcon,
@@ -360,171 +362,72 @@ const loadEvent = async () => {
   error.value = null;
   
   try {
-    const slug = route.params.slug;
+    let identifier = route.params.slug;
     
-    // Simulation d'appel API
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Base de données simulée (même que EventDetail.vue)
-    const events = {
-      'concert-jazz-etoiles': {
-        id: 1,
-        title: 'Concert Jazz sous les étoiles',
-        slug: 'concert-jazz-etoiles',
-        description: 'Une soirée musicale exceptionnelle sous un ciel étoilé avec les plus grands artistes de jazz de la région.',
-        venue_name: 'Palais de la Culture',
-        venue_address: '123 Avenue de la République, Abidjan',
-        event_date: '2025-10-15T20:00:00',
-        status: 'active',
-        category_name: 'Musique',
-        max_attendees: 500,
-        is_public: true,
-        sales_active: true,
-        image_url: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400',
-        ticket_types: [
-          {
-            id: 1,
-            name: 'Billet Standard',
-            description: 'Accès général à l\'événement',
-            price: 25000,
-            quantity: 300,
-            is_active: true
-          },
-          {
-            id: 2,
-            name: 'Billet VIP',
-            description: 'Accès VIP avec boissons incluses',
-            price: 50000,
-            quantity: 100,
-            is_active: true
-          }
-        ]
-      },
-      'oiseau-rare': {
-        id: 2,
-        title: "L'OISEAU RARE",
-        slug: 'oiseau-rare',
-        description: 'Concert intimiste dans un cadre exceptionnel',
-        venue_name: 'Entre Nous Bar',
-        venue_address: '456 Rue des Arts, Abidjan',
-        event_date: '2025-07-27T20:00:00',
-        status: 'published',
-        category_name: 'Musique',
-        max_attendees: 150,
-        is_public: true,
-        sales_active: true,
-        image_url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400',
-        ticket_types: [
-          {
-            id: 3,
-            name: 'Entrée Standard',
-            description: 'Accès à la soirée',
-            price: 10000,
-            quantity: 150,
-            is_active: true
-          }
-        ]
-      },
-      'festival-arts-culture': {
-        id: 3,
-        title: 'Festival Arts & Culture',
-        slug: 'festival-arts-culture',
-        description: 'Un festival célébrant la richesse culturelle ivoirienne',
-        venue_name: 'Amphithéâtre National',
-        venue_address: '789 Boulevard de la Culture, Abidjan',
-        event_date: '2025-09-10T14:00:00',
-        status: 'published',
-        category_name: 'Culture',
-        max_attendees: 300,
-        is_public: true,
-        sales_active: true,
-        image_url: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400',
-        ticket_types: [
-          {
-            id: 4,
-            name: 'Pass Journée',
-            description: 'Accès toute la journée',
-            price: 15000,
-            quantity: 300,
-            is_active: true
-          }
-        ]
-      },
-      'soiree-hip-hop': {
-        id: 4,
-        title: 'Soirée Hip-Hop',
-        slug: 'soiree-hip-hop',
-        description: 'Soirée hip-hop avec les meilleurs artistes locaux',
-        venue_name: 'Club Central',
-        venue_address: '321 Avenue Central, Abidjan',
-        event_date: '2025-06-20T21:00:00',
-        status: 'completed',
-        category_name: 'Musique',
-        max_attendees: 120,
-        is_public: true,
-        sales_active: false,
-        image_url: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400',
-        ticket_types: [
-          {
-            id: 5,
-            name: 'Entrée VIP',
-            description: 'Accès VIP avec bar',
-            price: 10000,
-            quantity: 120,
-            is_active: false
-          }
-        ]
-      },
-      'festival-gastronomique': {
-        id: 5,
-        title: 'Festival Gastronomique',
-        slug: 'festival-gastronomique',
-        description: 'Découverte de la gastronomie ivoirienne et internationale',
-        venue_name: 'Centre des Expositions',
-        venue_address: '654 Zone Industrielle, Abidjan',
-        event_date: '2025-11-02T12:00:00',
-        status: 'draft',
-        category_name: 'Gastronomie',
-        max_attendees: 400,
-        is_public: false,
-        sales_active: false,
-        image_url: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400',
-        ticket_types: [
-          {
-            id: 6,
-            name: 'Pass Dégustation',
-            description: 'Accès aux stands de dégustation',
-            price: 20000,
-            quantity: 400,
-            is_active: false
-          }
-        ]
-      }
-    };
-
-    if (events[slug]) {
-      event.value = events[slug];
-      
-      // Remplir le formulaire avec les données existantes
-      Object.assign(form, {
-        title: event.value.title,
-        description: event.value.description,
-        event_date: event.value.event_date,
-        category_name: event.value.category_name,
-        venue_name: event.value.venue_name,
-        venue_address: event.value.venue_address,
-        max_attendees: event.value.max_attendees,
-        image_url: event.value.image_url,
-        is_public: event.value.is_public,
-        sales_active: event.value.sales_active,
-        ticket_types: [...event.value.ticket_types]
-      });
+    // Déterminer si c'est un ID numérique ou un slug
+    let eventData;
+    if (/^\d+$/.test(identifier)) {
+      // C'est un ID numérique
+      const response = await organizerService.getEvent(identifier);
+      eventData = response.data.data;
     } else {
-      error.value = `Événement avec le slug "${slug}" non trouvé`;
+      // C'est un slug, on doit chercher par slug
+      try {
+        const eventsResponse = await organizerService.getEvents();
+        const events = eventsResponse.data.data.events.data || eventsResponse.data.data.events;
+        eventData = events.find(e => e.slug === identifier);
+        
+        if (!eventData) {
+          throw new Error(`Événement avec le slug "${identifier}" non trouvé`);
+        }
+      } catch (eventsError) {
+        throw new Error(`Événement avec le slug "${identifier}" non trouvé`);
+      }
     }
+    
+    if (!eventData) {
+      throw new Error(`Événement introuvable`);
+    }
+    
+    // Stocker l'événement
+    event.value = {
+      ...eventData,
+      venue_name: eventData.venue?.name || eventData.venue_name || '',
+      venue_address: eventData.venue?.address || eventData.venue_address || '',
+      category_name: eventData.category?.name || eventData.category_name || '',
+    };
+    
+    // Remplir le formulaire avec les données existantes
+    Object.assign(form, {
+      title: event.value.title || '',
+      description: event.value.description || '',
+      event_date: event.value.event_date ? new Date(event.value.event_date).toISOString().slice(0, 16) : '',
+      category_name: event.value.category_name || '',
+      venue_name: event.value.venue_name || '',
+      venue_address: event.value.venue_address || '',
+      max_attendees: event.value.max_attendees || '',
+      image_url: event.value.image_url || '',
+      is_public: event.value.is_public ?? true,
+      sales_active: event.value.is_active ?? true,
+      ticket_types: (event.value.ticket_types || []).map(tt => ({
+        id: tt.id,
+        name: tt.name || '',
+        description: tt.description || '',
+        price: tt.price || 0,
+        capacity: tt.capacity || tt.available_quantity || tt.max_quantity || tt.quantity || 0,
+        is_active: tt.is_active ?? (tt.status === 'active')
+      }))
+    });
+    
   } catch (err) {
-    error.value = 'Erreur lors du chargement de l\'événement';
-    console.error('Erreur:', err);
+    console.error('Erreur lors du chargement de l\'événement:', err);
+    if (err.response?.status === 404) {
+      error.value = `Événement avec l'identifiant "${route.params.slug}" non trouvé`;
+    } else if (err.message) {
+      error.value = err.message;
+    } else {
+      error.value = 'Erreur lors du chargement de l\'événement';
+    }
   } finally {
     loading.value = false;
   }
@@ -533,27 +436,77 @@ const loadEvent = async () => {
 const updateEvent = async () => {
   saving.value = true;
   try {
-    // Simulation d'appel API
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    if (!event.value) {
+      throw new Error('Aucun événement à mettre à jour');
+    }
+
+    // Préparer les données à envoyer
+    const updateData = {
+      title: form.title,
+      description: form.description,
+      is_active: form.sales_active
+    };
+
+    // Appel à l'API pour mettre à jour l'événement
+    await organizerService.updateEvent(event.value.id, updateData);
     
-    alert('Événement mis à jour avec succès !');
+    await Swal.fire({
+      title: 'Succès !',
+      text: 'Événement mis à jour avec succès !',
+      icon: 'success',
+      confirmButtonColor: '#272d63'
+    });
+    
     router.push({ name: 'organizer-event-detail', params: { slug: event.value.slug } });
   } catch (err) {
-    alert('Erreur lors de la mise à jour de l\'événement');
-    console.error('Erreur:', err);
+    console.error('Erreur lors de la mise à jour:', err);
+    await Swal.fire({
+      title: 'Erreur',
+      text: err.response?.data?.message || 'Erreur lors de la mise à jour de l\'événement',
+      icon: 'error',
+      confirmButtonColor: '#272d63'
+    });
   } finally {
     saving.value = false;
   }
 };
 
 const publishEvent = async () => {
-  if (confirm('Êtes-vous sûr de vouloir publier cet événement ?')) {
+  const result = await Swal.fire({
+    title: 'Publier l\'événement',
+    text: 'Êtes-vous sûr de vouloir publier cet événement ?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#272d63',
+    cancelButtonColor: '#6b7280',
+    confirmButtonText: 'Oui, publier',
+    cancelButtonText: 'Annuler'
+  });
+  
+  if (result.isConfirmed) {
     try {
-      // Simulation d'appel API
-      event.value.status = 'active';
-      alert('Événement publié avec succès !');
+      await organizerService.updateEvent(event.value.id, {
+        status: 'published',
+        is_active: true
+      });
+      
+      event.value.status = 'published';
+      event.value.is_active = true;
+      
+      await Swal.fire({
+        title: 'Succès !',
+        text: 'Événement publié avec succès !',
+        icon: 'success',
+        confirmButtonColor: '#272d63'
+      });
     } catch (err) {
-      alert('Erreur lors de la publication');
+      console.error('Erreur publication:', err);
+      await Swal.fire({
+        title: 'Erreur',
+        text: 'Erreur lors de la publication de l\'événement',
+        icon: 'error',
+        confirmButtonColor: '#272d63'
+      });
     }
   }
 };
@@ -563,13 +516,24 @@ const addTicketType = () => {
     name: '',
     description: '',
     price: '',
-    quantity: '',
+    capacity: '',
     is_active: true
   });
 };
 
-const removeTicketType = (index) => {
-  if (confirm('Êtes-vous sûr de vouloir supprimer ce type de billet ?')) {
+const removeTicketType = async (index) => {
+  const result = await Swal.fire({
+    title: 'Supprimer le type de billet',
+    text: 'Êtes-vous sûr de vouloir supprimer ce type de billet ?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#6b7280',
+    confirmButtonText: 'Oui, supprimer',
+    cancelButtonText: 'Annuler'
+  });
+  
+  if (result.isConfirmed) {
     form.ticket_types.splice(index, 1);
   }
 };
