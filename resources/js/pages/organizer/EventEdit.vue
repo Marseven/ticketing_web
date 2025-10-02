@@ -57,7 +57,7 @@
                 <h2 class="text-xl font-semibold text-primea-blue font-primea mb-6">Informations de base</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Titre de l'événement</label>
+                    <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Titre de l'événement *</label>
                     <input 
                       v-model="form.title"
                       type="text" 
@@ -78,71 +78,164 @@
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Date et heure</label>
-                    <input 
-                      v-model="form.event_date"
-                      type="datetime-local" 
-                      required
-                      class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
-                    />
-                  </div>
-
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Catégorie</label>
+                    <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Catégorie *</label>
                     <select 
-                      v-model="form.category_name"
+                      v-model="form.category_id"
+                      required
                       class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
                     >
                       <option value="">Sélectionner une catégorie</option>
-                      <option value="Musique">Musique</option>
-                      <option value="Culture">Culture</option>
-                      <option value="Gastronomie">Gastronomie</option>
-                      <option value="Sport">Sport</option>
-                      <option value="Business">Business</option>
-                      <option value="Autres">Autres</option>
+                      <option v-for="category in categories" :key="category.id" :value="category.id">
+                        {{ category.name }}
+                      </option>
                     </select>
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Lieu</label>
-                    <input 
-                      v-model="form.venue_name"
-                      type="text" 
-                      required
-                      class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
-                      placeholder="Nom du lieu"
-                    />
+                    <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Lieu *</label>
+                    <div v-if="!showNewVenue">
+                      <select 
+                        v-model="form.venue_id" 
+                        @change="handleVenueChange"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                      >
+                        <option value="">Sélectionner un lieu</option>
+                        <option v-for="venue in venues" :key="venue.id" :value="venue.id">
+                          {{ venue.name }} - {{ venue.city }}
+                        </option>
+                        <option value="new">+ Ajouter un nouveau lieu</option>
+                      </select>
+                    </div>
+                    
+                    <div v-if="showNewVenue || form.venue_id === 'new'" class="space-y-2">
+                      <input 
+                        v-model="form.new_venue_name" 
+                        type="text" 
+                        placeholder="Nom du lieu" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea" 
+                        required
+                      >
+                      <input 
+                        v-model="form.new_venue_city" 
+                        type="text" 
+                        placeholder="Ville" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea" 
+                        required
+                      >
+                      <input 
+                        v-model="form.new_venue_address" 
+                        type="text" 
+                        placeholder="Adresse" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                      >
+                      <button 
+                        type="button" 
+                        @click="cancelNewVenue" 
+                        class="text-sm text-primea-blue hover:text-primea-yellow font-primea"
+                      >
+                        Utiliser un lieu existant
+                      </button>
+                    </div>
                   </div>
 
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Adresse</label>
-                    <input 
-                      v-model="form.venue_address"
-                      type="text"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
-                      placeholder="Adresse complète"
-                    />
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Image de l'événement</label>
+                    <div class="border-2 border-dashed border-gray-300 rounded-primea p-4 text-center">
+                      <div v-if="form.image_preview" class="mb-4">
+                        <img :src="form.image_preview" alt="Aperçu" class="max-h-32 mx-auto rounded-primea">
+                        <button 
+                          type="button" 
+                          @click="removeImage" 
+                          class="mt-2 text-sm text-red-600 hover:text-red-800"
+                        >
+                          Supprimer l'image
+                        </button>
+                      </div>
+                      <div v-else>
+                        <input 
+                          ref="imageInput"
+                          type="file" 
+                          accept="image/*" 
+                          @change="handleImageUpload" 
+                          class="hidden"
+                        >
+                        <button 
+                          type="button" 
+                          @click="$refs.imageInput.click()" 
+                          class="bg-primea-blue text-white px-4 py-2 rounded-primea hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 font-primea"
+                        >
+                          Choisir une image
+                        </button>
+                        <p class="text-sm text-gray-500 mt-2 font-primea">ou</p>
+                        <input 
+                          v-model="form.image_url"
+                          type="url"
+                          class="mt-2 w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                          placeholder="URL de l'image (https://exemple.com/image.jpg)"
+                          @input="handleImageUrl"
+                        />
+                      </div>
+                    </div>
                   </div>
+                </div>
+              </div>
 
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Capacité maximale</label>
-                    <input 
-                      v-model="form.max_attendees"
-                      type="number" 
-                      min="1"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
-                      placeholder="Nombre de places (optionnel)"
-                    />
-                  </div>
+              <!-- Programmation -->
+              <div class="bg-white rounded-primea shadow-primea p-6">
+                <div class="flex items-center justify-between mb-6">
+                  <h2 class="text-xl font-semibold text-primea-blue font-primea">Programmation</h2>
+                  <button 
+                    type="button"
+                    @click="addSchedule"
+                    class="bg-primea-blue text-white px-4 py-2 rounded-primea hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 font-primea"
+                  >
+                    <PlusIcon class="w-4 h-4 inline mr-2" />
+                    Ajouter une séance
+                  </button>
+                </div>
 
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 font-primea mb-2">URL de l'image</label>
-                    <input 
-                      v-model="form.image_url"
-                      type="url"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
-                      placeholder="https://exemple.com/image.jpg"
-                    />
+                <div class="space-y-4">
+                  <div v-for="(schedule, index) in form.schedules" :key="index" 
+                       class="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border border-gray-200 rounded-primea">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Date et heure de début *</label>
+                      <input 
+                        v-model="schedule.starts_at"
+                        type="datetime-local" 
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Date et heure de fin *</label>
+                      <input 
+                        v-model="schedule.ends_at"
+                        type="datetime-local" 
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Ouverture des portes</label>
+                      <input 
+                        v-model="schedule.door_time"
+                        type="datetime-local"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                      />
+                    </div>
+                    
+                    <div class="flex items-end">
+                      <button 
+                        v-if="form.schedules.length > 1"
+                        type="button"
+                        @click="removeSchedule(index)"
+                        class="bg-red-600 text-white px-3 py-2 rounded-primea hover:bg-red-700 font-primea"
+                      >
+                        <TrashIcon class="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -169,73 +262,70 @@
 
                 <div v-else class="space-y-4">
                   <div v-for="(ticket, index) in form.ticket_types" :key="index" 
-                       class="border border-gray-200 rounded-primea p-4">
-                    <div class="flex justify-between items-start mb-4">
-                      <h3 class="font-semibold text-gray-900 font-primea">Type de billet {{ index + 1 }}</h3>
+                       class="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border border-gray-200 rounded-primea">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Nom *</label>
+                      <input 
+                        v-model="ticket.name"
+                        type="text" 
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                        placeholder="Ex: Billet Standard"
+                      />
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Prix (XAF) *</label>
+                      <input 
+                        v-model.number="ticket.price"
+                        type="number" 
+                        min="0"
+                        step="0.01"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                        placeholder="25000"
+                      />
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Capacité *</label>
+                      <input 
+                        v-model.number="ticket.capacity"
+                        type="number" 
+                        min="1"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                        placeholder="100"
+                      />
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Description</label>
+                      <textarea 
+                        v-model="ticket.description"
+                        rows="2"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea resize-none"
+                        placeholder="Description du billet..."
+                      ></textarea>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                      <label class="flex items-center space-x-2">
+                        <input 
+                          v-model="ticket.is_active"
+                          type="checkbox" 
+                          class="rounded border-gray-300 text-primea-blue focus:ring-primea-blue"
+                        />
+                        <span class="text-sm font-medium text-gray-700 font-primea">Actif</span>
+                      </label>
+                      
                       <button 
                         type="button"
                         @click="removeTicketType(index)"
-                        class="text-red-600 hover:text-red-800"
+                        class="text-red-600 hover:text-red-800 p-1"
                       >
                         <TrashIcon class="w-4 h-4" />
                       </button>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Nom</label>
-                        <input 
-                          v-model="ticket.name"
-                          type="text" 
-                          required
-                          class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
-                          placeholder="Ex: Billet Standard"
-                        />
-                      </div>
-
-                      <div>
-                        <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Prix (XAF)</label>
-                        <input 
-                          v-model="ticket.price"
-                          type="number" 
-                          min="0"
-                          required
-                          class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
-                          placeholder="25000"
-                        />
-                      </div>
-
-                      <div>
-                        <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Capacité</label>
-                        <input 
-                          v-model="ticket.capacity"
-                          type="number" 
-                          min="1"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
-                          placeholder="100 (optionnel)"
-                        />
-                      </div>
-
-                      <div class="flex items-center">
-                        <label class="flex items-center space-x-2">
-                          <input 
-                            v-model="ticket.is_active"
-                            type="checkbox" 
-                            class="rounded border-gray-300 text-primea-blue focus:ring-primea-blue"
-                          />
-                          <span class="text-sm font-medium text-gray-700 font-primea">Actif</span>
-                        </label>
-                      </div>
-
-                      <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Description</label>
-                        <textarea 
-                          v-model="ticket.description"
-                          rows="2"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea resize-none"
-                          placeholder="Description du billet..."
-                        ></textarea>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -251,25 +341,13 @@
                   <div>
                     <label class="flex items-center space-x-2">
                       <input 
-                        v-model="form.is_public"
+                        v-model="form.is_active"
                         type="checkbox" 
                         class="rounded border-gray-300 text-primea-blue focus:ring-primea-blue"
                       />
-                      <span class="text-sm font-medium text-gray-700 font-primea">Événement public</span>
+                      <span class="text-sm font-medium text-gray-700 font-primea">Événement actif</span>
                     </label>
-                    <p class="text-xs text-gray-500 mt-1 font-primea">Visible dans la liste publique des événements</p>
-                  </div>
-
-                  <div>
-                    <label class="flex items-center space-x-2">
-                      <input 
-                        v-model="form.sales_active"
-                        type="checkbox" 
-                        class="rounded border-gray-300 text-primea-blue focus:ring-primea-blue"
-                      />
-                      <span class="text-sm font-medium text-gray-700 font-primea">Ventes actives</span>
-                    </label>
-                    <p class="text-xs text-gray-500 mt-1 font-primea">Permettre l'achat de billets</p>
+                    <p class="text-xs text-gray-500 mt-1 font-primea">Publier l'événement et activer les ventes</p>
                   </div>
                 </div>
               </div>
@@ -287,14 +365,14 @@
                   </button>
 
                   <router-link 
-                    :to="{ name: 'organizer-event-detail', params: { slug: event.slug } }"
+                    :to="{ name: 'organizer-event-detail', params: { slug: event?.slug || route.params.slug } }"
                     class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 rounded-primea hover:bg-gray-50 transition-all duration-200 font-primea"
                   >
-                    Annuler
+                    Annuler les modifications
                   </router-link>
 
                   <button 
-                    v-if="event.status === 'draft'"
+                    v-if="event && !event.is_active"
                     type="button"
                     @click="publishEvent"
                     class="w-full bg-green-600 text-white px-4 py-2 rounded-primea hover:bg-green-700 transition-all duration-200 font-primea"
@@ -305,10 +383,10 @@
                 </div>
               </div>
 
-              <!-- Current image -->
-              <div v-if="form.image_url" class="bg-white rounded-primea shadow-primea p-6">
-                <h3 class="text-lg font-semibold text-primea-blue font-primea mb-4">Aperçu de l'image</h3>
-                <img :src="form.image_url" :alt="form.title" class="w-full h-48 object-cover rounded-primea">
+              <!-- Current image preview -->
+              <div v-if="event && event.image_url" class="bg-white rounded-primea shadow-primea p-6">
+                <h3 class="text-lg font-semibold text-primea-blue font-primea mb-4">Image actuelle</h3>
+                <img :src="event.image_url" :alt="event.title" class="w-full h-48 object-cover rounded-primea">
               </div>
             </div>
           </div>
@@ -340,23 +418,46 @@ const loading = ref(true);
 const saving = ref(false);
 const error = ref(null);
 const event = ref(null);
+const categories = ref([]);
+const venues = ref([]);
+const showNewVenue = ref(false);
+const imageInput = ref(null);
 
 // Formulaire
 const form = reactive({
   title: '',
   description: '',
-  event_date: '',
-  category_name: '',
-  venue_name: '',
-  venue_address: '',
-  max_attendees: '',
+  category_id: '',
+  venue_id: '',
+  new_venue_name: '',
+  new_venue_city: '',
+  new_venue_address: '',
   image_url: '',
-  is_public: true,
-  sales_active: true,
+  image_preview: '',
+  is_active: false,
+  schedules: [{ starts_at: '', ends_at: '', door_time: '' }],
   ticket_types: []
 });
 
 // Méthodes
+const loadCategories = async () => {
+  try {
+    const response = await organizerService.getCategories();
+    categories.value = response.data.categories || [];
+  } catch (err) {
+    console.error('Erreur chargement catégories:', err);
+  }
+};
+
+const loadVenues = async () => {
+  try {
+    const response = await organizerService.getVenues();
+    venues.value = response.data.venues || response.data.data || [];
+  } catch (err) {
+    console.error('Erreur chargement lieux:', err);
+  }
+};
+
 const loadEvent = async () => {
   loading.value = true;
   error.value = null;
@@ -401,14 +502,21 @@ const loadEvent = async () => {
     Object.assign(form, {
       title: event.value.title || '',
       description: event.value.description || '',
-      event_date: event.value.event_date ? new Date(event.value.event_date).toISOString().slice(0, 16) : '',
-      category_name: event.value.category_name || '',
-      venue_name: event.value.venue_name || '',
-      venue_address: event.value.venue_address || '',
-      max_attendees: event.value.max_attendees || '',
+      category_id: event.value.category_id || '',
+      venue_id: event.value.venue_id || '',
+      new_venue_name: '',
+      new_venue_city: '',
+      new_venue_address: '',
       image_url: event.value.image_url || '',
-      is_public: event.value.is_public ?? true,
-      sales_active: event.value.is_active ?? true,
+      image_preview: event.value.image_url || '',
+      is_active: event.value.is_active ?? false,
+      schedules: (event.value.schedules && event.value.schedules.length > 0) 
+        ? event.value.schedules.map(s => ({
+            starts_at: s.starts_at ? new Date(s.starts_at).toISOString().slice(0, 16) : '',
+            ends_at: s.ends_at ? new Date(s.ends_at).toISOString().slice(0, 16) : '',
+            door_time: s.door_time ? new Date(s.door_time).toISOString().slice(0, 16) : ''
+          }))
+        : [{ starts_at: '', ends_at: '', door_time: '' }],
       ticket_types: (event.value.ticket_types || []).map(tt => ({
         id: tt.id,
         name: tt.name || '',
@@ -440,11 +548,26 @@ const updateEvent = async () => {
       throw new Error('Aucun événement à mettre à jour');
     }
 
-    // Préparer les données à envoyer
+    // Préparer les données à envoyer (structure simplifiée pour l'édition)
     const updateData = {
       title: form.title,
       description: form.description,
-      is_active: form.sales_active
+      category_id: form.category_id,
+      venue_id: form.venue_id || null,
+      new_venue_name: form.venue_id === 'new' ? form.new_venue_name : null,
+      new_venue_city: form.venue_id === 'new' ? form.new_venue_city : null,
+      new_venue_address: form.venue_id === 'new' ? form.new_venue_address : null,
+      image_url: form.image_url,
+      is_active: form.is_active,
+      schedules: form.schedules,
+      ticket_types: form.ticket_types.map(tt => ({
+        id: tt.id || null,
+        name: tt.name,
+        description: tt.description,
+        price: tt.price,
+        capacity: tt.capacity,
+        is_active: tt.is_active
+      }))
     };
 
     // Appel à l'API pour mettre à jour l'événement
@@ -538,6 +661,55 @@ const removeTicketType = async (index) => {
   }
 };
 
+const addSchedule = () => {
+  form.schedules.push({ starts_at: '', ends_at: '', door_time: '' });
+};
+
+const removeSchedule = (index) => {
+  if (form.schedules.length > 1) {
+    form.schedules.splice(index, 1);
+  }
+};
+
+const handleVenueChange = () => {
+  if (form.venue_id === 'new') {
+    showNewVenue.value = true;
+  }
+};
+
+const cancelNewVenue = () => {
+  showNewVenue.value = false;
+  form.venue_id = '';
+  form.new_venue_name = '';
+  form.new_venue_city = '';
+  form.new_venue_address = '';
+};
+
+const handleImageUpload = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      form.image_preview = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+const handleImageUrl = () => {
+  if (form.image_url) {
+    form.image_preview = form.image_url;
+  }
+};
+
+const removeImage = () => {
+  form.image_url = '';
+  form.image_preview = '';
+  if (imageInput.value) {
+    imageInput.value.value = '';
+  }
+};
+
 // Utilitaires
 const getEventStatusName = (status) => {
   const names = {
@@ -561,8 +733,12 @@ const getEventStatusClass = (status) => {
   return classes[status] || 'bg-gray-100 text-gray-800';
 };
 
-onMounted(() => {
-  loadEvent();
+onMounted(async () => {
+  await Promise.all([
+    loadCategories(),
+    loadVenues(),
+    loadEvent()
+  ]);
 });
 </script>
 

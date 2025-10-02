@@ -33,8 +33,12 @@
       "assets/css/admin-CuNbIIWa.css"
     ]
   },
-  "_organizer-C0LQVtev.js": {
-    "file": "assets/js/organizer-C0LQVtev.js",
+  "_organizer-B2ytHE_E.css": {
+    "file": "assets/css/organizer-B2ytHE_E.css",
+    "src": "_organizer-B2ytHE_E.css"
+  },
+  "_organizer-ChNpOARi.js": {
+    "file": "assets/js/organizer-ChNpOARi.js",
     "name": "organizer",
     "isDynamicEntry": true,
     "imports": [
@@ -43,12 +47,8 @@
       "_vendor-BvANJOFB.js"
     ],
     "css": [
-      "assets/css/organizer-CfwRROPg.css"
+      "assets/css/organizer-B2ytHE_E.css"
     ]
-  },
-  "_organizer-CfwRROPg.css": {
-    "file": "assets/css/organizer-CfwRROPg.css",
-    "src": "_organizer-CfwRROPg.css"
   },
   "_pinia-vendor-n9B0B4v6.js": {
     "file": "assets/js/pinia-vendor-n9B0B4v6.js",
@@ -103,7 +103,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-D9AoBqkf.js",
+    "file": "assets/js/app-C-KRmCUt.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -126,13 +126,13 @@
       "_account-SYOFlVBk.js",
       "_account-SYOFlVBk.js",
       "resources/js/layouts/OrganizerLayout.vue",
-      "_organizer-C0LQVtev.js",
-      "_organizer-C0LQVtev.js",
-      "_organizer-C0LQVtev.js",
-      "_organizer-C0LQVtev.js",
-      "_organizer-C0LQVtev.js",
-      "_organizer-C0LQVtev.js",
-      "_organizer-C0LQVtev.js",
+      "_organizer-ChNpOARi.js",
+      "_organizer-ChNpOARi.js",
+      "_organizer-ChNpOARi.js",
+      "_organizer-ChNpOARi.js",
+      "_organizer-ChNpOARi.js",
+      "_organizer-ChNpOARi.js",
+      "_organizer-ChNpOARi.js",
       "resources/js/layouts/AdminLayout.vue",
       "_admin-DOU3jQbQ.js",
       "_admin-DOU3jQbQ.js",
@@ -185,14 +185,14 @@
     ]
   },
   "resources/js/pages/Checkout.vue": {
-    "file": "assets/js/Checkout-BRDEFFv3.js",
+    "file": "assets/js/Checkout-Thyoo85i.js",
     "name": "Checkout",
     "src": "resources/js/pages/Checkout.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vue-vendor-CDZB1Wme.js",
       "resources/js/app.js",
-      "_organizer-C0LQVtev.js",
+      "_organizer-ChNpOARi.js",
       "_account-SYOFlVBk.js",
       "_vendor-BvANJOFB.js",
       "_pinia-vendor-n9B0B4v6.js"
@@ -203,7 +203,7 @@
     ]
   },
   "resources/js/pages/EventDetail.vue": {
-    "file": "assets/js/EventDetail--d0ULYM1.js",
+    "file": "assets/js/EventDetail-Cg6n-Tru.js",
     "name": "EventDetail",
     "src": "resources/js/pages/EventDetail.vue",
     "isDynamicEntry": true,
@@ -220,7 +220,7 @@
     ]
   },
   "resources/js/pages/Events.vue": {
-    "file": "assets/js/Events-GjvXeoln.js",
+    "file": "assets/js/Events-DvFL9Sal.js",
     "name": "Events",
     "src": "resources/js/pages/Events.vue",
     "isDynamicEntry": true,
@@ -237,14 +237,14 @@
     ]
   },
   "resources/js/pages/TicketDownload.vue": {
-    "file": "assets/js/TicketDownload-BjyJHJ7Z.js",
+    "file": "assets/js/TicketDownload-DYDZ1l7k.js",
     "name": "TicketDownload",
     "src": "resources/js/pages/TicketDownload.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vue-vendor-CDZB1Wme.js",
       "_account-SYOFlVBk.js",
-      "_organizer-C0LQVtev.js",
+      "_organizer-ChNpOARi.js",
       "_pinia-vendor-n9B0B4v6.js",
       "_vendor-BvANJOFB.js"
     ],
@@ -253,14 +253,14 @@
     ]
   },
   "resources/js/pages/TicketRetrieve.vue": {
-    "file": "assets/js/TicketRetrieve-BpJfWwB7.js",
+    "file": "assets/js/TicketRetrieve-C9UIkETF.js",
     "name": "TicketRetrieve",
     "src": "resources/js/pages/TicketRetrieve.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vue-vendor-CDZB1Wme.js",
       "_account-SYOFlVBk.js",
-      "_organizer-C0LQVtev.js",
+      "_organizer-ChNpOARi.js",
       "_pinia-vendor-n9B0B4v6.js",
       "_vendor-BvANJOFB.js"
     ],
@@ -269,7 +269,7 @@
     ]
   },
   "resources/js/pages/auth/Register.vue": {
-    "file": "assets/js/Register-Bp_YKrGJ.js",
+    "file": "assets/js/Register-VdEHDT_d.js",
     "name": "Register",
     "src": "resources/js/pages/auth/Register.vue",
     "isDynamicEntry": true,
@@ -286,13 +286,13 @@
     ]
   },
   "resources/js/pages/auth/ResetPassword.vue": {
-    "file": "assets/js/ResetPassword-BnK1Bk6U.js",
+    "file": "assets/js/ResetPassword-DbqCbXFD.js",
     "name": "ResetPassword",
     "src": "resources/js/pages/auth/ResetPassword.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vue-vendor-CDZB1Wme.js",
-      "_organizer-C0LQVtev.js",
+      "_organizer-ChNpOARi.js",
       "_account-SYOFlVBk.js",
       "_vendor-BvANJOFB.js",
       "_pinia-vendor-n9B0B4v6.js"
