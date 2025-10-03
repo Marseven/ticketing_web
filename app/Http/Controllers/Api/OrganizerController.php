@@ -615,7 +615,7 @@ class OrganizerController extends Controller
                 'organization' => [
                     'id' => $organizer->id,
                     'name' => $organizer->name,
-                    'description' => $organizer->description,
+                    'description' => $organizer->bio,
                     'website_url' => $organizer->website_url,
                     'contact_email' => $organizer->contact_email,
                     'contact_phone' => $organizer->contact_phone,
@@ -704,7 +704,7 @@ class OrganizerController extends Controller
             }
 
             if ($request->has('name')) $organizer->name = $request->name;
-            if ($request->has('description')) $organizer->description = $request->description;
+            if ($request->has('description')) $organizer->bio = $request->description;
             if ($request->has('website_url')) $organizer->website_url = $request->website_url;
             if ($request->has('contact_email')) $organizer->contact_email = $request->contact_email;
             if ($request->has('contact_phone')) $organizer->contact_phone = $request->contact_phone;
