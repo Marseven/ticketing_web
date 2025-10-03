@@ -609,7 +609,7 @@ class OrganizerController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                     'phone' => $user->phone,
-                    'avatar_url' => $user->avatar_url,
+                    'avatar_url' => $user->avatar_url && file_exists(public_path(str_replace('/storage/', 'storage/', $user->avatar_url))) ? $user->avatar_url : null,
                     'email_verified_at' => $user->email_verified_at
                 ],
                 'organization' => [
@@ -619,7 +619,7 @@ class OrganizerController extends Controller
                     'website_url' => $organizer->website_url,
                     'contact_email' => $organizer->contact_email,
                     'contact_phone' => $organizer->contact_phone,
-                    'logo_url' => $organizer->logo_url,
+                    'logo_url' => $organizer->logo_url && file_exists(public_path(str_replace('/storage/', 'storage/', $organizer->logo_url))) ? $organizer->logo_url : null,
                     'verified_at' => $organizer->verified_at
                 ],
                 'stats' => $stats
@@ -636,50 +636,125 @@ class OrganizerController extends Controller
         
         if (!$user->is_organizer) {
             return response()->json([
+                'success' => false,
                 'message' => 'Accès refusé.',
             ], 403);
         }
 
-        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
-            'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,' . $user->id,
-            'phone' => 'sometimes|string|max:20',
-            'organizer_name' => 'sometimes|string|max:255',
-            'organizer_description' => 'sometimes|string'
-        ]);
+        // Déterminer le type de mise à jour
+        $type = $request->input('type', 'personal'); // personal ou organization
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Données invalides',
-                'errors' => $validator->errors()
-            ], 422);
-        }
+        if ($type === 'personal') {
+            // Validation des données personnelles
+            $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+                'name' => 'sometimes|string|max:255',
+                'email' => 'sometimes|email|unique:users,email,' . $user->id,
+                'phone' => 'sometimes|string|max:20',
+                'current_password' => 'sometimes|string|min:6',
+                'password' => 'sometimes|string|min:6|confirmed',
+            ]);
 
-        // Mise à jour des infos utilisateur
-        if ($request->has('name')) $user->name = $request->name;
-        if ($request->has('email')) $user->email = $request->email;
-        if ($request->has('phone')) $user->phone = $request->phone;
-        $user->save();
-
-        // Mise à jour des infos organisateur
-        if ($request->has('organizer_name') || $request->has('organizer_description')) {
-            $organizer = $user->organizers->first();
-            if ($organizer) {
-                if ($request->has('organizer_name')) $organizer->name = $request->organizer_name;
-                if ($request->has('organizer_description')) $organizer->bio = $request->organizer_description;
-                $organizer->save();
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Données invalides',
+                    'errors' => $validator->errors()
+                ], 422);
             }
+
+            // Mise à jour des infos utilisateur
+            if ($request->has('name')) $user->name = $request->name;
+            if ($request->has('email')) $user->email = $request->email;
+            if ($request->has('phone')) $user->phone = $request->phone;
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Informations personnelles mises à jour',
+                'data' => [
+                    'user' => $user
+                ]
+            ]);
+
+        } elseif ($type === 'organization') {
+            // Validation des données organisation
+            $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+                'name' => 'sometimes|string|max:255',
+                'description' => 'sometimes|string',
+                'website_url' => 'sometimes|nullable|url',
+                'contact_email' => 'sometimes|nullable|email',
+                'contact_phone' => 'sometimes|nullable|string|max:20'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Données invalides',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Mise à jour des infos organisateur
+            $organizer = $user->organizers->first();
+            if (!$organizer) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Organisation non trouvée',
+                ], 404);
+            }
+
+            if ($request->has('name')) $organizer->name = $request->name;
+            if ($request->has('description')) $organizer->description = $request->description;
+            if ($request->has('website_url')) $organizer->website_url = $request->website_url;
+            if ($request->has('contact_email')) $organizer->contact_email = $request->contact_email;
+            if ($request->has('contact_phone')) $organizer->contact_phone = $request->contact_phone;
+            $organizer->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Informations de l\'organisation mises à jour',
+                'data' => [
+                    'organization' => $organizer
+                ]
+            ]);
+
+        } elseif ($type === 'password') {
+            // Validation pour changement de mot de passe
+            $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+                'current_password' => 'required|string',
+                'password' => 'required|string|min:6|confirmed',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Données invalides',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Vérifier le mot de passe actuel
+            if (!\Illuminate\Support\Facades\Hash::check($request->current_password, $user->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Mot de passe actuel incorrect',
+                ], 422);
+            }
+
+            // Mettre à jour le mot de passe
+            $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Mot de passe mis à jour avec succès'
+            ]);
         }
 
         return response()->json([
-            'success' => true,
-            'message' => 'Profil mis à jour avec succès',
-            'data' => [
-                'user' => $user,
-                'organizer' => $user->organizers->first()
-            ]
-        ]);
+            'success' => false,
+            'message' => 'Type de mise à jour non valide',
+        ], 400);
     }
 
     /**
@@ -696,7 +771,9 @@ class OrganizerController extends Controller
         }
 
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
-            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'avatar' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'logo' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'type' => 'required|in:user,organization'
         ]);
 
         if ($validator->fails()) {
@@ -708,19 +785,55 @@ class OrganizerController extends Controller
         }
 
         try {
-            if ($request->hasFile('avatar')) {
-                $path = $request->file('avatar')->store('avatars', 'public');
+            $type = $request->input('type');
+            
+            if ($type === 'user' && $request->hasFile('avatar')) {
+                // Upload avatar utilisateur
+                $file = $request->file('avatar');
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('images/users', $filename, 'public');
+                
                 $user->avatar_url = '/storage/' . $path;
                 $user->save();
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Avatar uploadé avec succès',
+                    'data' => [
+                        'avatar_url' => $user->avatar_url
+                    ]
+                ]);
+                
+            } elseif ($type === 'organization' && $request->hasFile('logo')) {
+                // Upload logo organisation
+                $organizer = $user->organizers->first();
+                if (!$organizer) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Organisation non trouvée'
+                    ], 404);
+                }
+                
+                $file = $request->file('logo');
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('images/organizers', $filename, 'public');
+                
+                $organizer->logo_url = '/storage/' . $path;
+                $organizer->save();
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Logo uploadé avec succès',
+                    'data' => [
+                        'logo_url' => $organizer->logo_url
+                    ]
+                ]);
             }
-
+            
             return response()->json([
-                'success' => true,
-                'message' => 'Avatar uploadé avec succès',
-                'data' => [
-                    'avatar_url' => $user->avatar_url
-                ]
-            ]);
+                'success' => false,
+                'message' => 'Aucun fichier fourni'
+            ], 400);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
