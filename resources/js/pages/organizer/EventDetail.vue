@@ -650,28 +650,10 @@ const getEventImageUrl = () => {
   console.log('EventDetail - Image URL pour événement:', event.value.title, 'URL brute:', imageUrl);
   
   if (imageUrl && imageUrl.trim() !== '') {
-    let finalUrl = '';
-    
-    // Vérifier si c'est déjà une URL complète (commence par http:// ou https://)
-    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-      finalUrl = imageUrl;
-    } 
-    // Vérifier si c'est un chemin absolu (commence par /)
-    else if (imageUrl.startsWith('/')) {
-      finalUrl = imageUrl;
-    } 
-    // Si c'est juste un nom de fichier, on essaie plusieurs endroits
-    else if (!imageUrl.includes('/')) {
-      // D'abord essayer dans /storage/events/
-      finalUrl = `/storage/events/${imageUrl}`;
-    }
-    // Sinon, utiliser tel quel (chemin relatif)
-    else {
-      finalUrl = imageUrl;
-    }
-    
-    console.log('EventDetail - URL finale générée:', finalUrl);
-    return finalUrl;
+    // Pour les événements, on utilise généralement des URLs complètes saisies par l'utilisateur
+    // On retourne l'URL telle quelle
+    console.log('EventDetail - URL finale utilisée:', imageUrl);
+    return imageUrl;
   }
   
   console.log('EventDetail - Aucune image trouvée pour:', event.value.title);

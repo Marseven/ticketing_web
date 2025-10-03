@@ -754,16 +754,10 @@ const getCurrentImageUrl = () => {
   
   const imageUrl = event.value.image_url || event.value.image;
   
-  if (imageUrl) {
-    // Vérifier si c'est déjà une URL complète ou si c'est juste un nom de fichier
-    if (imageUrl.startsWith('http')) {
-      return imageUrl;
-    } else if (imageUrl.startsWith('/')) {
-      return imageUrl;
-    } else {
-      // Construire l'URL complète si c'est juste un nom de fichier
-      return `/storage/events/${imageUrl}`;
-    }
+  if (imageUrl && imageUrl.trim() !== '') {
+    // Pour les événements, on utilise généralement des URLs complètes saisies par l'utilisateur
+    // On retourne l'URL telle quelle
+    return imageUrl;
   }
   
   return '';
