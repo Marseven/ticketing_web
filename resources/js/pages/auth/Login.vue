@@ -282,7 +282,7 @@ export default {
           )
 
           if (!account) {
-            throw new Error('Identifiants incorrects. Essayez un des comptes de test.')
+            throw new Error('Identifiants incorrects.')
           }
 
           // Simuler la connexion
