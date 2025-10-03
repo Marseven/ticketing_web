@@ -732,6 +732,7 @@ class OrganizerController extends Controller
             'new_venue_address' => 'required_if:venue_id,new|nullable|string|max:500',
             'max_attendees' => 'nullable|integer|min:1',
             'image_url' => 'nullable|string',
+            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
             'is_active' => 'boolean',
             'schedules' => 'required|array|min:1',
             'schedules.*.starts_at' => 'required|date',
@@ -779,6 +780,18 @@ class OrganizerController extends Controller
                 $venueId = null; // Si pas de données pour nouveau lieu
             }
 
+            // Gérer l'upload d'image si présent
+            $imageUrl = $request->image_url;
+            $imageFile = null;
+            
+            if ($request->hasFile('image_file')) {
+                $file = $request->file('image_file');
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('images/events', $filename, 'public');
+                $imageFile = $filename;
+                $imageUrl = null; // Si on a un fichier, on ignore l'URL
+            }
+            
             // Créer l'événement
             $event = Event::create([
                 'title' => $request->title,
@@ -789,7 +802,8 @@ class OrganizerController extends Controller
                 'category_id' => $request->category_id,
                 'venue_id' => $venueId,
                 'max_attendees' => $request->max_attendees,
-                'image_url' => $request->image_url,
+                'image_url' => $imageUrl,
+                'image_file' => $imageFile,
                 'is_active' => $request->is_active ?? false,
                 'status' => $request->is_active ? 'published' : 'draft'
             ]);
@@ -869,6 +883,7 @@ class OrganizerController extends Controller
             'new_venue_city' => 'required_if:venue_id,new|nullable|string|max:255',
             'new_venue_address' => 'required_if:venue_id,new|nullable|string|max:500',
             'image_url' => 'sometimes|nullable|string',
+            'image_file' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
             'is_active' => 'sometimes|boolean',
             'status' => 'sometimes|in:draft,published,cancelled',
             'schedules' => 'sometimes|array',
@@ -906,10 +921,36 @@ class OrganizerController extends Controller
                 $request->merge(['venue_id' => $venue->id]);
             }
 
+            // Gérer l'upload d'image si présent
+            $updateData = $request->only([
+                'title', 'description', 'category_id', 'venue_id', 'is_active', 'status'
+            ]);
+            
+            if ($request->hasFile('image_file')) {
+                // Supprimer l'ancienne image si elle existe
+                if ($event->image_file) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete('images/events/' . $event->image_file);
+                }
+                
+                // Stocker la nouvelle image
+                $file = $request->file('image_file');
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('images/events', $filename, 'public');
+                
+                $updateData['image_file'] = $filename;
+                $updateData['image_url'] = null; // Clear URL si on a un fichier
+            } elseif ($request->has('image_url')) {
+                // Si une URL est fournie
+                $updateData['image_url'] = $request->image_url;
+                // Optionnellement, supprimer l'ancien fichier si on passe à une URL
+                if ($event->image_file) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete('images/events/' . $event->image_file);
+                    $updateData['image_file'] = null;
+                }
+            }
+            
             // Mettre à jour l'événement principal
-            $event->update($request->only([
-                'title', 'description', 'category_id', 'venue_id', 'image_url', 'is_active', 'status'
-            ]));
+            $event->update($updateData);
 
             // Mettre à jour les horaires
             if ($request->has('schedules')) {

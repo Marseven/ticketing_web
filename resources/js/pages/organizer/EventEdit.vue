@@ -570,7 +570,7 @@ const updateEvent = async () => {
       throw new Error('Aucun événement à mettre à jour');
     }
 
-    // Préparer les données à envoyer (structure simplifiée pour l'édition)
+    // Préparer les données à envoyer
     const updateData = {
       title: form.title,
       description: form.description,
@@ -579,7 +579,6 @@ const updateEvent = async () => {
       new_venue_name: form.venue_id === 'new' ? form.new_venue_name : null,
       new_venue_city: form.venue_id === 'new' ? form.new_venue_city : null,
       new_venue_address: form.venue_id === 'new' ? form.new_venue_address : null,
-      image_url: form.image_url,
       is_active: form.is_active,
       schedules: form.schedules,
       ticket_types: form.ticket_types.map(tt => ({
@@ -592,8 +591,33 @@ const updateEvent = async () => {
       }))
     };
 
-    // Appel à l'API pour mettre à jour l'événement
-    await organizerService.updateEvent(event.value.id, updateData);
+    // Gestion de l'image : soit URL soit fichier
+    if (form.image_file) {
+      // Si un fichier est uploadé, on doit l'envoyer via FormData
+      const formData = new FormData();
+      
+      // Ajouter tous les champs au FormData
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] !== null && updateData[key] !== undefined) {
+          if (key === 'schedules' || key === 'ticket_types') {
+            formData.append(key, JSON.stringify(updateData[key]));
+          } else {
+            formData.append(key, updateData[key]);
+          }
+        }
+      });
+      
+      // Ajouter le fichier image
+      formData.append('image_file', form.image_file);
+      
+      // Utiliser FormData pour l'envoi avec le bon Content-Type
+      await organizerService.updateEventWithFile(event.value.id, formData);
+    } else {
+      // Si une URL est saisie manuellement ou pas d'image
+      updateData.image_url = form.image_url || null;
+      updateData.image_file = null;
+      await organizerService.updateEvent(event.value.id, updateData);
+    }
     
     await Swal.fire({
       title: 'Succès !',

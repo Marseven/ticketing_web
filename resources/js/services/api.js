@@ -297,9 +297,27 @@ export const organizerService = {
     return api.post('/organizer/events', eventData)
   },
 
+  // Créer un nouvel événement avec fichier
+  createEventWithFile(formData) {
+    return api.post('/organizer/events', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  },
+
   // Mettre à jour un événement
   updateEvent(id, eventData) {
     return api.put(`/organizer/events/${id}`, eventData)
+  },
+
+  // Mettre à jour un événement avec fichier
+  updateEventWithFile(id, formData) {
+    return api.put(`/organizer/events/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
   },
 
   // Récupérer les détails d'un événement

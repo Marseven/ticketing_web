@@ -34,6 +34,10 @@ class Event extends Model
         'updated_at' => 'datetime',
     ];
 
+    protected $appends = [
+        'image'
+    ];
+
     /**
      * Get the organizer that owns the event.
      */
@@ -197,5 +201,28 @@ class Event extends Model
     protected function setImageFile(?string $filename): void
     {
         $this->attributes['image_file'] = $filename;
+    }
+
+    /**
+     * Accesseur pour l'URL de l'image à retourner dans l'API
+     */
+    public function getImageAttribute(): ?string
+    {
+        // Si on a une URL externe, on la retourne telle quelle
+        if ($this->image_url && filter_var($this->image_url, FILTER_VALIDATE_URL)) {
+            return $this->image_url;
+        }
+        
+        // Si on a un fichier local, on construit l'URL complète
+        if ($this->image_file) {
+            return asset('storage/images/events/' . $this->image_file);
+        }
+        
+        // Si on a une URL mais pas valide (chemin relatif par exemple)
+        if ($this->image_url) {
+            return $this->image_url;
+        }
+        
+        return null;
     }
 }

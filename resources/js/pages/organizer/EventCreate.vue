@@ -587,7 +587,6 @@ const createEvent = async () => {
       venue_name: form.venue_id === 'new' ? form.new_venue_name : null,
       venue_city: form.venue_id === 'new' ? form.new_venue_city : 'Abidjan',
       venue_address: form.venue_id === 'new' ? form.new_venue_address : null,
-      image_url: form.image_url,
       is_active: form.status === 'published',
       schedules: form.schedules.map(schedule => ({
         starts_at: schedule.starts_at,
@@ -603,7 +602,31 @@ const createEvent = async () => {
       }))
     };
     
-    const response = await organizerService.createEvent(eventData);
+    let response;
+    if (form.image_file) {
+      // Si un fichier est uploadé, utiliser FormData
+      const formData = new FormData();
+      
+      // Ajouter tous les champs au FormData
+      Object.keys(eventData).forEach(key => {
+        if (eventData[key] !== null && eventData[key] !== undefined) {
+          if (key === 'schedules' || key === 'ticket_types') {
+            formData.append(key, JSON.stringify(eventData[key]));
+          } else {
+            formData.append(key, eventData[key]);
+          }
+        }
+      });
+      
+      // Ajouter le fichier image
+      formData.append('image_file', form.image_file);
+      
+      response = await organizerService.createEventWithFile(formData);
+    } else {
+      // Si une URL est utilisée ou pas d'image
+      eventData.image_url = form.image_url || null;
+      response = await organizerService.createEvent(eventData);
+    }
     
     if (response.data.success) {
       Swal.fire({
