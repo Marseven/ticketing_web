@@ -637,22 +637,42 @@ const getEventDate = () => {
 
 const hasEventImage = () => {
   if (!event.value) return false;
-  const imageUrl = event.value.image_url || event.value.image;
+  const imageUrl = event.value.image_url || event.value.image || event.value.image_file;
   return imageUrl && imageUrl.trim() !== '';
 };
 
 const getEventImageUrl = () => {
   if (!event.value) return '';
   
-  // Priorité: image_url puis image
-  const imageUrl = event.value.image_url || event.value.image;
+  // Priorité: image_url, puis image, puis image_file
+  let imageUrl = event.value.image_url || event.value.image || event.value.image_file;
   
   console.log('EventDetail - Image URL pour événement:', event.value.title, 'URL brute:', imageUrl);
   
   if (imageUrl && imageUrl.trim() !== '') {
-    // Pour les événements, on utilise généralement des URLs complètes saisies par l'utilisateur
-    // On retourne l'URL telle quelle
-    console.log('EventDetail - URL finale utilisée:', imageUrl);
+    // Si c'est déjà une URL complète (commence par http:// ou https://), on la retourne telle quelle
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      console.log('EventDetail - URL complète détectée:', imageUrl);
+      return imageUrl;
+    }
+    
+    // Si c'est un chemin relatif, on construit l'URL complète
+    if (imageUrl.startsWith('/')) {
+      const baseUrl = window.location.origin;
+      imageUrl = baseUrl + imageUrl;
+      console.log('EventDetail - URL construite depuis chemin relatif:', imageUrl);
+      return imageUrl;
+    }
+    
+    // Si c'est un nom de fichier dans le storage
+    if (!imageUrl.includes('/')) {
+      const baseUrl = window.location.origin;
+      imageUrl = `${baseUrl}/storage/images/events/${imageUrl}`;
+      console.log('EventDetail - URL construite depuis nom de fichier:', imageUrl);
+      return imageUrl;
+    }
+    
+    // Sinon on retourne tel quel
     return imageUrl;
   }
   

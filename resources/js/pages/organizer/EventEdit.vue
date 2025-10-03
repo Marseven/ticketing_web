@@ -740,7 +740,7 @@ const hasCurrentImage = () => {
   
   // Vérifier s'il y a une image actuelle
   if (!event.value) return false;
-  const imageUrl = event.value.image_url || event.value.image;
+  const imageUrl = event.value.image_url || event.value.image || event.value.image_file;
   return imageUrl && imageUrl.trim() !== '';
 };
 
@@ -752,11 +752,27 @@ const getCurrentImageUrl = () => {
   
   if (!event.value) return '';
   
-  const imageUrl = event.value.image_url || event.value.image;
+  let imageUrl = event.value.image_url || event.value.image || event.value.image_file;
   
   if (imageUrl && imageUrl.trim() !== '') {
-    // Pour les événements, on utilise généralement des URLs complètes saisies par l'utilisateur
-    // On retourne l'URL telle quelle
+    // Si c'est déjà une URL complète (commence par http:// ou https://), on la retourne telle quelle
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+    
+    // Si c'est un chemin relatif, on construit l'URL complète
+    if (imageUrl.startsWith('/')) {
+      const baseUrl = window.location.origin;
+      return baseUrl + imageUrl;
+    }
+    
+    // Si c'est un nom de fichier dans le storage
+    if (!imageUrl.includes('/')) {
+      const baseUrl = window.location.origin;
+      return `${baseUrl}/storage/images/events/${imageUrl}`;
+    }
+    
+    // Sinon on retourne tel quel
     return imageUrl;
   }
   
