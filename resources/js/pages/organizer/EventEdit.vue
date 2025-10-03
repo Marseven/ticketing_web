@@ -456,6 +456,7 @@ const form = reactive({
   new_venue_address: '',
   image_url: '',
   image_preview: '',
+  image_file: null,
   is_active: false,
   schedules: [{ starts_at: '', ends_at: '', door_time: '' }],
   ticket_types: []
@@ -746,6 +747,10 @@ const cancelNewVenue = () => {
 const handleImageUpload = (event) => {
   const file = event.target.files[0];
   if (file) {
+    // Stocker le fichier pour l'upload
+    form.image_file = file;
+    form.image_url = ''; // Clear URL si on upload un fichier
+    
     const reader = new FileReader();
     reader.onload = (e) => {
       form.image_preview = e.target.result;
@@ -757,12 +762,14 @@ const handleImageUpload = (event) => {
 const handleImageUrl = () => {
   if (form.image_url) {
     form.image_preview = form.image_url;
+    form.image_file = null; // Clear file si on utilise une URL
   }
 };
 
 const removeImage = () => {
   form.image_url = '';
   form.image_preview = '';
+  form.image_file = null;
   if (imageInput.value) {
     imageInput.value.value = '';
   }
