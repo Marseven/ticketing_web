@@ -527,7 +527,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import CalendarIcon from '../../components/icons/CalendarIcon.vue'
 import PhoneInput from '../../components/PhoneInput.vue'
-import { clientService, ticketApiService } from '../../services/api.js'
+import { clientService, ticketApiService, authService } from '../../services/api.js'
 import { 
   UserIcon,
   TicketIcon,
@@ -919,15 +919,30 @@ export default {
     const resendEmailVerification = async () => {
       try {
         resendingEmail.value = true
-        await authService.resendEmailVerification()
+        error.value = null
         
-        successMessage.value = 'Email de vérification renvoyé avec succès'
+        console.log('Tentative de renvoi d\'email...')
+        const response = await authService.resendEmailVerification()
+        console.log('Réponse renvoi email:', response)
+        
+        successMessage.value = response.data.message || 'Email de vérification renvoyé avec succès'
         setTimeout(() => {
           successMessage.value = ''
         }, 3000)
       } catch (err) {
-        console.error('Erreur lors du renvoi:', err)
-        error.value = 'Impossible de renvoyer l\'email de vérification'
+        console.error('Erreur détaillée lors du renvoi:', err)
+        console.error('Response data:', err.response?.data)
+        console.error('Status:', err.response?.status)
+        
+        if (err.response?.data?.message) {
+          error.value = err.response.data.message
+        } else if (err.response?.status === 401) {
+          error.value = 'Vous devez être connecté pour renvoyer l\'email'
+        } else if (err.response?.status === 400) {
+          error.value = 'Email déjà vérifié'
+        } else {
+          error.value = 'Impossible de renvoyer l\'email de vérification'
+        }
       } finally {
         resendingEmail.value = false
       }
