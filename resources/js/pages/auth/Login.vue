@@ -267,6 +267,14 @@ export default {
             throw new Error(result.message || 'Identifiants incorrects')
           }
         } catch (apiError) {
+          // Vérifier si c'est une erreur de vérification d'email
+          if (apiError.response?.status === 403 && apiError.response?.data?.email_verification_required) {
+            router.push({ 
+              name: 'email-verification'
+            })
+            return
+          }
+          
           // Si l'API n'est pas disponible, utiliser les comptes de test
           console.warn('API non disponible, utilisation des comptes de test:', apiError)
           

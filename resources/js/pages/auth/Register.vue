@@ -221,13 +221,20 @@ export default {
           role: 'client' // Explicitement définir le rôle comme client
         }
         
-        await authService.register(registrationData)
+        const response = await authService.register(registrationData)
         
-        // Redirection vers la page de connexion avec message de succès
-        router.push({ 
-          name: 'login', 
-          query: { message: 'Inscription réussie ! Vous pouvez maintenant vous connecter.' }
-        })
+        // Si l'inscription nécessite une vérification d'email
+        if (response.data.email_verification_required) {
+          router.push({ 
+            name: 'email-verification'
+          })
+        } else {
+          // Redirection vers la page de connexion avec message de succès
+          router.push({ 
+            name: 'login', 
+            query: { message: 'Inscription réussie ! Vous pouvez maintenant vous connecter.' }
+          })
+        }
       } catch (err) {
         console.error('Erreur d\'inscription:', err)
         if (err.response?.data?.message) {

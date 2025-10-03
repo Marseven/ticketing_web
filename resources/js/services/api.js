@@ -197,6 +197,16 @@ export const authService = {
     return api.post('/auth/logout')
   },
 
+  // Vérifier le statut de vérification d'email
+  checkEmailVerification() {
+    return api.get('/auth/email/check')
+  },
+
+  // Renvoyer l'email de vérification
+  resendEmailVerification() {
+    return api.post('/auth/email/resend')
+  },
+
   // Récupérer les infos de l'utilisateur connecté
   getUser() {
     return api.get('/auth/me')

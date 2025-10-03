@@ -67,8 +67,13 @@ class AuthController extends Controller
             'phone' => $request->phone,
             'is_organizer' => $request->is_organizer ?? false,
             'status' => 'active',
+            'email_verified_at' => null, // L'email n'est pas encore vérifié
         ]);
 
+        // Envoyer l'email de vérification
+        $user->sendEmailVerificationNotification();
+
+        // Créer un token pour l'utilisateur non vérifié
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -78,9 +83,11 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'phone' => $user->phone,
                 'is_organizer' => $user->is_organizer,
+                'email_verified_at' => $user->email_verified_at,
             ],
             'token' => $token,
-            'message' => 'Inscription réussie',
+            'message' => 'Inscription réussie. Un email de vérification a été envoyé.',
+            'email_verification_required' => true,
         ], 201);
     }
 
@@ -145,6 +152,16 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Votre compte est inactif ou suspendu.',
+            ], 403);
+        }
+
+        // Vérifier si l'email est vérifié (uniquement pour les clients)
+        if (!$user->is_organizer && !$user->hasVerifiedEmail()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous devez vérifier votre adresse email avant de vous connecter.',
+                'email_verification_required' => true,
+                'user_id' => $user->id,
             ], 403);
         }
 
@@ -291,6 +308,75 @@ class AuthController extends Controller
         return response()->json([
             'token' => $token,
             'message' => 'Token rafraîchi avec succès',
+        ]);
+    }
+
+    /**
+     * Vérifier l'email avec le lien de vérification
+     */
+    public function verifyEmail(Request $request): JsonResponse
+    {
+        $user = User::find($request->route('id'));
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'Utilisateur non trouvé'
+            ], 404);
+        }
+
+        if (!hash_equals((string) $request->route('hash'), sha1($user->getEmailForVerification()))) {
+            return response()->json([
+                'message' => 'Lien de vérification invalide'
+            ], 400);
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return response()->json([
+                'message' => 'Email déjà vérifié'
+            ], 200);
+        }
+
+        if ($user->markEmailAsVerified()) {
+            // Optionnel: dispatch d'un événement
+            // event(new Verified($user));
+        }
+
+        return response()->json([
+            'message' => 'Email vérifié avec succès'
+        ], 200);
+    }
+
+    /**
+     * Renvoyer l'email de vérification
+     */
+    public function resendVerification(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if ($user->hasVerifiedEmail()) {
+            return response()->json([
+                'message' => 'Email déjà vérifié'
+            ], 400);
+        }
+
+        $user->sendEmailVerificationNotification();
+
+        return response()->json([
+            'message' => 'Email de vérification renvoyé'
+        ]);
+    }
+
+    /**
+     * Vérifier le statut de vérification d'email
+     */
+    public function checkEmailVerification(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        return response()->json([
+            'email_verified' => $user->hasVerifiedEmail(),
+            'email_verified_at' => $user->email_verified_at,
+            'needs_verification' => !$user->hasVerifiedEmail(),
         ]);
     }
 }

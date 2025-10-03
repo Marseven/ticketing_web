@@ -87,6 +87,11 @@ Route::prefix('v1')->group(function () {
         Route::post('logout', [App\Http\Controllers\Api\AuthController::class, 'logout'])->middleware('auth:sanctum');
         Route::get('me', [App\Http\Controllers\Api\AuthController::class, 'me'])->middleware('auth:sanctum');
         Route::post('refresh', [App\Http\Controllers\Api\AuthController::class, 'refresh'])->middleware('auth:sanctum');
+        
+        // Routes de vérification d'email
+        Route::get('email/verify/{id}/{hash}', [App\Http\Controllers\Api\AuthController::class, 'verifyEmail'])->name('verification.verify');
+        Route::post('email/resend', [App\Http\Controllers\Api\AuthController::class, 'resendVerification'])->middleware('auth:sanctum');
+        Route::get('email/check', [App\Http\Controllers\Api\AuthController::class, 'checkEmailVerification'])->middleware('auth:sanctum');
     });
 
     
