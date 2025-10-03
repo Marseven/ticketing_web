@@ -787,14 +787,51 @@ class OrganizerController extends Controller
         try {
             $type = $request->input('type');
             
+            \Log::info('Upload Avatar Request', [
+                'type' => $type,
+                'has_avatar' => $request->hasFile('avatar'),
+                'has_logo' => $request->hasFile('logo'),
+                'user_id' => $user->id
+            ]);
+            
             if ($type === 'user' && $request->hasFile('avatar')) {
                 // Upload avatar utilisateur
                 $file = $request->file('avatar');
                 $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                 $path = $file->storeAs('images/users', $filename, 'public');
                 
+                // Vérifier que le fichier a bien été créé
+                if (!file_exists(storage_path('app/public/' . $path))) {
+                    \Log::error('File not created after upload', [
+                        'path' => $path,
+                        'storage_path' => storage_path('app/public/' . $path)
+                    ]);
+                    throw new \Exception('Échec de la sauvegarde du fichier');
+                }
+                
+                // Supprimer l'ancienne image si elle existe
+                if ($user->avatar_url && file_exists(public_path(str_replace('/storage/', 'storage/', $user->avatar_url)))) {
+                    @unlink(public_path(str_replace('/storage/', 'storage/', $user->avatar_url)));
+                }
+                
                 $user->avatar_url = '/storage/' . $path;
                 $user->save();
+                
+                // Vérifier que la sauvegarde en DB a réussi
+                $user->refresh();
+                if ($user->avatar_url !== '/storage/' . $path) {
+                    \Log::error('Avatar URL not saved in database', [
+                        'expected' => '/storage/' . $path,
+                        'actual' => $user->avatar_url
+                    ]);
+                    throw new \Exception('Échec de la sauvegarde en base de données');
+                }
+                
+                \Log::info('Avatar saved', [
+                    'user_id' => $user->id,
+                    'avatar_url' => $user->avatar_url,
+                    'file_path' => $path
+                ]);
                 
                 return response()->json([
                     'success' => true,
@@ -818,8 +855,38 @@ class OrganizerController extends Controller
                 $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                 $path = $file->storeAs('images/organizers', $filename, 'public');
                 
+                // Vérifier que le fichier a bien été créé
+                if (!file_exists(storage_path('app/public/' . $path))) {
+                    \Log::error('Logo file not created after upload', [
+                        'path' => $path,
+                        'storage_path' => storage_path('app/public/' . $path)
+                    ]);
+                    throw new \Exception('Échec de la sauvegarde du fichier logo');
+                }
+                
+                // Supprimer l'ancienne image si elle existe
+                if ($organizer->logo_url && file_exists(public_path(str_replace('/storage/', 'storage/', $organizer->logo_url)))) {
+                    @unlink(public_path(str_replace('/storage/', 'storage/', $organizer->logo_url)));
+                }
+                
                 $organizer->logo_url = '/storage/' . $path;
                 $organizer->save();
+                
+                // Vérifier que la sauvegarde en DB a réussi
+                $organizer->refresh();
+                if ($organizer->logo_url !== '/storage/' . $path) {
+                    \Log::error('Logo URL not saved in database', [
+                        'expected' => '/storage/' . $path,
+                        'actual' => $organizer->logo_url
+                    ]);
+                    throw new \Exception('Échec de la sauvegarde du logo en base de données');
+                }
+                
+                \Log::info('Logo saved', [
+                    'organizer_id' => $organizer->id,
+                    'logo_url' => $organizer->logo_url,
+                    'file_path' => $path
+                ]);
                 
                 return response()->json([
                     'success' => true,

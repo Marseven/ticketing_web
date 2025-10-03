@@ -586,12 +586,23 @@ const handleAvatarUpload = async (event) => {
       // Mettre à jour l'avatar dans les données locales
       user.value.avatar_url = response.data.data.avatar_url;
       
+      // Forcer le rechargement de l'image
+      const avatarElement = document.querySelector(`img[alt="${user.value?.name}"]`);
+      if (avatarElement) {
+        avatarElement.src = response.data.data.avatar_url + '?t=' + new Date().getTime();
+      }
+      
       Swal.fire({
         title: 'Succès !',
         text: 'Photo de profil mise à jour',
         icon: 'success',
         confirmButtonColor: '#272d63'
       });
+      
+      // Recharger les données du profil pour s'assurer de la synchronisation
+      setTimeout(() => {
+        loadProfileData();
+      }, 1000);
     }
   } catch (error) {
     console.error('Erreur upload avatar:', error);
@@ -645,12 +656,23 @@ const handleLogoUpload = async (event) => {
       // Mettre à jour le logo dans les données locales
       organization.value.logo_url = response.data.data.logo_url;
       
+      // Forcer le rechargement de l'image
+      const logoElement = document.querySelector(`img[alt="${organization.value?.name}"]`);
+      if (logoElement) {
+        logoElement.src = response.data.data.logo_url + '?t=' + new Date().getTime();
+      }
+      
       Swal.fire({
         title: 'Succès !',
         text: 'Logo de l\'organisation mis à jour',
         icon: 'success',
         confirmButtonColor: '#272d63'
       });
+      
+      // Recharger les données du profil pour s'assurer de la synchronisation
+      setTimeout(() => {
+        loadProfileData();
+      }, 1000);
     }
   } catch (error) {
     console.error('Erreur upload logo:', error);
