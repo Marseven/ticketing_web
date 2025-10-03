@@ -29,12 +29,14 @@
         </div>
 
         <div class="bg-white rounded-primea-lg shadow-sm p-6 border-l-4 border-primea-yellow">
-          <div class="flex-shrink-0">
-            <CalendarIcon size="xl" class="text-primea-yellow" />
-          </div>
-          <div class="ml-4">
-            <p class="text-sm font-medium text-gray-500">Prochains événements</p>
-            <p class="text-2xl font-bold text-gray-900">{{ stats.upcomingEvents }}</p>
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <CalendarIcon size="xl" class="text-primea-yellow" />
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-500">Prochains événements</p>
+              <p class="text-2xl font-bold text-gray-900">{{ stats.upcomingEvents }}</p>
+            </div>
           </div>
         </div>
 

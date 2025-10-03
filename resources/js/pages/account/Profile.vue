@@ -72,6 +72,14 @@
         </button>
       </div>
 
+      <!-- Message de succès -->
+      <div v-if="successMessage && !loading && !error" class="mb-6 p-4 bg-green-50 border border-green-200 rounded-primea">
+        <div class="flex items-center">
+          <CheckCircleIcon class="w-5 h-5 text-green-500 mr-2" />
+          <p class="text-green-700 font-medium">{{ successMessage }}</p>
+        </div>
+      </div>
+
       <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Informations personnelles -->
         <div class="lg:col-span-2">
@@ -86,18 +94,34 @@
             <form @submit.prevent="updateProfile" class="p-6 space-y-6">
               <!-- Photo de profil -->
               <div class="flex items-center space-x-6">
-                <div class="w-20 h-20 bg-primea-blue text-white rounded-full flex items-center justify-center text-2xl font-bold">
-                  {{ userInitial }}
+                <div class="w-20 h-20 rounded-full overflow-hidden bg-primea-blue text-white flex items-center justify-center text-2xl font-bold">
+                  <img 
+                    v-if="profileForm.avatar" 
+                    :src="profileForm.avatar" 
+                    :alt="profileForm.name"
+                    class="w-full h-full object-cover"
+                  />
+                  <span v-else>{{ userInitial }}</span>
                 </div>
                 <div>
                   <h4 class="text-sm font-medium text-gray-900 mb-1">Photo de profil</h4>
                   <p class="text-sm text-gray-500 mb-3">Ajoutez une photo pour personnaliser votre profil</p>
+                  <input 
+                    ref="avatarInput"
+                    type="file" 
+                    accept="image/*" 
+                    @change="handleAvatarUpload"
+                    class="hidden"
+                  />
                   <button 
                     type="button"
-                    class="px-4 py-2 border border-gray-300 text-gray-700 rounded-primea hover:bg-gray-50 transition-colors duration-200 flex items-center gap-2"
+                    @click="$refs.avatarInput.click()"
+                    :disabled="uploadingAvatar"
+                    class="px-4 py-2 border border-gray-300 text-gray-700 rounded-primea hover:bg-gray-50 transition-colors duration-200 flex items-center gap-2 disabled:opacity-50"
                   >
-                    <PhotoIcon class="w-4 h-4" />
-                    Changer la photo
+                    <div v-if="uploadingAvatar" class="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                    <PhotoIcon v-else class="w-4 h-4" />
+                    {{ uploadingAvatar ? 'Upload...' : 'Changer la photo' }}
                   </button>
                 </div>
               </div>
@@ -398,6 +422,7 @@ import {
   StarIcon,
   PhotoIcon,
   CheckIcon,
+  CheckCircleIcon,
   ShieldCheckIcon,
   PencilIcon,
   ExclamationTriangleIcon,
@@ -414,6 +439,7 @@ export default {
     StarIcon,
     PhotoIcon,
     CheckIcon,
+    CheckCircleIcon,
     ShieldCheckIcon,
     PencilIcon,
     ExclamationTriangleIcon,
@@ -426,6 +452,8 @@ export default {
     const showPasswordModal = ref(false)
     const loading = ref(false)
     const error = ref(null)
+    const uploadingAvatar = ref(false)
+    const successMessage = ref('')
 
     const user = computed(() => authStore.user)
     const userInitial = computed(() => user.value?.name?.charAt(0).toUpperCase() || 'U')
@@ -438,7 +466,8 @@ export default {
       city: '',
       country: 'GA',
       bio: '',
-      language: 'fr'
+      language: 'fr',
+      avatar: null
     })
 
     // Charger le profil depuis l'API
@@ -457,7 +486,8 @@ export default {
           city: profile.city || '',
           country: profile.country || 'GA',
           bio: profile.bio || '',
-          language: profile.language || 'fr'
+          language: profile.language || 'fr',
+          avatar: profile.avatar || null
         }
       } catch (err) {
         console.error('Erreur lors du chargement du profil:', err)
@@ -471,7 +501,8 @@ export default {
           city: '',
           country: 'GA',
           bio: '',
-          language: 'fr'
+          language: 'fr',
+          avatar: null
         }
       } finally {
         loading.value = false
@@ -545,9 +576,13 @@ export default {
 
     const updateProfile = async () => {
       saving.value = true
+      error.value = null
+      successMessage.value = ''
+      
       try {
         await clientService.updateProfile(profileForm.value)
         console.log('Profil mis à jour:', profileForm.value)
+        successMessage.value = 'Profil mis à jour avec succès'
         
         // Mettre à jour les données dans le store auth si nécessaire
         if (authStore.updateUser) {
@@ -556,8 +591,13 @@ export default {
             email: profileForm.value.email
           })
         }
-      } catch (error) {
-        console.error('Erreur lors de la mise à jour:', error)
+        
+        // Effacer le message de succès après 3 secondes
+        setTimeout(() => {
+          successMessage.value = ''
+        }, 3000)
+      } catch (err) {
+        console.error('Erreur lors de la mise à jour:', err)
         error.value = 'Impossible de mettre à jour votre profil'
       } finally {
         saving.value = false
@@ -589,6 +629,52 @@ export default {
       loadProfile() // Recharger les données depuis l'API
     }
 
+    // Gérer l'upload d'avatar
+    const handleAvatarUpload = async (event) => {
+      const file = event.target.files[0]
+      if (!file) return
+
+      // Vérifier le type de fichier
+      if (!file.type.startsWith('image/')) {
+        alert('Veuillez sélectionner un fichier image')
+        return
+      }
+
+      // Vérifier la taille (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('La taille du fichier ne doit pas dépasser 5MB')
+        return
+      }
+
+      try {
+        uploadingAvatar.value = true
+        
+        // Créer FormData pour l'upload
+        const formData = new FormData()
+        formData.append('avatar', file)
+        
+        // Uploader via l'API
+        const response = await clientService.uploadAvatar(formData)
+        
+        // Mettre à jour l'avatar dans le formulaire
+        if (response.data.avatar_url) {
+          profileForm.value.avatar = response.data.avatar_url
+        }
+        
+        successMessage.value = 'Avatar mis à jour avec succès'
+        setTimeout(() => {
+          successMessage.value = ''
+        }, 3000)
+      } catch (error) {
+        console.error('Erreur lors de l\'upload de l\'avatar:', error)
+        error.value = 'Erreur lors de l\'upload de l\'avatar'
+      } finally {
+        uploadingAvatar.value = false
+        // Réinitialiser l'input file
+        event.target.value = ''
+      }
+    }
+
     return {
       profileForm,
       passwordForm,
@@ -599,11 +685,14 @@ export default {
       showPasswordModal,
       loading,
       error,
+      successMessage,
+      uploadingAvatar,
       userInitial,
       updateProfile,
       updatePassword,
       resetForm,
-      loadProfile
+      loadProfile,
+      handleAvatarUpload
     }
   }
 }
@@ -611,7 +700,7 @@ export default {
 
 <style scoped>
 .my-profile {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background-color: #f8fafc;
 }
 
 .font-primea {
