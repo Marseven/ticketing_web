@@ -12,8 +12,106 @@
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primea-blue"></div>
     </div>
 
-    <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <!-- Informations personnelles -->
+    <div v-else class="space-y-8">
+      <!-- Photos et Avatar -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Photo de profil utilisateur -->
+        <div class="bg-white rounded-primea shadow-primea p-6">
+          <h2 class="text-xl font-semibold text-primea-blue font-primea mb-6">Photo de Profil</h2>
+          
+          <div class="flex flex-col items-center space-y-4">
+            <div class="relative">
+              <div class="w-32 h-32 rounded-full overflow-hidden bg-gray-100 border-4 border-white shadow-lg">
+                <img 
+                  v-if="user?.avatar_url" 
+                  :src="user.avatar_url" 
+                  :alt="user?.name"
+                  class="w-full h-full object-cover"
+                />
+                <div v-else class="w-full h-full flex items-center justify-center bg-primea-blue text-white text-3xl font-bold font-primea">
+                  {{ user?.name?.charAt(0)?.toUpperCase() || 'U' }}
+                </div>
+              </div>
+              <button 
+                @click="$refs.avatarInput.click()"
+                :disabled="uploadingAvatar"
+                class="absolute bottom-0 right-0 bg-primea-blue text-white p-2 rounded-full hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 disabled:opacity-50"
+              >
+                <CameraIcon class="w-4 h-4" />
+              </button>
+            </div>
+            
+            <div class="text-center">
+              <p class="text-sm text-gray-600 font-primea">{{ user?.name || 'Utilisateur' }}</p>
+              <p class="text-xs text-gray-500 font-primea">Cliquez sur l'icône pour changer</p>
+            </div>
+            
+            <input 
+              ref="avatarInput"
+              type="file" 
+              accept="image/*" 
+              @change="handleAvatarUpload" 
+              class="hidden"
+            />
+            
+            <div v-if="uploadingAvatar" class="text-center">
+              <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primea-blue mx-auto"></div>
+              <p class="text-sm text-gray-600 font-primea mt-2">Upload en cours...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Logo de l'organisation -->
+        <div class="bg-white rounded-primea shadow-primea p-6">
+          <h2 class="text-xl font-semibold text-primea-blue font-primea mb-6">Logo de l'Organisation</h2>
+          
+          <div class="flex flex-col items-center space-y-4">
+            <div class="relative">
+              <div class="w-32 h-32 rounded-primea overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center">
+                <img 
+                  v-if="organization?.logo_url" 
+                  :src="organization.logo_url" 
+                  :alt="organization?.name"
+                  class="w-full h-full object-contain"
+                />
+                <div v-else class="text-center">
+                  <PhotoIcon class="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                  <p class="text-xs text-gray-500 font-primea">Aucun logo</p>
+                </div>
+              </div>
+              <button 
+                @click="$refs.logoInput.click()"
+                :disabled="uploadingLogo"
+                class="absolute bottom-0 right-0 bg-primea-blue text-white p-2 rounded-full hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 disabled:opacity-50"
+              >
+                <CameraIcon class="w-4 h-4" />
+              </button>
+            </div>
+            
+            <div class="text-center">
+              <p class="text-sm text-gray-600 font-primea">{{ organization?.name || 'Organisation' }}</p>
+              <p class="text-xs text-gray-500 font-primea">Logo de votre organisation</p>
+            </div>
+            
+            <input 
+              ref="logoInput"
+              type="file" 
+              accept="image/*" 
+              @change="handleLogoUpload" 
+              class="hidden"
+            />
+            
+            <div v-if="uploadingLogo" class="text-center">
+              <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primea-blue mx-auto"></div>
+              <p class="text-sm text-gray-600 font-primea mt-2">Upload en cours...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Informations -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Informations personnelles -->
       <div class="bg-white rounded-primea shadow-primea p-6">
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-xl font-semibold text-primea-blue font-primea">Informations Personnelles</h2>
@@ -50,12 +148,13 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Téléphone</label>
-            <input 
+            <PhoneInput
               v-model="personalForm.phone"
-              type="tel" 
+              id="personal-phone"
               :disabled="!editPersonal"
-              class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue disabled:bg-gray-50 font-primea"
-              placeholder="+225 XX XX XX XX XX"
+              :input-class="!editPersonal ? 'disabled:bg-gray-50' : ''"
+              placeholder="Numéro de téléphone"
+              default-country="CI"
             />
           </div>
 
@@ -137,12 +236,13 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Téléphone de contact</label>
-            <input 
+            <PhoneInput
               v-model="organizationForm.contact_phone"
-              type="tel" 
+              id="organization-phone"
               :disabled="!editOrganization"
-              class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue disabled:bg-gray-50 font-primea"
-              placeholder="+225 XX XX XX XX XX"
+              :input-class="!editOrganization ? 'disabled:bg-gray-50' : ''"
+              placeholder="Numéro de téléphone de contact"
+              default-country="CI"
             />
           </div>
 
@@ -243,6 +343,7 @@
           </div>
         </div>
       </div>
+      </div>
     </div>
     </div>
   </div>
@@ -251,10 +352,15 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { useAuthStore } from '../../stores/auth';
+import { organizerService } from '../../services/api';
+import Swal from 'sweetalert2';
+import PhoneInput from '../../components/PhoneInput.vue';
 import { 
   PencilIcon, 
   CheckCircleIcon, 
-  ShieldCheckIcon 
+  ShieldCheckIcon,
+  PhotoIcon,
+  CameraIcon
 } from '@heroicons/vue/24/outline';
 
 const authStore = useAuthStore();
@@ -266,6 +372,8 @@ const editOrganization = ref(false);
 const updatingPersonal = ref(false);
 const updatingOrganization = ref(false);
 const updatingPassword = ref(false);
+const uploadingAvatar = ref(false);
+const uploadingLogo = ref(false);
 
 // Données utilisateur et organisation
 const user = ref(null);
@@ -327,13 +435,33 @@ const cancelEditOrganization = () => {
 const updatePersonalInfo = async () => {
   updatingPersonal.value = true;
   try {
-    // Appel API pour mettre à jour les infos personnelles
-    console.log('Mise à jour des informations personnelles:', personalForm);
-    // Simulation d'appel API
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    editPersonal.value = false;
+    const response = await organizerService.updateProfile({
+      type: 'personal',
+      ...personalForm
+    });
+    
+    if (response.data.success) {
+      Swal.fire({
+        title: 'Succès !',
+        text: 'Informations personnelles mises à jour',
+        icon: 'success',
+        confirmButtonColor: '#272d63'
+      });
+      editPersonal.value = false;
+      
+      // Mettre à jour les données locales
+      if (response.data.data.user) {
+        user.value = { ...user.value, ...response.data.data.user };
+      }
+    }
   } catch (error) {
     console.error('Erreur lors de la mise à jour:', error);
+    Swal.fire({
+      title: 'Erreur',
+      text: 'Impossible de mettre à jour les informations',
+      icon: 'error',
+      confirmButtonColor: '#272d63'
+    });
   } finally {
     updatingPersonal.value = false;
   }
@@ -342,13 +470,33 @@ const updatePersonalInfo = async () => {
 const updateOrganizationInfo = async () => {
   updatingOrganization.value = true;
   try {
-    // Appel API pour mettre à jour les infos de l'organisation
-    console.log('Mise à jour de l\'organisation:', organizationForm);
-    // Simulation d'appel API
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    editOrganization.value = false;
+    const response = await organizerService.updateProfile({
+      type: 'organization',
+      ...organizationForm
+    });
+    
+    if (response.data.success) {
+      Swal.fire({
+        title: 'Succès !',
+        text: 'Informations de l\'organisation mises à jour',
+        icon: 'success',
+        confirmButtonColor: '#272d63'
+      });
+      editOrganization.value = false;
+      
+      // Mettre à jour les données locales
+      if (response.data.data.organization) {
+        organization.value = { ...organization.value, ...response.data.data.organization };
+      }
+    }
   } catch (error) {
     console.error('Erreur lors de la mise à jour:', error);
+    Swal.fire({
+      title: 'Erreur',
+      text: 'Impossible de mettre à jour les informations de l\'organisation',
+      icon: 'error',
+      confirmButtonColor: '#272d63'
+    });
   } finally {
     updatingOrganization.value = false;
   }
@@ -356,27 +504,166 @@ const updateOrganizationInfo = async () => {
 
 const updatePassword = async () => {
   if (passwordForm.password !== passwordForm.password_confirmation) {
-    alert('Les mots de passe ne correspondent pas');
+    Swal.fire({
+      title: 'Erreur',
+      text: 'Les mots de passe ne correspondent pas',
+      icon: 'error',
+      confirmButtonColor: '#272d63'
+    });
     return;
   }
 
   updatingPassword.value = true;
   try {
-    // Appel API pour changer le mot de passe
-    console.log('Changement de mot de passe');
-    // Simulation d'appel API
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Réinitialiser le formulaire
-    Object.assign(passwordForm, {
-      current_password: '',
-      password: '',
-      password_confirmation: ''
+    const response = await organizerService.updateProfile({
+      type: 'password',
+      ...passwordForm
     });
+    
+    if (response.data.success) {
+      Swal.fire({
+        title: 'Succès !',
+        text: 'Mot de passe mis à jour avec succès',
+        icon: 'success',
+        confirmButtonColor: '#272d63'
+      });
+      
+      // Réinitialiser le formulaire
+      Object.assign(passwordForm, {
+        current_password: '',
+        password: '',
+        password_confirmation: ''
+      });
+    }
   } catch (error) {
     console.error('Erreur lors du changement de mot de passe:', error);
+    Swal.fire({
+      title: 'Erreur',
+      text: 'Impossible de changer le mot de passe',
+      icon: 'error',
+      confirmButtonColor: '#272d63'
+    });
   } finally {
     updatingPassword.value = false;
+  }
+};
+
+// Gestion des uploads d'images
+const handleAvatarUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  // Validation du fichier
+  if (!file.type.startsWith('image/')) {
+    Swal.fire({
+      title: 'Erreur',
+      text: 'Veuillez sélectionner un fichier image',
+      icon: 'error',
+      confirmButtonColor: '#272d63'
+    });
+    return;
+  }
+  
+  if (file.size > 5 * 1024 * 1024) { // 5MB
+    Swal.fire({
+      title: 'Erreur',
+      text: 'L\'image ne doit pas dépasser 5MB',
+      icon: 'error',
+      confirmButtonColor: '#272d63'
+    });
+    return;
+  }
+  
+  uploadingAvatar.value = true;
+  try {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    formData.append('type', 'user');
+    
+    const response = await organizerService.uploadAvatar(formData);
+    
+    if (response.data.success) {
+      // Mettre à jour l'avatar dans les données locales
+      user.value.avatar_url = response.data.data.avatar_url;
+      
+      Swal.fire({
+        title: 'Succès !',
+        text: 'Photo de profil mise à jour',
+        icon: 'success',
+        confirmButtonColor: '#272d63'
+      });
+    }
+  } catch (error) {
+    console.error('Erreur upload avatar:', error);
+    Swal.fire({
+      title: 'Erreur',
+      text: 'Impossible de télécharger la photo',
+      icon: 'error',
+      confirmButtonColor: '#272d63'
+    });
+  } finally {
+    uploadingAvatar.value = false;
+    // Réinitialiser l'input file
+    event.target.value = '';
+  }
+};
+
+const handleLogoUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  // Validation du fichier
+  if (!file.type.startsWith('image/')) {
+    Swal.fire({
+      title: 'Erreur',
+      text: 'Veuillez sélectionner un fichier image',
+      icon: 'error',
+      confirmButtonColor: '#272d63'
+    });
+    return;
+  }
+  
+  if (file.size > 5 * 1024 * 1024) { // 5MB
+    Swal.fire({
+      title: 'Erreur',
+      text: 'L\'image ne doit pas dépasser 5MB',
+      icon: 'error',
+      confirmButtonColor: '#272d63'
+    });
+    return;
+  }
+  
+  uploadingLogo.value = true;
+  try {
+    const formData = new FormData();
+    formData.append('logo', file);
+    formData.append('type', 'organization');
+    
+    const response = await organizerService.uploadAvatar(formData);
+    
+    if (response.data.success) {
+      // Mettre à jour le logo dans les données locales
+      organization.value.logo_url = response.data.data.logo_url;
+      
+      Swal.fire({
+        title: 'Succès !',
+        text: 'Logo de l\'organisation mis à jour',
+        icon: 'success',
+        confirmButtonColor: '#272d63'
+      });
+    }
+  } catch (error) {
+    console.error('Erreur upload logo:', error);
+    Swal.fire({
+      title: 'Erreur',
+      text: 'Impossible de télécharger le logo',
+      icon: 'error',
+      confirmButtonColor: '#272d63'
+    });
+  } finally {
+    uploadingLogo.value = false;
+    // Réinitialiser l'input file
+    event.target.value = '';
   }
 };
 
@@ -388,46 +675,58 @@ const formatDate = (dateString) => {
 const loadProfileData = async () => {
   loading.value = true;
   try {
-    // Charger les données depuis l'API
-    // Simulation avec des données d'exemple
-    user.value = {
-      name: 'Marie Nzougou',
-      email: 'marie@example.com',
-      phone: '+225 07 12 34 56 78',
-      email_verified_at: '2024-01-15T10:30:00Z'
-    };
-
-    organization.value = {
-      name: 'Mon Organisation',
-      description: 'Organisation spécialisée dans l\'événementiel',
-      website_url: 'https://monorganisation.com',
-      contact_email: 'contact@monorganisation.com',
-      contact_phone: '+225 07 12 34 56 79',
-      verified_at: '2024-01-20T14:00:00Z'
-    };
-
-    stats.value = {
-      events: 12,
-      tickets: 345
-    };
-
-    // Remplir les formulaires
-    Object.assign(personalForm, {
-      name: user.value.name,
-      email: user.value.email,
-      phone: user.value.phone
-    });
-
-    Object.assign(organizationForm, {
-      name: organization.value.name,
-      description: organization.value.description,
-      website_url: organization.value.website_url,
-      contact_email: organization.value.contact_email,
-      contact_phone: organization.value.contact_phone
-    });
-
+    const response = await organizerService.getProfile();
+    console.log('Profile API Response:', response.data);
+    
+    if (response.data.success) {
+      const data = response.data.data;
+      
+      // Charger les données utilisateur
+      if (data.user) {
+        user.value = data.user;
+        Object.assign(personalForm, {
+          name: data.user.name || '',
+          email: data.user.email || '',
+          phone: data.user.phone || ''
+        });
+      }
+      
+      // Charger les données organisation
+      if (data.organization) {
+        organization.value = data.organization;
+        Object.assign(organizationForm, {
+          name: data.organization.name || '',
+          description: data.organization.description || '',
+          website_url: data.organization.website_url || '',
+          contact_email: data.organization.contact_email || '',
+          contact_phone: data.organization.contact_phone || ''
+        });
+      }
+      
+      // Charger les statistiques
+      if (data.stats) {
+        stats.value = {
+          events: data.stats.events || 0,
+          tickets: data.stats.tickets || 0
+        };
+      }
+    } else {
+      console.error('Profile API Error:', response.data.message);
+      Swal.fire({
+        title: 'Erreur',
+        text: 'Impossible de charger le profil',
+        icon: 'error',
+        confirmButtonColor: '#272d63'
+      });
+    }
   } catch (error) {
     console.error('Erreur lors du chargement du profil:', error);
+    Swal.fire({
+      title: 'Erreur',
+      text: 'Impossible de charger le profil',
+      icon: 'error',
+      confirmButtonColor: '#272d63'
+    });
   } finally {
     loading.value = false;
   }
@@ -481,5 +780,15 @@ onMounted(() => {
 /* Ombres Primea */
 .shadow-primea {
   box-shadow: 0 2px 15px rgba(39, 45, 99, 0.08);
+}
+
+/* PhoneInput disabled state */
+:deep(.phone-input:disabled) {
+  background-color: #f9fafb;
+}
+
+:deep(.country-selector:has(+ .phone-input:disabled)) {
+  pointer-events: none;
+  opacity: 0.6;
 }
 </style>

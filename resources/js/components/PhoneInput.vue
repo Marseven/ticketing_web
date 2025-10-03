@@ -2,7 +2,7 @@
   <div class="phone-input-wrapper">
     <div class="phone-input-container">
       <!-- Sélecteur de pays -->
-      <div class="country-selector" @click="toggleDropdown">
+      <div class="country-selector" @click="!disabled && toggleDropdown" :class="{ 'disabled': disabled }">
         <div class="selected-country">
           <img 
             :src="`https://flagcdn.com/w40/${selectedCountry.code.toLowerCase()}.png`" 
@@ -25,6 +25,7 @@
         @blur="handleBlur"
         :placeholder="placeholder"
         :required="required"
+        :disabled="disabled"
         class="phone-input"
         :class="inputClass"
       />
@@ -93,6 +94,10 @@ export default {
     inputClass: {
       type: String,
       default: ''
+    },
+    disabled: {
+      type: Boolean,
+      default: false
     }
   },
   emits: ['update:modelValue'],
@@ -405,5 +410,17 @@ export default {
 
 .country-list::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
+}
+
+/* Disabled state */
+.country-selector.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+  background: #f9fafb;
+}
+
+.phone-input:disabled {
+  background: #f9fafb;
+  cursor: not-allowed;
 }
 </style>
