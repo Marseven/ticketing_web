@@ -96,8 +96,27 @@
         </div>
       </div>
 
+      <!-- État de chargement -->
+      <div v-if="loading" class="text-center py-16">
+        <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primea-blue mx-auto mb-4"></div>
+        <p class="text-gray-500">Chargement de vos commandes...</p>
+      </div>
+
+      <!-- Message d'erreur -->
+      <div v-else-if="error" class="text-center py-16">
+        <ExclamationTriangleIcon class="w-16 h-16 text-red-400 mx-auto mb-4" />
+        <h3 class="text-xl font-medium text-red-600 mb-2">Erreur</h3>
+        <p class="text-gray-500 mb-6">{{ error }}</p>
+        <button 
+          @click="loadOrders"
+          class="inline-flex items-center px-6 py-3 bg-primea-blue text-white rounded-primea hover:bg-primea-yellow hover:text-primea-blue font-semibold transition-all duration-200"
+        >
+          Réessayer
+        </button>
+      </div>
+
       <!-- Liste des commandes -->
-      <div class="space-y-6">
+      <div v-else class="space-y-6">
         <div v-for="order in filteredOrders" :key="order.id" 
              class="bg-white rounded-primea-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
           
@@ -245,7 +264,7 @@
         </div>
 
         <!-- État vide -->
-        <div v-if="filteredOrders.length === 0" class="text-center py-16">
+        <div v-if="!loading && !error && filteredOrders.length === 0" class="text-center py-16">
           <ClipboardDocumentListIcon class="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 class="text-xl font-medium text-gray-500 mb-2">Aucune commande trouvée</h3>
           <p class="text-gray-400 mb-6">
@@ -266,9 +285,10 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import CalendarIcon from '../../components/icons/CalendarIcon.vue'
+import { ticketApiService } from '../../services/api.js'
 import { 
   ClipboardDocumentListIcon,
   CheckCircleIcon,
@@ -308,94 +328,82 @@ export default {
     const searchQuery = ref('')
     const statusFilter = ref('')
     const periodFilter = ref('')
+    const loading = ref(false)
+    const error = ref(null)
 
-    // Données de démonstration
-    const orders = ref([
-      {
-        id: 1,
-        reference: 'CMD-2025-001',
-        orderDate: new Date('2025-09-10T14:30:00'),
-        status: 'confirmed',
-        paymentMethod: 'airtel',
-        transactionId: 'TXN-AM-123456789',
-        total: 35000,
-        showDetails: false,
-        tickets: [
+    // Données réelles depuis l'API
+    const orders = ref([])
+
+    // Charger les commandes depuis l'API
+    const loadOrders = async () => {
+      try {
+        loading.value = true
+        error.value = null
+        const response = await ticketApiService.getMyTickets()
+        const apiOrders = response.data.orders || []
+        
+        // Transformer les commandes de l'API vers le format attendu par le composant
+        orders.value = apiOrders.map(order => ({
+          id: order.id,
+          reference: order.order_number,
+          orderDate: new Date(order.created_at.replace(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})/, '$3-$2-$1T$4:$5:$6')),
+          status: order.status === 'paid' ? 'confirmed' : order.status,
+          paymentMethod: 'airtel', // Par défaut
+          transactionId: `TXN-${order.order_number}`,
+          total: order.total_amount,
+          showDetails: false,
+          tickets: [{
+            id: order.id,
+            event: {
+              title: order.event?.title || 'Événement sans titre',
+              date: order.schedule?.starts_at ? new Date(order.schedule.starts_at.replace(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})/, '$3-$2-$1T$4:$5:$6')) : new Date(),
+              venue: `${order.event?.venue_name || ''}${order.event?.venue_city ? ', ' + order.event.venue_city : ''}`,
+              image: '/images/default-event.jpg'
+            },
+            type: 'Standard',
+            price: order.total_amount / (order.tickets_count || 1),
+            quantity: order.tickets_count || 1
+          }]
+        }))
+      } catch (err) {
+        console.error('Erreur lors du chargement des commandes:', err)
+        error.value = 'Impossible de charger vos commandes'
+        // Garder les données de démonstration en cas d'erreur
+        orders.value = [
           {
             id: 1,
-            event: {
-              title: "L'OISEAU RARE",
-              date: new Date('2025-12-25T20:00:00'),
-              venue: 'Entre Nous Bar, Libreville',
-              image: '/images/event-1.jpg'
-            },
-            type: 'Standard',
-            price: 10000,
-            quantity: 2
-          },
-          {
-            id: 2,
-            event: {
-              title: "L'OISEAU RARE",
-              date: new Date('2025-12-25T20:00:00'),
-              venue: 'Entre Nous Bar, Libreville',
-              image: '/images/event-1.jpg'
-            },
-            type: 'VIP',
-            price: 15000,
-            quantity: 1
+            reference: 'CMD-2025-001',
+            orderDate: new Date('2025-09-10T14:30:00'),
+            status: 'confirmed',
+            paymentMethod: 'airtel',
+            transactionId: 'TXN-AM-123456789',
+            total: 35000,
+            showDetails: false,
+            tickets: [
+              {
+                id: 1,
+                event: {
+                  title: "L'OISEAU RARE",
+                  date: new Date('2025-12-25T20:00:00'),
+                  venue: 'Entre Nous Bar, Libreville',
+                  image: '/images/event-1.jpg'
+                },
+                type: 'Standard',
+                price: 10000,
+                quantity: 2
+              }
+            ]
           }
         ]
-      },
-      {
-        id: 2,
-        reference: 'CMD-2025-002',
-        orderDate: new Date('2025-09-08T10:15:00'),
-        status: 'pending',
-        paymentMethod: 'moov',
-        transactionId: 'TXN-MM-987654321',
-        total: 25000,
-        showDetails: false,
-        tickets: [
-          {
-            id: 3,
-            event: {
-              title: 'Concert Jazz Night',
-              date: new Date('2025-10-15T19:30:00'),
-              venue: 'Palais de la Culture, Libreville',
-              image: '/images/event-2.jpg'
-            },
-            type: 'VIP',
-            price: 25000,
-            quantity: 1
-          }
-        ]
-      },
-      {
-        id: 3,
-        reference: 'CMD-2025-003',
-        orderDate: new Date('2025-08-25T16:45:00'),
-        status: 'cancelled',
-        paymentMethod: 'visa',
-        transactionId: 'TXN-VISA-456789123',
-        total: 15000,
-        showDetails: false,
-        tickets: [
-          {
-            id: 4,
-            event: {
-              title: 'Festival des Arts',
-              date: new Date('2025-08-20T18:00:00'),
-              venue: 'Parc du Banco, Libreville',
-              image: '/images/event-3.jpg'
-            },
-            type: 'Standard',
-            price: 15000,
-            quantity: 1
-          }
-        ]
+      } finally {
+        loading.value = false
       }
-    ])
+    }
+
+    // Charger les données au montage du composant
+    onMounted(() => {
+      loadOrders()
+    })
 
     const stats = computed(() => ({
       totalOrders: orders.value.length,
@@ -539,6 +547,8 @@ export default {
       searchQuery,
       statusFilter,
       periodFilter,
+      loading,
+      error,
       orders,
       stats,
       filteredOrders,
@@ -555,7 +565,8 @@ export default {
       downloadOrderReceipt,
       retryPayment,
       requestCancellation,
-      canCancelOrder
+      canCancelOrder,
+      loadOrders
     }
   }
 }

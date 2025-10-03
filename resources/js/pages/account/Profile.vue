@@ -53,7 +53,26 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- État de chargement -->
+      <div v-if="loading" class="text-center py-16">
+        <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primea-blue mx-auto mb-4"></div>
+        <p class="text-gray-500">Chargement de votre profil...</p>
+      </div>
+
+      <!-- Message d'erreur -->
+      <div v-else-if="error" class="text-center py-16">
+        <ExclamationTriangleIcon class="w-16 h-16 text-red-400 mx-auto mb-4" />
+        <h3 class="text-xl font-medium text-red-600 mb-2">Erreur</h3>
+        <p class="text-gray-500 mb-6">{{ error }}</p>
+        <button 
+          @click="loadProfile"
+          class="inline-flex items-center px-6 py-3 bg-primea-blue text-white rounded-primea hover:bg-primea-yellow hover:text-primea-blue font-semibold transition-all duration-200"
+        >
+          Réessayer
+        </button>
+      </div>
+
+      <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Informations personnelles -->
         <div class="lg:col-span-2">
           <div class="bg-white rounded-primea-lg shadow-sm overflow-hidden">
@@ -372,6 +391,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import CalendarIcon from '../../components/icons/CalendarIcon.vue'
+import { clientService, ticketApiService } from '../../services/api.js'
 import { 
   UserIcon,
   TicketIcon,
@@ -404,19 +424,81 @@ export default {
     const authStore = useAuthStore()
     const saving = ref(false)
     const showPasswordModal = ref(false)
+    const loading = ref(false)
+    const error = ref(null)
 
     const user = computed(() => authStore.user)
     const userInitial = computed(() => user.value?.name?.charAt(0).toUpperCase() || 'U')
 
     const profileForm = ref({
-      name: user.value?.name || 'John Doe',
-      email: user.value?.email || 'john.doe@example.com',
-      phone: '+241 01 23 45 67',
-      birthdate: '1990-01-15',
-      city: 'Libreville',
+      name: '',
+      email: '',
+      phone: '',
+      birthdate: '',
+      city: '',
       country: 'GA',
-      bio: 'Passionné d\'événements culturels et de musique live. J\'aime découvrir de nouveaux artistes et partager des moments uniques.',
+      bio: '',
       language: 'fr'
+    })
+
+    // Charger le profil depuis l'API
+    const loadProfile = async () => {
+      try {
+        loading.value = true
+        error.value = null
+        const response = await clientService.getProfile()
+        const profile = response.data.user || response.data
+        
+        profileForm.value = {
+          name: profile.name || '',
+          email: profile.email || '',
+          phone: profile.phone || '',
+          birthdate: profile.birthdate || '',
+          city: profile.city || '',
+          country: profile.country || 'GA',
+          bio: profile.bio || '',
+          language: profile.language || 'fr'
+        }
+      } catch (err) {
+        console.error('Erreur lors du chargement du profil:', err)
+        error.value = 'Impossible de charger votre profil'
+        // Utiliser les données par défaut depuis auth store
+        profileForm.value = {
+          name: user.value?.name || '',
+          email: user.value?.email || '',
+          phone: '',
+          birthdate: '',
+          city: '',
+          country: 'GA',
+          bio: '',
+          language: 'fr'
+        }
+      } finally {
+        loading.value = false
+      }
+    }
+
+    // Charger les statistiques depuis l'API
+    const loadStats = async () => {
+      try {
+        const response = await ticketApiService.getMyTickets()
+        const orders = response.data.orders || []
+        
+        stats.value = {
+          totalTickets: orders.reduce((sum, order) => sum + (order.tickets_count || 0), 0),
+          eventsAttended: orders.filter(order => order.status === 'paid').length,
+          loyaltyPoints: orders.length * 50 // Points fictifs basés sur le nombre de commandes
+        }
+      } catch (err) {
+        console.error('Erreur lors du chargement des statistiques:', err)
+        // Garder les valeurs par défaut
+      }
+    }
+
+    // Charger les données au montage du composant
+    onMounted(() => {
+      loadProfile()
+      loadStats()
     })
 
     const passwordForm = ref({
@@ -464,11 +546,19 @@ export default {
     const updateProfile = async () => {
       saving.value = true
       try {
-        // Simuler l'enregistrement
-        await new Promise(resolve => setTimeout(resolve, 1500))
+        await clientService.updateProfile(profileForm.value)
         console.log('Profil mis à jour:', profileForm.value)
+        
+        // Mettre à jour les données dans le store auth si nécessaire
+        if (authStore.updateUser) {
+          authStore.updateUser({
+            name: profileForm.value.name,
+            email: profileForm.value.email
+          })
+        }
       } catch (error) {
         console.error('Erreur lors de la mise à jour:', error)
+        error.value = 'Impossible de mettre à jour votre profil'
       } finally {
         saving.value = false
       }
@@ -496,16 +586,7 @@ export default {
     }
 
     const resetForm = () => {
-      profileForm.value = {
-        name: user.value?.name || 'John Doe',
-        email: user.value?.email || 'john.doe@example.com',
-        phone: '+241 01 23 45 67',
-        birthdate: '1990-01-15',
-        city: 'Libreville',
-        country: 'GA',
-        bio: 'Passionné d\'événements culturels et de musique live. J\'aime découvrir de nouveaux artistes et partager des moments uniques.',
-        language: 'fr'
-      }
+      loadProfile() // Recharger les données depuis l'API
     }
 
     return {
@@ -516,10 +597,13 @@ export default {
       recentActivities,
       saving,
       showPasswordModal,
+      loading,
+      error,
       userInitial,
       updateProfile,
       updatePassword,
-      resetForm
+      resetForm,
+      loadProfile
     }
   }
 }

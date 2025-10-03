@@ -98,6 +98,13 @@ Route::prefix('v1')->group(function () {
         Route::post('{order}/pay', [App\Http\Controllers\Api\PaymentController::class, 'processPayment']);
     });
 
+    // Routes du profil client
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('profile', [App\Http\Controllers\Api\ClientController::class, 'profile']);
+        Route::put('profile', [App\Http\Controllers\Api\ClientController::class, 'updateProfile']);
+        Route::post('profile/avatar', [App\Http\Controllers\Api\ClientController::class, 'uploadAvatar']);
+    });
+
     // Routes de paiement
     Route::prefix('payments')->group(function () {
         Route::middleware('auth:sanctum')->group(function () {

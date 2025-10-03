@@ -161,6 +161,23 @@ export const orderService = {
   // Traiter le paiement d'une commande
   processPayment(orderId, paymentData) {
     return api.post(`/orders/${orderId}/pay`, paymentData)
+  },
+
+  // Récupérer les tickets de l'utilisateur
+  getMyTickets() {
+    return api.get('/orders')
+  }
+}
+
+export const ticketApiService = {
+  // Récupérer les tickets de l'utilisateur connecté
+  getMyTickets(filters = {}) {
+    return api.get('/orders', { params: filters })
+  },
+  
+  // Récupérer les détails d'un ticket spécifique
+  getTicketDetails(ticketId) {
+    return api.get(`/tickets/${ticketId}`)
   }
 }
 
@@ -374,6 +391,27 @@ export const organizerService = {
   // Récupérer les lieux/venues
   getVenues() {
     return api.get('/venues')
+  }
+}
+
+export const clientService = {
+  // Récupérer le profil client
+  getProfile() {
+    return api.get('/profile')
+  },
+
+  // Mettre à jour le profil client
+  updateProfile(profileData) {
+    return api.put('/profile', profileData)
+  },
+
+  // Uploader un avatar
+  uploadAvatar(formData) {
+    return api.post('/profile/avatar', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
   }
 }
 

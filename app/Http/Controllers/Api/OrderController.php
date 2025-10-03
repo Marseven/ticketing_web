@@ -251,9 +251,74 @@ class OrderController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $user = $request->user();
+        
+        $query = $user->orders()
+            ->with(['tickets.event', 'tickets.ticketType', 'tickets.schedule']);
+        
+        // Filtrage par statut
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        
+        // Filtrage par event_id
+        if ($request->filled('event_id')) {
+            $query->whereHas('tickets.event', function($q) use ($request) {
+                $q->where('id', $request->event_id);
+            });
+        }
+        
+        // Filtrage par date
+        if ($request->filled('from_date')) {
+            $query->where('created_at', '>=', $request->from_date);
+        }
+        
+        if ($request->filled('to_date')) {
+            $query->where('created_at', '<=', $request->to_date);
+        }
+        
+        $perPage = min($request->get('per_page', 20), 100);
+        $orders = $query->orderBy('created_at', 'desc')->paginate($perPage);
+        
+        // Formater les données pour correspondre à la structure attendue
+        $formattedOrders = $orders->map(function($order) {
+            $firstTicket = $order->tickets->first();
+            $event = $firstTicket?->event;
+            $schedule = $firstTicket?->schedule;
+            
+            return [
+                'id' => $order->id,
+                'order_number' => $order->reference,
+                'status' => $order->status === 'completed' ? 'paid' : $order->status,
+                'total_amount' => $order->total_amount,
+                'currency' => $order->currency ?? 'XAF',
+                'created_at' => $order->created_at->format('d/m/Y H:i:s'),
+                'paid_at' => $order->status === 'completed' ? $order->updated_at->format('d/m/Y H:i:s') : null,
+                'event' => $event ? [
+                    'id' => $event->id,
+                    'title' => $event->title,
+                    'venue_name' => $event->venue_name,
+                    'venue_city' => $event->venue_city
+                ] : null,
+                'schedule' => $schedule ? [
+                    'id' => $schedule->id,
+                    'starts_at' => $schedule->starts_at->format('d/m/Y H:i:s')
+                ] : null,
+                'tickets_count' => $order->tickets->count()
+            ];
+        });
+        
         return response()->json([
-            'message' => 'OrderController index method - À implémenter'
-        ], 501);
+            'orders' => $formattedOrders,
+            'pagination' => [
+                'total' => $orders->total(),
+                'per_page' => $orders->perPage(),
+                'current_page' => $orders->currentPage(),
+                'last_page' => $orders->lastPage(),
+                'from' => $orders->firstItem(),
+                'to' => $orders->lastItem()
+            ]
+        ]);
     }
 
     /**

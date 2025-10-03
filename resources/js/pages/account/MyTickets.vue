@@ -82,8 +82,27 @@
         </div>
       </div>
 
+      <!-- État de chargement -->
+      <div v-if="loading" class="text-center py-16">
+        <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primea-blue mx-auto mb-4"></div>
+        <p class="text-gray-500">Chargement de vos billets...</p>
+      </div>
+
+      <!-- Message d'erreur -->
+      <div v-else-if="error" class="text-center py-16">
+        <ExclamationCircleIcon class="w-16 h-16 text-red-400 mx-auto mb-4" />
+        <h3 class="text-xl font-medium text-red-600 mb-2">Erreur</h3>
+        <p class="text-gray-500 mb-6">{{ error }}</p>
+        <button 
+          @click="loadTickets"
+          class="inline-flex items-center px-6 py-3 bg-primea-blue text-white rounded-primea hover:bg-primea-yellow hover:text-primea-blue font-semibold transition-all duration-200"
+        >
+          Réessayer
+        </button>
+      </div>
+
       <!-- Liste des billets -->
-      <div class="space-y-6">
+      <div v-else class="space-y-6">
         <!-- Billet actif avec événement à venir -->
         <div v-for="ticket in filteredTickets" :key="ticket.id" 
              class="bg-white rounded-primea-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
@@ -172,7 +191,7 @@
         </div>
 
         <!-- État vide -->
-        <div v-if="filteredTickets.length === 0" class="text-center py-16">
+        <div v-if="!loading && !error && filteredTickets.length === 0" class="text-center py-16">
           <TicketIcon class="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 class="text-xl font-medium text-gray-500 mb-2">Aucun billet trouvé</h3>
           <p class="text-gray-400 mb-6">
@@ -196,6 +215,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import CalendarIcon from '../../components/icons/CalendarIcon.vue'
+import { ticketApiService } from '../../services/api.js'
 import { 
   TicketIcon,
   CheckCircleIcon,
@@ -226,52 +246,70 @@ export default {
     const router = useRouter()
     const searchQuery = ref('')
     const statusFilter = ref('')
+    const loading = ref(false)
+    const error = ref(null)
 
-    // Données de démonstration
-    const tickets = ref([
-      {
-        id: 1,
-        reference: 'TK-2025-001',
-        event: {
-          title: "L'OISEAU RARE",
-          date: new Date('2025-12-25T20:00:00'),
-          venue: 'Entre Nous Bar, Libreville',
-          image: '/images/event-1.jpg'
-        },
-        type: 'Standard',
-        price: 10000,
-        status: 'active',
-        purchaseDate: new Date('2025-09-10T14:30:00')
-      },
-      {
-        id: 2,
-        reference: 'TK-2025-002', 
-        event: {
-          title: 'Concert Jazz Night',
-          date: new Date('2025-10-15T19:30:00'),
-          venue: 'Palais de la Culture, Libreville',
-          image: '/images/event-2.jpg'
-        },
-        type: 'VIP',
-        price: 25000,
-        status: 'used',
-        purchaseDate: new Date('2025-09-05T16:20:00')
-      },
-      {
-        id: 3,
-        reference: 'TK-2025-003',
-        event: {
-          title: 'Festival des Arts',
-          date: new Date('2025-08-20T18:00:00'),
-          venue: 'Parc du Banco, Libreville', 
-          image: '/images/event-3.jpg'
-        },
-        type: 'Standard',
-        price: 15000,
-        status: 'expired',
-        purchaseDate: new Date('2025-08-01T10:15:00')
+    // Données réelles depuis l'API
+    const orders = ref([])
+    const tickets = ref([])
+
+    // Charger les données depuis l'API
+    const loadTickets = async () => {
+      try {
+        loading.value = true
+        error.value = null
+        const response = await ticketApiService.getMyTickets()
+        orders.value = response.data.orders || []
+        
+        // Transformer les commandes en tickets pour l'affichage
+        tickets.value = orders.value.flatMap(order => {
+          if (!order.event) return []
+          
+          return Array.from({ length: order.tickets_count || 1 }, (_, index) => ({
+            id: `${order.id}-${index}`,
+            reference: `${order.order_number}-${index + 1}`,
+            event: {
+              title: order.event.title,
+              date: order.schedule?.starts_at ? new Date(order.schedule.starts_at.replace(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})/, '$3-$2-$1T$4:$5:$6')) : new Date(),
+              venue: `${order.event.venue_name}${order.event.venue_city ? ', ' + order.event.venue_city : ''}`,
+              image: '/images/default-event.jpg'
+            },
+            type: 'Standard',
+            price: order.total_amount / (order.tickets_count || 1),
+            status: order.status === 'paid' ? 'active' : order.status === 'cancelled' ? 'expired' : 'active',
+            purchaseDate: new Date(order.created_at.replace(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})/, '$3-$2-$1T$4:$5:$6')),
+            orderId: order.id
+          }))
+        })
+      } catch (err) {
+        console.error('Erreur lors du chargement des tickets:', err)
+        error.value = 'Impossible de charger vos tickets'
+        // Garder les données de démonstration en cas d'erreur
+        tickets.value = [
+          {
+            id: 1,
+            reference: 'TK-2025-001',
+            event: {
+              title: "L'OISEAU RARE",
+              date: new Date('2025-12-25T20:00:00'),
+              venue: 'Entre Nous Bar, Libreville',
+              image: '/images/event-1.jpg'
+            },
+            type: 'Standard',
+            price: 10000,
+            status: 'active',
+            purchaseDate: new Date('2025-09-10T14:30:00')
+          }
+        ]
+      } finally {
+        loading.value = false
       }
-    ])
+    }
+
+    // Charger les données au montage du composant
+    onMounted(() => {
+      loadTickets()
+    })
 
     const stats = computed(() => ({
       totalTickets: tickets.value.length,
@@ -347,6 +385,9 @@ export default {
     return {
       searchQuery,
       statusFilter,
+      loading,
+      error,
+      orders,
       tickets,
       stats,
       filteredTickets,
@@ -357,7 +398,8 @@ export default {
       getStatusIcon,
       getStatusText,
       viewTicket,
-      downloadTicket
+      downloadTicket,
+      loadTickets
     }
   }
 }
@@ -365,7 +407,7 @@ export default {
 
 <style scoped>
 .my-tickets {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background-color: #f8fafc;
 }
 
 .font-primea {
