@@ -177,6 +177,7 @@
                       v-model="schedule.starts_at"
                       type="datetime-local" 
                       required
+                      @change="adjustEndTime(schedule)"
                       class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
                     />
                   </div>
@@ -187,8 +188,10 @@
                       v-model="schedule.ends_at"
                       type="datetime-local" 
                       required
+                      :min="schedule.starts_at"
                       class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
                     />
+                    <p class="text-xs text-gray-500 mt-1 font-primea">La date de fin doit être égale ou postérieure à la date de début</p>
                   </div>
                   
                   <div class="flex items-end">
@@ -523,6 +526,16 @@ const removeTicketType = (index) => {
   }
 };
 
+const adjustEndTime = (schedule) => {
+  // Si la date de fin est antérieure à la date de début, l'ajuster
+  if (schedule.starts_at && (!schedule.ends_at || new Date(schedule.ends_at) < new Date(schedule.starts_at))) {
+    // Ajouter 2 heures par défaut à la date de début
+    const startDate = new Date(schedule.starts_at);
+    startDate.setHours(startDate.getHours() + 2);
+    schedule.ends_at = startDate.toISOString().slice(0, 16); // Format datetime-local
+  }
+};
+
 const createEvent = async () => {
   // Validation de base
   if (form.ticket_types.length === 0) {
@@ -572,6 +585,17 @@ const createEvent = async () => {
       Swal.fire({
         title: 'Erreur',
         text: 'Veuillez remplir toutes les dates et heures de programmation',
+        icon: 'error',
+        confirmButtonColor: '#272d63'
+      });
+      return;
+    }
+    
+    // Vérifier que les dates de fin sont après ou égales aux dates de début
+    if (form.schedules.some(s => new Date(s.ends_at) < new Date(s.starts_at))) {
+      Swal.fire({
+        title: 'Erreur',
+        text: 'La date de fin doit être égale ou postérieure à la date de début',
         icon: 'error',
         confirmButtonColor: '#272d63'
       });
