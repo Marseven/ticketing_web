@@ -126,6 +126,11 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
   
+  const updateUser = (userData) => {
+    user.value = { ...user.value, ...userData }
+    authUtils.saveAuth(token.value, user.value, userRole.value)
+  }
+  
   // Méthode de développement supprimée - authentification réelle uniquement
 
   return {
@@ -140,6 +145,7 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     logout,
     fetchUser,
+    updateUser,
     initialize
   }
 })

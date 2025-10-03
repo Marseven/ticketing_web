@@ -586,6 +586,9 @@ const handleAvatarUpload = async (event) => {
       // Mettre à jour l'avatar dans les données locales
       user.value.avatar_url = response.data.data.avatar_url;
       
+      // Mettre à jour dans l'authStore pour que le header se mette à jour
+      authStore.updateUser({ avatar_url: response.data.data.avatar_url });
+      
       // Forcer le rechargement de l'image
       const avatarElement = document.querySelector(`img[alt="${user.value?.name}"]`);
       if (avatarElement) {

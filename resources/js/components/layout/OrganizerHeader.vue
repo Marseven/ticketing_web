@@ -83,8 +83,14 @@
               @click="toggleDropdown" 
               class="flex items-center space-x-2 text-primea-blue hover:text-primea-yellow transition-colors duration-200"
             >
-              <div class="w-8 h-8 bg-primea-blue text-white rounded-full flex items-center justify-center">
-                <span class="text-sm font-medium font-primea">{{ userInitial }}</span>
+              <div class="w-8 h-8 rounded-full overflow-hidden bg-primea-blue text-white flex items-center justify-center">
+                <img 
+                  v-if="userAvatar" 
+                  :src="userAvatar" 
+                  :alt="userName" 
+                  class="w-full h-full object-cover"
+                />
+                <span v-else class="text-sm font-medium font-primea">{{ userInitial }}</span>
               </div>
               <div class="hidden md:block text-left">
                 <p class="text-sm font-medium font-primea">{{ userName }}</p>
@@ -256,6 +262,7 @@ const user = computed(() => authStore.user);
 const userInitial = computed(() => user.value?.name?.charAt(0).toUpperCase() || 'U');
 const userName = computed(() => user.value?.name || 'Mon compte');
 const organizerName = computed(() => authStore.currentOrganizer?.name || 'Mon organisation');
+const userAvatar = computed(() => user.value?.avatar_url || null);
 const notificationCount = computed(() => 0); // À implémenter plus tard
 
 // Methods
