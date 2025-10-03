@@ -173,11 +173,11 @@
               </div>
               <div v-if="order.status === 'confirmed'">
                 <p class="text-sm text-gray-500 mb-1">Billets générés</p>
-                <p class="text-green-600 font-medium">✓ {{ order.tickets.length }} billets disponibles</p>
+                <p class="text-green-600 font-medium">✓ {{ order.tickets.length }} tickets disponibles</p>
               </div>
             </div>
 
-            <!-- Liste des billets dans l'achat -->
+            <!-- Liste des tickets dans l'achat -->
             <div class="space-y-4">
               <h4 class="font-semibold text-gray-900 border-b border-gray-200 pb-2">
                 Billets achetés ({{ order.tickets.length }})
@@ -195,7 +195,7 @@
                   />
                 </div>
 
-                <!-- Détails du billet -->
+                <!-- Détails du ticket -->
                 <div class="flex-1">
                   <h5 class="font-bold text-primea-blue">{{ ticket.event.title }}</h5>
                   <div class="flex items-center text-sm text-gray-600 mt-1">
@@ -276,7 +276,7 @@
             class="inline-flex items-center px-6 py-3 bg-primea-blue text-white rounded-primea hover:bg-primea-yellow hover:text-primea-blue font-semibold transition-all duration-200"
           >
             <ShoppingCartIcon class="w-5 h-5 mr-2" />
-            Acheter des billets
+            Acheter des tickets
           </router-link>
         </div>
       </div>

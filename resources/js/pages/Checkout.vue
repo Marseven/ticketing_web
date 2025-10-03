@@ -11,7 +11,7 @@
           <div class="text-center mb-12">
             <img src="/images/logo.png" alt="Primea" class="h-16 mx-auto mb-6" />
             <h1 class="text-4xl font-bold text-primea-blue mb-4">Finaliser votre achat</h1>
-            <p class="text-lg text-gray-600">Sélectionnez vos billets et procédez au paiement</p>
+            <p class="text-lg text-gray-600">Sélectionnez vos tickets et procédez au paiement</p>
           </div>
 
           <!-- États de chargement et d'erreur -->
@@ -84,7 +84,7 @@
                   <div class="bg-red-50 border border-red-200 rounded-primea-lg p-4">
                     <ExclamationCircleIcon class="w-12 h-12 text-red-500 mx-auto mb-2" />
                     <p class="text-red-600 font-semibold">Cet événement est terminé</p>
-                    <p class="text-red-500 text-sm">Les billets ne sont plus disponibles</p>
+                    <p class="text-red-500 text-sm">Les tickets ne sont plus disponibles</p>
                   </div>
                 </div>
 
@@ -120,7 +120,7 @@
               <div v-if="isEventPassed" class="bg-red-50 border border-red-200 rounded-primea-lg p-6 text-center">
                 <ExclamationCircleIcon class="w-16 h-16 text-red-500 mx-auto mb-4" />
                 <h4 class="text-lg font-semibold text-red-800 mb-2">Événement terminé</h4>
-                <p class="text-red-600 mb-4">Cet événement s'est déjà déroulé. Il n'est plus possible d'acheter des billets.</p>
+                <p class="text-red-600 mb-4">Cet événement s'est déjà déroulé. Il n'est plus possible d'acheter des tickets.</p>
                 <router-link 
                   to="/events" 
                   class="bg-primea-blue text-white px-6 py-2 rounded-primea hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200"
@@ -131,9 +131,9 @@
               
               <form v-if="!isEventPassed" @submit.prevent="processOrder" class="space-y-6">
                 
-                <!-- Sélection billets Desktop -->
+                <!-- Sélection tickets Desktop -->
                 <div>
-                  <label class="block text-sm font-semibold text-primea-blue mb-3">Nombre de billets</label>
+                  <label class="block text-sm font-semibold text-primea-blue mb-3">Nombre de tickets</label>
                   <input 
                     type="number"
                     v-model="orderForm.quantity"
@@ -144,16 +144,16 @@
                   />
                 </div>
 
-                <!-- Type de billet Desktop -->
+                <!-- Type de ticket Desktop -->
                 <div>
-                  <label class="block text-sm font-semibold text-primea-blue mb-3">Type de billet</label>
+                  <label class="block text-sm font-semibold text-primea-blue mb-3">Type de ticket</label>
                   <select 
                     v-model="orderForm.ticketTypeId"
                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-primea-lg focus:border-primea-blue focus:outline-none transition-colors appearance-none bg-white"
                     required
                     :disabled="eventLoading || availableTicketTypes.length === 0"
                   >
-                    <option value="">Sélectionnez un type de billet</option>
+                    <option value="">Sélectionnez un type de ticket</option>
                     <option 
                       v-for="ticketType in availableTicketTypes" 
                       :key="ticketType.id" 
@@ -164,7 +164,7 @@
                     </option>
                   </select>
                   <div v-if="availableTicketTypes.length === 0 && !eventLoading" class="text-sm text-red-600 mt-1">
-                    Aucun billet disponible pour cet événement
+                    Aucun ticket disponible pour cet événement
                   </div>
                 </div>
 
@@ -390,7 +390,7 @@
                       
                       <h4 class="text-xl font-bold text-green-800 mb-2">Paiement réussi !</h4>
                       <p class="text-green-700 mb-4">Votre paiement a été validé avec succès.</p>
-                      <p class="text-green-600 text-sm">Redirection en cours vers votre billet...</p>
+                      <p class="text-green-600 text-sm">Redirection en cours vers votre ticket...</p>
                     </div>
                     
                     <!-- Paiement échoué -->
@@ -749,7 +749,7 @@ export default {
         const data = await eventsStore.fetchEvent(eventSlug)
         event.value = data.event
         
-        // Si l'événement n'a qu'un seul type de billet, le sélectionner automatiquement
+        // Si l'événement n'a qu'un seul type de ticket, le sélectionner automatiquement
         if (event.value?.ticket_types && event.value.ticket_types.length === 1) {
           orderForm.value.ticketTypeId = event.value.ticket_types[0].id
         }
@@ -879,7 +879,7 @@ export default {
 
         // Vérifier si l'événement est passé
         if (isEventPassed.value) {
-          throw new Error('Impossible d\'acheter des billets pour un événement terminé')
+          throw new Error('Impossible d\'acheter des tickets pour un événement terminé')
         }
 
         // Validation

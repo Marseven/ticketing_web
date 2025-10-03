@@ -24,10 +24,10 @@
           <!-- Titre -->
           <div class="text-center mb-8">
             <h1 class="text-3xl font-bold text-primea-blue mb-2">
-              Inscription
+              Inscription Client
             </h1>
             <p class="text-gray-600 font-primea">
-              Rejoignez la communauté Primea
+              Créez votre compte pour acheter des tickets
             </p>
           </div>
 
@@ -175,6 +175,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import PhoneInput from '../../components/PhoneInput.vue'
+import { authService } from '../../services/api.js'
 
 export default {
   name: 'Register',
@@ -210,13 +211,34 @@ export default {
       error.value = ''
 
       try {
-        // Simulation d'inscription (à remplacer par l'API réelle)
-        await new Promise(resolve => setTimeout(resolve, 2000))
+        // Préparer les données d'inscription avec le rôle client explicite
+        const registrationData = {
+          name: form.value.name,
+          email: form.value.email,
+          phone: form.value.phone,
+          password: form.value.password,
+          password_confirmation: form.value.password_confirmation,
+          role: 'client' // Explicitement définir le rôle comme client
+        }
         
-        // Redirection vers la page de connexion
-        router.push('/login')
+        await authService.register(registrationData)
+        
+        // Redirection vers la page de connexion avec message de succès
+        router.push({ 
+          name: 'login', 
+          query: { message: 'Inscription réussie ! Vous pouvez maintenant vous connecter.' }
+        })
       } catch (err) {
-        error.value = 'Erreur lors de l\'inscription. Veuillez réessayer.'
+        console.error('Erreur d\'inscription:', err)
+        if (err.response?.data?.message) {
+          error.value = err.response.data.message
+        } else if (err.response?.data?.errors) {
+          // Afficher la première erreur de validation
+          const firstError = Object.values(err.response.data.errors)[0]
+          error.value = Array.isArray(firstError) ? firstError[0] : firstError
+        } else {
+          error.value = 'Erreur lors de l\'inscription. Veuillez réessayer.'
+        }
       } finally {
         loading.value = false
       }

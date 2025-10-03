@@ -22,7 +22,7 @@
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 class="text-4xl font-bold text-primea-blue font-primea mb-2">Mon Compte</h1>
-            <p class="text-gray-600">Gérez vos billets, achats et informations personnelles</p>
+            <p class="text-gray-600">Gérez vos tickets, achats et informations personnelles</p>
           </div>
 
           <!-- Navigation rapide -->
@@ -33,7 +33,7 @@
               :class="{ 'border-primea-blue text-primea-blue bg-primea-blue/5': $route.name === 'my-tickets' }"
             >
               <TicketIcon class="w-4 h-4" />
-              <span class="hidden sm:inline">Mes billets</span>
+              <span class="hidden sm:inline">Mes tickets</span>
             </router-link>
             
             <router-link 
@@ -88,7 +88,7 @@ export default {
 
     const currentPageName = computed(() => {
       const pageNames = {
-        'my-tickets': 'Mes billets',
+        'my-tickets': 'Mes tickets',
         'my-orders': 'Mes achats', 
         'profile': 'Mon profil'
       }

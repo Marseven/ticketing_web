@@ -265,7 +265,7 @@ export const guestService = {
     })
   },
 
-  // Récupérer un billet invité par code
+  // Récupérer un ticket invité par code
   getGuestTicket(code) {
     return axios.get(`/api/guest/tickets/${code}`, {
       headers: {
@@ -276,7 +276,7 @@ export const guestService = {
     })
   },
 
-  // Récupérer tous les billets d'un email invité
+  // Récupérer tous les tickets d'un email invité
   retrieveGuestTickets(email) {
     return axios.get(`/api/guest/tickets/retrieve/${encodeURIComponent(email)}`, {
       headers: {

@@ -44,7 +44,7 @@
 
           <!-- User Menu -->
           <template v-else>
-            <!-- Icône billets pour les clients seulement -->
+            <!-- Icône tickets pour les clients seulement -->
             <router-link 
               v-if="!isAdmin"
               :to="{ name: 'my-tickets' }" 
@@ -130,7 +130,7 @@
                       @click="closeDropdown"
                     >
                       <TicketIcon class="w-5 h-5 mr-3" />
-                      Mes billets
+                      Mes tickets
                     </router-link>
                     <router-link 
                       :to="{ name: 'my-orders' }" 
@@ -264,7 +264,7 @@
                   class="block py-3 text-primea-blue hover:text-primea-yellow font-primea font-medium transition-colors duration-200"
                   @click="closeMobileMenu"
                 >
-                  Mes billets
+                  Mes tickets
                 </router-link>
                 <router-link 
                   :to="{ name: 'my-orders' }" 

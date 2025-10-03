@@ -22,7 +22,7 @@
               <TicketIcon class="w-8 h-8 text-green-500" />
             </div>
             <div class="ml-4">
-              <p class="text-sm font-medium text-gray-500">Billets achetés</p>
+              <p class="text-sm font-medium text-gray-500">Tickets achetés</p>
               <p class="text-2xl font-bold text-gray-900">{{ stats.totalTickets }}</p>
             </div>
           </div>
@@ -151,12 +151,12 @@
 
                 <!-- Téléphone -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Numéro de téléphone</label>
-                  <input 
+                  <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Numéro de téléphone</label>
+                  <PhoneInput
+                    id="phone"
                     v-model="profileForm.phone"
-                    type="tel" 
-                    class="w-full px-4 py-3 border border-gray-300 rounded-primea focus:ring-primea-blue focus:border-primea-blue"
-                    placeholder="+241 XX XX XX XX"
+                    placeholder="XX XX XX XX"
+                    default-country="GA"
                   />
                 </div>
 
@@ -415,6 +415,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import CalendarIcon from '../../components/icons/CalendarIcon.vue'
+import PhoneInput from '../../components/PhoneInput.vue'
 import { clientService, ticketApiService } from '../../services/api.js'
 import { 
   UserIcon,
@@ -434,6 +435,7 @@ export default {
   name: 'Profile',
   components: {
     CalendarIcon,
+    PhoneInput,
     UserIcon,
     TicketIcon,
     StarIcon,
@@ -556,7 +558,7 @@ export default {
     const recentActivities = ref([
       {
         id: 1,
-        title: 'Billet acheté pour "L\'OISEAU RARE"',
+        title: 'Ticket acheté pour "L\'OISEAU RARE"',
         date: 'Il y a 2 jours',
         icon: 'TicketIcon'
       },
@@ -658,7 +660,12 @@ export default {
         
         // Mettre à jour l'avatar dans le formulaire
         if (response.data.avatar_url) {
-          profileForm.value.avatar = response.data.avatar_url
+          // Si c'est l'avatar par défaut, ne pas l'utiliser pour éviter l'erreur 422
+          if (response.data.avatar_url.includes('user-default.jpg')) {
+            profileForm.value.avatar = null
+          } else {
+            profileForm.value.avatar = response.data.avatar_url
+          }
         }
         
         successMessage.value = 'Avatar mis à jour avec succès'

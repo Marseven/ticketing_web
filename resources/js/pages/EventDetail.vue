@@ -72,9 +72,9 @@
                 </div>
               </div>
 
-              <!-- Types de billets et prix -->
+              <!-- Types de tickets et prix -->
               <div class="bg-primea-blue/5 p-6 rounded-primea-xl mb-8">
-                <h3 class="text-lg font-bold text-primea-blue mb-4">Types de billets</h3>
+                <h3 class="text-lg font-bold text-primea-blue mb-4">Types de tickets</h3>
                 
                 <div v-if="event.ticket_types && event.ticket_types.length > 0" class="space-y-3">
                   <div 
@@ -104,7 +104,7 @@
                   </div>
                 </div>
                 
-                <!-- Fallback si pas de types de billets -->
+                <!-- Fallback si pas de types de tickets -->
                 <div v-else class="flex items-center justify-between p-4 bg-white rounded-primea border border-gray-200">
                   <div>
                     <h4 class="font-semibold text-primea-blue">Billet standard</h4>
@@ -349,7 +349,7 @@ export default {
     })
 
     const availableTickets = computed(() => {
-      // Si l'événement est passé, considérer qu'il n'y a plus de billets disponibles
+      // Si l'événement est passé, considérer qu'il n'y a plus de tickets disponibles
       if (isEventPassed.value) return 0
       
       if (event.value?.ticket_types && event.value.ticket_types.length > 0) {

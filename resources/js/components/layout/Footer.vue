@@ -54,7 +54,7 @@
             </li>
             <li>
               <router-link :to="{ name: 'ticket-retrieve' }" class="text-gray-300 hover:text-primea-yellow transition-colors duration-200 font-primea">
-                Récupérer mon billet
+                Récupérer mon ticket
               </router-link>
             </li>
           </ul>

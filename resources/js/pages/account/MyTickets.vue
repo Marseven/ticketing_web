@@ -10,7 +10,7 @@
               <TicketIcon class="w-8 h-8 text-primea-blue" />
             </div>
             <div class="ml-4">
-              <p class="text-sm font-medium text-gray-500">Total billets</p>
+              <p class="text-sm font-medium text-gray-500">Total tickets</p>
               <p class="text-2xl font-bold text-gray-900">{{ stats.totalTickets }}</p>
             </div>
           </div>
@@ -79,7 +79,7 @@
           </div>
 
           <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-500">{{ filteredTickets.length }} billets</span>
+            <span class="text-sm text-gray-500">{{ filteredTickets.length }} tickets</span>
           </div>
         </div>
       </div>
@@ -87,7 +87,7 @@
       <!-- État de chargement -->
       <div v-if="loading" class="text-center py-16">
         <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primea-blue mx-auto mb-4"></div>
-        <p class="text-gray-500">Chargement de vos billets...</p>
+        <p class="text-gray-500">Chargement de vos tickets...</p>
       </div>
 
       <!-- Message d'erreur -->
@@ -103,7 +103,7 @@
         </button>
       </div>
 
-      <!-- Liste des billets -->
+      <!-- Liste des tickets -->
       <div v-else class="space-y-6">
         <!-- Billet actif avec événement à venir -->
         <div v-for="ticket in filteredTickets" :key="ticket.id" 
@@ -119,7 +119,7 @@
                 />
               </div>
 
-              <!-- Informations du billet -->
+              <!-- Informations du ticket -->
               <div class="flex-1 space-y-3">
                 <div class="flex items-start justify-between">
                   <div>
@@ -137,7 +137,7 @@
                     </div>
                   </div>
 
-                  <!-- Statut du billet -->
+                  <!-- Statut du ticket -->
                   <div class="flex flex-col items-end gap-2">
                     <span :class="getStatusClass(ticket.status)" 
                           class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium">
@@ -148,7 +148,7 @@
                   </div>
                 </div>
 
-                <!-- Informations détaillées du billet -->
+                <!-- Informations détaillées du ticket -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
                   <div>
                     <p class="text-xs text-gray-500 uppercase tracking-wide">Référence</p>
@@ -176,7 +176,7 @@
                   class="flex-1 lg:w-full bg-primea-blue text-white px-4 py-2 rounded-primea hover:bg-primea-yellow hover:text-primea-blue font-semibold transition-all duration-200 flex items-center justify-center gap-2"
                 >
                   <EyeIcon class="w-4 h-4" />
-                  Voir le billet
+                  Voir le ticket
                 </button>
                 
                 <button 
@@ -195,9 +195,9 @@
         <!-- État vide -->
         <div v-if="!loading && !error && filteredTickets.length === 0" class="text-center py-16">
           <TicketIcon class="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 class="text-xl font-medium text-gray-500 mb-2">Aucun billet trouvé</h3>
+          <h3 class="text-xl font-medium text-gray-500 mb-2">Aucun ticket trouvé</h3>
           <p class="text-gray-400 mb-6">
-            {{ searchQuery || statusFilter ? 'Essayez de modifier vos filtres' : 'Vous n\'avez pas encore de billets' }}
+            {{ searchQuery || statusFilter ? 'Essayez de modifier vos filtres' : 'Vous n\'avez pas encore de tickets' }}
           </p>
           <router-link 
             v-if="!searchQuery && !statusFilter"
@@ -380,7 +380,7 @@ export default {
     }
 
     const downloadTicket = (ticket) => {
-      console.log('Télécharger le billet:', ticket.reference)
+      console.log('Télécharger le ticket:', ticket.reference)
       // Logique de téléchargement
     }
 

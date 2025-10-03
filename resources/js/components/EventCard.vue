@@ -229,7 +229,7 @@ export default {
     })
 
     const availableTickets = computed(() => {
-      // Si l'événement est passé, considérer qu'il n'y a plus de billets disponibles
+      // Si l'événement est passé, considérer qu'il n'y a plus de tickets disponibles
       if (isEventPassed.value) return 0
       
       const ticketTypes = props.event.ticket_types || props.event.ticketTypes
