@@ -904,6 +904,20 @@ class OrganizerController extends Controller
         if ($request->has('ticket_types') && is_string($request->ticket_types)) {
             $request->merge(['ticket_types' => json_decode($request->ticket_types, true)]);
         }
+        
+        // Debug: Log file upload info
+        \Illuminate\Support\Facades\Log::info('EventEdit Debug', [
+            'event_id' => $id,
+            'has_image_file' => $request->hasFile('image_file'),
+            'image_file_info' => $request->hasFile('image_file') ? [
+                'name' => $request->file('image_file')->getClientOriginalName(),
+                'size' => $request->file('image_file')->getSize(),
+                'mime' => $request->file('image_file')->getMimeType()
+            ] : null,
+            'image_url' => $request->image_url,
+            'request_content_type' => $request->header('Content-Type'),
+            'all_files' => array_keys($request->allFiles())
+        ]);
 
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'title' => 'sometimes|string|max:255',
@@ -970,6 +984,12 @@ class OrganizerController extends Controller
                 
                 $updateData['image_file'] = $filename;
                 $updateData['image_url'] = null; // Clear URL si on a un fichier
+                
+                \Illuminate\Support\Facades\Log::info('File uploaded successfully', [
+                    'filename' => $filename,
+                    'path' => $path,
+                    'event_id' => $event->id
+                ]);
             } elseif ($request->has('image_url')) {
                 // Si une URL est fournie
                 $updateData['image_url'] = $request->image_url;
@@ -978,7 +998,17 @@ class OrganizerController extends Controller
                     \Illuminate\Support\Facades\Storage::disk('public')->delete('images/events/' . $event->image_file);
                     $updateData['image_file'] = null;
                 }
+                
+                \Illuminate\Support\Facades\Log::info('Image URL updated', [
+                    'image_url' => $request->image_url,
+                    'event_id' => $event->id
+                ]);
             }
+            
+            \Illuminate\Support\Facades\Log::info('UpdateData before event update', [
+                'updateData' => $updateData,
+                'event_id' => $event->id
+            ]);
             
             // Mettre à jour l'événement principal
             $event->update($updateData);
