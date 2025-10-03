@@ -5,15 +5,15 @@
     <div class="mb-8">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">Gestion des Soldes & Payouts</h1>
-          <p class="text-gray-600">Consultez vos soldes et gérez vos demandes de payout</p>
+          <h1 class="text-3xl font-bold text-primea-blue font-primea mb-2">Mon Solde</h1>
+          <p class="text-gray-600 font-primea">Consultez votre solde et effectuez des demandes de versement</p>
         </div>
         <button @click="$router.push('/organizer/payouts/history')" 
-                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                class="bg-primea-blue text-white px-4 py-2 rounded-primea hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 font-primea">
           <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
           </svg>
-          Historique Payouts
+          Historique Versements
         </button>
       </div>
     </div>
@@ -91,18 +91,22 @@
           </div>
 
           <!-- Auto Payout Status -->
-          <div class="mb-4 p-3 bg-gray-50 rounded-lg">
+          <div class="mb-4 p-3 bg-gray-50 rounded-primea">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-sm font-medium text-gray-700">Payout Automatique</span>
+              <span class="text-sm font-medium text-gray-700 font-primea">Versement Automatique</span>
               <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
                     :class="balance.auto_payout_enabled ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
                 {{ balance.auto_payout_enabled ? 'Activé' : 'Désactivé' }}
               </span>
             </div>
             
-            <div v-if="balance.auto_payout_enabled" class="text-sm text-gray-600">
+            <div v-if="balance.auto_payout_enabled" class="text-sm text-gray-600 font-primea">
               <p>Seuil: {{ formatAmount(balance.auto_payout_threshold) }} XAF</p>
               <p v-if="balance.payout_phone_number">Téléphone: {{ balance.payout_phone_number }}</p>
+              <p class="text-xs text-gray-500 mt-1">Configuration gérée par l'administrateur</p>
+            </div>
+            <div v-else class="text-sm text-gray-600 font-primea">
+              <p class="text-xs text-gray-500">Pour activer le versement automatique, contactez l'administrateur</p>
             </div>
           </div>
 
@@ -110,20 +114,11 @@
           <div class="space-y-3">
             <button @click="requestPayout(balance)" 
                     :disabled="balance.balance < 1000"
-                    class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                    class="w-full bg-primea-blue text-white py-2 px-4 rounded-primea hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 font-primea disabled:opacity-50 disabled:cursor-not-allowed">
               <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
               </svg>
-              {{ balance.balance < 1000 ? 'Solde insuffisant (min 1000 XAF)' : 'Demander un Payout' }}
-            </button>
-            
-            <button @click="configureAutoPayout(balance)" 
-                    class="w-full bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700">
-              <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              </svg>
-              Configurer Auto-Payout
+              {{ balance.balance < 1000 ? 'Solde insuffisant (min 1000 XAF)' : 'Demander un Versement' }}
             </button>
           </div>
 
@@ -214,8 +209,8 @@
 
     <!-- Payout Request Modal -->
     <div v-if="showPayoutModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg p-6 w-full max-w-md">
-        <h3 class="text-lg font-bold mb-4">Demande de Payout</h3>
+      <div class="bg-white rounded-primea p-6 w-full max-w-md">
+        <h3 class="text-lg font-bold text-primea-blue font-primea mb-4">Demande de Versement</h3>
         
         <form @submit.prevent="submitPayoutRequest">
           <div class="space-y-4">
@@ -253,332 +248,256 @@
               Annuler
             </button>
             <button type="submit" :disabled="requestingPayout"
-                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50">
-              {{ requestingPayout ? 'Demande en cours...' : 'Demander le Payout' }}
+                    class="bg-primea-blue text-white px-4 py-2 rounded-primea hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 font-primea disabled:opacity-50">
+              {{ requestingPayout ? 'Demande en cours...' : 'Demander le Versement' }}
             </button>
           </div>
         </form>
       </div>
     </div>
 
-    <!-- Auto Payout Config Modal -->
-    <div v-if="showConfigModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg p-6 w-full max-w-md">
-        <h3 class="text-lg font-bold mb-4">Configuration Auto-Payout - {{ getGatewayName(configForm.gateway) }}</h3>
-        
-        <form @submit.prevent="saveAutoPayoutConfig">
-          <div class="space-y-4">
-            <div>
-              <label class="flex items-center space-x-2">
-                <input type="checkbox" v-model="configForm.auto_payout_enabled" 
-                       class="rounded border-gray-300">
-                <span class="text-sm font-medium text-gray-700">Activer le payout automatique</span>
-              </label>
-            </div>
-            
-            <div v-if="configForm.auto_payout_enabled">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Seuil de payout (XAF)</label>
-              <input v-model.number="configForm.auto_payout_threshold" type="number" min="1000" 
-                     class="w-full border rounded-lg px-3 py-2">
-              <p class="text-xs text-gray-500 mt-1">Montant minimum pour déclencher un payout automatique</p>
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Numéro de téléphone</label>
-              <input v-model="configForm.payout_phone_number" type="tel" maxlength="9" pattern="[0-9]{9}" 
-                     placeholder="074123456" class="w-full border rounded-lg px-3 py-2">
-              <p class="text-xs text-gray-500 mt-1">Numéro pour recevoir les payouts automatiques</p>
-            </div>
-          </div>
-          
-          <div class="flex justify-end space-x-3 mt-6">
-            <button type="button" @click="showConfigModal = false" 
-                    class="px-4 py-2 text-gray-600 hover:text-gray-800">
-              Annuler
-            </button>
-            <button type="submit" :disabled="savingConfig"
-                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50">
-              {{ savingConfig ? 'Enregistrement...' : 'Enregistrer' }}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
     </div>
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
-
-export default {
-  name: 'BalanceManagement',
-  setup() {
-    // État réactif
-    const loading = ref(false)
-    const requestingPayout = ref(false)
-    const savingConfig = ref(false)
-    const showPayoutModal = ref(false)
-    const showConfigModal = ref(false)
+import { organizerService } from '../../services/api'
+import Swal from 'sweetalert2'
+// État réactif
+const loading = ref(false)
+const requestingPayout = ref(false)
+const showPayoutModal = ref(false)
     
-    const balances = ref([])
-    const recentPayouts = ref([])
-    
-    const stats = reactive({
-      pending_payouts: 0,
-      total_payouts: 0
+const balances = ref([])
+const recentPayouts = ref([])
+
+const stats = reactive({
+  pending_payouts: 0,
+  total_payouts: 0
+})
+
+const payoutForm = reactive({
+  gateway: '',
+  available_balance: 0,
+  amount: '',
+  phone_number: '',
+})
+
+// Computed
+const totalBalance = computed(() => {
+  return balances.value.reduce((total, balance) => total + balance.balance, 0)
+})
+
+// Méthodes
+const loadBalances = async () => {
+  loading.value = true
+  try {
+    const response = await organizerService.getBalance()
+    if (response.data.success) {
+      balances.value = response.data.data.balances || []
+    }
+  } catch (error) {
+    console.error('Erreur chargement soldes:', error)
+    Swal.fire({
+      title: 'Erreur',
+      text: 'Impossible de charger les soldes',
+      icon: 'error',
+      confirmButtonColor: '#272d63'
     })
-    
-    const payoutForm = reactive({
-      gateway: '',
-      available_balance: 0,
-      amount: '',
-      phone_number: '',
-    })
-
-    const configForm = reactive({
-      gateway: '',
-      auto_payout_enabled: false,
-      auto_payout_threshold: 10000,
-      payout_phone_number: '',
-    })
-
-    // Computed
-    const totalBalance = computed(() => {
-      return balances.value.reduce((total, balance) => total + balance.balance, 0)
-    })
-
-    // Méthodes
-    const loadBalances = async () => {
-      loading.value = true
-      try {
-        const response = await fetch('/api/v1/organizer/balances', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json'
-          }
-        })
-        
-        const data = await response.json()
-        if (data.success) {
-          balances.value = data.data.balances
-        }
-      } catch (error) {
-        console.error('Erreur chargement soldes:', error)
-      } finally {
-        loading.value = false
-      }
-    }
-
-    const loadRecentPayouts = async () => {
-      try {
-        const response = await fetch('/api/v1/organizer/payouts?limit=10', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json'
-          }
-        })
-        
-        const data = await response.json()
-        if (data.success) {
-          recentPayouts.value = data.data.payouts.data || data.data.payouts
-          stats.pending_payouts = recentPayouts.value.filter(p => ['pending', 'processing'].includes(p.status)).length
-          stats.total_payouts = recentPayouts.value.reduce((sum, p) => sum + p.amount, 0)
-        }
-      } catch (error) {
-        console.error('Erreur chargement payouts récents:', error)
-      }
-    }
-
-    const requestPayout = (balance) => {
-      Object.assign(payoutForm, {
-        gateway: balance.gateway,
-        available_balance: balance.balance,
-        amount: '',
-        phone_number: balance.payout_phone_number || '',
-      })
-      showPayoutModal.value = true
-    }
-
-    const submitPayoutRequest = async () => {
-      requestingPayout.value = true
-      try {
-        const response = await fetch('/api/v1/organizer/payouts', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payoutForm)
-        })
-        
-        const data = await response.json()
-        if (data.success) {
-          alert('Demande de payout envoyée avec succès')
-          showPayoutModal.value = false
-          loadBalances()
-          loadRecentPayouts()
-        } else {
-          alert(data.message || 'Erreur lors de la demande')
-        }
-      } catch (error) {
-        console.error('Erreur demande payout:', error)
-        alert('Erreur technique')
-      } finally {
-        requestingPayout.value = false
-      }
-    }
-
-    const configureAutoPayout = (balance) => {
-      Object.assign(configForm, {
-        gateway: balance.gateway,
-        auto_payout_enabled: balance.auto_payout_enabled,
-        auto_payout_threshold: balance.auto_payout_threshold,
-        payout_phone_number: balance.payout_phone_number || '',
-      })
-      showConfigModal.value = true
-    }
-
-    const saveAutoPayoutConfig = async () => {
-      savingConfig.value = true
-      try {
-        const response = await fetch(`/api/v1/organizer/auto-payout-config`, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(configForm)
-        })
-        
-        const data = await response.json()
-        if (data.success) {
-          alert('Configuration mise à jour avec succès')
-          showConfigModal.value = false
-          loadBalances()
-        } else {
-          alert(data.message || 'Erreur lors de la mise à jour')
-        }
-      } catch (error) {
-        console.error('Erreur sauvegarde config:', error)
-        alert('Erreur technique')
-      } finally {
-        savingConfig.value = false
-      }
-    }
-
-    const getRecentPayouts = (gateway) => {
-      return recentPayouts.value.filter(p => p.gateway === gateway).slice(0, 3)
-    }
-
-    const viewPayoutDetails = (payout) => {
-      alert(`Détails du payout #${payout.reference}\nMontant: ${formatAmount(payout.amount)} XAF\nStatut: ${getPayoutStatusName(payout.status)}`)
-    }
-
-    // Utilitaires
-    const formatAmount = (amount) => {
-      return new Intl.NumberFormat('fr-FR').format(amount)
-    }
-
-    const formatDate = (date) => {
-      return new Date(date).toLocaleDateString('fr-FR')
-    }
-
-    const formatDateTime = (datetime) => {
-      return new Date(datetime).toLocaleDateString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-    }
-
-    const getGatewayName = (gateway) => {
-      const names = {
-        airtelmoney: 'Airtel Money',
-        moovmoney: 'Moov Money'
-      }
-      return names[gateway] || gateway
-    }
-
-    const getGatewayBadgeClass = (gateway) => {
-      const classes = {
-        airtelmoney: 'bg-red-100 text-red-800',
-        moovmoney: 'bg-orange-100 text-orange-800'
-      }
-      return classes[gateway] || 'bg-gray-100 text-gray-800'
-    }
-
-    const getPayoutStatusName = (status) => {
-      const names = {
-        pending: 'En attente',
-        processing: 'En cours',
-        success: 'Réussi',
-        failed: 'Échoué',
-        cancelled: 'Annulé'
-      }
-      return names[status] || status
-    }
-
-    const getPayoutStatusClass = (status) => {
-      const classes = {
-        pending: 'bg-yellow-100 text-yellow-800',
-        processing: 'bg-blue-100 text-blue-800',
-        success: 'bg-green-100 text-green-800',
-        failed: 'bg-red-100 text-red-800',
-        cancelled: 'bg-gray-100 text-gray-800'
-      }
-      return classes[status] || 'bg-gray-100 text-gray-800'
-    }
-
-    // Lifecycle
-    onMounted(() => {
-      loadBalances()
-      loadRecentPayouts()
-    })
-
-    return {
-      // État
-      loading,
-      requestingPayout,
-      savingConfig,
-      showPayoutModal,
-      showConfigModal,
-      balances,
-      recentPayouts,
-      stats,
-      payoutForm,
-      configForm,
-      totalBalance,
-      
-      // Méthodes
-      loadBalances,
-      loadRecentPayouts,
-      requestPayout,
-      submitPayoutRequest,
-      configureAutoPayout,
-      saveAutoPayoutConfig,
-      getRecentPayouts,
-      viewPayoutDetails,
-      
-      // Utilitaires
-      formatAmount,
-      formatDate,
-      formatDateTime,
-      getGatewayName,
-      getGatewayBadgeClass,
-      getPayoutStatusName,
-      getPayoutStatusClass,
-    }
+  } finally {
+    loading.value = false
   }
 }
+
+const loadRecentPayouts = async () => {
+  try {
+    const response = await organizerService.getPaymentHistory()
+    if (response.data.success) {
+      recentPayouts.value = response.data.data.payouts?.data || response.data.data.payouts || []
+      stats.pending_payouts = recentPayouts.value.filter(p => ['pending', 'processing'].includes(p.status)).length
+      stats.total_payouts = recentPayouts.value.reduce((sum, p) => sum + (p.amount || 0), 0)
+    }
+  } catch (error) {
+    console.error('Erreur chargement payouts récents:', error)
+  }
+}
+
+const requestPayout = (balance) => {
+  Object.assign(payoutForm, {
+    gateway: balance.gateway,
+    available_balance: balance.balance,
+    amount: '',
+    phone_number: balance.payout_phone_number || '',
+  })
+  showPayoutModal.value = true
+}
+
+const submitPayoutRequest = async () => {
+  requestingPayout.value = true
+  try {
+    const response = await organizerService.requestPayout(payoutForm)
+    if (response.data.success) {
+      Swal.fire({
+        title: 'Succès !',
+        text: 'Demande de versement envoyée avec succès',
+        icon: 'success',
+        confirmButtonColor: '#272d63'
+      })
+      showPayoutModal.value = false
+      loadBalances()
+      loadRecentPayouts()
+    } else {
+      Swal.fire({
+        title: 'Erreur',
+        text: response.data.message || 'Erreur lors de la demande',
+        icon: 'error',
+        confirmButtonColor: '#272d63'
+      })
+    }
+  } catch (error) {
+    console.error('Erreur demande payout:', error)
+    Swal.fire({
+      title: 'Erreur technique',
+      text: 'Une erreur est survenue lors de la demande',
+      icon: 'error',
+      confirmButtonColor: '#272d63'
+    })
+  } finally {
+    requestingPayout.value = false
+  }
+}
+
+
+const getRecentPayouts = (gateway) => {
+  return recentPayouts.value.filter(p => p.gateway === gateway).slice(0, 3)
+}
+
+const viewPayoutDetails = (payout) => {
+  Swal.fire({
+    title: `Versement #${payout.reference}`,
+    html: `
+      <div class="text-left">
+        <p><strong>Montant:</strong> ${formatAmount(payout.amount)} XAF</p>
+        <p><strong>Statut:</strong> ${getPayoutStatusName(payout.status)}</p>
+        <p><strong>Gateway:</strong> ${getGatewayName(payout.gateway)}</p>
+        <p><strong>Date:</strong> ${formatDateTime(payout.created_at)}</p>
+      </div>
+    `,
+    icon: 'info',
+    confirmButtonColor: '#272d63'
+  })
+}
+
+// Utilitaires
+const formatAmount = (amount) => {
+  return new Intl.NumberFormat('fr-FR').format(amount || 0)
+}
+
+const formatDate = (date) => {
+  return new Date(date).toLocaleDateString('fr-FR')
+}
+
+const formatDateTime = (datetime) => {
+  return new Date(datetime).toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+const getGatewayName = (gateway) => {
+  const names = {
+    airtelmoney: 'Airtel Money',
+    moovmoney: 'Moov Money'
+  }
+  return names[gateway] || gateway
+}
+
+const getGatewayBadgeClass = (gateway) => {
+  const classes = {
+    airtelmoney: 'bg-red-100 text-red-800',
+    moovmoney: 'bg-orange-100 text-orange-800'
+  }
+  return classes[gateway] || 'bg-gray-100 text-gray-800'
+}
+
+const getPayoutStatusName = (status) => {
+  const names = {
+    pending: 'En attente',
+    processing: 'En cours',
+    success: 'Réussi',
+    failed: 'Échoué',
+    cancelled: 'Annulé'
+  }
+  return names[status] || status
+}
+
+const getPayoutStatusClass = (status) => {
+  const classes = {
+    pending: 'bg-yellow-100 text-yellow-800',
+    processing: 'bg-blue-100 text-blue-800',
+    success: 'bg-green-100 text-green-800',
+    failed: 'bg-red-100 text-red-800',
+    cancelled: 'bg-gray-100 text-gray-800'
+  }
+  return classes[status] || 'bg-gray-100 text-gray-800'
+}
+
+// Lifecycle
+onMounted(() => {
+  loadBalances()
+  loadRecentPayouts()
+})
 </script>
 
 <style scoped>
 .balance-management {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Couleurs Primea */
+.text-primea-blue {
+  color: #272d63;
+}
+
+.text-primea-yellow {
+  color: #fab511;
+}
+
+.bg-primea-blue {
+  background-color: #272d63;
+}
+
+.bg-primea-yellow {
+  background-color: #fab511;
+}
+
+.hover\:bg-primea-blue:hover {
+  background-color: #272d63;
+}
+
+.hover\:bg-primea-yellow:hover {
+  background-color: #fab511;
+}
+
+.hover\:text-primea-blue:hover {
+  color: #272d63;
+}
+
+.hover\:text-primea-yellow:hover {
+  color: #fab511;
+}
+
+/* Coins arrondis Primea */
+.rounded-primea {
+  border-radius: 12px;
+}
+
+/* Police Primea */
+.font-primea {
+  font-family: 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 </style>

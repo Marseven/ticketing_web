@@ -342,6 +342,11 @@ export const organizerService = {
     return api.get('/organizer/payments')
   },
 
+  // Demander un payout
+  requestPayout(payoutData) {
+    return api.post('/organizer/payouts', payoutData)
+  },
+
   // Récupérer le profil de l'organisateur
   getProfile() {
     return api.get('/organizer/profile')
