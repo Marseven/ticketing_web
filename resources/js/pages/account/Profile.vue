@@ -96,10 +96,11 @@
               <div class="flex items-center space-x-6">
                 <div class="w-20 h-20 rounded-full overflow-hidden bg-primea-blue text-white flex items-center justify-center text-2xl font-bold">
                   <img 
-                    v-if="profileForm.avatar" 
+                    v-if="profileForm.avatar && !profileForm.avatar.includes('user-default.jpg')" 
                     :src="profileForm.avatar" 
                     :alt="profileForm.name"
                     class="w-full h-full object-cover"
+                    @error="profileForm.avatar = null"
                   />
                   <span v-else>{{ userInitial }}</span>
                 </div>
@@ -158,7 +159,7 @@
                 </div>
 
                 <!-- Téléphone -->
-                <div>
+                <div v-if="hasPhoneField">
                   <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Numéro de téléphone</label>
                   <PhoneInput
                     id="phone"
@@ -169,7 +170,7 @@
                 </div>
 
                 <!-- Date de naissance -->
-                <div>
+                <div v-if="hasBirthdateField">
                   <label class="block text-sm font-medium text-gray-700 mb-2">Date de naissance</label>
                   <input 
                     v-model="profileForm.birthdate"
@@ -179,7 +180,7 @@
                 </div>
 
                 <!-- Ville -->
-                <div>
+                <div v-if="hasCityField">
                   <label class="block text-sm font-medium text-gray-700 mb-2">Ville</label>
                   <input 
                     v-model="profileForm.city"
@@ -191,7 +192,7 @@
                 </div>
 
                 <!-- Pays -->
-                <div>
+                <div v-if="hasCountryField">
                   <label class="block text-sm font-medium text-gray-700 mb-2">Pays</label>
                   <select 
                     v-model="profileForm.country"
@@ -208,7 +209,7 @@
               </div>
 
               <!-- Bio -->
-              <div>
+              <div v-if="hasBioField">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Biographie</label>
                 <textarea 
                   v-model="profileForm.bio"
@@ -324,7 +325,7 @@
                 </button>
               </div>
 
-              <div>
+              <div v-if="hasLanguageField">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Langue préférée</label>
                 <select 
                   v-model="profileForm.language"
@@ -469,6 +470,14 @@ export default {
 
     const user = computed(() => authStore.user)
     const userInitial = computed(() => user.value?.name?.charAt(0).toUpperCase() || 'U')
+    
+    // Computed pour vérifier les champs disponibles
+    const hasPhoneField = computed(() => profileForm.value.phone !== null && profileForm.value.phone !== undefined)
+    const hasBioField = computed(() => profileForm.value.bio !== null && profileForm.value.bio !== undefined)
+    const hasCityField = computed(() => profileForm.value.city !== null && profileForm.value.city !== undefined)
+    const hasCountryField = computed(() => profileForm.value.country !== null && profileForm.value.country !== undefined)
+    const hasBirthdateField = computed(() => profileForm.value.birthdate !== null && profileForm.value.birthdate !== undefined)
+    const hasLanguageField = computed(() => profileForm.value.language !== null && profileForm.value.language !== undefined)
 
     const profileForm = ref({
       name: '',
@@ -753,7 +762,13 @@ export default {
       updatePassword,
       resetForm,
       loadProfile,
-      handleAvatarUpload
+      handleAvatarUpload,
+      hasPhoneField,
+      hasBioField,
+      hasCityField,
+      hasCountryField,
+      hasBirthdateField,
+      hasLanguageField
     }
   }
 }

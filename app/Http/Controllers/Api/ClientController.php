@@ -32,6 +32,8 @@ class ClientController extends Controller
                 ->sum('total_amount')
         ];
 
+        $metadata = $user->metadata ?? [];
+        
         return response()->json([
             'user' => [
                 'id' => $user->id,
@@ -39,6 +41,11 @@ class ClientController extends Controller
                 'email' => $user->email,
                 'phone' => $user->phone,
                 'avatar_url' => $user->getImageUrl(),
+                'bio' => $metadata['bio'] ?? null,
+                'city' => $metadata['city'] ?? null,
+                'country' => $metadata['country'] ?? null,
+                'birthdate' => $metadata['birthdate'] ?? null,
+                'language' => $metadata['language'] ?? 'fr',
                 'created_at' => $user->created_at->format('d/m/Y H:i:s'),
                 'updated_at' => $user->updated_at->format('d/m/Y H:i:s'),
             ],
