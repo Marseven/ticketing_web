@@ -156,13 +156,13 @@
         <!-- Lien création de compte -->
         <div class="mt-8 pt-6 border-t border-gray-200 text-center">
           <p class="text-sm text-gray-600 mb-4 font-primea">
-            Vous êtes un organisateur d'événements ?
+            Nouveau sur Primea ?
           </p>
           <router-link 
             to="/register"
             class="text-primea-blue hover:text-primea-yellow font-bold text-sm transition-colors duration-200 font-primea"
           >
-            Créer un compte pour publier mes événements !
+            Créer un compte pour suivre mes achats !
           </router-link>
         </div>
         

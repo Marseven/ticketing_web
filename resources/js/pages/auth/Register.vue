@@ -27,7 +27,7 @@
               Inscription Client
             </h1>
             <p class="text-gray-600 font-primea">
-              Créez votre compte pour acheter des tickets
+              Créez votre compte pour suivre vos achats de tickets
             </p>
           </div>
 

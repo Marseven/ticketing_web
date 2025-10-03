@@ -359,14 +359,21 @@ class ClientController extends Controller
      */
     private function formatActivityDate($date): string
     {
+        $diffInMinutes = now()->diffInMinutes($date);
+        $diffInHours = now()->diffInHours($date);
         $diffInDays = now()->diffInDays($date);
         
-        if ($diffInDays === 0) {
-            return "Aujourd'hui";
+        // Si c'est dans le futur ou très récent (moins de 5 minutes)
+        if ($diffInMinutes < 5) {
+            return "À l'instant";
+        } elseif ($diffInMinutes < 60) {
+            return "Il y a {$diffInMinutes} minute" . ($diffInMinutes > 1 ? 's' : '');
+        } elseif ($diffInHours < 24) {
+            return "Il y a {$diffInHours} heure" . ($diffInHours > 1 ? 's' : '');
         } elseif ($diffInDays === 1) {
             return "Hier";
         } elseif ($diffInDays < 7) {
-            return "Il y a {$diffInDays} jours";
+            return "Il y a {$diffInDays} jour" . ($diffInDays > 1 ? 's' : '');
         } elseif ($diffInDays < 30) {
             $weeks = floor($diffInDays / 7);
             return $weeks === 1 ? "Il y a 1 semaine" : "Il y a {$weeks} semaines";
