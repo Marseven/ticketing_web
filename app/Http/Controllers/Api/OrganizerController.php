@@ -884,6 +884,13 @@ class OrganizerController extends Controller
      */
     public function updateEvent(Request $request, $id): JsonResponse
     {
+        \Illuminate\Support\Facades\Log::info('UpdateEvent method called', [
+            'event_id' => $id,
+            'user_id' => $request->user()?->id,
+            'content_type' => $request->header('Content-Type'),
+            'method' => $request->getMethod()
+        ]);
+        
         $user = $request->user();
         
         if (!$user->is_organizer) {

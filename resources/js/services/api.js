@@ -313,7 +313,9 @@ export const organizerService = {
 
   // Mettre à jour un événement avec fichier
   updateEventWithFile(id, formData) {
-    return api.put(`/organizer/events/${id}`, formData, {
+    // Ajouter _method pour Laravel method spoofing avec PUT et FormData
+    formData.append('_method', 'PUT');
+    return api.post(`/organizer/events/${id}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }

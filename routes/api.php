@@ -141,6 +141,7 @@ Route::prefix('v1')->group(function () {
         Route::get('events', [App\Http\Controllers\Api\OrganizerController::class, 'events']);
         Route::post('events', [App\Http\Controllers\Api\OrganizerController::class, 'createEvent']);
         Route::put('events/{id}', [App\Http\Controllers\Api\OrganizerController::class, 'updateEvent']);
+        Route::post('events/{id}', [App\Http\Controllers\Api\OrganizerController::class, 'updateEvent']); // Pour FormData avec method spoofing
         Route::get('events/{id}', [App\Http\Controllers\Api\OrganizerController::class, 'getEvent']);
         Route::get('events/{id}/stats', [App\Http\Controllers\Api\OrganizerController::class, 'getEventStats']);
         Route::get('events/{eventId}/sales', [App\Http\Controllers\Api\OrganizerController::class, 'eventSales']);
