@@ -584,17 +584,45 @@ class OrganizerController extends Controller
         }
 
         $organizer = $user->organizers->first();
+        
+        if (!$organizer) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Aucune organisation trouvée pour cet utilisateur.',
+            ], 404);
+        }
+
+        // Calculer les statistiques
+        $stats = [
+            'events' => Event::where('organizer_id', $organizer->id)->count(),
+            'tickets' => Ticket::whereHas('event', function($query) use ($organizer) {
+                $query->where('organizer_id', $organizer->id);
+            })->count()
+        ];
 
         return response()->json([
+            'success' => true,
+            'message' => 'Profil récupéré avec succès',
             'data' => [
                 'user' => [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
                     'phone' => $user->phone,
-                    'avatar_url' => $user->avatar_url
+                    'avatar_url' => $user->avatar_url,
+                    'email_verified_at' => $user->email_verified_at
                 ],
-                'organizer' => $organizer
+                'organization' => [
+                    'id' => $organizer->id,
+                    'name' => $organizer->name,
+                    'description' => $organizer->description,
+                    'website_url' => $organizer->website_url,
+                    'contact_email' => $organizer->contact_email,
+                    'contact_phone' => $organizer->contact_phone,
+                    'logo_url' => $organizer->logo_url,
+                    'verified_at' => $organizer->verified_at
+                ],
+                'stats' => $stats
             ]
         ]);
     }

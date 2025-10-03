@@ -154,7 +154,7 @@
               :disabled="!editPersonal"
               :input-class="!editPersonal ? 'disabled:bg-gray-50' : ''"
               placeholder="Numéro de téléphone"
-              default-country="CI"
+              default-country="GA"
             />
           </div>
 
@@ -242,7 +242,7 @@
               :disabled="!editOrganization"
               :input-class="!editOrganization ? 'disabled:bg-gray-50' : ''"
               placeholder="Numéro de téléphone de contact"
-              default-country="CI"
+              default-country="GA"
             />
           </div>
 

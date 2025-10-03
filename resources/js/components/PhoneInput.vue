@@ -113,7 +113,7 @@ export default {
       { code: 'CM', name: 'Cameroun', dial: '+237' },
       { code: 'CD', name: 'RD Congo', dial: '+243' },
       { code: 'CG', name: 'Congo', dial: '+242' },
-      { code: 'CI', name: 'Côte d\'Ivoire', dial: '+241' },
+      { code: 'CI', name: 'Côte d\'Ivoire', dial: '+225' },
       { code: 'SN', name: 'Sénégal', dial: '+221' },
       { code: 'ML', name: 'Mali', dial: '+223' },
       { code: 'BF', name: 'Burkina Faso', dial: '+226' },
