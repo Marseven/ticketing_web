@@ -587,11 +587,11 @@ const createEvent = async () => {
       venue_name: form.venue_id === 'new' ? form.new_venue_name : null,
       venue_city: form.venue_id === 'new' ? form.new_venue_city : 'Abidjan',
       venue_address: form.venue_id === 'new' ? form.new_venue_address : null,
-      is_active: form.status === 'published',
+      is_active: form.status === 'published' ? 1 : 0,
       schedules: form.schedules.map(schedule => ({
         starts_at: schedule.starts_at,
         ends_at: schedule.ends_at,
-        door_time: new Date(new Date(schedule.starts_at).getTime() - 30 * 60 * 1000).toISOString() // -30min par défaut
+        door_time: schedule.starts_at // Utiliser la même heure de début pour door_time
       })),
       ticket_types: form.ticket_types.map(ticket => ({
         name: ticket.name,

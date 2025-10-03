@@ -729,6 +729,14 @@ class OrganizerController extends Controller
         if ($request->has('ticket_types') && is_string($request->ticket_types)) {
             $request->merge(['ticket_types' => json_decode($request->ticket_types, true)]);
         }
+        
+        // Debug: Log validation data
+        \Illuminate\Support\Facades\Log::info('CreateEvent Debug', [
+            'is_active' => $request->is_active,
+            'is_active_type' => gettype($request->is_active),
+            'schedules' => $request->schedules,
+            'first_schedule' => $request->schedules[0] ?? null
+        ]);
 
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'title' => 'required|string|max:255',
@@ -741,7 +749,7 @@ class OrganizerController extends Controller
             'max_attendees' => 'nullable|integer|min:1',
             'image_url' => 'nullable|string',
             'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
-            'is_active' => 'boolean',
+            'is_active' => 'boolean|in:0,1,true,false',
             'schedules' => 'required|array|min:1',
             'schedules.*.starts_at' => 'required|date',
             'schedules.*.ends_at' => 'required|date|after:schedules.*.starts_at',
