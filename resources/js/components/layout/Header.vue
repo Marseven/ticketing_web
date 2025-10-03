@@ -61,8 +61,15 @@
                 @click="toggleDropdown" 
                 class="flex items-center space-x-2 text-primea-blue hover:text-primea-yellow transition-colors duration-200"
               >
-                <div class="w-8 h-8 bg-primea-blue text-white rounded-full flex items-center justify-center">
-                  <span class="text-sm font-medium font-primea">{{ userInitial }}</span>
+                <div class="w-8 h-8 bg-primea-blue text-white rounded-full flex items-center justify-center overflow-hidden">
+                  <img 
+                    v-if="userAvatar" 
+                    :src="userAvatar" 
+                    :alt="userName"
+                    class="w-full h-full object-cover"
+                    @error="handleAvatarError"
+                  />
+                  <span v-else class="text-sm font-medium font-primea">{{ userInitial }}</span>
                 </div>
                 <span class="font-medium font-primea">{{ userName }}</span>
                 <ChevronDownIcon class="w-4 h-4 ml-1" />
@@ -299,7 +306,7 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../../stores/auth';
 import { 
@@ -330,6 +337,28 @@ const isOrganizer = computed(() => authStore.isOrganizer);
 const isAdmin = computed(() => authStore.isAdmin);
 const ticketCount = computed(() => authStore.activeTicketsCount || 0);
 const userInitial = computed(() => user.value?.name?.charAt(0).toUpperCase() || 'U');
+const userAvatar = ref(null);
+
+// Charger l'avatar utilisateur
+const loadUserAvatar = () => {
+  if (user.value) {
+    // Priorité : avatar_file > avatar_url
+    if (user.value.avatar_file) {
+      userAvatar.value = `/storage/images/users/${user.value.avatar_file}`;
+    } else if (user.value.avatar_url && !user.value.avatar_url.includes('user-default.jpg')) {
+      userAvatar.value = user.value.avatar_url;
+    } else {
+      userAvatar.value = null;
+    }
+  } else {
+    userAvatar.value = null;
+  }
+};
+
+// Gérer les erreurs d'avatar
+const handleAvatarError = () => {
+  userAvatar.value = null;
+};
 
 const userName = computed(() => {
   if (!user.value) return 'Mon compte'
@@ -376,7 +405,14 @@ onMounted(async () => {
   document.addEventListener('click', handleClickOutside);
   // Initialiser le store d'authentification
   await authStore.initialize();
+  // Charger l'avatar initial
+  loadUserAvatar();
 });
+
+// Surveiller les changements de l'utilisateur pour recharger l'avatar
+watch(user, () => {
+  loadUserAvatar();
+}, { deep: true });
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
