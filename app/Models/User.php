@@ -32,6 +32,7 @@ class User extends Authenticatable
         'phone_verified_at',
         'avatar_url',
         'avatar_file',
+        'metadata',
     ];
 
     /**

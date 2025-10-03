@@ -96,7 +96,7 @@
               <div class="flex items-center space-x-6">
                 <div class="w-20 h-20 rounded-full overflow-hidden bg-primea-blue text-white flex items-center justify-center text-2xl font-bold">
                   <img 
-                    v-if="profileForm.avatar && !profileForm.avatar.includes('user-default.jpg')" 
+                    v-if="profileForm.avatar" 
                     :src="profileForm.avatar" 
                     :alt="profileForm.name"
                     class="w-full h-full object-cover"
@@ -471,13 +471,13 @@ export default {
     const user = computed(() => authStore.user)
     const userInitial = computed(() => user.value?.name?.charAt(0).toUpperCase() || 'U')
     
-    // Computed pour vérifier les champs disponibles
-    const hasPhoneField = computed(() => profileForm.value.phone !== null && profileForm.value.phone !== undefined)
-    const hasBioField = computed(() => profileForm.value.bio !== null && profileForm.value.bio !== undefined)
-    const hasCityField = computed(() => profileForm.value.city !== null && profileForm.value.city !== undefined)
-    const hasCountryField = computed(() => profileForm.value.country !== null && profileForm.value.country !== undefined)
-    const hasBirthdateField = computed(() => profileForm.value.birthdate !== null && profileForm.value.birthdate !== undefined)
-    const hasLanguageField = computed(() => profileForm.value.language !== null && profileForm.value.language !== undefined)
+    // Computed pour vérifier les champs disponibles - afficher toujours les champs pour permettre la saisie
+    const hasPhoneField = computed(() => true)
+    const hasBioField = computed(() => true)
+    const hasCityField = computed(() => true)
+    const hasCountryField = computed(() => true)
+    const hasBirthdateField = computed(() => true)
+    const hasLanguageField = computed(() => true)
 
     const profileForm = ref({
       name: '',
@@ -499,6 +499,8 @@ export default {
         const response = await clientService.getProfile()
         const profile = response.data.user || response.data
         
+        console.log('Données du profil reçues:', profile)
+        
         profileForm.value = {
           name: profile.name || '',
           email: profile.email || '',
@@ -508,7 +510,7 @@ export default {
           country: profile.country || 'GA',
           birthdate: profile.birthdate || '',
           language: profile.language || 'fr',
-          avatar: profile.avatar_url || null
+          avatar: profile.avatar_url && !profile.avatar_url.includes('user-default.jpg') ? profile.avatar_url : null
         }
       } catch (err) {
         console.error('Erreur lors du chargement du profil:', err)
@@ -721,14 +723,11 @@ export default {
         // Uploader via l'API
         const response = await clientService.uploadAvatar(formData)
         
-        // Mettre à jour l'avatar dans le formulaire
+        // Mettre à jour l'avatar dans le formulaire avec cache busting
         if (response.data.avatar_url) {
-          // Si c'est l'avatar par défaut, ne pas l'utiliser pour éviter l'erreur 422
-          if (response.data.avatar_url.includes('user-default.jpg')) {
-            profileForm.value.avatar = null
-          } else {
-            profileForm.value.avatar = response.data.avatar_url
-          }
+          // Ajouter un timestamp pour forcer le rafraîchissement
+          const timestamp = new Date().getTime()
+          profileForm.value.avatar = `${response.data.avatar_url}?t=${timestamp}`
         }
         
         successMessage.value = 'Avatar mis à jour avec succès'
