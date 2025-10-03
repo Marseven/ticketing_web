@@ -714,6 +714,14 @@ const loadProfileData = async () => {
           email: data.user.email || '',
           phone: data.user.phone || ''
         });
+        
+        // Mettre à jour l'authStore avec les nouvelles données incluant avatar_url
+        authStore.updateUser({
+          name: data.user.name,
+          email: data.user.email,
+          phone: data.user.phone,
+          avatar_url: data.user.avatar_url
+        });
       }
       
       // Charger les données organisation
