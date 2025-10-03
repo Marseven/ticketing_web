@@ -596,19 +596,30 @@ const updateEvent = async () => {
       // Si un fichier est uploadé, on doit l'envoyer via FormData
       const formData = new FormData();
       
+      console.log('EventEdit - Upload de fichier détecté:', form.image_file);
+      console.log('EventEdit - Données à envoyer:', updateData);
+      
       // Ajouter tous les champs au FormData
       Object.keys(updateData).forEach(key => {
         if (updateData[key] !== null && updateData[key] !== undefined) {
           if (key === 'schedules' || key === 'ticket_types') {
             formData.append(key, JSON.stringify(updateData[key]));
+            console.log(`EventEdit - Ajout ${key} (JSON):`, JSON.stringify(updateData[key]));
           } else {
             formData.append(key, updateData[key]);
+            console.log(`EventEdit - Ajout ${key}:`, updateData[key]);
           }
         }
       });
       
       // Ajouter le fichier image
       formData.append('image_file', form.image_file);
+      console.log('EventEdit - Fichier ajouté à FormData:', form.image_file.name);
+      
+      // Log du contenu FormData
+      for (let [key, value] of formData.entries()) {
+        console.log(`EventEdit - FormData ${key}:`, value);
+      }
       
       // Utiliser FormData pour l'envoi avec le bon Content-Type
       await organizerService.updateEventWithFile(event.value.id, formData);
@@ -616,6 +627,7 @@ const updateEvent = async () => {
       // Si une URL est saisie manuellement ou pas d'image
       updateData.image_url = form.image_url || null;
       updateData.image_file = null;
+      console.log('EventEdit - Envoi sans fichier, avec URL:', updateData.image_url);
       await organizerService.updateEvent(event.value.id, updateData);
     }
     

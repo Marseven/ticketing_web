@@ -721,6 +721,14 @@ class OrganizerController extends Controller
                 'message' => 'Accès refusé.',
             ], 403);
         }
+        
+        // Parser les données JSON si elles existent (pour FormData)
+        if ($request->has('schedules') && is_string($request->schedules)) {
+            $request->merge(['schedules' => json_decode($request->schedules, true)]);
+        }
+        if ($request->has('ticket_types') && is_string($request->ticket_types)) {
+            $request->merge(['ticket_types' => json_decode($request->ticket_types, true)]);
+        }
 
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'title' => 'required|string|max:255',
@@ -780,6 +788,15 @@ class OrganizerController extends Controller
                 $venueId = null; // Si pas de données pour nouveau lieu
             }
 
+            // Debug: Logging des données reçues
+            \Illuminate\Support\Facades\Log::info('CreateEvent - Données reçues:', [
+                'has_image_file' => $request->hasFile('image_file'),
+                'image_url' => $request->image_url,
+                'schedules_type' => gettype($request->schedules),
+                'ticket_types_type' => gettype($request->ticket_types),
+                'all_keys' => array_keys($request->all())
+            ]);
+            
             // Gérer l'upload d'image si présent
             $imageUrl = $request->image_url;
             $imageFile = null;
@@ -790,6 +807,12 @@ class OrganizerController extends Controller
                 $path = $file->storeAs('images/events', $filename, 'public');
                 $imageFile = $filename;
                 $imageUrl = null; // Si on a un fichier, on ignore l'URL
+                
+                \Illuminate\Support\Facades\Log::info('CreateEvent - Fichier uploadé:', [
+                    'filename' => $filename,
+                    'path' => $path,
+                    'size' => $file->getSize()
+                ]);
             }
             
             // Créer l'événement
@@ -873,6 +896,14 @@ class OrganizerController extends Controller
         
         $event = Event::whereIn('organizer_id', $organizerIds)
             ->findOrFail($id);
+        
+        // Parser les données JSON si elles existent (pour FormData)
+        if ($request->has('schedules') && is_string($request->schedules)) {
+            $request->merge(['schedules' => json_decode($request->schedules, true)]);
+        }
+        if ($request->has('ticket_types') && is_string($request->ticket_types)) {
+            $request->merge(['ticket_types' => json_decode($request->ticket_types, true)]);
+        }
 
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'title' => 'sometimes|string|max:255',
