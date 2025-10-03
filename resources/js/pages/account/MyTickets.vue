@@ -261,7 +261,7 @@ export default {
         const response = await ticketApiService.getMyTickets()
         orders.value = response.data.orders || []
         
-        // Transformer les commandes en tickets pour l'affichage
+        // Transformer les achats en tickets pour l'affichage
         tickets.value = orders.value.flatMap(order => {
           if (!order.event) return []
           

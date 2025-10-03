@@ -22,7 +22,7 @@
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 class="text-4xl font-bold text-primea-blue font-primea mb-2">Mon Compte</h1>
-            <p class="text-gray-600">Gérez vos billets, commandes et informations personnelles</p>
+            <p class="text-gray-600">Gérez vos billets, achats et informations personnelles</p>
           </div>
 
           <!-- Navigation rapide -->
@@ -42,7 +42,7 @@
               :class="{ 'border-primea-blue text-primea-blue bg-primea-blue/5': $route.name === 'my-orders' }"
             >
               <ClipboardDocumentListIcon class="w-4 h-4" />
-              <span class="hidden sm:inline">Mes commandes</span>
+              <span class="hidden sm:inline">Mes achats</span>
             </router-link>
             
             <router-link 
@@ -89,7 +89,7 @@ export default {
     const currentPageName = computed(() => {
       const pageNames = {
         'my-tickets': 'Mes billets',
-        'my-orders': 'Mes commandes', 
+        'my-orders': 'Mes achats', 
         'profile': 'Mon profil'
       }
       return pageNames[route.name] || null

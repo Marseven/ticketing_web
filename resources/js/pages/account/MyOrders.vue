@@ -10,7 +10,7 @@
               <ClipboardDocumentListIcon class="w-8 h-8 text-primea-blue" />
             </div>
             <div class="ml-4">
-              <p class="text-sm font-medium text-gray-500">Total commandes</p>
+              <p class="text-sm font-medium text-gray-500">Total achats</p>
               <p class="text-2xl font-bold text-gray-900">{{ stats.totalOrders }}</p>
             </div>
           </div>
@@ -91,7 +91,7 @@
           </div>
 
           <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-500">{{ filteredOrders.length }} commandes</span>
+            <span class="text-sm text-gray-500">{{ filteredOrders.length }} achats</span>
           </div>
         </div>
       </div>
@@ -99,7 +99,7 @@
       <!-- État de chargement -->
       <div v-if="loading" class="text-center py-16">
         <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primea-blue mx-auto mb-4"></div>
-        <p class="text-gray-500">Chargement de vos commandes...</p>
+        <p class="text-gray-500">Chargement de vos achats...</p>
       </div>
 
       <!-- Message d'erreur -->
@@ -115,17 +115,17 @@
         </button>
       </div>
 
-      <!-- Liste des commandes -->
+      <!-- Liste des achats -->
       <div v-else class="space-y-6">
         <div v-for="order in filteredOrders" :key="order.id" 
              class="bg-white rounded-primea-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
           
-          <!-- En-tête de commande -->
+          <!-- En-tête d'achat -->
           <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div class="flex items-center gap-4">
                 <div>
-                  <p class="text-sm text-gray-500">Commande</p>
+                  <p class="text-sm text-gray-500">Achat</p>
                   <p class="font-mono text-lg font-bold text-primea-blue">{{ order.reference }}</p>
                 </div>
                 <div class="hidden md:block w-px h-12 bg-gray-300"></div>
@@ -156,7 +156,7 @@
             </div>
           </div>
 
-          <!-- Contenu de la commande -->
+          <!-- Contenu de l'achat -->
           <div class="p-6">
             <!-- Informations de paiement -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -177,10 +177,10 @@
               </div>
             </div>
 
-            <!-- Liste des billets dans la commande -->
+            <!-- Liste des billets dans l'achat -->
             <div class="space-y-4">
               <h4 class="font-semibold text-gray-900 border-b border-gray-200 pb-2">
-                Billets commandés ({{ order.tickets.length }})
+                Billets achetés ({{ order.tickets.length }})
               </h4>
               
               <div v-for="ticket in order.tickets" :key="ticket.id" 
@@ -231,7 +231,7 @@
               </div>
             </div>
 
-            <!-- Actions sur la commande -->
+            <!-- Actions sur l'achat -->
             <div class="flex flex-col md:flex-row gap-3 mt-6 pt-6 border-t border-gray-200">
               <button 
                 v-if="order.status === 'confirmed'"
@@ -266,9 +266,9 @@
         <!-- État vide -->
         <div v-if="!loading && !error && filteredOrders.length === 0" class="text-center py-16">
           <ClipboardDocumentListIcon class="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 class="text-xl font-medium text-gray-500 mb-2">Aucune commande trouvée</h3>
+          <h3 class="text-xl font-medium text-gray-500 mb-2">Aucun achat trouvé</h3>
           <p class="text-gray-400 mb-6">
-            {{ searchQuery || statusFilter || periodFilter ? 'Essayez de modifier vos filtres' : 'Vous n\'avez pas encore passé de commande' }}
+            {{ searchQuery || statusFilter || periodFilter ? 'Essayez de modifier vos filtres' : 'Vous n\'avez pas encore effectué d\'achat' }}
           </p>
           <router-link 
             v-if="!searchQuery && !statusFilter && !periodFilter"
@@ -334,7 +334,7 @@ export default {
     // Données réelles depuis l'API
     const orders = ref([])
 
-    // Charger les commandes depuis l'API
+    // Charger les achats depuis l'API
     const loadOrders = async () => {
       try {
         loading.value = true
@@ -342,7 +342,7 @@ export default {
         const response = await ticketApiService.getMyTickets()
         const apiOrders = response.data.orders || []
         
-        // Transformer les commandes de l'API vers le format attendu par le composant
+        // Transformer les achats de l'API vers le format attendu par le composant
         orders.value = apiOrders.map(order => ({
           id: order.id,
           reference: order.order_number,
@@ -366,8 +366,8 @@ export default {
           }]
         }))
       } catch (err) {
-        console.error('Erreur lors du chargement des commandes:', err)
-        error.value = 'Impossible de charger vos commandes'
+        console.error('Erreur lors du chargement des achats:', err)
+        error.value = 'Impossible de charger vos achats'
         // Garder les données de démonstration en cas d'erreur
         orders.value = [
           {
@@ -535,7 +535,7 @@ export default {
     }
 
     const canCancelOrder = (order) => {
-      // Logique pour déterminer si une commande peut être annulée
+      // Logique pour déterminer si un achat peut être annulé
       // Par exemple, moins de 24h avant l'événement
       const now = new Date()
       const eventDate = new Date(Math.min(...order.tickets.map(t => t.event.date)))

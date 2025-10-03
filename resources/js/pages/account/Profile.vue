@@ -487,7 +487,7 @@ export default {
         stats.value = {
           totalTickets: orders.reduce((sum, order) => sum + (order.tickets_count || 0), 0),
           eventsAttended: orders.filter(order => order.status === 'paid').length,
-          loyaltyPoints: orders.length * 50 // Points fictifs basés sur le nombre de commandes
+          loyaltyPoints: orders.length * 50 // Points fictifs basés sur le nombre d'achats
         }
       } catch (err) {
         console.error('Erreur lors du chargement des statistiques:', err)

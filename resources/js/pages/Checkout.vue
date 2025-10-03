@@ -10,7 +10,7 @@
           <!-- Header Desktop -->
           <div class="text-center mb-12">
             <img src="/images/logo.png" alt="Primea" class="h-16 mx-auto mb-6" />
-            <h1 class="text-4xl font-bold text-primea-blue mb-4">Finaliser votre commande</h1>
+            <h1 class="text-4xl font-bold text-primea-blue mb-4">Finaliser votre achat</h1>
             <p class="text-lg text-gray-600">Sélectionnez vos billets et procédez au paiement</p>
           </div>
 
@@ -110,10 +110,10 @@
 
             </div>
 
-            <!-- Colonne droite - Formulaire de commande -->
+            <!-- Colonne droite - Formulaire d'achat -->
             <div class="bg-white rounded-primea-xl shadow-primea p-8">
               <h3 class="text-2xl font-bold text-primea-blue mb-6">
-                {{ isEventPassed ? 'Commande impossible' : 'Votre commande' }}
+                {{ isEventPassed ? 'Achat impossible' : 'Votre achat' }}
               </h3>
 
               <!-- Message événement passé -->
@@ -467,7 +467,7 @@
     <div class="md:hidden bg-gray-100 min-h-screen py-8 px-4">
       <div class="max-w-md mx-auto">
       
-        <!-- En-tête selon maquette commande.png -->
+        <!-- En-tête selon maquette achat.png -->
         <div class="flex items-center justify-between mb-8">
           <button @click="goBack" class="text-gray-600 hover:text-gray-800">
             <ChevronLeftIcon class="w-6 h-6" />
@@ -527,7 +527,7 @@ export default {
     const router = useRouter()
     const eventsStore = useEventsStore()
 
-    // État de l'événement et de la commande
+    // État de l'événement et de l'achat
     const event = ref(null)
     const eventLoading = ref(true)
     const eventError = ref('')
@@ -553,7 +553,7 @@ export default {
     const paymentStatus = ref('')
     const currentPayment = ref(null)
 
-    // Formulaire de commande
+    // Formulaire d'achat
     const orderForm = ref({
       quantity: 1,
       ticketTypeId: '',
@@ -879,7 +879,7 @@ export default {
 
         // Vérifier si l'événement est passé
         if (isEventPassed.value) {
-          throw new Error('Impossible de commander des billets pour un événement terminé')
+          throw new Error('Impossible d\'acheter des billets pour un événement terminé')
         }
 
         // Validation
@@ -900,7 +900,7 @@ export default {
         }
 
       } catch (err) {
-        console.error('Erreur lors du processus de commande:', err)
+        console.error('Erreur lors du processus d\'achat:', err)
         if (err.response?.data?.message) {
           error.value = err.response.data.message
         } else if (err.response?.data?.errors) {
@@ -908,7 +908,7 @@ export default {
           const errors = Object.values(err.response.data.errors).flat()
           error.value = errors.join(', ')
         } else {
-          error.value = err.message || 'Erreur lors du traitement de la commande'
+          error.value = err.message || 'Erreur lors du traitement de l\'achat'
         }
       } finally {
         loading.value = false
@@ -917,7 +917,7 @@ export default {
 
     const processEBillingPayment = async () => {
       try {
-        // 1. Créer la commande
+        // 1. Créer l'achat
         const orderData = {
           event_slug: event.value.slug,
           ticket_type_id: orderForm.value.ticketTypeId,
@@ -929,7 +929,7 @@ export default {
         const orderResponse = await guestService.createGuestOrder(orderData)
         
         if (!orderResponse.data.success) {
-          throw new Error(orderResponse.data.message || 'Erreur lors de la création de la commande')
+          throw new Error(orderResponse.data.message || 'Erreur lors de la création de l\'achat')
         }
 
         const order = orderResponse.data.data.order
@@ -1001,7 +1001,7 @@ export default {
 
     const processOrabankPayment = async () => {
       try {
-        // 1. Créer la commande
+        // 1. Créer l'achat
         const orderData = {
           event_slug: event.value.slug,
           ticket_type_id: orderForm.value.ticketTypeId,
@@ -1013,7 +1013,7 @@ export default {
         const orderResponse = await guestService.createGuestOrder(orderData)
         
         if (!orderResponse.data.success) {
-          throw new Error(orderResponse.data.message || 'Erreur lors de la création de la commande')
+          throw new Error(orderResponse.data.message || 'Erreur lors de la création de l\'achat')
         }
 
         const order = orderResponse.data.data.order
