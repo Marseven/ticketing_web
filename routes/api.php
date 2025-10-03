@@ -103,6 +103,10 @@ Route::prefix('v1')->group(function () {
         Route::get('profile', [App\Http\Controllers\Api\ClientController::class, 'profile']);
         Route::put('profile', [App\Http\Controllers\Api\ClientController::class, 'updateProfile']);
         Route::post('profile/avatar', [App\Http\Controllers\Api\ClientController::class, 'uploadAvatar']);
+        Route::get('profile/activities', [App\Http\Controllers\Api\ClientController::class, 'getRecentActivities']);
+        Route::put('profile/password', [App\Http\Controllers\Api\ClientController::class, 'updatePassword']);
+        Route::put('profile/preferences', [App\Http\Controllers\Api\ClientController::class, 'updatePreferences']);
+        Route::delete('profile/account', [App\Http\Controllers\Api\ClientController::class, 'deleteAccount']);
     });
 
     // Routes de paiement

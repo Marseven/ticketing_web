@@ -46,6 +46,8 @@ class ClientController extends Controller
                 'country' => $metadata['country'] ?? null,
                 'birthdate' => $metadata['birthdate'] ?? null,
                 'language' => $metadata['language'] ?? 'fr',
+                'email_notifications' => $metadata['email_notifications'] ?? true,
+                'sms_notifications' => $metadata['sms_notifications'] ?? true,
                 'created_at' => $user->created_at->format('d/m/Y H:i:s'),
                 'updated_at' => $user->updated_at->format('d/m/Y H:i:s'),
             ],
@@ -180,5 +182,197 @@ class ClientController extends Controller
         return response()->json([
             'message' => 'Aucun fichier fourni'
         ], 400);
+    }
+
+    /**
+     * Get client recent activities
+     */
+    public function getRecentActivities(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $activities = [];
+
+        // Récupérer les tickets récents
+        $recentTickets = $user->tickets()
+            ->with('event')
+            ->orderBy('created_at', 'desc')
+            ->limit(3)
+            ->get();
+
+        foreach ($recentTickets as $ticket) {
+            $activities[] = [
+                'id' => 'ticket_' . $ticket->id,
+                'type' => 'ticket_purchase',
+                'title' => 'Ticket acheté pour "' . $ticket->event->title . '"',
+                'date' => $this->formatActivityDate($ticket->created_at),
+                'icon' => 'TicketIcon',
+                'created_at' => $ticket->created_at
+            ];
+        }
+
+        // Récupérer les commandes récentes
+        $recentOrders = $user->orders()
+            ->where('status', 'completed')
+            ->orderBy('created_at', 'desc')
+            ->limit(2)
+            ->get();
+
+        foreach ($recentOrders as $order) {
+            $activities[] = [
+                'id' => 'order_' . $order->id,
+                'type' => 'order_completed',
+                'title' => 'Achat confirmé - ' . $order->tickets_count . ' ticket(s)',
+                'date' => $this->formatActivityDate($order->created_at),
+                'icon' => 'CheckCircleIcon',
+                'created_at' => $order->created_at
+            ];
+        }
+
+        // Activité de mise à jour du profil
+        if ($user->updated_at > $user->created_at) {
+            $activities[] = [
+                'id' => 'profile_update',
+                'type' => 'profile_update',
+                'title' => 'Profil mis à jour',
+                'date' => $this->formatActivityDate($user->updated_at),
+                'icon' => 'UserIcon',
+                'created_at' => $user->updated_at
+            ];
+        }
+
+        // Trier par date décroissante et limiter à 5
+        usort($activities, function($a, $b) {
+            return $b['created_at'] <=> $a['created_at'];
+        });
+
+        $activities = array_slice($activities, 0, 5);
+
+        // Nettoyer les created_at pour la réponse
+        foreach ($activities as &$activity) {
+            unset($activity['created_at']);
+        }
+
+        return response()->json([
+            'activities' => $activities
+        ]);
+    }
+
+    /**
+     * Update client password
+     */
+    public function updatePassword(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'current_password' => ['required', 'string'],
+            'new_password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        // Vérifier le mot de passe actuel
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'message' => 'Données invalides',
+                'errors' => ['current_password' => ['Le mot de passe actuel est incorrect.']]
+            ], 422);
+        }
+
+        // Mettre à jour le mot de passe
+        $user->update([
+            'password' => Hash::make($request->new_password)
+        ]);
+
+        return response()->json([
+            'message' => 'Mot de passe mis à jour avec succès'
+        ]);
+    }
+
+    /**
+     * Delete client account
+     */
+    public function deleteAccount(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'password' => ['required', 'string'],
+            'confirmation' => ['required', 'string', 'in:SUPPRIMER']
+        ]);
+
+        // Vérifier le mot de passe
+        if (!Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'message' => 'Mot de passe incorrect',
+                'errors' => ['password' => ['Le mot de passe est incorrect.']]
+            ], 422);
+        }
+
+        // Supprimer l'utilisateur (soft delete si configuré)
+        $user->delete();
+
+        return response()->json([
+            'message' => 'Compte supprimé avec succès'
+        ]);
+    }
+
+    /**
+     * Update client preferences
+     */
+    public function updatePreferences(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'email_notifications' => ['boolean'],
+            'sms_notifications' => ['boolean'],
+            'language' => ['string', 'in:fr,en']
+        ]);
+
+        $metadata = $user->metadata ?? [];
+        
+        if ($request->has('email_notifications')) {
+            $metadata['email_notifications'] = $request->boolean('email_notifications');
+        }
+        
+        if ($request->has('sms_notifications')) {
+            $metadata['sms_notifications'] = $request->boolean('sms_notifications');
+        }
+        
+        if ($request->has('language')) {
+            $metadata['language'] = $request->language;
+        }
+
+        $user->update(['metadata' => $metadata]);
+
+        return response()->json([
+            'message' => 'Préférences mises à jour avec succès',
+            'preferences' => [
+                'email_notifications' => $metadata['email_notifications'] ?? true,
+                'sms_notifications' => $metadata['sms_notifications'] ?? true,
+                'language' => $metadata['language'] ?? 'fr'
+            ]
+        ]);
+    }
+
+    /**
+     * Format activity date for display
+     */
+    private function formatActivityDate($date): string
+    {
+        $diffInDays = now()->diffInDays($date);
+        
+        if ($diffInDays === 0) {
+            return "Aujourd'hui";
+        } elseif ($diffInDays === 1) {
+            return "Hier";
+        } elseif ($diffInDays < 7) {
+            return "Il y a {$diffInDays} jours";
+        } elseif ($diffInDays < 30) {
+            $weeks = floor($diffInDays / 7);
+            return $weeks === 1 ? "Il y a 1 semaine" : "Il y a {$weeks} semaines";
+        } else {
+            $months = floor($diffInDays / 30);
+            return $months === 1 ? "Il y a 1 mois" : "Il y a {$months} mois";
+        }
     }
 }

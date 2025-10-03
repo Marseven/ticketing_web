@@ -283,7 +283,10 @@
               </div>
 
               <div class="pt-4 border-t border-gray-200">
-                <button class="w-full px-4 py-2 text-left text-red-600 hover:bg-red-50 rounded-primea transition-colors duration-200 flex items-center gap-2">
+                <button 
+                  @click="showDeleteModal = true"
+                  class="w-full px-4 py-2 text-left text-red-600 hover:bg-red-50 rounded-primea transition-colors duration-200 flex items-center gap-2"
+                >
                   <ExclamationTriangleIcon class="w-4 h-4" />
                   Supprimer mon compte
                 </button>
@@ -307,9 +310,16 @@
                   <p class="text-sm text-gray-500">Recevoir les offres et nouveautés</p>
                 </div>
                 <button 
-                  class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-primea-blue transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primea-blue focus:ring-offset-2"
+                  @click="updatePreferences('emailNotifications', !preferences.emailNotifications)"
+                  :class="[
+                    'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primea-blue focus:ring-offset-2',
+                    preferences.emailNotifications ? 'bg-primea-blue' : 'bg-gray-200'
+                  ]"
                 >
-                  <span class="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                  <span :class="[
+                    'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+                    preferences.emailNotifications ? 'translate-x-5' : 'translate-x-0'
+                  ]"></span>
                 </button>
               </div>
 
@@ -319,16 +329,24 @@
                   <p class="text-sm text-gray-500">Rappels et confirmations</p>
                 </div>
                 <button 
-                  class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-primea-blue transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primea-blue focus:ring-offset-2"
+                  @click="updatePreferences('smsNotifications', !preferences.smsNotifications)"
+                  :class="[
+                    'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primea-blue focus:ring-offset-2',
+                    preferences.smsNotifications ? 'bg-primea-blue' : 'bg-gray-200'
+                  ]"
                 >
-                  <span class="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                  <span :class="[
+                    'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+                    preferences.smsNotifications ? 'translate-x-5' : 'translate-x-0'
+                  ]"></span>
                 </button>
               </div>
 
               <div v-if="hasLanguageField">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Langue préférée</label>
                 <select 
-                  v-model="profileForm.language"
+                  v-model="preferences.language"
+                  @change="updatePreferences('language', preferences.language)"
                   class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-primea-blue focus:border-primea-blue"
                 >
                   <option value="fr">Français</option>
@@ -418,6 +436,67 @@
           </form>
         </div>
       </div>
+
+      <!-- Modal suppression de compte -->
+      <div v-if="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-primea-lg max-w-md w-full p-6">
+          <h3 class="text-lg font-semibold text-red-600 mb-4 flex items-center gap-2">
+            <ExclamationTriangleIcon class="w-6 h-6" />
+            Supprimer mon compte
+          </h3>
+          
+          <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-primea">
+            <p class="text-red-800 text-sm font-medium mb-2">⚠️ Action irréversible</p>
+            <p class="text-red-700 text-sm">Cette action supprimera définitivement votre compte et toutes vos données. Cette action ne peut pas être annulée.</p>
+          </div>
+          
+          <form @submit.prevent="deleteAccount" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Mot de passe</label>
+              <input 
+                v-model="deleteForm.password"
+                type="password" 
+                class="w-full px-4 py-3 border border-gray-300 rounded-primea focus:ring-red-500 focus:border-red-500"
+                placeholder="Votre mot de passe"
+                required
+              />
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Tapez "SUPPRIMER" pour confirmer
+              </label>
+              <input 
+                v-model="deleteForm.confirmation"
+                type="text" 
+                class="w-full px-4 py-3 border border-gray-300 rounded-primea focus:ring-red-500 focus:border-red-500"
+                placeholder="SUPPRIMER"
+                required
+              />
+            </div>
+
+            <div v-if="error" class="bg-red-50 border border-red-200 rounded-primea p-3">
+              <p class="text-red-800 text-sm">{{ error }}</p>
+            </div>
+
+            <div class="flex gap-3 pt-4">
+              <button 
+                type="submit"
+                class="flex-1 px-4 py-3 bg-red-600 text-white rounded-primea hover:bg-red-700 font-semibold transition-all duration-200"
+              >
+                Supprimer définitivement
+              </button>
+              <button 
+                type="button"
+                @click="showDeleteModal = false; deleteForm = { password: '', confirmation: '' }"
+                class="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-primea hover:bg-gray-50 font-semibold transition-all duration-200"
+              >
+                Annuler
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -463,10 +542,24 @@ export default {
     const authStore = useAuthStore()
     const saving = ref(false)
     const showPasswordModal = ref(false)
+    const showDeleteModal = ref(false)
     const loading = ref(false)
     const error = ref(null)
     const uploadingAvatar = ref(false)
     const successMessage = ref('')
+    
+    // Variables pour les préférences
+    const preferences = ref({
+      emailNotifications: true,
+      smsNotifications: true,
+      language: 'fr'
+    })
+    
+    // Variables pour la suppression
+    const deleteForm = ref({
+      password: '',
+      confirmation: ''
+    })
 
     const user = computed(() => authStore.user)
     const userInitial = computed(() => user.value?.name?.charAt(0).toUpperCase() || 'U')
@@ -512,6 +605,13 @@ export default {
           language: profile.language || 'fr',
           avatar: profile.avatar_url && !profile.avatar_url.includes('user-default.jpg') ? profile.avatar_url : null
         }
+        
+        // Charger les préférences depuis les métadonnées
+        preferences.value = {
+          emailNotifications: profile.email_notifications ?? true,
+          smsNotifications: profile.sms_notifications ?? true,
+          language: profile.language || 'fr'
+        }
       } catch (err) {
         console.error('Erreur lors du chargement du profil:', err)
         error.value = 'Impossible de charger votre profil'
@@ -549,10 +649,22 @@ export default {
       }
     }
 
+    // Charger les activités récentes depuis l'API
+    const loadActivities = async () => {
+      try {
+        const response = await clientService.getRecentActivities()
+        recentActivities.value = response.data.activities || []
+      } catch (err) {
+        console.error('Erreur lors du chargement des activités:', err)
+        // Garder les valeurs par défaut
+      }
+    }
+
     // Charger les données au montage du composant
     onMounted(() => {
       loadProfile()
       loadStats()
+      loadActivities()
     })
 
     const passwordForm = ref({
@@ -673,22 +785,39 @@ export default {
 
     const updatePassword = async () => {
       if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
-        alert('Les mots de passe ne correspondent pas')
+        error.value = 'Les mots de passe ne correspondent pas'
         return
       }
       
       try {
-        // Simuler la mise à jour du mot de passe
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        console.log('Mot de passe mis à jour')
+        error.value = null
+        const response = await clientService.updatePassword({
+          current_password: passwordForm.value.currentPassword,
+          new_password: passwordForm.value.newPassword,
+          new_password_confirmation: passwordForm.value.confirmPassword
+        })
+        
+        successMessage.value = response.data.message || 'Mot de passe mis à jour avec succès'
         showPasswordModal.value = false
         passwordForm.value = {
           currentPassword: '',
           newPassword: '',
           confirmPassword: ''
         }
-      } catch (error) {
-        console.error('Erreur lors de la mise à jour du mot de passe:', error)
+        
+        setTimeout(() => {
+          successMessage.value = ''
+        }, 3000)
+      } catch (err) {
+        console.error('Erreur lors de la mise à jour du mot de passe:', err)
+        if (err.response?.data?.errors) {
+          const firstError = Object.values(err.response.data.errors)[0]
+          error.value = Array.isArray(firstError) ? firstError[0] : firstError
+        } else if (err.response?.data?.message) {
+          error.value = err.response.data.message
+        } else {
+          error.value = 'Erreur lors de la mise à jour du mot de passe'
+        }
       }
     }
 
@@ -744,6 +873,55 @@ export default {
       }
     }
 
+    // Mettre à jour les préférences
+    const updatePreferences = async (type, value) => {
+      try {
+        const updateData = {}
+        updateData[type] = value
+        
+        await clientService.updatePreferences(updateData)
+        preferences.value[type] = value
+        
+        successMessage.value = 'Préférences mises à jour'
+        setTimeout(() => {
+          successMessage.value = ''
+        }, 2000)
+      } catch (err) {
+        console.error('Erreur lors de la mise à jour des préférences:', err)
+        error.value = 'Erreur lors de la mise à jour des préférences'
+      }
+    }
+
+    // Supprimer le compte
+    const deleteAccount = async () => {
+      if (deleteForm.value.confirmation !== 'SUPPRIMER') {
+        error.value = 'Vous devez taper "SUPPRIMER" pour confirmer'
+        return
+      }
+      
+      try {
+        error.value = null
+        await clientService.deleteAccount({
+          password: deleteForm.value.password,
+          confirmation: deleteForm.value.confirmation
+        })
+        
+        // Déconnecter l'utilisateur et rediriger
+        authStore.logout()
+        window.location.href = '/'
+      } catch (err) {
+        console.error('Erreur lors de la suppression:', err)
+        if (err.response?.data?.errors) {
+          const firstError = Object.values(err.response.data.errors)[0]
+          error.value = Array.isArray(firstError) ? firstError[0] : firstError
+        } else if (err.response?.data?.message) {
+          error.value = err.response.data.message
+        } else {
+          error.value = 'Erreur lors de la suppression du compte'
+        }
+      }
+    }
+
     return {
       profileForm,
       passwordForm,
@@ -752,13 +930,18 @@ export default {
       recentActivities,
       saving,
       showPasswordModal,
+      showDeleteModal,
       loading,
       error,
       successMessage,
       uploadingAvatar,
       userInitial,
+      preferences,
+      deleteForm,
       updateProfile,
       updatePassword,
+      updatePreferences,
+      deleteAccount,
       resetForm,
       loadProfile,
       handleAvatarUpload,

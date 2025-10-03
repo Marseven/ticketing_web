@@ -412,6 +412,22 @@ export const clientService = {
         'Content-Type': 'multipart/form-data'
       }
     })
+  },
+  // Récupérer les activités récentes
+  getRecentActivities() {
+    return api.get('/profile/activities')
+  },
+  // Mettre à jour le mot de passe
+  updatePassword(passwordData) {
+    return api.put('/profile/password', passwordData)
+  },
+  // Mettre à jour les préférences
+  updatePreferences(preferences) {
+    return api.put('/profile/preferences', preferences)
+  },
+  // Supprimer le compte
+  deleteAccount(data) {
+    return api.delete('/profile/account', { data })
   }
 }
 
