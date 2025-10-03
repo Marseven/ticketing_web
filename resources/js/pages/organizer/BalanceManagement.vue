@@ -286,7 +286,7 @@ const payoutForm = reactive({
 
 // Computed
 const totalBalance = computed(() => {
-  return balances.value.reduce((total, balance) => total + balance.balance, 0)
+  return balances.value.reduce((total, balance) => total + (parseFloat(balance.balance) || 0), 0)
 })
 
 // Méthodes
@@ -294,15 +294,61 @@ const loadBalances = async () => {
   loading.value = true
   try {
     const response = await organizerService.getBalance()
+    console.log('Balance API Response:', response.data)
+    
     if (response.data.success) {
       balances.value = response.data.data.balances || []
+      console.log('Balances loaded:', balances.value)
+      
+      // Si aucun solde n'est retourné, créer des soldes par défaut
+      if (balances.value.length === 0) {
+        balances.value = [
+          {
+            gateway: 'airtelmoney',
+            balance: 0,
+            auto_payout_enabled: false,
+            auto_payout_threshold: 10000,
+            payout_phone_number: null
+          },
+          {
+            gateway: 'moovmoney',
+            balance: 0,
+            auto_payout_enabled: false,
+            auto_payout_threshold: 10000,
+            payout_phone_number: null
+          }
+        ]
+        console.log('Default balances created:', balances.value)
+      }
+    } else {
+      console.error('Balance API Error:', response.data.message)
     }
   } catch (error) {
     console.error('Erreur chargement soldes:', error)
+    console.error('Error details:', error.response?.data)
+    
+    // Créer des soldes par défaut en cas d'erreur
+    balances.value = [
+      {
+        gateway: 'airtelmoney',
+        balance: 0,
+        auto_payout_enabled: false,
+        auto_payout_threshold: 10000,
+        payout_phone_number: null
+      },
+      {
+        gateway: 'moovmoney',
+        balance: 0,
+        auto_payout_enabled: false,
+        auto_payout_threshold: 10000,
+        payout_phone_number: null
+      }
+    ]
+    
     Swal.fire({
       title: 'Erreur',
-      text: 'Impossible de charger les soldes',
-      icon: 'error',
+      text: 'Impossible de charger les soldes. Affichage des valeurs par défaut.',
+      icon: 'warning',
       confirmButtonColor: '#272d63'
     })
   } finally {
@@ -313,13 +359,20 @@ const loadBalances = async () => {
 const loadRecentPayouts = async () => {
   try {
     const response = await organizerService.getPaymentHistory()
+    console.log('Payment History API Response:', response.data)
+    
     if (response.data.success) {
       recentPayouts.value = response.data.data.payouts?.data || response.data.data.payouts || []
+      console.log('Recent payouts loaded:', recentPayouts.value)
       stats.pending_payouts = recentPayouts.value.filter(p => ['pending', 'processing'].includes(p.status)).length
       stats.total_payouts = recentPayouts.value.reduce((sum, p) => sum + (p.amount || 0), 0)
+      console.log('Stats calculated:', stats)
+    } else {
+      console.error('Payment History API Error:', response.data.message)
     }
   } catch (error) {
     console.error('Erreur chargement payouts récents:', error)
+    console.error('Error details:', error.response?.data)
   }
 }
 

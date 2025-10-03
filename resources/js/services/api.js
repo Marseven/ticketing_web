@@ -334,12 +334,12 @@ export const organizerService = {
 
   // Récupérer le solde et les transactions
   getBalance() {
-    return api.get('/organizer/balance')
+    return api.get('/organizer/balances')
   },
 
   // Récupérer l'historique des paiements
   getPaymentHistory() {
-    return api.get('/organizer/payments')
+    return api.get('/organizer/payouts')
   },
 
   // Demander un payout
