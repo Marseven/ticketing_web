@@ -609,7 +609,7 @@ class OrganizerController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                     'phone' => $user->phone,
-                    'avatar_url' => $user->avatar_url && file_exists(public_path(str_replace('/storage/', 'storage/', $user->avatar_url))) ? $user->avatar_url : null,
+                    'avatar_url' => $user->avatar_file ? '/storage/images/users/' . $user->avatar_file : $user->avatar_url,
                     'email_verified_at' => $user->email_verified_at
                 ],
                 'organization' => [
@@ -619,7 +619,7 @@ class OrganizerController extends Controller
                     'website_url' => $organizer->website_url,
                     'contact_email' => $organizer->contact_email,
                     'contact_phone' => $organizer->contact_phone,
-                    'logo_url' => $organizer->logo_url && file_exists(public_path(str_replace('/storage/', 'storage/', $organizer->logo_url))) ? $organizer->logo_url : null,
+                    'logo_url' => $organizer->logo_file ? '/storage/images/organizers/' . $organizer->logo_file : $organizer->logo_url,
                     'verified_at' => $organizer->verified_at
                 ],
                 'stats' => $stats
@@ -797,47 +797,33 @@ class OrganizerController extends Controller
             if ($type === 'user' && $request->hasFile('avatar')) {
                 // Upload avatar utilisateur
                 $file = $request->file('avatar');
+                
+                // Supprimer l'ancienne image si elle existe
+                if ($user->avatar_file) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete('images/users/' . $user->avatar_file);
+                }
+                
+                // Stocker la nouvelle image
                 $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                 $path = $file->storeAs('images/users', $filename, 'public');
                 
-                // Vérifier que le fichier a bien été créé
-                if (!file_exists(storage_path('app/public/' . $path))) {
-                    \Log::error('File not created after upload', [
-                        'path' => $path,
-                        'storage_path' => storage_path('app/public/' . $path)
-                    ]);
-                    throw new \Exception('Échec de la sauvegarde du fichier');
-                }
-                
-                // Supprimer l'ancienne image si elle existe
-                if ($user->avatar_url && file_exists(public_path(str_replace('/storage/', 'storage/', $user->avatar_url)))) {
-                    @unlink(public_path(str_replace('/storage/', 'storage/', $user->avatar_url)));
-                }
-                
-                $user->avatar_url = '/storage/' . $path;
+                // Sauvegarder uniquement le nom du fichier
+                $user->avatar_file = $filename;
+                $user->avatar_url = null; // Clear URL si on a un fichier
                 $user->save();
-                
-                // Vérifier que la sauvegarde en DB a réussi
-                $user->refresh();
-                if ($user->avatar_url !== '/storage/' . $path) {
-                    \Log::error('Avatar URL not saved in database', [
-                        'expected' => '/storage/' . $path,
-                        'actual' => $user->avatar_url
-                    ]);
-                    throw new \Exception('Échec de la sauvegarde en base de données');
-                }
                 
                 \Log::info('Avatar saved', [
                     'user_id' => $user->id,
-                    'avatar_url' => $user->avatar_url,
-                    'file_path' => $path
+                    'avatar_file' => $user->avatar_file,
+                    'path' => $path
                 ]);
                 
+                // Retourner l'URL complète pour l'affichage
                 return response()->json([
                     'success' => true,
                     'message' => 'Avatar uploadé avec succès',
                     'data' => [
-                        'avatar_url' => $user->avatar_url
+                        'avatar_url' => '/storage/images/users/' . $filename
                     ]
                 ]);
                 
@@ -852,47 +838,33 @@ class OrganizerController extends Controller
                 }
                 
                 $file = $request->file('logo');
+                
+                // Supprimer l'ancienne image si elle existe
+                if ($organizer->logo_file) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete('images/organizers/' . $organizer->logo_file);
+                }
+                
+                // Stocker la nouvelle image
                 $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                 $path = $file->storeAs('images/organizers', $filename, 'public');
                 
-                // Vérifier que le fichier a bien été créé
-                if (!file_exists(storage_path('app/public/' . $path))) {
-                    \Log::error('Logo file not created after upload', [
-                        'path' => $path,
-                        'storage_path' => storage_path('app/public/' . $path)
-                    ]);
-                    throw new \Exception('Échec de la sauvegarde du fichier logo');
-                }
-                
-                // Supprimer l'ancienne image si elle existe
-                if ($organizer->logo_url && file_exists(public_path(str_replace('/storage/', 'storage/', $organizer->logo_url)))) {
-                    @unlink(public_path(str_replace('/storage/', 'storage/', $organizer->logo_url)));
-                }
-                
-                $organizer->logo_url = '/storage/' . $path;
+                // Sauvegarder uniquement le nom du fichier
+                $organizer->logo_file = $filename;
+                $organizer->logo_url = null; // Clear URL si on a un fichier
                 $organizer->save();
-                
-                // Vérifier que la sauvegarde en DB a réussi
-                $organizer->refresh();
-                if ($organizer->logo_url !== '/storage/' . $path) {
-                    \Log::error('Logo URL not saved in database', [
-                        'expected' => '/storage/' . $path,
-                        'actual' => $organizer->logo_url
-                    ]);
-                    throw new \Exception('Échec de la sauvegarde du logo en base de données');
-                }
                 
                 \Log::info('Logo saved', [
                     'organizer_id' => $organizer->id,
-                    'logo_url' => $organizer->logo_url,
-                    'file_path' => $path
+                    'logo_file' => $organizer->logo_file,
+                    'path' => $path
                 ]);
                 
+                // Retourner l'URL complète pour l'affichage
                 return response()->json([
                     'success' => true,
                     'message' => 'Logo uploadé avec succès',
                     'data' => [
-                        'logo_url' => $organizer->logo_url
+                        'logo_url' => '/storage/images/organizers/' . $filename
                     ]
                 ]);
             }

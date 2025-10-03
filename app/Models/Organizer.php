@@ -17,6 +17,8 @@ class Organizer extends Model
         'slug',
         'bio',
         'logo_url',
+        'logo_file',
+        'website_url',
         'contact_email',
         'contact_phone',
         'status',
