@@ -129,10 +129,14 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Nom -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Nom complet</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Nom complet <span class="text-red-500">*</span>
+                  </label>
                   <input 
                     v-model="profileForm.name"
-                    type="text" 
+                    type="text"
+                    required
+                    maxlength="255"
                     class="w-full px-4 py-3 border border-gray-300 rounded-primea focus:ring-primea-blue focus:border-primea-blue"
                     placeholder="Votre nom complet"
                   />
@@ -140,10 +144,14 @@
 
                 <!-- Email -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Adresse email</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Adresse email <span class="text-red-500">*</span>
+                  </label>
                   <input 
                     v-model="profileForm.email"
-                    type="email" 
+                    type="email"
+                    required
+                    maxlength="255"
                     class="w-full px-4 py-3 border border-gray-300 rounded-primea focus:ring-primea-blue focus:border-primea-blue"
                     placeholder="votre@email.com"
                   />
@@ -175,7 +183,8 @@
                   <label class="block text-sm font-medium text-gray-700 mb-2">Ville</label>
                   <input 
                     v-model="profileForm.city"
-                    type="text" 
+                    type="text"
+                    maxlength="100"
                     class="w-full px-4 py-3 border border-gray-300 rounded-primea focus:ring-primea-blue focus:border-primea-blue"
                     placeholder="Libreville"
                   />
@@ -204,10 +213,11 @@
                 <textarea 
                   v-model="profileForm.bio"
                   rows="4"
+                  maxlength="500"
                   class="w-full px-4 py-3 border border-gray-300 rounded-primea focus:ring-primea-blue focus:border-primea-blue"
                   placeholder="Parlez-nous de vous..."
                 ></textarea>
-                <p class="text-sm text-gray-500 mt-1">{{ profileForm.bio.length }}/500 caractères</p>
+                <p class="text-sm text-gray-500 mt-1">{{ (profileForm.bio || '').length }}/500 caractères</p>
               </div>
 
               <!-- Boutons d'action -->
@@ -464,10 +474,10 @@ export default {
       name: '',
       email: '',
       phone: '',
-      birthdate: '',
+      bio: '',
       city: '',
       country: 'GA',
-      bio: '',
+      birthdate: '',
       language: 'fr',
       avatar: null
     })
@@ -484,12 +494,12 @@ export default {
           name: profile.name || '',
           email: profile.email || '',
           phone: profile.phone || '',
-          birthdate: profile.birthdate || '',
+          bio: profile.bio || '',
           city: profile.city || '',
           country: profile.country || 'GA',
-          bio: profile.bio || '',
+          birthdate: profile.birthdate || '',
           language: profile.language || 'fr',
-          avatar: profile.avatar || null
+          avatar: profile.avatar_url || null
         }
       } catch (err) {
         console.error('Erreur lors du chargement du profil:', err)
@@ -499,10 +509,10 @@ export default {
           name: user.value?.name || '',
           email: user.value?.email || '',
           phone: '',
-          birthdate: '',
+          bio: '',
           city: '',
           country: 'GA',
-          bio: '',
+          birthdate: '',
           language: 'fr',
           avatar: null
         }
@@ -576,10 +586,46 @@ export default {
       }
     ])
 
+    // Validation côté client
+    const validateForm = () => {
+      if (!profileForm.value.name?.trim()) {
+        error.value = 'Le nom est requis'
+        return false
+      }
+      
+      if (!profileForm.value.email?.trim()) {
+        error.value = 'L\'email est requis'
+        return false
+      }
+      
+      if (profileForm.value.bio && profileForm.value.bio.length > 500) {
+        error.value = 'La biographie ne peut pas dépasser 500 caractères'
+        return false
+      }
+      
+      if (profileForm.value.city && profileForm.value.city.length > 100) {
+        error.value = 'La ville ne peut pas dépasser 100 caractères'
+        return false
+      }
+      
+      if (profileForm.value.country && profileForm.value.country.length !== 2) {
+        error.value = 'Le code pays doit faire 2 caractères'
+        return false
+      }
+      
+      return true
+    }
+
     const updateProfile = async () => {
-      saving.value = true
       error.value = null
       successMessage.value = ''
+      
+      // Validation côté client
+      if (!validateForm()) {
+        return
+      }
+      
+      saving.value = true
       
       try {
         await clientService.updateProfile(profileForm.value)
@@ -600,7 +646,15 @@ export default {
         }, 3000)
       } catch (err) {
         console.error('Erreur lors de la mise à jour:', err)
-        error.value = 'Impossible de mettre à jour votre profil'
+        if (err.response?.data?.errors) {
+          // Afficher la première erreur de validation du backend
+          const firstError = Object.values(err.response.data.errors)[0]
+          error.value = Array.isArray(firstError) ? firstError[0] : firstError
+        } else if (err.response?.data?.message) {
+          error.value = err.response.data.message
+        } else {
+          error.value = 'Impossible de mettre à jour votre profil'
+        }
       } finally {
         saving.value = false
       }
