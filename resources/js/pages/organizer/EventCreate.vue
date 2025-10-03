@@ -642,9 +642,23 @@ const createEvent = async () => {
     }
   } catch (err) {
     console.error('Erreur création événement:', err);
+    console.error('Détails erreur:', err.response?.data);
+    
+    let errorMessage = err.response?.data?.message || 'Erreur lors de la création de l\'événement';
+    
+    // Afficher les détails des erreurs de validation
+    if (err.response?.data?.errors) {
+      const errors = err.response.data.errors;
+      const errorDetails = Object.keys(errors).map(field => {
+        return `${field}: ${errors[field].join(', ')}`;
+      }).join('\n');
+      
+      errorMessage += '\n\nDétails:\n' + errorDetails;
+    }
+    
     Swal.fire({
-      title: 'Erreur',
-      text: err.response?.data?.message || 'Erreur lors de la création de l\'événement',
+      title: 'Erreur de validation',
+      text: errorMessage,
       icon: 'error',
       confirmButtonColor: '#272d63'
     });

@@ -763,6 +763,11 @@ class OrganizerController extends Controller
         ]);
 
         if ($validator->fails()) {
+            \Illuminate\Support\Facades\Log::error('CreateEvent Validation Failed', [
+                'errors' => $validator->errors()->toArray(),
+                'input_data' => $request->all()
+            ]);
+            
             return response()->json([
                 'success' => false,
                 'message' => 'Données invalides',
