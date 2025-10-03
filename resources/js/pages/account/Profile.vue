@@ -72,6 +72,27 @@
         </button>
       </div>
 
+      <!-- Alert de vérification d'email -->
+      <div v-if="!emailVerified && !loading && !error" class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-primea">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <ExclamationTriangleIcon class="w-5 h-5 text-yellow-500 mr-2" />
+            <div>
+              <p class="text-yellow-800 font-medium">Email non vérifié</p>
+              <p class="text-yellow-700 text-sm">Vérifiez votre email pour accéder à toutes les fonctionnalités.</p>
+            </div>
+          </div>
+          <button 
+            @click="resendEmailVerification"
+            :disabled="resendingEmail"
+            class="px-4 py-2 bg-yellow-500 text-white rounded-primea hover:bg-yellow-600 font-semibold transition-all duration-200 disabled:opacity-50"
+          >
+            <span v-if="resendingEmail">Envoi...</span>
+            <span v-else>Renvoyer</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Message de succès -->
       <div v-if="successMessage && !loading && !error" class="mb-6 p-4 bg-green-50 border border-green-200 rounded-primea">
         <div class="flex items-center">
@@ -547,6 +568,8 @@ export default {
     const error = ref(null)
     const uploadingAvatar = ref(false)
     const successMessage = ref('')
+    const emailVerified = ref(true)
+    const resendingEmail = ref(false)
     
     // Variables pour les préférences
     const preferences = ref({
@@ -612,6 +635,9 @@ export default {
           smsNotifications: profile.sms_notifications ?? true,
           language: profile.language || 'fr'
         }
+        
+        // Vérifier le statut de vérification d'email
+        emailVerified.value = !!profile.email_verified_at
       } catch (err) {
         console.error('Erreur lors du chargement du profil:', err)
         error.value = 'Impossible de charger votre profil'
@@ -680,12 +706,28 @@ export default {
     })
 
     const membershipDuration = computed(() => {
-      const memberSince = new Date('2023-03-15')
+      if (!user.value?.created_at) return 'Récent'
+      
+      const memberSince = new Date(user.value.created_at)
       const now = new Date()
       const diffTime = Math.abs(now - memberSince)
+      const diffMinutes = Math.floor(diffTime / (1000 * 60))
+      const diffHours = Math.floor(diffTime / (1000 * 60 * 60))
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
       const months = Math.floor(diffDays / 30)
-      return months > 12 ? `${Math.floor(months / 12)} an${Math.floor(months / 12) > 1 ? 's' : ''}` : `${months} mois`
+      
+      if (diffMinutes < 60) {
+        return `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''}`
+      } else if (diffHours < 24) {
+        return `${diffHours} heure${diffHours > 1 ? 's' : ''}`
+      } else if (diffDays < 30) {
+        return `${diffDays} jour${diffDays > 1 ? 's' : ''}`
+      } else if (months < 12) {
+        return `${months} mois`
+      } else {
+        const years = Math.floor(months / 12)
+        return `${years} an${years > 1 ? 's' : ''}`
+      }
     })
 
     const recentActivities = ref([
@@ -873,6 +915,24 @@ export default {
       }
     }
 
+    // Renvoyer l'email de vérification
+    const resendEmailVerification = async () => {
+      try {
+        resendingEmail.value = true
+        await authService.resendEmailVerification()
+        
+        successMessage.value = 'Email de vérification renvoyé avec succès'
+        setTimeout(() => {
+          successMessage.value = ''
+        }, 3000)
+      } catch (err) {
+        console.error('Erreur lors du renvoi:', err)
+        error.value = 'Impossible de renvoyer l\'email de vérification'
+      } finally {
+        resendingEmail.value = false
+      }
+    }
+
     // Mettre à jour les préférences
     const updatePreferences = async (type, value) => {
       try {
@@ -938,6 +998,9 @@ export default {
       userInitial,
       preferences,
       deleteForm,
+      emailVerified,
+      resendingEmail,
+      resendEmailVerification,
       updateProfile,
       updatePassword,
       updatePreferences,

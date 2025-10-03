@@ -48,7 +48,8 @@ class ClientController extends Controller
                 'language' => $metadata['language'] ?? 'fr',
                 'email_notifications' => $metadata['email_notifications'] ?? true,
                 'sms_notifications' => $metadata['sms_notifications'] ?? true,
-                'created_at' => $user->created_at->format('d/m/Y H:i:s'),
+                'email_verified_at' => $user->email_verified_at,
+                'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at->format('d/m/Y H:i:s'),
             ],
             'stats' => $stats
