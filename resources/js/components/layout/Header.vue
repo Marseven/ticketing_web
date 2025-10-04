@@ -145,7 +145,7 @@
                       @click="closeDropdown"
                     >
                       <ClipboardDocumentListIcon class="w-5 h-5 mr-3" />
-                      Mes commandes
+                      Mes achats
                     </router-link>
                     <div class="border-t border-gray-200 my-2"></div>
                   </template>
@@ -278,7 +278,7 @@
                   class="block py-3 text-primea-blue hover:text-primea-yellow font-primea font-medium transition-colors duration-200"
                   @click="closeMobileMenu"
                 >
-                  Mes commandes
+                  Mes achats
                 </router-link>
               </template>
               
