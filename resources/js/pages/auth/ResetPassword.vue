@@ -156,11 +156,11 @@ export default {
 
     const verifyToken = async () => {
       try {
-        const response = await api.post('/verify-reset-token', {
+        const response = await api.post('/auth/verify-reset-token', {
           token: form.value.token,
           email: form.value.email
         })
-        
+
         if (!response.data.success) {
           tokenInvalid.value = true
         }
@@ -177,7 +177,7 @@ export default {
       submitting.value = true
 
       try {
-        const response = await api.post('/reset-password', form.value)
+        const response = await api.post('/auth/reset-password', form.value)
         
         if (response.data.success) {
           success.value = response.data.message

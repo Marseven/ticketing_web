@@ -52,16 +52,11 @@ Route::prefix('payment')->group(function () {
     })->name('payment.cancel');
 });
 
-// Routes d'authentification (sans préfixe v1 pour correspondre aux annotations)
+// Routes d'authentification (sans préfixe v1 pour correspondre aux annotations - DEPRECATED, utiliser v1/auth à la place)
 Route::post('register', [App\Http\Controllers\Api\AuthController::class, 'register']);
 Route::post('login', [App\Http\Controllers\Api\AuthController::class, 'login']);
 Route::post('logout', [App\Http\Controllers\Api\AuthController::class, 'logout'])->middleware('auth:sanctum');
 Route::get('me', [App\Http\Controllers\Api\AuthController::class, 'me'])->middleware('auth:sanctum');
-
-// Routes de réinitialisation de mot de passe
-Route::post('forgot-password', [App\Http\Controllers\Auth\PasswordResetController::class, 'forgotPassword']);
-Route::post('reset-password', [App\Http\Controllers\Auth\PasswordResetController::class, 'resetPassword']);
-Route::post('verify-reset-token', [App\Http\Controllers\Auth\PasswordResetController::class, 'verifyToken']);
 
 // Route publique pour servir les images (fallback) - SUPPRIMÉE car elle va dans routes/web.php
 
@@ -87,11 +82,16 @@ Route::prefix('v1')->group(function () {
         Route::post('logout', [App\Http\Controllers\Api\AuthController::class, 'logout'])->middleware('auth:sanctum');
         Route::get('me', [App\Http\Controllers\Api\AuthController::class, 'me'])->middleware('auth:sanctum');
         Route::post('refresh', [App\Http\Controllers\Api\AuthController::class, 'refresh'])->middleware('auth:sanctum');
-        
+
         // Routes de vérification d'email
         Route::get('email/verify/{id}/{hash}', [App\Http\Controllers\Api\AuthController::class, 'verifyEmail'])->name('verification.verify');
         Route::post('email/resend', [App\Http\Controllers\Api\AuthController::class, 'resendVerification'])->middleware('auth:sanctum');
         Route::get('email/check', [App\Http\Controllers\Api\AuthController::class, 'checkEmailVerification'])->middleware('auth:sanctum');
+
+        // Routes de réinitialisation de mot de passe
+        Route::post('forgot-password', [App\Http\Controllers\Auth\PasswordResetController::class, 'forgotPassword']);
+        Route::post('reset-password', [App\Http\Controllers\Auth\PasswordResetController::class, 'resetPassword']);
+        Route::post('verify-reset-token', [App\Http\Controllers\Auth\PasswordResetController::class, 'verifyToken']);
     });
 
     
