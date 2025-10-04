@@ -122,6 +122,11 @@
             <p class="text-red-600 text-sm font-primea">{{ error }}</p>
           </div>
 
+          <!-- Message d'information -->
+          <div v-if="info" class="bg-blue-50 border border-blue-200 rounded-primea-lg p-4">
+            <p class="text-blue-600 text-sm font-primea">{{ info }}</p>
+          </div>
+
           <!-- Bouton Connexion -->
           <button 
             type="submit"
@@ -206,6 +211,7 @@ export default {
     const showPassword = ref(false)
     const loading = ref(false)
     const error = ref('')
+    const info = ref('')
     const loginType = ref('email')
 
     const loginForm = ref({
@@ -222,12 +228,14 @@ export default {
       loginType.value = type
       loginForm.value.login = '' // Réinitialiser le champ
       error.value = '' // Effacer les erreurs
+      info.value = '' // Effacer les messages d'info
     }
 
     const handleLogin = async () => {
       try {
         loading.value = true
         error.value = ''
+        info.value = ''
 
         // Validation basique
         if (!loginForm.value.login || !loginForm.value.password) {
@@ -242,16 +250,21 @@ export default {
           })
 
           if (result.success) {
+            // Afficher un message d'information si l'email n'est pas vérifié
+            if (result.email_verification_required) {
+              info.value = result.message || 'N\'oubliez pas de vérifier votre adresse email.'
+            }
+
             // Vérifier s'il y a une URL de redirection dans les query params
             const redirectUrl = route.query.redirect
-            
+
             if (redirectUrl) {
               // Si une URL de redirection existe, y aller directement
               router.push(redirectUrl)
             } else {
               // Sinon, redirection basée sur le niveau d'accès
               const accessLevel = result.access_level || 'client'
-              
+
               switch (accessLevel) {
                 case 'admin':
                   router.push('/admin/dashboard')
@@ -267,25 +280,17 @@ export default {
             throw new Error(result.message || 'Identifiants incorrects')
           }
         } catch (apiError) {
-          // Vérifier si c'est une erreur de vérification d'email
-          if (apiError.response?.status === 403 && apiError.response?.data?.email_verification_required) {
-            router.push({ 
-              name: 'email-verification'
-            })
-            return
-          }
-          
           // Si l'API n'est pas disponible, utiliser les comptes de test
           console.warn('API non disponible, utilisation des comptes de test:', apiError)
-          
+
           const testAccounts = [
             { login: 'user@test.com', phone: '+241012345678', password: 'user123', role: 'user', name: 'Utilisateur Test' },
             { login: 'organizer@test.com', phone: '+241078901234', password: 'organizer123', role: 'organizer', name: 'Organisateur Test' },
             { login: 'admin@test.com', phone: '+241065432100', password: 'admin123', role: 'admin', name: 'Admin Test' }
           ]
 
-          const account = testAccounts.find(acc => 
-            (acc.login === loginForm.value.login || acc.phone === loginForm.value.login) && 
+          const account = testAccounts.find(acc =>
+            (acc.login === loginForm.value.login || acc.phone === loginForm.value.login) &&
             acc.password === loginForm.value.password
           )
 
@@ -295,17 +300,17 @@ export default {
 
           // Simuler la connexion
           await new Promise(resolve => setTimeout(resolve, 1000))
-          
+
           // Stocker les informations d'authentification avec authUtils
           const token = 'test-token-' + account.role
-          authUtils.saveAuth(token, { 
-            name: account.name, 
-            email: account.login 
+          authUtils.saveAuth(token, {
+            name: account.name,
+            email: account.login
           }, account.role)
-          
+
           // Vérifier s'il y a une URL de redirection
           const redirectUrl = route.query.redirect
-          
+
           if (redirectUrl) {
             // Si une URL de redirection existe, y aller directement
             router.push(redirectUrl)
@@ -335,6 +340,7 @@ export default {
       showPassword,
       loading,
       error,
+      info,
       loginType,
       loginForm,
       togglePasswordVisibility,

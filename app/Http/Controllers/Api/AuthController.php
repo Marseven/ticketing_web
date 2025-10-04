@@ -155,16 +155,6 @@ class AuthController extends Controller
             ], 403);
         }
 
-        // Vérifier si l'email est vérifié (uniquement pour les clients)
-        if (!$user->is_organizer && !$user->hasVerifiedEmail()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Vous devez vérifier votre adresse email avant de vous connecter.',
-                'email_verification_required' => true,
-                'user_id' => $user->id,
-            ], 403);
-        }
-
         // Pour l'app mobile, vérifier si c'est un organisateur
         $userAgent = $request->header('User-Agent');
         if (str_contains($userAgent, 'TicketingMobile') && !$user->is_organizer) {
@@ -181,14 +171,20 @@ class AuthController extends Controller
 
         // Charger les rôles
         $userData = $user->load('roles');
-        
+
         // Déterminer le type d'utilisateur
         $isAdmin = $userData->roles->contains('slug', 'admin');
         $isOrganizer = $userData->roles->contains('slug', 'organizer') || $userData->is_organizer;
-        
+
         // Ajouter les propriétés calculées
         $userData->is_admin = $isAdmin;
         $userData->is_organizer = $isOrganizer;
+
+        // Vérifier si l'email est vérifié (pour afficher un message, mais ne pas bloquer)
+        $emailVerified = $user->hasVerifiedEmail();
+        $message = $emailVerified
+            ? 'Connexion réussie'
+            : 'Connexion réussie. N\'oubliez pas de vérifier votre adresse email.';
 
         return response()->json([
             'success' => true,
@@ -202,10 +198,12 @@ class AuthController extends Controller
                 'is_admin' => $userData->is_admin,
                 'roles' => $userData->roles,
                 'active_tickets_count' => 0, // TODO: calculer
+                'email_verified_at' => $user->email_verified_at,
             ],
             'token' => $token,
-            'message' => 'Connexion réussie',
-            'access_level' => $isAdmin ? 'admin' : ($isOrganizer ? 'organizer' : 'client')
+            'message' => $message,
+            'access_level' => $isAdmin ? 'admin' : ($isOrganizer ? 'organizer' : 'client'),
+            'email_verification_required' => !$emailVerified,
         ]);
     }
 

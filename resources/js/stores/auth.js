@@ -46,27 +46,29 @@ export const useAuthStore = defineStore('auth', () => {
       if (response.data.success) {
         token.value = response.data.token
         user.value = response.data.user
-        
+
         // Déterminer le rôle et l'access level
-        const accessLevel = response.data.access_level || 
-                          (user.value?.is_admin ? 'admin' : 
+        const accessLevel = response.data.access_level ||
+                          (user.value?.is_admin ? 'admin' :
                            user.value?.is_organizer ? 'organizer' : 'client')
-        
+
         // Utiliser authUtils pour stocker les informations
         authUtils.saveAuth(token.value, user.value, accessLevel)
-        
+
         userRole.value = accessLevel
         axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
-        
-        return { 
+
+        return {
           success: true,
           user: response.data.user,
-          access_level: accessLevel
+          access_level: accessLevel,
+          message: response.data.message,
+          email_verification_required: response.data.email_verification_required
         }
       } else {
-        return { 
-          success: false, 
-          message: response.data.message || 'Erreur de connexion' 
+        return {
+          success: false,
+          message: response.data.message || 'Erreur de connexion'
         }
       }
     } catch (error) {
