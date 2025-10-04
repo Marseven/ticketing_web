@@ -363,16 +363,24 @@ export default {
         })
         
         const data = response.data.data.events
-        events.value = data.data.map(event => ({
-          ...event,
-          tickets_sold: event.tickets?.filter(t => ['issued', 'used'].includes(t.status)).length || 0,
-          total_tickets: event.ticket_types?.reduce((sum, tt) => sum + tt.capacity, 0) || 0,
-          revenue: event.tickets?.filter(t => ['issued', 'used'].includes(t.status))
-            .reduce((sum, t) => sum + (t.ticket_type?.price || 0), 0) || 0,
-          venue: event.venue?.name || '',
-          date: event.event_date || event.schedules?.[0]?.starts_at,
-          isFavorite: false
-        }))
+        events.value = data.data.map(event => {
+          console.log('EVENT DATA:', {
+            title: event.title,
+            image: event.image,
+            image_url: event.image_url,
+            image_file: event.image_file
+          })
+          return {
+            ...event,
+            tickets_sold: event.tickets?.filter(t => ['issued', 'used'].includes(t.status)).length || 0,
+            total_tickets: event.ticket_types?.reduce((sum, tt) => sum + tt.capacity, 0) || 0,
+            revenue: event.tickets?.filter(t => ['issued', 'used'].includes(t.status))
+              .reduce((sum, t) => sum + (t.ticket_type?.price || 0), 0) || 0,
+            venue: event.venue?.name || '',
+            date: event.event_date || event.schedules?.[0]?.starts_at,
+            isFavorite: false
+          }
+        })
         
         pagination.current = data.current_page
         pagination.total = data.last_page
