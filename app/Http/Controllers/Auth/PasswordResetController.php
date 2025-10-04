@@ -78,7 +78,8 @@ class PasswordResetController extends Controller
                 ->where('email', $request->email)
                 ->first();
 
-            if (!$tokenData || !Hash::check($request->token, $tokenData->token)) {
+            // Comparer les tokens hashés avec SHA256
+            if (!$tokenData || hash('sha256', $request->token) !== $tokenData->token) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Token invalide ou expiré.'
@@ -134,7 +135,8 @@ class PasswordResetController extends Controller
             ->where('email', $request->email)
             ->first();
 
-        if (!$tokenData || !Hash::check($request->token, $tokenData->token)) {
+        // Comparer les tokens hashés avec SHA256
+        if (!$tokenData || hash('sha256', $request->token) !== $tokenData->token) {
             return response()->json([
                 'success' => false,
                 'message' => 'Token invalide.'
