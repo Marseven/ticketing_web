@@ -9,9 +9,9 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\URL;
 
-class VerifyEmailNotification extends Notification implements ShouldQueue
+class VerifyEmailNotification extends Notification // implements ShouldQueue - Désactivé pour envoi immédiat
 {
-    use Queueable;
+    // use Queueable; - Désactivé pour envoi immédiat
 
     /**
      * Create a new notification instance.
