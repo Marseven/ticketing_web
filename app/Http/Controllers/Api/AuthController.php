@@ -325,26 +325,20 @@ class AuthController extends Controller
     /**
      * Vérifier l'email avec le lien de vérification
      */
-    public function verifyEmail(Request $request): JsonResponse
+    public function verifyEmail(Request $request)
     {
         $user = User::find($request->route('id'));
 
         if (!$user) {
-            return response()->json([
-                'message' => 'Utilisateur non trouvé'
-            ], 404);
+            return redirect('/email-verification-result?status=error&message=' . urlencode('Utilisateur non trouvé'));
         }
 
         if (!hash_equals((string) $request->route('hash'), sha1($user->getEmailForVerification()))) {
-            return response()->json([
-                'message' => 'Lien de vérification invalide'
-            ], 400);
+            return redirect('/email-verification-result?status=error&message=' . urlencode('Lien de vérification invalide'));
         }
 
         if ($user->hasVerifiedEmail()) {
-            return response()->json([
-                'message' => 'Email déjà vérifié'
-            ], 200);
+            return redirect('/email-verification-result?status=info&message=' . urlencode('Email déjà vérifié'));
         }
 
         if ($user->markEmailAsVerified()) {
@@ -352,9 +346,7 @@ class AuthController extends Controller
             // event(new Verified($user));
         }
 
-        return response()->json([
-            'message' => 'Email vérifié avec succès'
-        ], 200);
+        return redirect('/email-verification-result?status=success&message=' . urlencode('Email vérifié avec succès'));
     }
 
     /**

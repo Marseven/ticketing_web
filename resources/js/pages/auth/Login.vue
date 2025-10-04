@@ -153,7 +153,7 @@
 
           <!-- Mot de passe oublié -->
           <div class="text-center">
-            <router-link 
+            <router-link
               to="/forgot-password"
               class="text-sm text-primea-blue hover:text-primea-yellow font-semibold transition-colors duration-200 font-primea"
             >

@@ -103,7 +103,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-tghvM73y.js",
+    "file": "assets/js/app-CFmrxXBQ.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -119,6 +119,8 @@
       "resources/js/pages/Checkout.vue",
       "resources/js/pages/auth/Register.vue",
       "resources/js/pages/auth/EmailVerification.vue",
+      "resources/js/pages/EmailVerificationResult.vue",
+      "resources/js/pages/auth/ForgotPassword.vue",
       "resources/js/pages/auth/ResetPassword.vue",
       "resources/js/pages/TicketRetrieve.vue",
       "resources/js/pages/TicketDownload.vue",
@@ -151,7 +153,7 @@
       "resources/js/pages/scanner/ScannerApp.vue"
     ],
     "css": [
-      "assets/css/app-uRf1_nU6.css",
+      "assets/css/app-C6iTlI2G.css",
       "assets/css/app-0DAC_KVm.css"
     ]
   },
@@ -186,7 +188,7 @@
     ]
   },
   "resources/js/pages/Checkout.vue": {
-    "file": "assets/js/Checkout-Ll9-CGHo.js",
+    "file": "assets/js/Checkout-pJc7bA-z.js",
     "name": "Checkout",
     "src": "resources/js/pages/Checkout.vue",
     "isDynamicEntry": true,
@@ -202,8 +204,23 @@
       "assets/css/app-0DAC_KVm.css"
     ]
   },
+  "resources/js/pages/EmailVerificationResult.vue": {
+    "file": "assets/js/EmailVerificationResult-CnshYwfk.js",
+    "name": "EmailVerificationResult",
+    "src": "resources/js/pages/EmailVerificationResult.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vue-vendor-DkyC1Igy.js",
+      "_account-CGG2Ynfa.js",
+      "_pinia-vendor-T35r7xXn.js",
+      "_vendor-BvANJOFB.js"
+    ],
+    "css": [
+      "assets/css/EmailVerificationResult-GuzdjnIR.css"
+    ]
+  },
   "resources/js/pages/EventDetail.vue": {
-    "file": "assets/js/EventDetail-BQA2KJY3.js",
+    "file": "assets/js/EventDetail-CbGH8bcZ.js",
     "name": "EventDetail",
     "src": "resources/js/pages/EventDetail.vue",
     "isDynamicEntry": true,
@@ -220,7 +237,7 @@
     ]
   },
   "resources/js/pages/Events.vue": {
-    "file": "assets/js/Events-CGIBkhHb.js",
+    "file": "assets/js/Events-DKeQhKol.js",
     "name": "Events",
     "src": "resources/js/pages/Events.vue",
     "isDynamicEntry": true,
@@ -279,6 +296,21 @@
     ],
     "css": [
       "assets/css/EmailVerification-Cjhn7MjH.css"
+    ]
+  },
+  "resources/js/pages/auth/ForgotPassword.vue": {
+    "file": "assets/js/ForgotPassword-Cpv4txpf.js",
+    "name": "ForgotPassword",
+    "src": "resources/js/pages/auth/ForgotPassword.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vue-vendor-DkyC1Igy.js",
+      "_vendor-BvANJOFB.js",
+      "_account-CGG2Ynfa.js",
+      "_pinia-vendor-T35r7xXn.js"
+    ],
+    "css": [
+      "assets/css/ForgotPassword-GIBQ3cmO.css"
     ]
   },
   "resources/js/pages/auth/Register.vue": {
