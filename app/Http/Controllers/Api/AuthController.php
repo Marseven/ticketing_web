@@ -359,11 +359,29 @@ class AuthController extends Controller
             ], 400);
         }
 
-        $user->sendEmailVerificationNotification();
+        try {
+            $user->sendEmailVerificationNotification();
+            
+            \Log::info('Email de vérification renvoyé', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'time' => now()
+            ]);
 
-        return response()->json([
-            'message' => 'Email de vérification renvoyé'
-        ]);
+            return response()->json([
+                'message' => 'Email de vérification renvoyé'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors du renvoi de l\'email de vérification', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'message' => 'Erreur lors de l\'envoi de l\'email'
+            ], 500);
+        }
     }
 
     /**
