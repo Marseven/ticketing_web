@@ -197,6 +197,24 @@ export default {
     })
 
     const register = async () => {
+      // Validation côté client
+      error.value = ''
+
+      if (!form.value.name || form.value.name.trim().length < 2) {
+        error.value = 'Le nom complet doit contenir au moins 2 caractères'
+        return
+      }
+
+      if (!form.value.phone) {
+        error.value = 'Le numéro de téléphone est obligatoire'
+        return
+      }
+
+      if (!form.value.password || form.value.password.length < 8) {
+        error.value = 'Le mot de passe doit contenir au moins 8 caractères'
+        return
+      }
+
       if (form.value.password !== form.value.password_confirmation) {
         error.value = 'Les mots de passe ne correspondent pas'
         return
@@ -208,43 +226,82 @@ export default {
       }
 
       loading.value = true
-      error.value = ''
 
       try {
         // Préparer les données d'inscription avec le rôle client explicite
         const registrationData = {
           name: form.value.name,
-          email: form.value.email,
+          email: form.value.email || undefined, // N'envoyer que si rempli
           phone: form.value.phone,
           password: form.value.password,
           password_confirmation: form.value.password_confirmation,
           role: 'client' // Explicitement définir le rôle comme client
         }
-        
+
         const response = await authService.register(registrationData)
-        
+
         // Si l'inscription nécessite une vérification d'email
         if (response.data.email_verification_required) {
-          router.push({ 
+          router.push({
             name: 'email-verification'
           })
         } else {
           // Redirection vers la page de connexion avec message de succès
-          router.push({ 
-            name: 'login', 
+          router.push({
+            name: 'login',
             query: { message: 'Inscription réussie ! Vous pouvez maintenant vous connecter.' }
           })
         }
       } catch (err) {
         console.error('Erreur d\'inscription:', err)
-        if (err.response?.data?.message) {
-          error.value = err.response.data.message
-        } else if (err.response?.data?.errors) {
-          // Afficher la première erreur de validation
-          const firstError = Object.values(err.response.data.errors)[0]
-          error.value = Array.isArray(firstError) ? firstError[0] : firstError
+
+        // Gestion détaillée des erreurs
+        if (err.response) {
+          const status = err.response.status
+          const data = err.response.data
+
+          if (status === 422) {
+            // Erreurs de validation
+            if (data.errors) {
+              // Afficher toutes les erreurs de validation de manière claire
+              const errors = data.errors
+              const errorMessages = []
+
+              if (errors.name) errorMessages.push(`Nom: ${errors.name[0]}`)
+              if (errors.email) errorMessages.push(`Email: ${errors.email[0]}`)
+              if (errors.phone) errorMessages.push(`Téléphone: ${errors.phone[0]}`)
+              if (errors.password) errorMessages.push(`Mot de passe: ${errors.password[0]}`)
+
+              if (errorMessages.length > 0) {
+                error.value = errorMessages.join(' • ')
+              } else {
+                // Si pas de détails, afficher le premier message d'erreur
+                const firstError = Object.values(errors)[0]
+                error.value = Array.isArray(firstError) ? firstError[0] : firstError
+              }
+            } else if (data.message) {
+              error.value = data.message
+            } else {
+              error.value = 'Données invalides. Veuillez vérifier vos informations.'
+            }
+          } else if (status === 409) {
+            // Conflit (email ou téléphone déjà utilisé)
+            error.value = data.message || 'Cet email ou ce numéro de téléphone est déjà utilisé'
+          } else if (status === 429) {
+            // Trop de tentatives
+            error.value = 'Trop de tentatives. Veuillez réessayer dans quelques minutes.'
+          } else if (status >= 500) {
+            // Erreur serveur
+            error.value = 'Erreur du serveur. Veuillez réessayer plus tard.'
+          } else {
+            error.value = data.message || 'Une erreur est survenue lors de l\'inscription'
+          }
+        } else if (err.request) {
+          // La requête a été envoyée mais pas de réponse
+          error.value = 'Impossible de se connecter au serveur. Vérifiez votre connexion internet.'
         } else {
-          error.value = 'Erreur lors de l\'inscription. Veuillez réessayer.'
+          // Erreur lors de la configuration de la requête
+          error.value = err.message || 'Une erreur est survenue. Veuillez réessayer.'
         }
       } finally {
         loading.value = false

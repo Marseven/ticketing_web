@@ -53,11 +53,21 @@ class AuthController extends Controller
     public function register(Request $request): JsonResponse
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'name' => 'required|string|min:2|max:255',
+            'email' => 'nullable|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'required|string|max:20|unique:users',
             'is_organizer' => 'nullable|boolean',
+        ], [
+            'name.required' => 'Le nom complet est obligatoire',
+            'name.min' => 'Le nom doit contenir au moins 2 caractères',
+            'email.email' => 'L\'adresse email n\'est pas valide',
+            'email.unique' => 'Cet email est déjà utilisé',
+            'password.required' => 'Le mot de passe est obligatoire',
+            'password.min' => 'Le mot de passe doit contenir au moins 8 caractères',
+            'password.confirmed' => 'Les mots de passe ne correspondent pas',
+            'phone.required' => 'Le numéro de téléphone est obligatoire',
+            'phone.unique' => 'Ce numéro de téléphone est déjà utilisé',
         ]);
 
         $user = User::create([
@@ -134,6 +144,9 @@ class AuthController extends Controller
         $request->validate([
             'login' => 'required|string', // Peut être email ou téléphone
             'password' => 'required|string',
+        ], [
+            'login.required' => 'L\'email ou le téléphone est obligatoire',
+            'password.required' => 'Le mot de passe est obligatoire',
         ]);
 
         // Déterminer si le login est un email ou un téléphone

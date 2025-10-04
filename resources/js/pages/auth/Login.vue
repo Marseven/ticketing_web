@@ -127,6 +127,11 @@
             <p class="text-blue-600 text-sm font-primea">{{ info }}</p>
           </div>
 
+          <!-- Message de succès -->
+          <div v-if="success" class="bg-green-50 border border-green-200 rounded-primea-lg p-4">
+            <p class="text-green-600 text-sm font-primea">{{ success }}</p>
+          </div>
+
           <!-- Bouton Connexion -->
           <button 
             type="submit"
@@ -212,7 +217,13 @@ export default {
     const loading = ref(false)
     const error = ref('')
     const info = ref('')
+    const success = ref('')
     const loginType = ref('email')
+
+    // Afficher le message de succès depuis les query params (après inscription)
+    if (route.query.message) {
+      success.value = route.query.message
+    }
 
     const loginForm = ref({
       login: '',
@@ -229,6 +240,7 @@ export default {
       loginForm.value.login = '' // Réinitialiser le champ
       error.value = '' // Effacer les erreurs
       info.value = '' // Effacer les messages d'info
+      success.value = '' // Effacer les messages de succès
     }
 
     const handleLogin = async () => {
@@ -236,6 +248,7 @@ export default {
         loading.value = true
         error.value = ''
         info.value = ''
+        success.value = ''
 
         // Validation basique
         if (!loginForm.value.login || !loginForm.value.password) {
@@ -277,56 +290,50 @@ export default {
               }
             }
           } else {
-            throw new Error(result.message || 'Identifiants incorrects')
+            // Afficher le message d'erreur de l'API
+            error.value = result.message || 'Identifiants incorrects'
+            return
           }
         } catch (apiError) {
-          // Si l'API n'est pas disponible, utiliser les comptes de test
+          // Gestion des erreurs réseau ou serveur
+          console.error('Erreur de connexion:', apiError)
+
+          // Analyser l'erreur pour afficher un message approprié
+          if (apiError.response) {
+            // Le serveur a répondu avec un code d'erreur
+            const status = apiError.response.status
+            const data = apiError.response.data
+
+            if (status === 401 || status === 422) {
+              // Erreur d'authentification
+              error.value = data.message || 'Email ou mot de passe incorrect'
+            } else if (status === 403) {
+              // Compte inactif ou autre restriction
+              error.value = data.message || 'Accès refusé. Votre compte est peut-être inactif.'
+            } else if (status === 429) {
+              // Trop de tentatives
+              error.value = 'Trop de tentatives de connexion. Veuillez réessayer dans quelques minutes.'
+            } else if (status >= 500) {
+              // Erreur serveur
+              error.value = 'Erreur du serveur. Veuillez réessayer plus tard.'
+            } else {
+              error.value = data.message || 'Une erreur est survenue lors de la connexion'
+            }
+          } else if (apiError.request) {
+            // La requête a été envoyée mais pas de réponse
+            error.value = 'Impossible de se connecter au serveur. Vérifiez votre connexion internet.'
+          } else {
+            // Erreur lors de la configuration de la requête
+            error.value = apiError.message || 'Une erreur est survenue'
+          }
+
+          return
+        }
+
+        // Fallback: Si l'API n'est pas disponible, utiliser les comptes de test
+        if (false) { // Désactivé pour forcer l'utilisation de l'API réelle
           console.warn('API non disponible, utilisation des comptes de test:', apiError)
 
-          const testAccounts = [
-            { login: 'user@test.com', phone: '+241012345678', password: 'user123', role: 'user', name: 'Utilisateur Test' },
-            { login: 'organizer@test.com', phone: '+241078901234', password: 'organizer123', role: 'organizer', name: 'Organisateur Test' },
-            { login: 'admin@test.com', phone: '+241065432100', password: 'admin123', role: 'admin', name: 'Admin Test' }
-          ]
-
-          const account = testAccounts.find(acc =>
-            (acc.login === loginForm.value.login || acc.phone === loginForm.value.login) &&
-            acc.password === loginForm.value.password
-          )
-
-          if (!account) {
-            throw new Error('Identifiants incorrects.')
-          }
-
-          // Simuler la connexion
-          await new Promise(resolve => setTimeout(resolve, 1000))
-
-          // Stocker les informations d'authentification avec authUtils
-          const token = 'test-token-' + account.role
-          authUtils.saveAuth(token, {
-            name: account.name,
-            email: account.login
-          }, account.role)
-
-          // Vérifier s'il y a une URL de redirection
-          const redirectUrl = route.query.redirect
-
-          if (redirectUrl) {
-            // Si une URL de redirection existe, y aller directement
-            router.push(redirectUrl)
-          } else {
-            // Sinon, redirection selon le rôle
-            switch (account.role) {
-              case 'admin':
-                router.push('/admin/dashboard')
-                break
-              case 'organizer':
-                router.push('/organizer/dashboard')
-                break
-              default:
-                router.push('/')
-            }
-          }
         }
 
       } catch (err) {
@@ -341,6 +348,7 @@ export default {
       loading,
       error,
       info,
+      success,
       loginType,
       loginForm,
       togglePasswordVisibility,
