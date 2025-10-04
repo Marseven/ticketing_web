@@ -125,9 +125,9 @@
           >
             <!-- Image de l'événement avec overlay comme dans la maquette -->
             <div class="h-48 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 relative overflow-hidden">
-              <img 
-                v-if="event.image" 
-                :src="event.image" 
+              <img
+                v-if="event.image || event.image_url || event.image_file"
+                :src="event.image_url || event.image || event.image_file"
                 :alt="event.title"
                 class="w-full h-full object-cover"
               />

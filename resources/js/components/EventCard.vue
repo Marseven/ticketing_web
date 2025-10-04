@@ -2,15 +2,16 @@
   <article v-if="event && event.title" class="event-card-modern group cursor-pointer" @click="goToEvent">
     <!-- Image de l'événement -->
     <div class="event-image">
-      <img 
-        v-if="event.image_url" 
-        :src="event.image_url" 
-        :alt="event.title" 
+      <img
+        v-if="eventImageUrl"
+        :src="eventImageUrl"
+        :alt="event.title"
         loading="lazy"
         class="w-full h-full object-cover"
+        @error="handleImageError"
       />
-      <div 
-        v-else 
+      <div
+        v-else
         class="w-full h-full bg-gradient-to-br from-blue-100 to-yellow-100 flex items-center justify-center"
       >
         <CalendarIcon size="2xl" class="primea-text-gray-400" />
@@ -141,8 +142,40 @@ export default {
   },
   setup(props) {
     const router = useRouter()
+    const imageError = ref(false)
 
     // Computed properties
+    const eventImageUrl = computed(() => {
+      if (imageError.value) return null
+
+      // Essayer plusieurs sources d'images
+      let imageUrl = props.event.image_url ||
+                     props.event.image ||
+                     props.event.image_file ||
+                     props.event.imageUrl
+
+      if (!imageUrl || imageUrl.trim() === '') {
+        return null
+      }
+
+      // Si c'est déjà une URL complète (commence par http:// ou https://), on la retourne telle quelle
+      if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+        return imageUrl
+      }
+
+      // Si c'est un chemin relatif commençant par /
+      if (imageUrl.startsWith('/')) {
+        return window.location.origin + imageUrl
+      }
+
+      // Si c'est un nom de fichier dans le storage
+      if (!imageUrl.includes('/')) {
+        return `${window.location.origin}/storage/images/events/${imageUrl}`
+      }
+
+      return imageUrl
+    })
+
     const eventDate = computed(() => {
       // Essayer plusieurs sources de dates
       let dateStr = null;
@@ -343,16 +376,22 @@ export default {
       console.log('handleReserveClick called')
       event.preventDefault()
       event.stopPropagation()
-      
+
       if (!canPurchase.value) {
         console.log('Cannot purchase - button disabled')
         return
       }
-      
+
       goToCheckout()
     }
 
+    const handleImageError = () => {
+      console.warn('Image loading error for event:', props.event.title)
+      imageError.value = true
+    }
+
     return {
+      eventImageUrl,
       eventDate,
       minPrice,
       isEventPassed,
@@ -365,7 +404,8 @@ export default {
       truncateText,
       goToEvent,
       goToCheckout,
-      handleReserveClick
+      handleReserveClick,
+      handleImageError
     }
   }
 }
