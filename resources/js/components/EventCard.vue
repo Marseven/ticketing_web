@@ -122,7 +122,7 @@
 </template>
 
 <script>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import CalendarIcon from './icons/CalendarIcon.vue'
 import { ClockIcon, MapPinIcon } from '@heroicons/vue/24/outline'
