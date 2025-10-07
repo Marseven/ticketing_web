@@ -66,10 +66,10 @@ class PaymentController extends Controller
                 'id' => $payment->id,
                 'amount' => round($payment->amount),
                 'status' => $this->getStatusMessage($payment->status),
-                'gateway' => $this->getGatewayName($payment->gateway),
+                'gateway' => $this->getGatewayName($payment->provider),
                 'date' => $payment->created_at->format('d-m-Y H:i'),
                 'event_title' => $payment->order->event->title,
-                'reference' => $payment->reference,
+                'reference' => $payment->provider_txn_ref,
                 'type' => 'Achat de billet',
             ];
         });
@@ -151,10 +151,10 @@ class PaymentController extends Controller
 
         $paymentData = [
             'id' => $payment->id,
-            'reference' => $payment->reference,
+            'reference' => $payment->provider_txn_ref,
             'amount' => $payment->amount,
             'status' => $payment->status,
-            'gateway' => $this->getGatewayName($payment->gateway),
+            'gateway' => $this->getGatewayName($payment->provider),
             'transaction_id' => $payment->transaction_id,
             'date' => $payment->paid_at ? $payment->paid_at->format('d-m-Y H:i') : $payment->created_at->format('d-m-Y H:i'),
             'type' => 'Achat de billet',
@@ -163,7 +163,7 @@ class PaymentController extends Controller
                 'venue_name' => $payment->order->event->venue_name,
             ],
             'tickets_count' => $payment->order->tickets->count(),
-            'expires_at' => $payment->expired_at,
+            'expires_at' => isset($payment->payload['expired_at']) ? \Carbon\Carbon::parse($payment->payload['expired_at'])->format('Y-m-d H:i:s') : null,
         ];
 
         return response()->json([
@@ -281,19 +281,19 @@ class PaymentController extends Controller
 
         // Créer un nouveau paiement
         $reference = $this->generateReference();
-        
+
         $payment = Payment::create([
             'order_id' => $order->id,
-            'reference' => $reference,
-            'gateway' => $request->gateway,
+            'provider_txn_ref' => $reference,
+            'provider' => $request->gateway,
             'amount' => $order->total_amount,
             'status' => 'pending',
-            'expired_at' => now()->addMinutes(15), // 15 minutes pour payer
-            'metadata' => [
+            'payload' => [
                 'phone' => $request->phone,
                 'operator' => $request->operator,
                 'user_agent' => $request->header('User-Agent'),
                 'ip_address' => $request->ip(),
+                'expired_at' => now()->addMinutes(15)->toIso8601String(), // 15 minutes pour payer
             ]
         ]);
 
@@ -316,7 +316,7 @@ class PaymentController extends Controller
             'payer_msisdn' => $eBillingService->formatPhoneNumber($request->phone ?? '074808000'),
             'amount' => (int) $payment->amount,
             'short_description' => 'Achat billet - ' . $payment->order->event->title,
-            'external_reference' => $payment->reference,
+            'external_reference' => $payment->provider_txn_ref,
             'payer_name' => $payment->order->guest_name ?? 'Client',
             'expiry_period' => 60, // 60 minutes
             'notification_url' => route('webhook.ebilling')
@@ -336,14 +336,14 @@ class PaymentController extends Controller
         $payment->update([
             'transaction_id' => $result['bill_id'],
             'gateway_response' => $result['data'],
-            'metadata' => array_merge($payment->metadata ?? [], [
+            'payload' => array_merge($payment->payload ?? [], [
                 'ebilling_bill_id' => $result['bill_id'],
                 'ebilling_post_url' => $result['post_url']
             ])
         ]);
 
         // Selon le type de gateway, on peut soit rediriger vers E-Billing soit faire un push USSD
-        switch ($payment->gateway) {
+        switch ($payment->provider) {
             case 'airtelmoney':
             case 'moovmoney':
                 // Pour mobile money, on propose le push USSD en plus de la redirection
@@ -351,37 +351,37 @@ class PaymentController extends Controller
                     'success' => true,
                     'message' => 'Facture créée. Vous pouvez soit être redirigé vers la page de paiement, soit recevoir un push USSD.',
                     'payment_id' => $payment->id,
-                    'reference' => $payment->reference,
+                    'reference' => $payment->provider_txn_ref,
                     'bill_id' => $result['bill_id'],
                     'payment_url' => $result['post_url'],
-                    'expires_at' => $payment->expired_at->format('Y-m-d H:i:s'),
+                    'expires_at' => isset($payment->payload['expired_at']) ? \Carbon\Carbon::parse($payment->payload['expired_at'])->format('Y-m-d H:i:s') : null,
                     'ussd_available' => true,
                     'redirect_data' => [
                         'url' => $result['post_url'],
                         'method' => 'POST',
                         'data' => [
                             'invoice_number' => $result['bill_id'],
-                            'merchant_redirect_url' => route('payment.success', ['reference' => $payment->reference])
+                            'merchant_redirect_url' => route('payment.success', ['reference' => $payment->provider_txn_ref])
                         ]
                     ]
                 ];
-            
+
             case 'ORABANK_NG':
             case 'visa':
             case 'card':
                 // Pour ORABANK_NG (Visa/Mastercard), redirection vers billing-easy.net
                 $redirectUrl = "https://test.billing-easy.net?invoice={$result['bill_id']}&operator=ORABANK_NG&redirect=1";
-                
+
                 return [
                     'success' => true,
                     'message' => 'Redirection vers la page de paiement sécurisée',
                     'payment_id' => $payment->id,
-                    'reference' => $payment->reference,
+                    'reference' => $payment->provider_txn_ref,
                     'bill_id' => $result['bill_id'],
                     'redirect_url' => $redirectUrl,
-                    'expires_at' => $payment->expired_at->format('Y-m-d H:i:s')
+                    'expires_at' => isset($payment->payload['expired_at']) ? \Carbon\Carbon::parse($payment->payload['expired_at'])->format('Y-m-d H:i:s') : null
                 ];
-            
+
             default:
                 return [
                     'success' => false,
@@ -398,7 +398,7 @@ class PaymentController extends Controller
         try {
             // Simulation d'appel API Airtel Money
             $response = Http::timeout(30)->post(env('AIRTEL_API_URL', 'https://api.airtel.com/payment'), [
-                'reference' => $payment->reference,
+                'reference' => $payment->provider_txn_ref,
                 'amount' => $payment->amount,
                 'phone' => $phone,
                 'description' => 'Achat billet - ' . $payment->order->event->title,
@@ -407,7 +407,7 @@ class PaymentController extends Controller
 
             if ($response->successful()) {
                 $data = $response->json();
-                
+
                 $payment->update([
                     'transaction_id' => $data['transaction_id'] ?? null,
                     'gateway_response' => $data,
@@ -417,8 +417,8 @@ class PaymentController extends Controller
                     'success' => true,
                     'message' => 'Push USSD envoyé sur votre mobile. Veuillez valider la transaction.',
                     'payment_id' => $payment->id,
-                    'reference' => $payment->reference,
-                    'expires_at' => $payment->expired_at->format('Y-m-d H:i:s'),
+                    'reference' => $payment->provider_txn_ref,
+                    'expires_at' => isset($payment->payload['expired_at']) ? \Carbon\Carbon::parse($payment->payload['expired_at'])->format('Y-m-d H:i:s') : null,
                     'push_sent' => true,
                     'instructions' => 'Vous allez recevoir une demande de confirmation sur votre téléphone. Tapez 1 pour confirmer.',
                 ];
@@ -447,7 +447,7 @@ class PaymentController extends Controller
         try {
             // Simulation d'appel API Moov Money
             $response = Http::timeout(30)->post(env('MOOV_API_URL', 'https://api.moov.com/payment'), [
-                'reference' => $payment->reference,
+                'reference' => $payment->provider_txn_ref,
                 'amount' => $payment->amount,
                 'phone' => $phone,
                 'description' => 'Achat billet - ' . $payment->order->event->title,
@@ -456,7 +456,7 @@ class PaymentController extends Controller
 
             if ($response->successful()) {
                 $data = $response->json();
-                
+
                 $payment->update([
                     'transaction_id' => $data['transaction_id'] ?? null,
                     'gateway_response' => $data,
@@ -466,8 +466,8 @@ class PaymentController extends Controller
                     'success' => true,
                     'message' => 'Push USSD envoyé sur votre mobile. Veuillez valider la transaction.',
                     'payment_id' => $payment->id,
-                    'reference' => $payment->reference,
-                    'expires_at' => $payment->expired_at->format('Y-m-d H:i:s'),
+                    'reference' => $payment->provider_txn_ref,
+                    'expires_at' => isset($payment->payload['expired_at']) ? \Carbon\Carbon::parse($payment->payload['expired_at'])->format('Y-m-d H:i:s') : null,
                     'push_sent' => true,
                     'instructions' => 'Vous allez recevoir une demande de confirmation sur votre téléphone. Tapez 1 pour confirmer.',
                 ];
@@ -495,7 +495,7 @@ class PaymentController extends Controller
     {
         // Générer une URL de paiement sécurisée
         $paymentUrl = env('CARD_PAYMENT_URL', 'https://secure.payment.com') . '?' . http_build_query([
-            'reference' => $payment->reference,
+            'reference' => $payment->provider_txn_ref,
             'amount' => $payment->amount,
             'currency' => 'XAF', // Franc CFA CEMAC (Gabon)
             'return_url' => env('APP_URL') . '/payment/success',
@@ -508,7 +508,7 @@ class PaymentController extends Controller
             'message' => 'Redirection vers la page de paiement',
             'payment_id' => $payment->id,
             'payment_url' => $paymentUrl,
-            'expires_at' => $payment->expired_at->format('Y-m-d H:i:s'),
+            'expires_at' => isset($payment->payload['expired_at']) ? \Carbon\Carbon::parse($payment->payload['expired_at'])->format('Y-m-d H:i:s') : null,
         ];
     }
 
@@ -559,7 +559,8 @@ class PaymentController extends Controller
     public function getPaymentStatus(Payment $payment): JsonResponse
     {
         // Vérifier si le paiement a expiré
-        if ($payment->expired_at && $payment->expired_at->isPast() && $payment->status === 'pending') {
+        $expiredAt = isset($payment->payload['expired_at']) ? \Carbon\Carbon::parse($payment->payload['expired_at']) : null;
+        if ($expiredAt && $expiredAt->isPast() && $payment->status === 'initiated') {
             $payment->update(['status' => 'expired']);
         }
 
@@ -568,11 +569,11 @@ class PaymentController extends Controller
             'data' => [
                 'payment' => [
                     'id' => $payment->id,
-                    'reference' => $payment->reference,
+                    'reference' => $payment->provider_txn_ref,
                     'status' => $payment->status,
                     'amount' => $payment->amount,
-                    'gateway' => $this->getGatewayName($payment->gateway),
-                    'expires_at' => $payment->expired_at?->format('Y-m-d H:i:s'),
+                    'gateway' => $this->getGatewayName($payment->provider),
+                    'expires_at' => isset($payment->payload['expired_at']) ? \Carbon\Carbon::parse($payment->payload['expired_at'])->format('Y-m-d H:i:s') : null,
                     'paid_at' => $payment->paid_at?->format('Y-m-d H:i:s'),
                 ]
             ],
@@ -704,7 +705,7 @@ class PaymentController extends Controller
             $eBillingService = new EBillingService();
             
             // Récupérer l'ID de facture E-Billing
-            $billId = $payment->metadata['ebilling_bill_id'] ?? $payment->transaction_id;
+            $billId = $payment->payload['ebilling_bill_id'] ?? $payment->transaction_id;
             
             if (!$billId) {
                 return response()->json([
@@ -725,7 +726,7 @@ class PaymentController extends Controller
             if ($result['success']) {
                 // Mettre à jour le paiement avec les infos du push
                 $payment->update([
-                    'metadata' => array_merge($payment->metadata ?? [], [
+                    'payload' => array_merge($payment->payload ?? [], [
                         'push_sent_at' => now()->toISOString(),
                         'push_response' => $result['data'] ?? []
                     ])
@@ -736,9 +737,9 @@ class PaymentController extends Controller
                     'message' => 'Push USSD envoyé avec succès',
                     'data' => [
                         'payment_id' => $payment->id,
-                        'reference' => $payment->reference,
+                        'reference' => $payment->provider_txn_ref,
                         'bill_id' => $billId,
-                        'expires_at' => $payment->expired_at->format('Y-m-d H:i:s'),
+                        'expires_at' => isset($payment->payload['expired_at']) ? \Carbon\Carbon::parse($payment->payload['expired_at'])->format('Y-m-d H:i:s') : null,
                         'instructions' => 'Vérifiez votre téléphone et confirmez la transaction en tapant 1.',
                     ]
                 ]);
@@ -936,18 +937,18 @@ class PaymentController extends Controller
 
         // Créer un nouveau paiement
         $reference = $this->generateReference();
-        
+
         $payment = Payment::create([
             'order_id' => $order->id,
-            'reference' => $reference,
-            'gateway' => $request->gateway,
+            'provider' => $request->gateway, // Utiliser 'provider' au lieu de 'gateway'
+            'provider_txn_ref' => $reference, // Utiliser 'provider_txn_ref' au lieu de 'reference'
             'amount' => $request->amount,
-            'status' => 'pending',
-            'expired_at' => now()->addMinutes(15), // 15 minutes pour payer
-            'metadata' => [
+            'status' => 'initiated', // Utiliser 'initiated' au lieu de 'pending'
+            'payload' => [ // Utiliser 'payload' au lieu de 'metadata'
                 'phone' => $request->phone,
                 'user_agent' => $request->header('User-Agent'),
                 'ip_address' => $request->ip(),
+                'expired_at' => now()->addMinutes(15)->toIso8601String(),
             ]
         ]);
 
@@ -961,7 +962,7 @@ class PaymentController extends Controller
                 'data' => [
                     'payment' => [
                         'id' => $payment->id,
-                        'reference' => $payment->reference,
+                        'reference' => $payment->provider_txn_ref,
                     ],
                     'bill_id' => $result['bill_id'] ?? null,
                     'redirect_url' => $result['redirect_url'] ?? null,
@@ -1033,7 +1034,7 @@ class PaymentController extends Controller
             if ($result['success']) {
                 // Mettre à jour le paiement avec les infos du push
                 $payment->update([
-                    'metadata' => array_merge($payment->metadata ?? [], [
+                    'payload' => array_merge($payment->payload ?? [], [
                         'push_sent_at' => now()->toISOString(),
                         'push_response' => $result['data'] ?? []
                     ])
