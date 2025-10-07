@@ -137,12 +137,22 @@ class OrderController extends Controller
             }
 
             // Vérifier la disponibilité des billets
-            $availableQuantity = $ticketType->quantity - ($ticketType->sold ?? 0);
-            if ($availableQuantity < $validated['quantity']) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "Seulement {$availableQuantity} billets disponibles pour ce type"
-                ], 400);
+            // Calculer le nombre de billets vendus
+            $soldQuantity = \DB::table('tickets')
+                ->where('ticket_type_id', $ticketType->id)
+                ->whereIn('status', ['issued', 'used'])
+                ->count();
+
+            // Si available_quantity est null, c'est illimité
+            if ($ticketType->available_quantity !== null) {
+                $availableQuantity = $ticketType->available_quantity - $soldQuantity;
+
+                if ($availableQuantity < $validated['quantity']) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Seulement {$availableQuantity} billets disponibles pour ce type"
+                    ], 400);
+                }
             }
 
             // Vérifier si l'événement est passé

@@ -247,6 +247,8 @@ class EventController extends Controller
                 'slug' => $event->slug,
                 'description' => $event->description,
                 'image_url' => $event->image_url,
+                'image_file' => $event->image_file,
+                'image' => $event->image, // Accessor qui retourne l'URL complète de l'image
                 'status' => $event->status,
                 'is_active' => $event->is_active,
                 'published_at' => $event->published_at,

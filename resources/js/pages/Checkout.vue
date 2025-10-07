@@ -1260,7 +1260,7 @@ export default {
     // Lifecycle
     onMounted(() => {
       loadEvent()
-      startCountdown()
+      // startCountdown() est appelé dans loadEvent() après le chargement de l'événement
     })
 
     onUnmounted(() => {
