@@ -212,8 +212,8 @@ class OrderController extends Controller
                 ]);
             }
 
-            // Mettre à jour le compteur de billets vendus
-            $ticketType->increment('sold_quantity', $validated['quantity']);
+            // Note: Le nombre de billets vendus est calculé dynamiquement en comptant les tickets
+            // avec status 'issued' ou 'used', pas besoin de maintenir un compteur
 
             DB::commit();
 
