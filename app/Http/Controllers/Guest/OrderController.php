@@ -209,9 +209,6 @@ class OrderController extends Controller
                     'code' => $this->generateTicketCode(),
                     'status' => 'issued',
                     'issued_at' => now(),
-                    'buyer_name' => $validated['guest_name'],
-                    'buyer_email' => $validated['guest_email'],
-                    'buyer_phone' => $validated['guest_phone'] ?? null,
                 ]);
             }
 

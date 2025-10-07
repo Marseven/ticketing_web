@@ -30,11 +30,12 @@
             <!-- Image de l'événement -->
             <div class="order-2 lg:order-1">
               <div class="rounded-primea-xl overflow-hidden shadow-primea-lg">
-                <img 
-                  v-if="event.image_url" 
-                  :src="event.image_url" 
-                  :alt="event.title" 
+                <img
+                  v-if="eventImageUrl"
+                  :src="eventImageUrl"
+                  :alt="event.title"
                   class="w-full h-96 object-cover"
+                  @error="handleImageError"
                 />
                 <div v-else class="w-full h-96 bg-primea-gradient flex items-center justify-center">
                   <PhotoIcon class="w-24 h-24 text-white/50" />
@@ -136,9 +137,9 @@
                 >
                   <TicketIcon class="w-6 h-6" />
                   <span v-if="minPrice > 0">
-                    Réserver dès {{ formatPrice(minPrice) }} FCFA
+                    Acheter un ticket à partir de {{ formatPrice(minPrice) }} FCFA
                   </span>
-                  <span v-else>Réserver gratuitement</span>
+                  <span v-else>Obtenir un ticket gratuit</span>
                 </button>
                 
                 <div v-else class="flex-1 px-8 py-4 rounded-primea-lg font-bold text-lg flex items-center justify-center gap-2"
@@ -323,8 +324,37 @@ export default {
     const loading = ref(true)
     const error = ref(null)
     const currentSlide = ref(0)
+    const imageError = ref(false)
 
     // Computed properties
+    const eventImageUrl = computed(() => {
+      if (imageError.value || !event.value) return null
+
+      // Priorité: image (accessor) > image_url > image_file
+      let imageUrl = event.value.image || event.value.image_url || event.value.image_file
+
+      if (!imageUrl || imageUrl.trim() === '') {
+        return null
+      }
+
+      // Si c'est déjà une URL complète
+      if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+        return imageUrl
+      }
+
+      // Si c'est un chemin relatif commençant par /
+      if (imageUrl.startsWith('/')) {
+        return window.location.origin + imageUrl
+      }
+
+      // Si c'est un nom de fichier dans le storage
+      if (!imageUrl.includes('/')) {
+        return `${window.location.origin}/storage/images/events/${imageUrl}`
+      }
+
+      return imageUrl
+    })
+
     const eventDate = computed(() => {
       if (event.value?.schedules && event.value.schedules.length > 0) {
         const dateStr = event.value.schedules[0].starts_at
@@ -502,6 +532,11 @@ export default {
       loadEvent()
     })
 
+    const handleImageError = () => {
+      console.warn('EventDetail - Erreur de chargement de l\'image')
+      imageError.value = true
+    }
+
     return {
       // État
       event,
@@ -509,8 +544,9 @@ export default {
       loading,
       error,
       currentSlide,
-      
+
       // Computed
+      eventImageUrl,
       eventDate,
       minPrice,
       isEventPassed,
@@ -518,7 +554,7 @@ export default {
       canPurchaseTickets,
       descriptionParagraphs,
       slidesData,
-      
+
       // Méthodes
       formatFullDate,
       formatTime,
@@ -529,7 +565,8 @@ export default {
       getQuantityDisplayCount,
       getQuantityDisplay,
       nextSlide,
-      previousSlide
+      previousSlide,
+      handleImageError
     }
   }
 }
