@@ -807,22 +807,32 @@ export default {
           minutes: timeLeft.minutes,
           seconds: timeLeft.seconds
         }
+        console.log('Checkout - Countdown updated:', countdown.value)
+      } else {
+        console.log('Checkout - timeUntilEvent is null')
       }
     }
 
     const startCountdown = () => {
+      // Nettoyer le timer précédent s'il existe
+      if (countdownTimer.value) {
+        clearInterval(countdownTimer.value)
+      }
+
       // Mise à jour initiale
       updateCountdown()
-      
+
       // Mise à jour chaque seconde
       countdownTimer.value = setInterval(() => {
         updateCountdown()
-        
+
         // Arrêter le timer si l'événement est passé
         if (timeUntilEvent.value?.expired) {
           clearInterval(countdownTimer.value)
         }
       }, 1000)
+
+      console.log('Checkout - Compte à rebours démarré')
     }
 
     const validatePhoneNumber = () => {
