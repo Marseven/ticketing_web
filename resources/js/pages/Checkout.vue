@@ -41,11 +41,12 @@
               <!-- Carte événement -->
               <div class="bg-white rounded-primea-xl shadow-primea overflow-hidden">
                 <div class="relative h-64">
-                  <img 
-                    v-if="event?.image_url" 
-                    :src="event.image_url" 
+                  <img
+                    v-if="eventImageUrl"
+                    :src="eventImageUrl"
                     :alt="event.title"
                     class="w-full h-full object-cover"
+                    @error="handleImageError"
                   />
                   <div v-else class="w-full h-full bg-primea-gradient flex items-center justify-center">
                     <PhotoIcon class="w-24 h-24 text-white/50" />
@@ -566,7 +567,40 @@ export default {
       guestPhone: ''
     })
 
+    // État pour les erreurs d'image
+    const imageError = ref(false)
+
     // Computed properties
+    const eventImageUrl = computed(() => {
+      if (imageError.value || !event.value) return null
+
+      // Priorité: image (accessor) > image_url > image_file
+      let imageUrl = event.value.image || event.value.image_url || event.value.image_file
+
+      console.log('Checkout - Image URL:', imageUrl)
+
+      if (!imageUrl || imageUrl.trim() === '') {
+        return null
+      }
+
+      // Si c'est déjà une URL complète
+      if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+        return imageUrl
+      }
+
+      // Si c'est un chemin relatif commençant par /
+      if (imageUrl.startsWith('/')) {
+        return window.location.origin + imageUrl
+      }
+
+      // Si c'est un nom de fichier dans le storage
+      if (!imageUrl.includes('/')) {
+        return `${window.location.origin}/storage/images/events/${imageUrl}`
+      }
+
+      return imageUrl
+    })
+
     const formatEventDate = computed(() => {
       if (!event.value?.schedules || event.value.schedules.length === 0) {
         return 'Date à confirmer'
@@ -745,15 +779,18 @@ export default {
       try {
         eventLoading.value = true
         eventError.value = ''
-        
+
         const data = await eventsStore.fetchEvent(eventSlug)
         event.value = data.event
-        
+
         // Si l'événement n'a qu'un seul type de ticket, le sélectionner automatiquement
         if (event.value?.ticket_types && event.value.ticket_types.length === 1) {
           orderForm.value.ticketTypeId = event.value.ticket_types[0].id
         }
-        
+
+        // Démarrer le compte à rebours après avoir chargé l'événement
+        startCountdown()
+
       } catch (err) {
         eventError.value = err.message || 'Erreur lors du chargement de l\'événement'
       } finally {
@@ -923,7 +960,8 @@ export default {
           ticket_type_id: orderForm.value.ticketTypeId,
           quantity: orderForm.value.quantity,
           guest_name: orderForm.value.guestName,
-          guest_phone: orderForm.value.guestPhone || null
+          guest_phone: orderForm.value.guestPhone || null,
+          guest_email: 'guest@primea.ga' // Email par défaut pour eBilling
         }
 
         const orderResponse = await guestService.createGuestOrder(orderData)
@@ -1007,7 +1045,8 @@ export default {
           ticket_type_id: orderForm.value.ticketTypeId,
           quantity: orderForm.value.quantity,
           guest_name: orderForm.value.guestName,
-          guest_phone: orderForm.value.guestPhone || null
+          guest_phone: orderForm.value.guestPhone || null,
+          guest_email: 'guest@primea.ga' // Email par défaut
         }
 
         const orderResponse = await guestService.createGuestOrder(orderData)
@@ -1214,6 +1253,11 @@ export default {
       }
     })
 
+    const handleImageError = () => {
+      console.warn('Checkout - Erreur de chargement de l\'image')
+      imageError.value = true
+    }
+
     return {
       event,
       eventLoading,
@@ -1257,7 +1301,10 @@ export default {
       formatPhoneForDisplay,
       // Méthodes de paiement
       processEBillingPayment,
-      processOrabankPayment
+      processOrabankPayment,
+      // Image
+      eventImageUrl,
+      handleImageError
     }
   }
 }
