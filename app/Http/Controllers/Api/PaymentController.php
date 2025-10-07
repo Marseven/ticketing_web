@@ -322,10 +322,30 @@ class PaymentController extends Controller
             'notification_url' => route('webhook.ebilling')
         ];
 
+        // Logs avant l'appel API E-Billing
+        \Log::info('E-Billing API Call - Create Bill', [
+            'payment_id' => $payment->id,
+            'data_sent' => $eBillingData,
+            'provider' => $payment->provider,
+        ]);
+
         // Créer la facture E-Billing
         $result = $eBillingService->createBill($eBillingData);
 
+        // Logs après l'appel API E-Billing
+        \Log::info('E-Billing API Response - Create Bill', [
+            'payment_id' => $payment->id,
+            'success' => $result['success'] ?? false,
+            'result' => $result,
+        ]);
+
         if (!$result['success']) {
+            \Log::error('E-Billing API Error - Create Bill Failed', [
+                'payment_id' => $payment->id,
+                'error_message' => $result['message'] ?? 'Unknown error',
+                'full_result' => $result,
+            ]);
+
             return [
                 'success' => false,
                 'message' => $result['message'] ?? 'Erreur lors de la création de la facture'

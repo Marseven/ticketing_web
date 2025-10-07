@@ -27,8 +27,13 @@ class EBillingService
     {
         try {
             $auth = $this->username . ':' . $this->sharedKey;
-            
-            Log::info('E-Billing createBill', ['data' => $data]);
+
+            Log::info('E-Billing createBill - Request', [
+                'url' => $this->serverUrl,
+                'username' => $this->username,
+                'has_shared_key' => !empty($this->sharedKey),
+                'data' => $data
+            ]);
 
             $response = Http::withBasicAuth($this->username, $this->sharedKey)
                 ->withHeaders([
@@ -39,9 +44,10 @@ class EBillingService
             $status = $response->status();
             $responseData = $response->json();
 
-            Log::info('E-Billing response', [
+            Log::info('E-Billing createBill - Response', [
                 'status' => $status,
-                'data' => $responseData
+                'response_body' => $responseData,
+                'response_headers' => $response->headers(),
             ]);
 
             if ($status >= 200 && $status <= 299) {
@@ -53,16 +59,24 @@ class EBillingService
                 ];
             }
 
+            Log::warning('E-Billing createBill - Non-success status', [
+                'status' => $status,
+                'response' => $responseData,
+            ]);
+
             return [
                 'success' => false,
                 'message' => 'Erreur lors de la création de la facture E-Billing',
-                'error' => $responseData['message'] ?? 'Erreur inconnue',
+                'error' => $responseData['message'] ?? $responseData['error'] ?? 'Erreur inconnue',
+                'error_details' => $responseData,
                 'status' => $status
             ];
 
         } catch (\Exception $e) {
-            Log::error('E-Billing createBill error', [
+            Log::error('E-Billing createBill - Exception', [
                 'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
 
