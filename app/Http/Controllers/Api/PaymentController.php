@@ -952,6 +952,9 @@ class PaymentController extends Controller
             ]
         ]);
 
+        // Charger les relations nécessaires pour initiatePPayment
+        $payment->load('order.event');
+
         // Initier le paiement selon la passerelle
         $result = $this->initiatePPayment($payment, $request);
 
