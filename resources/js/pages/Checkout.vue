@@ -941,9 +941,31 @@ export default {
         if (err.response?.data?.message) {
           error.value = err.response.data.message
         } else if (err.response?.data?.errors) {
-          // Afficher les erreurs de validation
-          const errors = Object.values(err.response.data.errors).flat()
-          error.value = errors.join(', ')
+          // Mapper les erreurs de validation en messages français
+          const validationErrors = err.response.data.errors
+          const errorMessages = []
+
+          for (const [field, messages] of Object.entries(validationErrors)) {
+            const fieldName = {
+              'guest_name': 'Nom complet',
+              'guest_email': 'Email',
+              'guest_phone': 'Téléphone',
+              'ticket_type_id': 'Type de ticket',
+              'quantity': 'Quantité',
+              'phone': 'Numéro de téléphone',
+              'amount': 'Montant'
+            }[field] || field
+
+            messages.forEach(msg => {
+              if (msg === 'validation.required') {
+                errorMessages.push(`Le champ ${fieldName} est requis`)
+              } else {
+                errorMessages.push(msg)
+              }
+            })
+          }
+
+          error.value = errorMessages.join('. ')
         } else {
           error.value = err.message || 'Erreur lors du traitement de l\'achat'
         }
