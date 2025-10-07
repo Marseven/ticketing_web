@@ -213,7 +213,7 @@ class OrderController extends Controller
             }
 
             // Mettre à jour le compteur de billets vendus
-            $ticketType->increment('sold', $validated['quantity']);
+            $ticketType->increment('sold_quantity', $validated['quantity']);
 
             DB::commit();
 
