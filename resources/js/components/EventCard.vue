@@ -307,7 +307,7 @@ export default {
     const buttonText = computed(() => {
       if (isEventPassed.value) return 'Événement passé'
       if (availableTickets.value === 0) return 'Complet'
-      return 'Réserver'
+      return 'Acheter un ticket'
     })
 
     const canPurchase = computed(() => {
