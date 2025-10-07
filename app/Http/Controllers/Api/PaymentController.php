@@ -585,11 +585,9 @@ class PaymentController extends Controller
      */
     private function generateReference(): string
     {
-        do {
-            $reference = 'PAY-' . strtoupper(substr(md5(uniqid()), 0, 10));
-        } while (Payment::where('reference', $reference)->exists());
-
-        return $reference;
+        // Générer une référence unique basée sur le timestamp et un hash aléatoire
+        // Note: La table payments utilise provider_txn_ref, pas reference
+        return 'PAY-' . strtoupper(substr(md5(uniqid() . microtime()), 0, 10));
     }
 
     /**
