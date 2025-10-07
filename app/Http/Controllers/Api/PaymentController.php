@@ -315,7 +315,7 @@ class PaymentController extends Controller
             'payer_email' => $payment->order->guest_email ?? 'customer@example.com',
             'payer_msisdn' => $eBillingService->formatPhoneNumber($request->phone ?? '074808000'),
             'amount' => (int) $payment->amount,
-            'short_description' => 'Achat billet - ' . $payment->order->event->title,
+            'short_description' => 'Achat billet - ' . ($payment->order->tickets->first()->event->title ?? 'Event'),
             'external_reference' => $payment->provider_txn_ref,
             'payer_name' => $payment->order->guest_name ?? 'Client',
             'expiry_period' => 60, // 60 minutes
@@ -953,7 +953,7 @@ class PaymentController extends Controller
         ]);
 
         // Charger les relations nécessaires pour initiatePPayment
-        $payment->load('order.event');
+        $payment->load('order.tickets.event');
 
         // Initier le paiement selon la passerelle
         $result = $this->initiatePPayment($payment, $request);
