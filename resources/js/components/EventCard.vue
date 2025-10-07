@@ -148,31 +148,38 @@ export default {
     const eventImageUrl = computed(() => {
       if (imageError.value) return null
 
-      // Essayer plusieurs sources d'images
-      let imageUrl = props.event.image_url ||
-                     props.event.image ||
-                     props.event.image_file ||
-                     props.event.imageUrl
+      // Le modèle Event retourne déjà l'URL complète dans le champ 'image' via l'accessor
+      // Priorité: image (accessor) > image_url > image_file
+      let imageUrl = props.event.image || props.event.image_url || props.event.image_file
+
+      console.log('EventCard - Image URL pour:', props.event.title, 'Image:', imageUrl)
 
       if (!imageUrl || imageUrl.trim() === '') {
+        console.log('EventCard - Aucune image trouvée')
         return null
       }
 
       // Si c'est déjà une URL complète (commence par http:// ou https://), on la retourne telle quelle
       if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+        console.log('EventCard - URL complète détectée:', imageUrl)
         return imageUrl
       }
 
       // Si c'est un chemin relatif commençant par /
       if (imageUrl.startsWith('/')) {
-        return window.location.origin + imageUrl
+        const fullUrl = window.location.origin + imageUrl
+        console.log('EventCard - Chemin relatif converti:', fullUrl)
+        return fullUrl
       }
 
       // Si c'est un nom de fichier dans le storage
       if (!imageUrl.includes('/')) {
-        return `${window.location.origin}/storage/images/events/${imageUrl}`
+        const fullUrl = `${window.location.origin}/storage/images/events/${imageUrl}`
+        console.log('EventCard - Nom de fichier converti:', fullUrl)
+        return fullUrl
       }
 
+      console.log('EventCard - URL retournée telle quelle:', imageUrl)
       return imageUrl
     })
 
@@ -385,8 +392,9 @@ export default {
       goToCheckout()
     }
 
-    const handleImageError = () => {
-      console.warn('Image loading error for event:', props.event.title)
+    const handleImageError = (event) => {
+      console.warn('EventCard - Erreur de chargement image pour:', props.event.title)
+      console.warn('EventCard - URL qui a échoué:', event?.target?.src)
       imageError.value = true
     }
 
