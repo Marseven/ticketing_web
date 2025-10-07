@@ -940,11 +940,11 @@ class PaymentController extends Controller
 
         $payment = Payment::create([
             'order_id' => $order->id,
-            'provider' => $request->gateway, // Utiliser 'provider' au lieu de 'gateway'
-            'provider_txn_ref' => $reference, // Utiliser 'provider_txn_ref' au lieu de 'reference'
+            'provider' => $request->gateway, // airtelmoney, moovmoney, ou ORABANK_NG
+            'provider_txn_ref' => $reference,
             'amount' => $request->amount,
-            'status' => 'initiated', // Utiliser 'initiated' au lieu de 'pending'
-            'payload' => [ // Utiliser 'payload' au lieu de 'metadata'
+            'status' => 'initiated',
+            'payload' => [
                 'phone' => $request->phone,
                 'user_agent' => $request->header('User-Agent'),
                 'ip_address' => $request->ip(),
