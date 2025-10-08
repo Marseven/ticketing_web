@@ -395,7 +395,8 @@ class PaymentController extends Controller
             case 'visa':
             case 'card':
                 // Pour ORABANK_NG (Visa/Mastercard), redirection vers billing-easy.net
-                $redirectUrl = "https://test.billing-easy.net?invoice={$result['bill_id']}&operator=ORABANK_NG&redirect=1";
+                $successUrl = route('payment.success', ['reference' => $payment->provider_txn_ref]);
+                $redirectUrl = "https://test.billing-easy.net/?invoice={$result['bill_id']}&operator=ORABANK_NG&redirect=1&redirect_url=" . urlencode($successUrl);
 
                 return [
                     'success' => true,
