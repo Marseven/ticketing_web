@@ -262,7 +262,7 @@ export const qrCodeService = {
 export const guestService = {
   // Créer une commande invité (sans authentification)
   createGuestOrder(orderData) {
-    return axios.post('/api/guest/orders', orderData, {
+    return axios.post('/api/v1/guest/orders', orderData, {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -273,7 +273,7 @@ export const guestService = {
 
   // Récupérer une commande invité par référence
   getGuestOrder(reference) {
-    return axios.get(`/api/guest/orders/${reference}`, {
+    return axios.get(`/api/v1/guest/orders/${reference}`, {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -284,7 +284,7 @@ export const guestService = {
 
   // Récupérer un ticket invité par code
   getGuestTicket(code) {
-    return axios.get(`/api/guest/tickets/${code}`, {
+    return axios.get(`/api/v1/guest/tickets/${code}`, {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -295,7 +295,7 @@ export const guestService = {
 
   // Récupérer tous les tickets d'un email invité
   retrieveGuestTickets(email) {
-    return axios.get(`/api/guest/tickets/retrieve/${encodeURIComponent(email)}`, {
+    return axios.get(`/api/v1/guest/tickets/retrieve/${encodeURIComponent(email)}`, {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
