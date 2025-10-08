@@ -489,25 +489,25 @@ class WebhookController extends Controller
 
         if ($internalStatus === 'successful') {
             $updateData['paid_at'] = now();
-            
+
             // Marquer la commande comme payée
             $order = Order::find($payment->order_id);
             if ($order) {
                 $order->update([
-                    'status' => 'completed',
+                    'status' => 'paid',
                     'processed_at' => now(),
                 ]);
 
                 // Émettre les billets
                 $this->issueTickets($order);
-                
+
                 Log::info('Commande payée et billets émis', ['order_id' => $order->id]);
             }
         } elseif (in_array($internalStatus, ['failed', 'cancelled', 'expired'])) {
             // Libérer les places réservées si le paiement échoue
             $order = Order::find($payment->order_id);
             if ($order) {
-                $order->update(['status' => 'failed']);
+                $order->update(['status' => 'cancelled']);
                 // TODO: Libérer les quantités réservées dans les TicketTypes
             }
         }
