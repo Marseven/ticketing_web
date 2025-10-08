@@ -82,12 +82,10 @@
                   <label for="phone" class="block text-sm font-semibold text-primea-blue mb-2 font-primea">
                     Numéro de téléphone
                   </label>
-                  <input 
-                    type="tel"
-                    id="phone"
+                  <PhoneInput
                     v-model="searchForm.phone"
-                    placeholder="+241012345678"
-                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-primea-lg focus:ring-2 focus:ring-primea-yellow focus:border-primea-blue transition-all duration-200 font-primea bg-white/90"
+                    placeholder="Numéro de téléphone"
+                    :required="false"
                   />
                 </div>
 
@@ -208,12 +206,14 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import TicketCard from '../components/TicketCard.vue'
+import PhoneInput from '../components/PhoneInput.vue'
 import { ticketService } from '../services/api.js'
 
 export default {
   name: 'TicketRetrieve',
   components: {
-    TicketCard
+    TicketCard,
+    PhoneInput
   },
   setup() {
     const router = useRouter()

@@ -65,15 +65,18 @@ export const ticketService = {
 
   // Rechercher des tickets par email, téléphone ou référence
   searchTickets(searchData) {
-    // Cette méthode simule une recherche basée sur les données fournies
-    // En réalité, il faudrait créer un endpoint spécifique dans le backend
+    return api.post('/guest/tickets/search', searchData)
+  },
+
+  // Ancienne méthode de recherche (conservée pour compatibilité)
+  searchTicketsLegacy(searchData) {
     const { reference, phone, email } = searchData
-    
+
     if (reference) {
       // Si on a une référence, essayer de récupérer directement
       return this.getTicket(reference)
     }
-    
+
     // Pour email/phone, on pourrait créer un token de récupération
     // Format: base64(email:reference_estimee)
     if (email || phone) {

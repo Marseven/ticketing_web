@@ -212,4 +212,107 @@ class TicketController extends Controller
             ]
         ]);
     }
+
+    /**
+     * Search tickets by reference, phone or email
+     */
+    public function search(Request $request)
+    {
+        $request->validate([
+            'reference' => 'nullable|string',
+            'phone' => 'nullable|string',
+            'email' => 'nullable|email',
+        ]);
+
+        $query = Ticket::query()->with(['event.schedules', 'ticketType', 'buyer', 'order']);
+
+        // Recherche par référence (code du ticket OU référence de la commande)
+        if ($request->filled('reference')) {
+            $ref = $request->input('reference');
+            $query->where(function($q) use ($ref) {
+                $q->where('code', 'LIKE', "%{$ref}%")
+                  ->orWhereHas('order', function($orderQuery) use ($ref) {
+                      $orderQuery->where('reference', 'LIKE', "%{$ref}%");
+                  });
+            });
+        }
+
+        // Recherche par téléphone
+        if ($request->filled('phone')) {
+            $phone = $request->input('phone');
+            $query->where(function($q) use ($phone) {
+                $q->whereHas('buyer', function($buyerQuery) use ($phone) {
+                    $buyerQuery->where('phone', 'LIKE', "%{$phone}%");
+                })
+                ->orWhereHas('order', function($orderQuery) use ($phone) {
+                    $orderQuery->where('guest_phone', 'LIKE', "%{$phone}%");
+                });
+            });
+        }
+
+        // Recherche par email
+        if ($request->filled('email')) {
+            $email = $request->input('email');
+            $query->where(function($q) use ($email) {
+                $q->whereHas('buyer', function($buyerQuery) use ($email) {
+                    $buyerQuery->where('email', 'LIKE', "%{$email}%");
+                })
+                ->orWhereHas('order', function($orderQuery) use ($email) {
+                    $orderQuery->where('guest_email', 'LIKE', "%{$email}%");
+                });
+            });
+        }
+
+        $tickets = $query->get();
+
+        if ($tickets->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Aucun ticket trouvé avec ces critères de recherche'
+            ], 404);
+        }
+
+        $ticketsData = $tickets->map(function ($ticket) {
+            return [
+                'id' => $ticket->id,
+                'code' => $ticket->code,
+                'status' => $ticket->status,
+                'issued_at' => $ticket->issued_at,
+                'used_at' => $ticket->used_at,
+                'qr_code' => $ticket->qr_code,
+                'event' => [
+                    'id' => $ticket->event->id,
+                    'title' => $ticket->event->title,
+                    'slug' => $ticket->event->slug,
+                    'venue_name' => $ticket->event->venue_name,
+                    'image_url' => $ticket->event->image_url,
+                ],
+                'schedule' => [
+                    'starts_at' => $ticket->event->schedules->first()?->starts_at,
+                ],
+                'ticket_type' => [
+                    'name' => $ticket->ticketType->name,
+                    'price' => $ticket->ticketType->price,
+                ],
+                'buyer' => [
+                    'name' => $ticket->buyer->name ?? $ticket->order->guest_name,
+                    'email' => $ticket->buyer->email ?? $ticket->order->guest_email,
+                    'phone' => $ticket->buyer->phone ?? $ticket->order->guest_phone,
+                ],
+                'order' => [
+                    'reference' => $ticket->order->reference,
+                    'total_amount' => $ticket->order->total_amount,
+                    'status' => $ticket->order->status,
+                ],
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'tickets' => $ticketsData,
+                'total' => $tickets->count(),
+            ]
+        ]);
+    }
 }
