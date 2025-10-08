@@ -172,14 +172,20 @@ export default {
 
     const showStaticMap = () => {
       if (!mapContainer.value) return
-      
+
+      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+      if (!apiKey) {
+        showPlaceholder()
+        return
+      }
+
       const address = encodeURIComponent(`${props.event.venue_address}, ${props.event.venue_city}`)
-      const staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${address}&zoom=15&size=600x400&markers=color:0x272d63%7C${address}&key=YOUR_GOOGLE_MAPS_API_KEY`
-      
+      const staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${address}&zoom=15&size=600x400&markers=color:0x272d63%7C${address}&key=${apiKey}`
+
       mapContainer.value.innerHTML = `
-        <img 
-          src="${staticMapUrl}" 
-          alt="Carte du lieu" 
+        <img
+          src="${staticMapUrl}"
+          alt="Carte du lieu"
           class="w-full h-full object-cover"
           onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\\'flex items-center justify-center h-full text-gray-500\\'>Carte non disponible</div>'"
         />
@@ -212,8 +218,14 @@ export default {
           return
         }
 
+        const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+        if (!apiKey) {
+          reject(new Error('Google Maps API key is not configured'))
+          return
+        }
+
         const script = document.createElement('script')
-        script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places`
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`
         script.async = true
         script.defer = true
         script.onload = resolve
@@ -235,17 +247,22 @@ export default {
     }
 
     onMounted(async () => {
-      // Désactiver temporairement Google Maps en développement
-      showPlaceholder()
-      
-      // Pour activer Google Maps, décommentez les lignes ci-dessous et ajoutez une vraie clé API
-      // try {
-      //   await loadGoogleMapsScript()
-      //   await initializeMap()
-      // } catch (error) {
-      //   console.error('Erreur lors du chargement de Google Maps:', error)
-      //   showPlaceholder()
-      // }
+      // Charger Google Maps si la clé API est configurée
+      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+
+      if (!apiKey) {
+        console.warn('Google Maps API key not configured, showing placeholder')
+        showPlaceholder()
+        return
+      }
+
+      try {
+        await loadGoogleMapsScript()
+        await initializeMap()
+      } catch (error) {
+        console.error('Erreur lors du chargement de Google Maps:', error)
+        showPlaceholder()
+      }
     })
 
     // Réinitialiser la carte si l'événement change
