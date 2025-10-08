@@ -238,20 +238,11 @@ export default {
       try {
         loading.value = true
         error.value = ''
-        
-        const ticketId = route.params.id
-        
-        // Si on a un ID numérique, récupérer par ID, sinon par code
-        let response
-        if (/^\d+$/.test(ticketId)) {
-          // ID numérique - utiliser l'API avec le code du ticket
-          // Pour l'instant, simuler avec le code basé sur l'ID
-          const ticketCode = `TKT-2024-${ticketId.padStart(3, '0')}`
-          response = await ticketService.getTicket(ticketCode)
-        } else {
-          // Code de ticket direct
-          response = await ticketService.getTicket(ticketId)
-        }
+
+        const ticketCode = route.params.id
+
+        // Utiliser directement le code du ticket (format: TKT-XXXXXXXX)
+        const response = await ticketService.getTicket(ticketCode)
         
         if (response.data?.ticket) {
           // Transformer les données de l'API pour correspondre au format attendu

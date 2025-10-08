@@ -93,7 +93,7 @@
                     <p class="text-sm text-gray-600">Code: {{ ticket.code }}</p>
                   </div>
                   <router-link
-                    :to="`/ticket/${ticket.id}/download`"
+                    :to="`/ticket/${ticket.code}/download`"
                     class="bg-primea-blue text-white px-4 py-2 rounded-primea text-sm hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200"
                   >
                     Télécharger
@@ -226,7 +226,7 @@ export default {
       // Ouvrir chaque ticket dans un nouvel onglet
       tickets.value.forEach((ticket, index) => {
         setTimeout(() => {
-          window.open(`/ticket/${ticket.id}/download`, '_blank')
+          window.open(`/ticket/${ticket.code}/download`, '_blank')
         }, index * 500) // Délai de 500ms entre chaque ouverture
       })
     }
