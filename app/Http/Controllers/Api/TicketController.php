@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 /**
  * @OA\Tag(
@@ -578,13 +579,25 @@ class TicketController extends Controller
                 'buyer' => $ticket->buyer->name
             ]);
 
-            // Générer le QR code
-            $qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" . urlencode($ticket->code);
+            // Générer le QR code en base64
+            $qrCode = QrCode::format('png')
+                           ->size(200)
+                           ->margin(1)
+                           ->generate($ticket->code);
+            $qrCodeBase64 = 'data:image/png;base64,' . base64_encode($qrCode);
+
+            // Charger le logo en base64
+            $logoPath = public_path('images/logo.png');
+            $logoBase64 = '';
+            if (file_exists($logoPath)) {
+                $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+            }
 
             // Préparer les données pour le PDF
             $data = [
                 'ticket' => $ticket,
-                'qrCodeUrl' => $qrCodeUrl,
+                'qrCodeBase64' => $qrCodeBase64,
+                'logoBase64' => $logoBase64,
                 'event' => $ticket->event,
                 'ticketType' => $ticket->ticketType,
                 'buyer' => $ticket->buyer,
@@ -595,7 +608,8 @@ class TicketController extends Controller
             Log::info('📝 Données PDF préparées', [
                 'has_ticket' => isset($data['ticket']),
                 'has_event' => isset($data['event']),
-                'has_qrCode' => !empty($qrCodeUrl)
+                'has_qrCode' => !empty($qrCodeBase64),
+                'has_logo' => !empty($logoBase64)
             ]);
 
             // Générer le PDF

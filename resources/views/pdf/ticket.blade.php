@@ -31,6 +31,13 @@
             color: white;
             padding: 30px;
             text-align: center;
+            position: relative;
+        }
+
+        .logo {
+            width: 100px;
+            height: auto;
+            margin-bottom: 15px;
         }
 
         .ticket-header h1 {
@@ -119,6 +126,9 @@
 <body>
     <div class="ticket">
         <div class="ticket-header">
+            @if($logoBase64)
+                <img src="{{ $logoBase64 }}" alt="Primea" class="logo">
+            @endif
             <h1>{{ $event->title }}</h1>
             <p>{{ $venue?->name ?? 'À définir' }}</p>
         </div>
@@ -161,7 +171,7 @@
 
             <div class="qr-section">
                 <p style="color: #666; margin-bottom: 10px;">Présentez ce QR code à l'entrée</p>
-                <img src="{{ $qrCodeUrl }}" alt="QR Code">
+                <img src="{{ $qrCodeBase64 }}" alt="QR Code">
                 <div class="ticket-code">{{ $ticket->code }}</div>
                 <p style="color: #999; font-size: 12px;">Ce QR code est unique et ne peut être scanné qu'une seule fois</p>
             </div>
