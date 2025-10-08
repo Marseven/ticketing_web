@@ -403,8 +403,8 @@ class WebhookController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Reference missing'], 400);
         }
 
-        // Trouver le paiement par référence
-        $payment = Payment::where('reference', $reference)->first();
+        // Trouver le paiement par référence (provider_txn_ref)
+        $payment = Payment::where('provider_txn_ref', $reference)->first();
 
         if (!$payment) {
             Log::error('Webhook E-Billing: paiement non trouvé', ['reference' => $reference]);

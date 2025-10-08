@@ -356,23 +356,24 @@
                       
                       <!-- Boutons d'action -->
                       <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                        <button 
+                        <button
                           @click="retryUSSDPush"
-                          :disabled="loading"
-                          class="bg-blue-600 text-white px-4 py-2 rounded-primea hover:bg-blue-700 transition-colors disabled:opacity-50"
+                          :disabled="loading || ussdCountdown > 0"
+                          class="bg-blue-600 text-white px-4 py-2 rounded-primea hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <span v-if="loading">Envoi...</span>
                           <span v-else>Renvoyer le push</span>
                         </button>
-                        
-                        <button 
+
+                        <button
                           @click="changeOperator"
-                          class="bg-gray-500 text-white px-4 py-2 rounded-primea hover:bg-gray-600 transition-colors"
+                          :disabled="ussdCountdown > 0"
+                          class="bg-gray-500 text-white px-4 py-2 rounded-primea hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           Changer d'opérateur
                         </button>
-                        
-                        <button 
+
+                        <button
                           @click="cancelUSSDPush"
                           class="bg-red-500 text-white px-4 py-2 rounded-primea hover:bg-red-600 transition-colors"
                         >
@@ -1143,12 +1144,15 @@ export default {
       if (ussdTimer.value) {
         clearInterval(ussdTimer.value)
       }
-      
+
       ussdTimer.value = setInterval(() => {
         ussdCountdown.value--
-        
+
         if (ussdCountdown.value <= 0) {
           clearInterval(ussdTimer.value)
+          // Arrêter le polling et changer le statut en expired
+          clearInterval(paymentPollingTimer.value)
+          paymentStatus.value = 'expired'
         }
       }, 1000)
     }
