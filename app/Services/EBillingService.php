@@ -221,6 +221,61 @@ class EBillingService
     }
 
     /**
+     * Vérifier le statut d'une facture E-Billing
+     */
+    public function getBillStatus(string $billId): array
+    {
+        try {
+            $url = rtrim($this->serverUrl, '/e_bills') . '/e_bills/' . $billId;
+
+            Log::info('E-Billing API Call - Get Bill Status', [
+                'url' => $url,
+                'bill_id' => $billId,
+            ]);
+
+            $response = Http::withBasicAuth($this->username, $this->sharedKey)
+                ->withHeaders([
+                    'Accept' => 'application/json',
+                ])
+                ->get($url);
+
+            $status = $response->status();
+            $responseData = $response->json();
+
+            Log::info('E-Billing API Response - Get Bill Status', [
+                'status' => $status,
+                'response_json' => $responseData,
+            ]);
+
+            if ($status === 200) {
+                return [
+                    'success' => true,
+                    'bill_status' => $responseData['e_bill']['state'] ?? null,
+                    'data' => $responseData
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => 'Impossible de récupérer le statut de la facture',
+                'status' => $status
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('E-Billing getBillStatus error', [
+                'error' => $e->getMessage(),
+                'bill_id' => $billId
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Erreur lors de la vérification du statut',
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
      * Obtenir le nom du système de paiement à partir du gateway
      */
     public function getPaymentSystemName(string $gateway): string

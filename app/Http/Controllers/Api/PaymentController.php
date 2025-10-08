@@ -354,11 +354,12 @@ class PaymentController extends Controller
 
         // Mettre à jour le paiement avec l'ID de facture E-Billing
         $payment->update([
+            'billing_id' => $result['bill_id'],
             'transaction_id' => $result['bill_id'],
-            'gateway_response' => $result['data'],
             'payload' => array_merge($payment->payload ?? [], [
                 'ebilling_bill_id' => $result['bill_id'],
-                'ebilling_post_url' => $result['post_url']
+                'ebilling_post_url' => $result['post_url'],
+                'ebilling_created_at' => now()->toIso8601String()
             ])
         ]);
 
@@ -1036,7 +1037,6 @@ class PaymentController extends Controller
     {
         $request->validate([
             'payment_id' => 'required|integer|exists:payments,id',
-            'bill_id' => 'required|string',
             'phone' => 'required|string',
             'gateway' => 'required|in:airtelmoney,moovmoney',
         ]);
@@ -1053,28 +1053,114 @@ class PaymentController extends Controller
 
         try {
             $eBillingService = new EBillingService();
-            
+
             // Obtenir le nom du système de paiement pour E-Billing
             $paymentSystem = $eBillingService->getPaymentSystemName($request->gateway);
-            
+
             // Formater le numéro de téléphone
             $formattedPhone = $eBillingService->formatPhoneNumber($request->phone);
 
-            // Envoyer le push USSD via E-Billing
-            $result = $eBillingService->pushUSSD($request->bill_id, $paymentSystem, $formattedPhone);
+            $billId = $payment->billing_id;
+
+            // Si une facture existe déjà, vérifier son statut
+            if ($billId) {
+                $billStatus = $eBillingService->getBillStatus($billId);
+
+                if ($billStatus['success']) {
+                    $state = $billStatus['bill_status'];
+
+                    // Si la facture est payable (ready ou pending), on réessaie sur la même facture
+                    if (in_array($state, ['ready', 'pending'])) {
+                        Log::info('Réessai push sur facture existante', [
+                            'payment_id' => $payment->id,
+                            'bill_id' => $billId,
+                            'bill_status' => $state
+                        ]);
+
+                        $result = $eBillingService->pushUSSD($billId, $paymentSystem, $formattedPhone);
+
+                        if ($result['success']) {
+                            $payment->update([
+                                'payload' => array_merge($payment->payload ?? [], [
+                                    'push_resent_at' => now()->toIso8601String(),
+                                    'push_retry_count' => ($payment->payload['push_retry_count'] ?? 0) + 1
+                                ])
+                            ]);
+
+                            return response()->json([
+                                'success' => true,
+                                'message' => 'Push USSD renvoyé avec succès',
+                                'bill_id' => $billId
+                            ]);
+                        }
+                    } else {
+                        // Facture expirée, payée ou autre statut final → Créer nouvelle facture
+                        Log::info('Création nouvelle facture - Ancienne facture non payable', [
+                            'payment_id' => $payment->id,
+                            'old_bill_id' => $billId,
+                            'bill_status' => $state
+                        ]);
+
+                        $billId = null; // Forcer la création d'une nouvelle facture
+                    }
+                }
+            }
+
+            // Si pas de facture ou facture expirée, créer une nouvelle facture
+            if (!$billId) {
+                Log::info('Création nouvelle facture E-Billing', [
+                    'payment_id' => $payment->id
+                ]);
+
+                $eBillingData = [
+                    'payer_email' => $payment->order->guest_email ?? 'customer@example.com',
+                    'payer_msisdn' => $formattedPhone,
+                    'amount' => (int) $payment->amount,
+                    'short_description' => 'Achat billet - ' . ($payment->order->tickets->first()->event->title ?? 'Event'),
+                    'external_reference' => $payment->provider_txn_ref,
+                    'payer_name' => $payment->order->guest_name ?? 'Client',
+                    'expiry_period' => 60, // 60 minutes
+                    'notification_url' => route('webhook.ebilling')
+                ];
+
+                $createResult = $eBillingService->createBill($eBillingData);
+
+                if (!$createResult['success']) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Erreur lors de la création de la nouvelle facture'
+                    ], 400);
+                }
+
+                $billId = $createResult['bill_id'];
+
+                // Mettre à jour le paiement avec le nouveau bill_id
+                $payment->update([
+                    'billing_id' => $billId,
+                    'transaction_id' => $billId,
+                    'payload' => array_merge($payment->payload ?? [], [
+                        'ebilling_bill_id' => $billId,
+                        'ebilling_post_url' => $createResult['post_url'],
+                        'ebilling_recreated_at' => now()->toIso8601String()
+                    ])
+                ]);
+            }
+
+            // Envoyer le push USSD
+            $result = $eBillingService->pushUSSD($billId, $paymentSystem, $formattedPhone);
 
             if ($result['success']) {
-                // Mettre à jour le paiement avec les infos du push
                 $payment->update([
                     'payload' => array_merge($payment->payload ?? [], [
-                        'push_sent_at' => now()->toISOString(),
+                        'push_sent_at' => now()->toIso8601String(),
                         'push_response' => $result['data'] ?? []
                     ])
                 ]);
 
                 return response()->json([
                     'success' => true,
-                    'message' => 'Push USSD envoyé avec succès'
+                    'message' => 'Push USSD envoyé avec succès',
+                    'bill_id' => $billId
                 ]);
             }
 
