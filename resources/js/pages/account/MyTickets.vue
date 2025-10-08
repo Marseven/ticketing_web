@@ -171,18 +171,18 @@
 
               <!-- Actions -->
               <div class="flex lg:flex-col gap-3 lg:w-40">
-                <button 
+                <button
                   @click="viewTicket(ticket)"
-                  class="flex-1 lg:w-full bg-primea-blue text-white px-4 py-2 rounded-primea hover:bg-primea-yellow hover:text-primea-blue font-semibold transition-all duration-200 flex items-center justify-center gap-2"
+                  class="btn-view flex-1 lg:w-full px-4 py-2 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2"
                 >
                   <EyeIcon class="w-4 h-4" />
                   Voir le ticket
                 </button>
-                
-                <button 
+
+                <button
                   v-if="ticket.status === 'active'"
                   @click="downloadTicket(ticket)"
-                  class="flex-1 lg:w-full border-2 border-primea-blue text-primea-blue px-4 py-2 rounded-primea hover:bg-primea-blue hover:text-white font-semibold transition-all duration-200 flex items-center justify-center gap-2"
+                  class="btn-download flex-1 lg:w-full px-4 py-2 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2"
                 >
                   <ArrowDownTrayIcon class="w-4 h-4" />
                   Télécharger
@@ -275,7 +275,7 @@ export default {
               title: order.event.title,
               slug: order.event.slug,
               date: order.schedule?.starts_at ? new Date(order.schedule.starts_at.replace(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})/, '$3-$2-$1T$4:$5:$6')) : new Date(),
-              venue: `${order.event.venue_name}${order.event.venue_city ? ', ' + order.event.venue_city : ''}`,
+              venue: [order.event.venue_name, order.event.venue_city].filter(v => v && v !== 'null').join(', ') || 'Lieu à définir',
               image: order.event.image || '/images/logo.png'
             },
             type: ticket.ticket_type?.name || 'Standard',
@@ -460,5 +460,27 @@ export default {
 
 .rounded-primea-lg {
   border-radius: 16px;
+}
+
+/* Boutons d'action */
+.btn-view {
+  background-color: #272d63;
+  color: white;
+}
+
+.btn-view:hover {
+  background-color: #fab511;
+  color: #272d63;
+}
+
+.btn-download {
+  border: 2px solid #fab511;
+  background-color: white;
+  color: #fab511;
+}
+
+.btn-download:hover {
+  background-color: #fab511;
+  color: #272d63;
 }
 </style>
