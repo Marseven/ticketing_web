@@ -1033,9 +1033,9 @@ class PaymentController extends Controller
         ]);
 
         $payment = Payment::findOrFail($request->payment_id);
-        
+
         // Vérifier que le paiement est en attente
-        if ($payment->status !== 'pending') {
+        if ($payment->status !== 'initiated') {
             return response()->json([
                 'success' => false,
                 'message' => 'Ce paiement n\'est plus en attente'

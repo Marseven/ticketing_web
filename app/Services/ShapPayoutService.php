@@ -32,6 +32,12 @@ class ShapPayoutService
         }
 
         try {
+            Log::info('SHAP API Call - Get Access Token', [
+                'url' => $this->baseUrl . 'auth',
+                'api_id' => $this->apiId,
+                'has_api_secret' => !empty($this->apiSecret),
+            ]);
+
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json'
@@ -40,17 +46,29 @@ class ShapPayoutService
                 'api_secret' => $this->apiSecret
             ]);
 
+            $status = $response->status();
+            $responseBody = $response->body();
+            $responseData = $response->json();
+
+            Log::info('SHAP API Response - Get Access Token', [
+                'status' => $status,
+                'response_raw' => $responseBody,
+                'response_json' => $responseData,
+                'response_headers' => $response->headers(),
+                'content_type' => $response->header('Content-Type'),
+            ]);
+
             if ($response->successful()) {
                 $data = $response->json();
-                
+
                 $this->accessToken = $data['access_token'];
                 $this->tokenExpiresAt = now()->addSeconds($data['expires_in'] - 60); // 60 secondes de marge
-                
+
                 Log::info('Token SHAP obtenu avec succès', [
                     'expires_in' => $data['expires_in'],
                     'expires_at' => $this->tokenExpiresAt->toISOString()
                 ]);
-                
+
                 return $this->accessToken;
             }
 
@@ -103,7 +121,8 @@ class ShapPayoutService
                 'payout_type' => $payoutType
             ];
 
-            Log::info('Création payout SHAP', [
+            Log::info('SHAP API Call - Create Payout', [
+                'url' => $this->baseUrl . 'payout',
                 'payment_system' => $paymentSystemName,
                 'payout_data' => $payoutData
             ]);
@@ -117,11 +136,16 @@ class ShapPayoutService
                 'payout' => json_encode($payoutData)
             ]);
 
+            $status = $response->status();
+            $responseBody = $response->body();
             $responseData = $response->json();
 
-            Log::info('Réponse payout SHAP', [
-                'status' => $response->status(),
-                'data' => $responseData
+            Log::info('SHAP API Response - Create Payout', [
+                'status' => $status,
+                'response_raw' => $responseBody,
+                'response_json' => $responseData,
+                'response_headers' => $response->headers(),
+                'content_type' => $response->header('Content-Type'),
             ]);
 
             if ($response->successful() && isset($responseData['successful'])) {
@@ -169,14 +193,30 @@ class ShapPayoutService
         try {
             $token = $this->getAccessToken();
 
+            Log::info('SHAP API Call - Get Balance', [
+                'url' => $this->baseUrl . 'balance',
+            ]);
+
             $response = Http::withHeaders([
                 'Accept' => 'application/json',
                 'Authorization' => 'Bearer ' . $token
             ])->get($this->baseUrl . 'balance');
 
+            $status = $response->status();
+            $responseBody = $response->body();
+            $responseData = $response->json();
+
+            Log::info('SHAP API Response - Get Balance', [
+                'status' => $status,
+                'response_raw' => $responseBody,
+                'response_json' => $responseData,
+                'response_headers' => $response->headers(),
+                'content_type' => $response->header('Content-Type'),
+            ]);
+
             if ($response->successful()) {
                 $data = $response->json();
-                
+
                 return [
                     'success' => true,
                     'data' => $data['data']
@@ -209,6 +249,12 @@ class ShapPayoutService
         try {
             $token = $this->getAccessToken();
 
+            Log::info('SHAP API Call - Get Payout', [
+                'url' => $this->baseUrl . 'payout',
+                'payee_msisdn' => $this->formatPhoneNumber($payeeMsisdn),
+                'external_reference' => $externalReference,
+            ]);
+
             $response = Http::withHeaders([
                 'Accept' => 'application/json',
                 'Authorization' => 'Bearer ' . $token
@@ -217,14 +263,26 @@ class ShapPayoutService
                 'external_reference' => $externalReference
             ]);
 
+            $status = $response->status();
+            $responseBody = $response->body();
+            $responseData = $response->json();
+
+            Log::info('SHAP API Response - Get Payout', [
+                'status' => $status,
+                'response_raw' => $responseBody,
+                'response_json' => $responseData,
+                'response_headers' => $response->headers(),
+                'content_type' => $response->header('Content-Type'),
+            ]);
+
             if ($response->successful()) {
                 $data = $response->json();
-                
+
                 Log::info('Statut payout SHAP récupéré', [
                     'external_reference' => $externalReference,
                     'payout_data' => $data['payout']
                 ]);
-                
+
                 return [
                     'success' => true,
                     'data' => $data['payout'],
@@ -237,7 +295,7 @@ class ShapPayoutService
                 'external_reference' => $externalReference,
                 'error' => $errorData
             ]);
-            
+
             return [
                 'success' => false,
                 'message' => $errorData['error_description'] ?? 'Payout non trouvé',

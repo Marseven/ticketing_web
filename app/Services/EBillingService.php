@@ -99,10 +99,18 @@ class EBillingService
     {
         try {
             $url = rtrim($this->serverUrl, '/e_bills') . '/e_bills/' . $billId . '/ussd_push';
-            
+
+            Log::info('E-Billing API Call - Push USSD', [
+                'url' => $url,
+                'bill_id' => $billId,
+                'payment_system' => $paymentSystem,
+                'msisdn' => $msisdn,
+            ]);
+
             $response = Http::withBasicAuth($this->username, $this->sharedKey)
                 ->withHeaders([
                     'Content-Type' => 'application/json',
+                    'Accept' => 'application/json',
                 ])
                 ->post($url, [
                     'payment_system_name' => $paymentSystem,
@@ -110,11 +118,15 @@ class EBillingService
                 ]);
 
             $status = $response->status();
+            $responseBody = $response->body();
             $responseData = $response->json();
 
-            Log::info('E-Billing USSD Push response', [
+            Log::info('E-Billing API Response - Push USSD', [
                 'status' => $status,
-                'data' => $responseData
+                'response_raw' => $responseBody,
+                'response_json' => $responseData,
+                'response_headers' => $response->headers(),
+                'content_type' => $response->header('Content-Type'),
             ]);
 
             if ($status >= 200 && $status <= 299) {
@@ -152,19 +164,32 @@ class EBillingService
     {
         try {
             $url = rtrim($this->serverUrl, '/e_bills') . '/kyc';
-            
+
+            Log::info('E-Billing API Call - Check KYC', [
+                'url' => $url,
+                'payment_system' => $paymentSystem,
+                'msisdn' => $msisdn,
+            ]);
+
             $response = Http::withBasicAuth($this->username, $this->sharedKey)
+                ->withHeaders([
+                    'Accept' => 'application/json',
+                ])
                 ->get($url, [
                     'payment_system_name' => $paymentSystem,
                     'msisdn' => $msisdn
                 ]);
 
             $status = $response->status();
+            $responseBody = $response->body();
             $responseData = $response->json();
 
-            Log::info('E-Billing KYC response', [
+            Log::info('E-Billing API Response - Check KYC', [
                 'status' => $status,
-                'data' => $responseData
+                'response_raw' => $responseBody,
+                'response_json' => $responseData,
+                'response_headers' => $response->headers(),
+                'content_type' => $response->header('Content-Type'),
             ]);
 
             if ($status === 200) {
