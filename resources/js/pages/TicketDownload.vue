@@ -247,24 +247,32 @@ export default {
         if (response.data?.ticket) {
           // Transformer les données de l'API pour correspondre au format attendu
           const apiTicket = response.data.ticket
+
+          // Construire l'URL complète de l'image
+          const imageUrl = apiTicket.event.image_url
+            ? (apiTicket.event.image_url.startsWith('http')
+                ? apiTicket.event.image_url
+                : `${window.location.origin}${apiTicket.event.image_url}`)
+            : 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800'
+
           ticket.value = {
             id: apiTicket.id,
             reference: apiTicket.code,
             event: {
               id: apiTicket.event.id,
               title: apiTicket.event.title,
-              date: apiTicket.schedule?.starts_at ? 
-                    new Date(apiTicket.schedule.starts_at.split('/').reverse().join('-')).toISOString() : 
+              date: apiTicket.schedule?.starts_at ?
+                    new Date(apiTicket.schedule.starts_at.split('/').reverse().join('-')).toISOString() :
                     '2025-07-27T20:00:00',
               venue_name: apiTicket.event.venue_name || 'Entre Nous Bar',
-              image: apiTicket.event.image_url || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800',
-              time: apiTicket.schedule?.door_time ? 
-                    new Date(apiTicket.schedule.door_time.split('/').reverse().join('-')).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : 
+              image: imageUrl,
+              time: apiTicket.schedule?.door_time ?
+                    new Date(apiTicket.schedule.door_time.split('/').reverse().join('-')).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) :
                     '13H'
             },
             ticketType: apiTicket.ticket_type?.name || 'Standard',
             price: apiTicket.ticket_type?.price || 10000,
-            qrCode: null, // Sera généré par le composant si nécessaire
+            qrCode: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(apiTicket.code)}`,
             status: apiTicket.status,
             buyer_name: apiTicket.buyer?.name,
             buyer_email: apiTicket.buyer?.email,

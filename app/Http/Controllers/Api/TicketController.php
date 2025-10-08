@@ -346,7 +346,7 @@ class TicketController extends Controller
      */
     public function show(Request $request, $code): JsonResponse
     {
-        $ticket = Ticket::with(['event', 'ticketType', 'buyer', 'schedule', 'checkins'])
+        $ticket = Ticket::with(['event.venue', 'ticketType', 'buyer', 'schedule', 'checkins'])
                        ->byCode($code)
                        ->first();
 
@@ -517,11 +517,13 @@ class TicketController extends Controller
                 'title' => $ticket->event->title,
                 'slug' => $ticket->event->slug,
                 'image_url' => $ticket->event->image_url,
+                'venue_name' => $ticket->event->venue?->name ?? 'À définir',
             ],
             'ticket_type' => [
                 'id' => $ticket->ticketType->id,
                 'name' => $ticket->ticketType->name,
                 'description' => $ticket->ticketType->description,
+                'price' => (float) $ticket->ticketType->price,
             ],
             'buyer' => [
                 'name' => $ticket->buyer->name,
