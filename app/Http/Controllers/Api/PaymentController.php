@@ -576,8 +576,17 @@ class PaymentController extends Controller
      * 
      * Vérifier le statut d'un paiement
      */
-    public function getPaymentStatus(Payment $payment): JsonResponse
+    public function getPaymentStatus($id): JsonResponse
     {
+        $payment = Payment::find($id);
+
+        if (!$payment) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Paiement introuvable'
+            ], 404);
+        }
+
         // Vérifier si le paiement a expiré
         $expiredAt = isset($payment->payload['expired_at']) ? \Carbon\Carbon::parse($payment->payload['expired_at']) : null;
         if ($expiredAt && $expiredAt->isPast() && $payment->status === 'initiated') {
