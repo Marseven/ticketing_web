@@ -25,8 +25,6 @@ class PayoutService
     public function processSuccessfulPayment(Payment $payment): void
     {
         try {
-            DB::beginTransaction();
-
             $order = $payment->order;
             $organizer = $order->event->organizer;
 
@@ -38,15 +36,22 @@ class PayoutService
                 'gateway' => $payment->gateway
             ]);
 
-            // 1. Créer ou mettre à jour le solde de l'organisateur
+            // 1. Créer ou mettre à jour le solde de l'organisateur (TOUJOURS crédité)
+            // Transaction séparée pour garantir que le solde est crédité même si payout échoue
+            DB::beginTransaction();
             $organizerBalance = $this->updateOrganizerBalance($organizer, $payment);
+            DB::commit();
+
+            Log::info('Solde organisateur crédité avec succès', [
+                'organizer_id' => $organizer->id,
+                'new_balance' => $organizerBalance->fresh()->balance
+            ]);
 
             // 2. Vérifier si un payout automatique doit être déclenché
+            // Cette étape est indépendante - si elle échoue, le solde reste crédité
             if ($organizerBalance->shouldTriggerAutoPayout()) {
                 $this->triggerAutomaticPayout($organizerBalance);
             }
-
-            DB::commit();
 
         } catch (\Exception $e) {
             DB::rollBack();
