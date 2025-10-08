@@ -111,7 +111,7 @@ class EBillingService
                 'payload' => $payload,
             ]);
 
-            $response = Http::timeout(15) // Timeout de 15s au lieu de 30s
+            $response = Http::timeout(30) // Timeout de 30s pour le push USSD
                 ->withBasicAuth($this->username, $this->sharedKey)
                 ->withHeaders([
                     'Content-Type' => 'application/json',
