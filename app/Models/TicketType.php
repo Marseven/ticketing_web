@@ -163,6 +163,6 @@ class TicketType extends Model
      */
     public function getFormattedPriceAttribute(): string
     {
-        return number_format($this->price, 2) . ' ' . ($this->currency ?? 'XOF');
+        return number_format($this->price, 2) . ' ' . ($this->currency ?? 'XAF');
     }
 }

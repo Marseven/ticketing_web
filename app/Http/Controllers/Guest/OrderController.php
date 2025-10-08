@@ -46,7 +46,7 @@ class OrderController extends Controller
      *                     @OA\Property(property="guest_name", type="string", example="John Doe"),
      *                     @OA\Property(property="guest_email", type="string", example="john@example.com"),
      *                     @OA\Property(property="total_amount", type="number", example=25000),
-     *                     @OA\Property(property="currency", type="string", example="XOF"),
+     *                     @OA\Property(property="currency", type="string", example="XAF"),
      *                     @OA\Property(property="status", type="string", example="pending"),
      *                     @OA\Property(property="tickets_count", type="integer", example=2),
      *                     @OA\Property(property="event", type="object",
@@ -184,7 +184,7 @@ class OrderController extends Controller
             $order = Order::create([
                 'organizer_id' => $event->organizer_id,
                 'buyer_id' => $guestUser->id,
-                'currency' => 'XOF', // Franc CFA
+                'currency' => 'XAF', // Franc CFA d'Afrique Centrale (CEMAC)
                 'subtotal_amount' => $subtotalAmount,
                 'fees_amount' => $feesAmount,
                 'tax_amount' => $taxAmount,
