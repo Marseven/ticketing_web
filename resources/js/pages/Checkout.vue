@@ -510,7 +510,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useEventsStore } from '../stores/events'
 import { useAuthStore } from '../stores/auth'
-import { guestService } from '../services/api'
+import { guestService, orderService } from '../services/api'
 import PhoneInput from '../components/PhoneInput.vue'
 import { 
   ExclamationCircleIcon,
@@ -1010,7 +1010,10 @@ export default {
           guest_email: isAuthenticated.value ? currentUser.value.email : 'guest@primea.ga'
         }
 
-        const orderResponse = await guestService.createGuestOrder(orderData)
+        // Utiliser le service approprié selon l'authentification
+        const orderResponse = isAuthenticated.value
+          ? await orderService.createOrder(orderData)
+          : await guestService.createGuestOrder(orderData)
         
         if (!orderResponse.data.success) {
           throw new Error(orderResponse.data.message || 'Erreur lors de la création de l\'achat')
@@ -1113,7 +1116,10 @@ export default {
           guest_email: isAuthenticated.value ? currentUser.value.email : 'guest@primea.ga'
         }
 
-        const orderResponse = await guestService.createGuestOrder(orderData)
+        // Utiliser le service approprié selon l'authentification
+        const orderResponse = isAuthenticated.value
+          ? await orderService.createOrder(orderData)
+          : await guestService.createGuestOrder(orderData)
         
         if (!orderResponse.data.success) {
           throw new Error(orderResponse.data.message || 'Erreur lors de la création de l\'achat')
@@ -1195,7 +1201,7 @@ export default {
       
       paymentPollingTimer.value = setInterval(async () => {
         try {
-          const response = await fetch(`/api/payments/${paymentId}/status`, {
+          const response = await fetch(`/api/v1/payments/${paymentId}/status`, {
             headers: {
               'Accept': 'application/json',
               'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
@@ -1249,11 +1255,11 @@ export default {
 
     const retryUSSDPush = async () => {
       if (!currentPayment.value) return
-      
+
       try {
         loading.value = true
-        
-        const response = await fetch('/api/payments/push-ussd', {
+
+        const response = await fetch('/api/v1/payments/push-ussd', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

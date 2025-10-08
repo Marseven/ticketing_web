@@ -135,17 +135,11 @@ trait HasImages
     /**
      * Obtenir l'URL par défaut selon le type
      */
-    protected function getDefaultImageUrl(string $size = 'medium'): string
+    protected function getDefaultImageUrl(string $size = 'medium'): ?string
     {
-        $type = $this->getImageType();
-        $defaults = [
-            'events' => '/images/defaults/event-default.jpg',
-            'venues' => '/images/defaults/venue-default.jpg',
-            'users' => '/images/defaults/user-default.jpg',
-            'organizers' => '/images/defaults/organizer-default.jpg',
-        ];
-        
-        return $defaults[$type] ?? '/images/defaults/placeholder.jpg';
+        // Retourner null au lieu d'une image par défaut qui n'existe pas
+        // Le frontend gérera l'affichage d'un placeholder
+        return null;
     }
 
     /**
