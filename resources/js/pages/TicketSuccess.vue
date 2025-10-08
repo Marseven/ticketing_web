@@ -147,6 +147,7 @@
 <script>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/vue/24/outline'
 
 export default {
@@ -158,6 +159,7 @@ export default {
   setup() {
     const route = useRoute()
     const router = useRouter()
+    const authStore = useAuthStore()
 
     const loading = ref(true)
     const error = ref('')
@@ -177,12 +179,25 @@ export default {
         loading.value = true
         error.value = ''
 
-        // Récupérer la commande via l'API avec le préfixe v1
-        const response = await fetch(`/api/v1/guest/orders/${reference}`, {
-          headers: {
-            'Accept': 'application/json'
+        // Déterminer quelle API utiliser selon l'authentification
+        const isAuthenticated = authStore.isAuthenticated
+        const apiUrl = isAuthenticated
+          ? `/api/v1/orders/${reference}`
+          : `/api/v1/guest/orders/${reference}`
+
+        const headers = {
+          'Accept': 'application/json'
+        }
+
+        // Ajouter le token si l'utilisateur est authentifié
+        if (isAuthenticated) {
+          const token = localStorage.getItem('auth_token') || localStorage.getItem('token')
+          if (token) {
+            headers['Authorization'] = `Bearer ${token}`
           }
-        })
+        }
+
+        const response = await fetch(apiUrl, { headers })
 
         if (!response.ok) {
           throw new Error('Commande introuvable')

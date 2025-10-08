@@ -646,9 +646,70 @@ class OrderController extends Controller
      */
     public function show(Request $request, $id): JsonResponse
     {
+        $user = $request->user();
+
+        // Chercher la commande par ID ou référence
+        if (is_numeric($id)) {
+            $order = $user->orders()->with(['tickets.event', 'tickets.ticketType', 'tickets.schedule'])->find($id);
+        } else {
+            $order = $user->orders()->with(['tickets.event', 'tickets.ticketType', 'tickets.schedule'])
+                ->where('reference', $id)->first();
+        }
+
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Commande introuvable'
+            ], 404);
+        }
+
+        // Récupérer l'événement et le schedule du premier ticket
+        $firstTicket = $order->tickets->first();
+        $event = $firstTicket?->event;
+        $schedule = $firstTicket?->schedule;
+
+        $orderData = [
+            'id' => $order->id,
+            'reference' => $order->reference,
+            'total_amount' => $order->total_amount,
+            'subtotal_amount' => $order->subtotal_amount,
+            'currency' => $order->currency ?? 'XAF',
+            'status' => $order->status,
+            'quantity' => $order->tickets->count(),
+            'created_at' => $order->created_at->format('d/m/Y H:i:s'),
+            'guest_email' => $user->email,
+            'event' => $event ? [
+                'id' => $event->id,
+                'title' => $event->title,
+                'slug' => $event->slug,
+                'image' => $event->getImageUrl('medium'),
+                'venue_name' => $event->venue_name,
+                'venue_city' => $event->venue_city
+            ] : null,
+            'schedule' => $schedule ? [
+                'id' => $schedule->id,
+                'starts_at' => $schedule->starts_at->format('d/m/Y H:i:s')
+            ] : null,
+            'tickets' => $order->tickets->map(function($ticket) {
+                return [
+                    'id' => $ticket->id,
+                    'code' => $ticket->code,
+                    'status' => $ticket->status,
+                    'ticket_type' => $ticket->ticketType ? [
+                        'id' => $ticket->ticketType->id,
+                        'name' => $ticket->ticketType->name,
+                        'price' => $ticket->ticketType->price
+                    ] : null
+                ];
+            })
+        ];
+
         return response()->json([
-            'message' => 'OrderController show method - À implémenter'
-        ], 501);
+            'success' => true,
+            'data' => [
+                'order' => $orderData
+            ]
+        ]);
     }
 
     /**
