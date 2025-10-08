@@ -441,7 +441,7 @@ class OrderController extends Controller
         $user = $request->user();
         
         $query = $user->orders()
-            ->with(['tickets.event', 'tickets.ticketType', 'tickets.schedule']);
+            ->with(['tickets.event.venue', 'tickets.ticketType', 'tickets.schedule']);
         
         // Filtrage par statut
         if ($request->filled('status')) {
@@ -486,9 +486,9 @@ class OrderController extends Controller
                     'id' => $event->id,
                     'title' => $event->title,
                     'slug' => $event->slug,
-                    'image' => $event->getImageUrl('medium'),
-                    'venue_name' => $event->venue_name,
-                    'venue_city' => $event->venue_city
+                    'image' => $event->image,
+                    'venue_name' => $event->venue?->name,
+                    'venue_city' => $event->venue?->city
                 ] : null,
                 'schedule' => $schedule ? [
                     'id' => $schedule->id,
@@ -653,9 +653,9 @@ class OrderController extends Controller
 
         // Chercher la commande par ID ou référence
         if (is_numeric($id)) {
-            $order = $user->orders()->with(['tickets.event', 'tickets.ticketType', 'tickets.schedule'])->find($id);
+            $order = $user->orders()->with(['tickets.event.venue', 'tickets.ticketType', 'tickets.schedule'])->find($id);
         } else {
-            $order = $user->orders()->with(['tickets.event', 'tickets.ticketType', 'tickets.schedule'])
+            $order = $user->orders()->with(['tickets.event.venue', 'tickets.ticketType', 'tickets.schedule'])
                 ->where('reference', $id)->first();
         }
 
@@ -687,9 +687,9 @@ class OrderController extends Controller
                 'id' => $event->id,
                 'title' => $event->title,
                 'slug' => $event->slug,
-                'image' => $event->getImageUrl('medium'),
-                'venue_name' => $event->venue_name,
-                'venue_city' => $event->venue_city
+                'image' => $event->image,
+                'venue_name' => $event->venue?->name,
+                'venue_city' => $event->venue?->city
             ] : null,
             'schedule' => $schedule ? [
                 'id' => $schedule->id,
