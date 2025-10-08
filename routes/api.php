@@ -30,18 +30,6 @@ Route::prefix('client')->group(function () {
     });
 });
 
-// Routes publiques pour les achats invités
-Route::prefix('guest')->group(function () {
-    // Commandes invité (sans authentification)
-    Route::post('orders', [App\Http\Controllers\Guest\OrderController::class, 'store']);
-    Route::get('orders/{reference}', [App\Http\Controllers\Guest\OrderController::class, 'show']);
-    
-    // Billets invité
-    Route::get('tickets/search', [App\Http\Controllers\Guest\TicketController::class, 'search']);
-    Route::get('tickets/{code}', [App\Http\Controllers\Guest\TicketController::class, 'show']);
-    Route::get('tickets/retrieve/{email}', [App\Http\Controllers\Guest\TicketController::class, 'retrieve']);
-});
-
 Route::prefix('payment')->group(function () {
     Route::get('success/{reference}', function ($reference) {
         return redirect('/payment-success?reference=' . $reference);
@@ -126,6 +114,18 @@ Route::prefix('v1')->group(function () {
     Route::prefix('payments')->middleware('auth:sanctum')->group(function () {
         Route::get('/', [App\Http\Controllers\Api\PaymentController::class, 'payments']);
         Route::get('{id}', [App\Http\Controllers\Api\PaymentController::class, 'payment']);
+    });
+
+    // Routes publiques pour les achats invités
+    Route::prefix('guest')->group(function () {
+        // Commandes invité (sans authentification)
+        Route::post('orders', [App\Http\Controllers\Guest\OrderController::class, 'store']);
+        Route::get('orders/{reference}', [App\Http\Controllers\Guest\OrderController::class, 'show']);
+
+        // Billets invité
+        Route::get('tickets/search', [App\Http\Controllers\Guest\TicketController::class, 'search']);
+        Route::get('tickets/{code}', [App\Http\Controllers\Guest\TicketController::class, 'show']);
+        Route::get('tickets/retrieve/{email}', [App\Http\Controllers\Guest\TicketController::class, 'retrieve']);
     });
 
     // Routes des tickets
