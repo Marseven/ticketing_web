@@ -114,12 +114,11 @@ class OrganizerController extends Controller
             $query->whereIn('organizer_id', $organizerIds);
         })->where('status', 'used')->count();
         
-        $totalRevenue = DB::table('tickets')
-            ->join('ticket_types', 'tickets.ticket_type_id', '=', 'ticket_types.id')
-            ->join('events', 'tickets.event_id', '=', 'events.id')
-            ->whereIn('events.organizer_id', $organizerIds)
-            ->whereIn('tickets.status', ['issued', 'used'])
-            ->sum('ticket_types.price');
+        // Calcul du revenu basé sur les commandes (subtotal_amount = net pour l'organisateur)
+        $totalRevenue = DB::table('orders')
+            ->whereIn('organizer_id', $organizerIds)
+            ->whereIn('status', ['completed', 'paid'])
+            ->sum('subtotal_amount');
 
         // Statistiques de scan des 7 derniers jours
         $scanStats = Checkin::whereHas('ticket.event', function ($query) use ($organizerIds) {
@@ -340,36 +339,60 @@ class OrganizerController extends Controller
         $totalTickets = $event->tickets->count();
         $soldTickets = $event->tickets->whereIn('status', ['issued', 'used'])->count();
         $usedTickets = $event->tickets->where('status', 'used')->count();
-        $revenue = $event->tickets->whereIn('status', ['issued', 'used'])
-            ->sum(function($ticket) {
-                return $ticket->ticketType->price;
-            });
+
+        // Calculer le revenu à partir des commandes complétées (subtotal_amount = net pour l'organisateur)
+        $revenue = \App\Models\Order::where('organizer_id', $event->organizer_id)
+            ->whereHas('tickets', function($query) use ($event) {
+                $query->where('event_id', $event->id);
+            })
+            ->whereIn('status', ['completed', 'paid'])
+            ->sum('subtotal_amount');
 
         // Ventes par type de ticket
-        $salesByType = $event->ticketTypes->map(function($type) {
+        $salesByType = $event->ticketTypes->map(function($type) use ($event) {
             $tickets = $type->tickets;
+            $soldCount = $tickets->whereIn('status', ['issued', 'used'])->count();
+
+            // Calculer le revenu net pour ce type de ticket (proportionnel au prix)
+            // On obtient le ratio de ce que l'organisateur reçoit par rapport au prix affiché
+            $orders = \App\Models\Order::where('organizer_id', $event->organizer_id)
+                ->whereHas('tickets', function($query) use ($type) {
+                    $query->where('ticket_type_id', $type->id);
+                })
+                ->whereIn('status', ['completed', 'paid'])
+                ->get();
+
+            $revenueForType = $orders->sum('subtotal_amount');
+
             return [
                 'type_name' => $type->name,
                 'price' => $type->price,
-                'total_capacity' => $type->capacity,
-                'sold' => $tickets->whereIn('status', ['issued', 'used'])->count(),
+                'total_capacity' => $type->available_quantity,
+                'sold' => $soldCount,
                 'used' => $tickets->where('status', 'used')->count(),
-                'revenue' => $tickets->whereIn('status', ['issued', 'used'])->count() * $type->price,
+                'revenue' => round($revenueForType, 2),
             ];
         });
 
-        // Ventes par jour
-        $salesByDay = $event->tickets->whereIn('status', ['issued', 'used'])
-            ->groupBy(function($ticket) {
-                return $ticket->created_at->format('Y-m-d');
+        // Ventes par jour (basé sur les commandes)
+        $salesByDay = \App\Models\Order::where('organizer_id', $event->organizer_id)
+            ->whereHas('tickets', function($query) use ($event) {
+                $query->where('event_id', $event->id);
             })
-            ->map(function($tickets, $date) {
+            ->whereIn('status', ['completed', 'paid'])
+            ->get()
+            ->groupBy(function($order) {
+                return $order->created_at->format('Y-m-d');
+            })
+            ->map(function($orders, $date) {
+                $ticketsCount = $orders->sum(function($order) {
+                    return $order->tickets->count();
+                });
+
                 return [
                     'date' => $date,
-                    'count' => $tickets->count(),
-                    'revenue' => $tickets->sum(function($ticket) {
-                        return $ticket->ticketType->price;
-                    }),
+                    'count' => $ticketsCount,
+                    'revenue' => round($orders->sum('subtotal_amount'), 2),
                 ];
             })->values();
 
@@ -486,12 +509,11 @@ class OrganizerController extends Controller
             $query->whereIn('organizer_id', $organizerIds);
         })->whereIn('status', ['issued', 'used'])->count();
         
-        $totalRevenue = DB::table('tickets')
-            ->join('ticket_types', 'tickets.ticket_type_id', '=', 'ticket_types.id')
-            ->join('events', 'tickets.event_id', '=', 'events.id')
-            ->whereIn('events.organizer_id', $organizerIds)
-            ->whereIn('tickets.status', ['issued', 'used'])
-            ->sum('ticket_types.price');
+        // Calcul du revenu basé sur les commandes (subtotal_amount = net pour l'organisateur)
+        $totalRevenue = DB::table('orders')
+            ->whereIn('organizer_id', $organizerIds)
+            ->whereIn('status', ['completed', 'paid'])
+            ->sum('subtotal_amount');
 
         return response()->json([
             'data' => [

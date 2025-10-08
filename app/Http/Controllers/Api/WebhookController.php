@@ -515,11 +515,11 @@ class WebhookController extends Controller
         if ($internalStatus === 'success') {
             $updateData['paid_at'] = now();
 
-            // Marquer la commande comme payée
+            // Marquer la commande comme payée (completed pour cohérence avec OrderController)
             $order = Order::find($payment->order_id);
             if ($order) {
                 $order->update([
-                    'status' => 'paid',
+                    'status' => 'completed',
                     'processed_at' => now(),
                 ]);
 

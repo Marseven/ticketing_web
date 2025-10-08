@@ -73,15 +73,19 @@ class PayoutService
             'auto_payout_threshold' => 0,
         ]);
 
-        // Ajouter le montant au solde (déduction des frais si applicable)
-        $netAmount = $this->calculateNetAmount($payment->amount, $payment->gateway);
+        // Utiliser le subtotal_amount de la commande (net après frais plateforme et taxes)
+        // Au lieu de calculer des frais supplémentaires sur le payment->amount
+        $order = $payment->order;
+        $netAmount = floatval($order->subtotal_amount);
+
         $organizerBalance->addBalance($netAmount);
 
         Log::info('Solde organisateur mis à jour', [
             'organizer_id' => $organizer->id,
             'gateway' => $payment->gateway,
-            'gross_amount' => $payment->amount,
-            'net_amount' => $netAmount,
+            'order_id' => $order->id,
+            'total_paid_by_customer' => $payment->amount,
+            'net_for_organizer' => $netAmount,
             'new_balance' => $organizerBalance->fresh()->balance
         ]);
 
