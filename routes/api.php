@@ -132,6 +132,7 @@ Route::prefix('v1')->group(function () {
     Route::prefix('tickets')->group(function () {
         Route::get('retrieve/{token}', [App\Http\Controllers\Api\TicketController::class, 'retrieve']);
         Route::post('validate', [App\Http\Controllers\Api\TicketController::class, 'validateTicket'])->middleware('auth:sanctum');
+        Route::get('{code}/pdf', [App\Http\Controllers\Api\TicketController::class, 'downloadPDF']);
         Route::get('{code}', [App\Http\Controllers\Api\TicketController::class, 'show'])->name('api.tickets.validate');
     });
 

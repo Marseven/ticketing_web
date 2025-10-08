@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 /**
  * @OA\Tag(
@@ -516,7 +517,7 @@ class TicketController extends Controller
                 'id' => $ticket->event->id,
                 'title' => $ticket->event->title,
                 'slug' => $ticket->event->slug,
-                'image_url' => $ticket->event->image_url,
+                'image_url' => $ticket->event->image, // Utilise l'accesseur qui construit l'URL complète
                 'venue_name' => $ticket->event->venue?->name ?? 'À définir',
             ],
             'ticket_type' => [
@@ -552,5 +553,39 @@ class TicketController extends Controller
         }
 
         return $data;
+    }
+
+    /**
+     * Télécharger le PDF du ticket
+     */
+    public function downloadPDF($code)
+    {
+        $ticket = Ticket::with(['event.venue', 'ticketType', 'buyer', 'schedule'])
+                       ->byCode($code)
+                       ->first();
+
+        if (!$ticket) {
+            abort(404, 'Ticket non trouvé');
+        }
+
+        // Générer le QR code
+        $qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" . urlencode($ticket->code);
+
+        // Préparer les données pour le PDF
+        $data = [
+            'ticket' => $ticket,
+            'qrCodeUrl' => $qrCodeUrl,
+            'event' => $ticket->event,
+            'ticketType' => $ticket->ticketType,
+            'buyer' => $ticket->buyer,
+            'schedule' => $ticket->schedule,
+            'venue' => $ticket->event->venue,
+        ];
+
+        // Générer le PDF
+        $pdf = Pdf::loadView('pdf.ticket', $data)
+                  ->setPaper('a4', 'portrait');
+
+        return $pdf->download('ticket-' . $ticket->code . '.pdf');
     }
 }

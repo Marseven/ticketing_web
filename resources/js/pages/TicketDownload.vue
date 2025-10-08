@@ -248,12 +248,8 @@ export default {
           // Transformer les données de l'API pour correspondre au format attendu
           const apiTicket = response.data.ticket
 
-          // Construire l'URL complète de l'image
-          const imageUrl = apiTicket.event.image_url
-            ? (apiTicket.event.image_url.startsWith('http')
-                ? apiTicket.event.image_url
-                : `${window.location.origin}${apiTicket.event.image_url}`)
-            : 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800'
+          // L'image_url vient déjà de l'accesseur qui construit l'URL complète
+          const imageUrl = apiTicket.event.image_url || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800'
 
           ticket.value = {
             id: apiTicket.id,
@@ -325,14 +321,10 @@ export default {
 
     const downloadTicket = async () => {
       try {
-        // En mode réel, on pourrait appeler une API pour générer le PDF
-        // Pour l'instant, simulation du téléchargement
-        const element = document.createElement('a')
-        element.href = 'data:application/pdf;base64,JVBERi0xLjMKJf////8KMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovT3V0bGluZXMgMiAwIFIKL1BhZ2VzIDMgMCBSCj4+CmVuZG9iago='
-        element.download = `ticket-${ticket.value?.reference || 'primea'}.pdf`
-        document.body.appendChild(element)
-        element.click()
-        document.body.removeChild(element)
+        const ticketCode = route.params.id
+
+        // Ouvrir le lien de téléchargement PDF dans un nouvel onglet
+        window.open(`/api/v1/tickets/${ticketCode}/pdf`, '_blank')
       } catch (err) {
         console.error('Erreur lors du téléchargement:', err)
         alert('Erreur lors du téléchargement du ticket')
