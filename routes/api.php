@@ -37,7 +37,7 @@ Route::prefix('guest')->group(function () {
     Route::get('orders/{reference}', [App\Http\Controllers\Guest\OrderController::class, 'show']);
     
     // Billets invité
-    Route::post('tickets/search', [App\Http\Controllers\Guest\TicketController::class, 'search']);
+    Route::get('tickets/search', [App\Http\Controllers\Guest\TicketController::class, 'search']);
     Route::get('tickets/{code}', [App\Http\Controllers\Guest\TicketController::class, 'show']);
     Route::get('tickets/retrieve/{email}', [App\Http\Controllers\Guest\TicketController::class, 'retrieve']);
 });

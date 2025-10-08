@@ -65,7 +65,11 @@ export const ticketService = {
 
   // Rechercher des tickets par email, téléphone ou référence
   searchTickets(searchData) {
-    return api.post('/guest/tickets/search', searchData)
+    const params = new URLSearchParams()
+    if (searchData.reference) params.append('reference', searchData.reference)
+    if (searchData.phone) params.append('phone', searchData.phone)
+    if (searchData.email) params.append('email', searchData.email)
+    return api.get(`/guest/tickets/search?${params.toString()}`)
   },
 
   // Ancienne méthode de recherche (conservée pour compatibilité)
