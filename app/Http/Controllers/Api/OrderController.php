@@ -134,9 +134,193 @@ class OrderController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        return response()->json([
-            'message' => 'OrderController store method - À implémenter'
-        ], 501);
+        // Validation des données
+        $validated = $request->validate([
+            'event_slug' => 'required|string|exists:events,slug',
+            'ticket_type_id' => 'required|integer|exists:ticket_types,id',
+            'quantity' => 'required|integer|min:1|max:10',
+        ]);
+
+        try {
+            \DB::beginTransaction();
+
+            $user = $request->user();
+
+            // Récupérer l'événement
+            $event = \App\Models\Event::where('slug', $validated['event_slug'])
+                ->with(['ticketTypes', 'schedules'])
+                ->first();
+
+            if (!$event) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Événement non trouvé'
+                ], 404);
+            }
+
+            // Vérifier que l'événement est publié et actif
+            if ($event->status !== 'published') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cet événement n\'est pas disponible pour la réservation'
+                ], 400);
+            }
+
+            // Récupérer le type de billet
+            $ticketType = $event->ticketTypes()
+                ->where('id', $validated['ticket_type_id'])
+                ->where('status', 'active')
+                ->first();
+
+            if (!$ticketType) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Type de billet non trouvé ou non disponible'
+                ], 404);
+            }
+
+            // Vérifier la disponibilité des billets
+            $soldQuantity = \DB::table('tickets')
+                ->where('ticket_type_id', $ticketType->id)
+                ->whereIn('status', ['issued', 'used'])
+                ->count();
+
+            // Si available_quantity est null, c'est illimité
+            if ($ticketType->available_quantity !== null) {
+                $availableQuantity = $ticketType->available_quantity - $soldQuantity;
+
+                if ($availableQuantity < $validated['quantity']) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Seulement {$availableQuantity} billets disponibles pour ce type"
+                    ], 400);
+                }
+            }
+
+            // Vérifier si l'événement est passé
+            if ($event->schedules->isNotEmpty()) {
+                $nextSchedule = $event->schedules->where('status', 'active')->first();
+                if ($nextSchedule && $nextSchedule->starts_at < now()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Impossible de réserver des billets pour un événement passé'
+                    ], 400);
+                }
+            }
+
+            // Calculer les montants
+            $unitPrice = $ticketType->price ?? 0;
+            $subtotalAmount = $unitPrice * $validated['quantity'];
+            $feesAmount = $this->calculateFees($subtotalAmount);
+            $taxAmount = $this->calculateTaxes($subtotalAmount);
+            $totalAmount = $subtotalAmount + $feesAmount + $taxAmount;
+
+            // Créer la commande pour l'utilisateur authentifié
+            $order = \App\Models\Order::create([
+                'organizer_id' => $event->organizer_id,
+                'buyer_id' => $user->id,
+                'currency' => 'XAF',
+                'subtotal_amount' => $subtotalAmount,
+                'fees_amount' => $feesAmount,
+                'tax_amount' => $taxAmount,
+                'total_amount' => $totalAmount,
+                'status' => 'pending',
+                'reference' => $this->generateOrderReference(),
+                'placed_at' => now(),
+                'is_guest_order' => false,
+            ]);
+
+            // Créer les billets
+            for ($i = 0; $i < $validated['quantity']; $i++) {
+                \App\Models\Ticket::create([
+                    'order_id' => $order->id,
+                    'event_id' => $event->id,
+                    'ticket_type_id' => $ticketType->id,
+                    'schedule_id' => $event->schedules->where('status', 'active')->first()?->id,
+                    'buyer_id' => $user->id,
+                    'code' => $this->generateTicketCode(),
+                    'status' => 'issued',
+                    'issued_at' => now(),
+                ]);
+            }
+
+            \DB::commit();
+
+            // Préparer la réponse
+            $orderData = [
+                'id' => $order->id,
+                'reference' => $order->reference,
+                'total_amount' => $order->total_amount,
+                'currency' => $order->currency,
+                'status' => $order->status,
+                'tickets_count' => $validated['quantity'],
+                'event' => [
+                    'title' => $event->title,
+                    'slug' => $event->slug,
+                ],
+                'placed_at' => $order->placed_at->toISOString(),
+            ];
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Commande créée avec succès',
+                'data' => [
+                    'order' => $orderData,
+                    'payment_url' => "/payment/{$order->reference}",
+                ]
+            ], 201);
+
+        } catch (\Exception $e) {
+            \DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la création de la commande',
+                'error' => config('app.debug') ? $e->getMessage() : 'Erreur interne'
+            ], 500);
+        }
+    }
+
+    /**
+     * Calculate fees for the order
+     */
+    private function calculateFees(float $subtotal): float
+    {
+        // Frais de service de 5%
+        return $subtotal * 0.05;
+    }
+
+    /**
+     * Calculate taxes for the order
+     */
+    private function calculateTaxes(float $subtotal): float
+    {
+        // TVA de 18% au Gabon
+        return $subtotal * 0.18;
+    }
+
+    /**
+     * Generate unique order reference
+     */
+    private function generateOrderReference(): string
+    {
+        do {
+            $reference = 'ORD-' . strtoupper(\Illuminate\Support\Str::random(8));
+        } while (\App\Models\Order::where('reference', $reference)->exists());
+
+        return $reference;
+    }
+
+    /**
+     * Generate unique ticket code
+     */
+    private function generateTicketCode(): string
+    {
+        do {
+            $code = 'TKT-' . strtoupper(\Illuminate\Support\Str::random(8));
+        } while (\App\Models\Ticket::where('code', $code)->exists());
+
+        return $code;
     }
 
     /**
