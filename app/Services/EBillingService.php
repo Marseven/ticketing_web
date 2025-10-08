@@ -182,7 +182,7 @@ class EBillingService
 
             return [
                 'success' => false,
-                'message' => 'Erreur technique lors du push USSD: ' . $e->getMessage(),
+                'message' => 'Erreur lors de l\'envoi du push USSD',
                 'error' => $e->getMessage()
             ];
         }
