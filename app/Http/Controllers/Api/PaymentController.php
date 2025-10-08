@@ -282,10 +282,13 @@ class PaymentController extends Controller
         // Créer un nouveau paiement
         $reference = $this->generateReference();
 
+        // Normaliser le provider pour correspondre à l'enum de la base
+        $provider = $this->normalizeProvider($request->gateway);
+
         $payment = Payment::create([
             'order_id' => $order->id,
             'provider_txn_ref' => $reference,
-            'provider' => $request->gateway,
+            'provider' => $provider,
             'amount' => $order->total_amount,
             'status' => 'pending',
             'payload' => [
@@ -294,6 +297,7 @@ class PaymentController extends Controller
                 'user_agent' => $request->header('User-Agent'),
                 'ip_address' => $request->ip(),
                 'expired_at' => now()->addMinutes(15)->toIso8601String(), // 15 minutes pour payer
+                'gateway_requested' => $request->gateway
             ]
         ]);
 
@@ -366,7 +370,7 @@ class PaymentController extends Controller
         // Selon le type de gateway, on peut soit rediriger vers E-Billing soit faire un push USSD
         switch ($payment->provider) {
             case 'airtelmoney':
-            case 'moovmoney':
+            case 'moovmoney4':
                 // Pour mobile money, on propose le push USSD en plus de la redirection
                 return [
                     'success' => true,
@@ -622,13 +626,26 @@ class PaymentController extends Controller
     }
 
     /**
+     * Normaliser le provider pour la base de données
+     */
+    private function normalizeProvider(string $gateway): string
+    {
+        return match($gateway) {
+            'moovmoney', 'moov', 'moovmoney4' => 'moovmoney4',
+            'airtelmoney', 'airtel' => 'airtelmoney',
+            'ORABANK_NG', 'card', 'visa' => 'ORABANK_NG',
+            default => $gateway,
+        };
+    }
+
+    /**
      * Obtenir le nom d'affichage de la passerelle
      */
     private function getGatewayName(?string $gateway): string
     {
         return match($gateway) {
             'airtelmoney' => 'Airtel Money',
-            'moovmoney' => 'Moov Money',
+            'moovmoney', 'moovmoney4' => 'Moov Money',
             'ORABANK_NG' => 'Visa/Mastercard',
             'card' => 'Carte bancaire',
             default => 'Inconnu',
@@ -968,9 +985,12 @@ class PaymentController extends Controller
         // Créer un nouveau paiement
         $reference = $this->generateReference();
 
+        // Normaliser le provider pour correspondre à l'enum de la base
+        $provider = $this->normalizeProvider($request->gateway);
+
         $payment = Payment::create([
             'order_id' => $order->id,
-            'provider' => $request->gateway, // airtelmoney, moovmoney, ou ORABANK_NG
+            'provider' => $provider, // airtelmoney, moovmoney4, ou ORABANK_NG
             'provider_txn_ref' => $reference,
             'amount' => $request->amount,
             'status' => 'initiated',
@@ -979,6 +999,7 @@ class PaymentController extends Controller
                 'user_agent' => $request->header('User-Agent'),
                 'ip_address' => $request->ip(),
                 'expired_at' => now()->addMinutes(15)->toIso8601String(),
+                'gateway_requested' => $request->gateway // Garder trace du gateway demandé
             ]
         ]);
 
