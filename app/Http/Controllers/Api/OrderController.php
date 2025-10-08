@@ -209,21 +209,24 @@ class OrderController extends Controller
             }
 
             // Calculer les montants
+            // Le prix affiché au client est le prix TTC (tout compris)
             $unitPrice = $ticketType->price ?? 0;
-            $subtotalAmount = $unitPrice * $validated['quantity'];
-            $feesAmount = $this->calculateFees($subtotalAmount);
-            $taxAmount = $this->calculateTaxes($subtotalAmount);
-            $totalAmount = $subtotalAmount + $feesAmount + $taxAmount;
+            $totalAmount = $unitPrice * $validated['quantity']; // Ce que le client paie
+
+            // Les frais et taxes sont déduits du montant total pour calculer le net organisateur
+            $feesAmount = $this->calculateFees($totalAmount);
+            $taxAmount = $this->calculateTaxes($totalAmount);
+            $subtotalAmount = $totalAmount - $feesAmount - $taxAmount; // Net reversé à l'organisateur
 
             // Créer la commande pour l'utilisateur authentifié
             $order = \App\Models\Order::create([
                 'organizer_id' => $event->organizer_id,
                 'buyer_id' => $user->id,
                 'currency' => 'XAF',
-                'subtotal_amount' => $subtotalAmount,
-                'fees_amount' => $feesAmount,
-                'tax_amount' => $taxAmount,
-                'total_amount' => $totalAmount,
+                'subtotal_amount' => $subtotalAmount, // Net pour l'organisateur
+                'fees_amount' => $feesAmount, // Frais plateforme
+                'tax_amount' => $taxAmount, // Taxes
+                'total_amount' => $totalAmount, // Total payé par le client
                 'status' => 'pending',
                 'reference' => $this->generateOrderReference(),
                 'placed_at' => now(),
@@ -673,6 +676,8 @@ class OrderController extends Controller
             'reference' => $order->reference,
             'total_amount' => $order->total_amount,
             'subtotal_amount' => $order->subtotal_amount,
+            'fees_amount' => $order->fees_amount,
+            'tax_amount' => $order->tax_amount,
             'currency' => $order->currency ?? 'XAF',
             'status' => $order->status,
             'quantity' => $order->tickets->count(),

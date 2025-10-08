@@ -279,7 +279,7 @@ export default {
               image: order.event.image || '/images/logo.png'
             },
             type: ticket.ticket_type?.name || 'Standard',
-            price: ticket.ticket_type?.price || (order.subtotal_amount / order.tickets_count),
+            price: ticket.ticket_type?.price || (order.total_amount / order.tickets_count),
             status: order.status === 'paid' || order.status === 'completed' ? 'active' : order.status === 'cancelled' ? 'expired' : 'active',
             purchaseDate: new Date(order.created_at.replace(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})/, '$3-$2-$1T$4:$5:$6')),
             orderId: order.id
