@@ -538,6 +538,7 @@ export default {
     const error = ref('')
     const phoneError = ref('')
     const countdownTimer = ref(null)
+    const currentTime = ref(new Date()) // Temps actuel réactif
 
     // État du compte à rebours pour l'événement
     const countdown = ref({
@@ -642,10 +643,9 @@ export default {
 
     const timeUntilEvent = computed(() => {
       if (!eventDate.value) return null
-      
-      const now = new Date()
-      const timeDiff = eventDate.value.getTime() - now.getTime()
-      
+
+      const timeDiff = eventDate.value.getTime() - currentTime.value.getTime()
+
       if (timeDiff <= 0) {
         return {
           days: 0,
@@ -821,10 +821,12 @@ export default {
       }
 
       // Mise à jour initiale
+      currentTime.value = new Date()
       updateCountdown()
 
       // Mise à jour chaque seconde
       countdownTimer.value = setInterval(() => {
+        currentTime.value = new Date() // Mettre à jour le temps actuel
         updateCountdown()
 
         // Arrêter le timer si l'événement est passé
