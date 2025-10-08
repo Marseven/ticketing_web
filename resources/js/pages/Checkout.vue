@@ -816,9 +816,6 @@ export default {
           minutes: timeLeft.minutes,
           seconds: timeLeft.seconds
         }
-        console.log('Checkout - Countdown updated:', countdown.value)
-      } else {
-        console.log('Checkout - timeUntilEvent is null')
       }
     }
 
