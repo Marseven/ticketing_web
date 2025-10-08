@@ -312,11 +312,8 @@ class OrderController extends Controller
             ->where('is_guest_order', true)
             ->with([
                 'tickets' => function($query) {
-                    $query->select('id', 'order_id', 'code', 'status', 'issued_at', 'used_at');
-                },
-                'event:id,title,slug',
-                'event.schedules' => function($query) {
-                    $query->where('status', 'active')->orderBy('starts_at');
+                    $query->select('id', 'order_id', 'event_id', 'ticket_type_id', 'code', 'status', 'issued_at', 'used_at')
+                          ->with(['event:id,title,slug', 'ticketType:id,name']);
                 }
             ])
             ->first();
@@ -328,6 +325,10 @@ class OrderController extends Controller
             ], 404);
         }
 
+        // Récupérer l'événement du premier ticket
+        $firstTicket = $order->tickets->first();
+        $event = $firstTicket ? $firstTicket->event : null;
+
         $orderData = [
             'reference' => $order->reference,
             'guest_name' => $order->guest_name,
@@ -336,21 +337,27 @@ class OrderController extends Controller
             'total_amount' => $order->total_amount,
             'currency' => $order->currency,
             'status' => $order->status,
-            'placed_at' => $order->placed_at->toISOString(),
+            'quantity' => $order->tickets->count(),
+            'placed_at' => $order->placed_at?->toISOString(),
+            'created_at' => $order->created_at?->toISOString(),
             'tickets' => $order->tickets->map(function($ticket) {
                 return [
+                    'id' => $ticket->id,
                     'code' => $ticket->code,
                     'status' => $ticket->status,
                     'issued_at' => $ticket->issued_at?->toISOString(),
                     'used_at' => $ticket->used_at?->toISOString(),
                     'qr_code_url' => "/api/guest/tickets/{$ticket->code}",
+                    'ticket_type' => [
+                        'id' => $ticket->ticketType?->id,
+                        'name' => $ticket->ticketType?->name,
+                    ]
                 ];
             }),
-            'event' => [
-                'title' => $order->event->title,
-                'slug' => $order->event->slug,
-                'date' => $order->event->schedules->first()?->starts_at,
-            ],
+            'event' => $event ? [
+                'title' => $event->title,
+                'slug' => $event->slug,
+            ] : null,
         ];
 
         return response()->json([

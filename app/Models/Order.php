@@ -22,6 +22,10 @@ class Order extends Model
         'status',
         'reference',
         'placed_at',
+        'is_guest_order',
+        'guest_name',
+        'guest_email',
+        'guest_phone',
     ];
 
     protected $casts = [
@@ -32,6 +36,7 @@ class Order extends Model
         'total_amount' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'is_guest_order' => 'boolean',
     ];
 
     /**
@@ -56,6 +61,21 @@ class Order extends Model
     public function tickets(): HasMany
     {
         return $this->hasMany(Ticket::class, 'order_id');
+    }
+
+    /**
+     * Get the event related to this order through the first ticket.
+     */
+    public function event()
+    {
+        return $this->hasOneThrough(
+            Event::class,
+            Ticket::class,
+            'order_id',  // Foreign key on tickets table
+            'id',        // Foreign key on events table
+            'id',        // Local key on orders table
+            'event_id'   // Local key on tickets table
+        );
     }
 
     /**
