@@ -292,7 +292,7 @@ class EBillingService
     {
         return match($gateway) {
             'airtelmoney', 'airtel' => 'airtelmoney',
-            'moovmoney', 'moov', 'moovmoney4' => 'moovmoney4',
+            'moovmoney', 'moov', 'moovmoney4' => 'moovmoney', // E-Billing attend probablement 'moovmoney' sans le 4
             'visa', 'card' => 'VISA',
             default => strtoupper($gateway)
         };
