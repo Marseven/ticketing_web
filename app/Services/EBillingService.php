@@ -38,16 +38,20 @@ class EBillingService
             $response = Http::withBasicAuth($this->username, $this->sharedKey)
                 ->withHeaders([
                     'Content-Type' => 'application/json',
+                    'Accept' => 'application/json',
                 ])
                 ->post($this->serverUrl, $data);
 
             $status = $response->status();
+            $responseBody = $response->body();
             $responseData = $response->json();
 
             Log::info('E-Billing createBill - Response', [
                 'status' => $status,
-                'response_body' => $responseData,
+                'response_raw' => $responseBody,
+                'response_json' => $responseData,
                 'response_headers' => $response->headers(),
+                'content_type' => $response->header('Content-Type'),
             ]);
 
             if ($status >= 200 && $status <= 299) {
