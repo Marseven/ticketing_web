@@ -14,10 +14,10 @@ class EBillingService
 
     public function __construct()
     {
-        $this->username = env('EBILLING_USERNAME');
-        $this->sharedKey = env('EBILLING_SHARED_KEY');
-        $this->serverUrl = env('EBILLING_SERVER_URL');
-        $this->postUrl = env('EBILLING_POST_URL');
+        $this->username = env('EBILLING_USERNAME') ?? throw new \Exception('EBILLING_USERNAME n\'est pas configuré dans .env');
+        $this->sharedKey = env('EBILLING_SHARED_KEY') ?? throw new \Exception('EBILLING_SHARED_KEY n\'est pas configuré dans .env');
+        $this->serverUrl = env('EBILLING_SERVER_URL') ?? throw new \Exception('EBILLING_SERVER_URL n\'est pas configuré dans .env');
+        $this->postUrl = env('EBILLING_POST_URL') ?? throw new \Exception('EBILLING_POST_URL n\'est pas configuré dans .env');
     }
 
     /**

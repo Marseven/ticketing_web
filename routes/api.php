@@ -42,8 +42,11 @@ Route::prefix('guest')->group(function () {
     Route::get('tickets/retrieve/{email}', [App\Http\Controllers\Guest\TicketController::class, 'retrieve']);
 });
 
-// Routes publiques pour les paiements (status checking accessible sans auth)
+// Routes publiques pour les paiements (status checking et initiation accessibles sans auth)
 Route::prefix('payments')->group(function () {
+    Route::post('initiate', [App\Http\Controllers\Api\PaymentController::class, 'initiateGuestPayment']);
+    Route::post('push-ussd', [App\Http\Controllers\Api\PaymentController::class, 'pushUSSD']);
+    Route::post('kyc', [App\Http\Controllers\Api\PaymentController::class, 'checkKYC']);
     Route::get('{id}/status', [App\Http\Controllers\Api\PaymentController::class, 'getPaymentStatus']);
 });
 
@@ -119,18 +122,10 @@ Route::prefix('v1')->group(function () {
         Route::delete('profile/account', [App\Http\Controllers\Api\ClientController::class, 'deleteAccount']);
     });
 
-    // Routes de paiement
-    Route::prefix('payments')->group(function () {
-        Route::middleware('auth:sanctum')->group(function () {
-            Route::get('/', [App\Http\Controllers\Api\PaymentController::class, 'payments']);
-            Route::get('{id}', [App\Http\Controllers\Api\PaymentController::class, 'payment']);
-            Route::get('{id}/status', [App\Http\Controllers\Api\PaymentController::class, 'getPaymentStatus']);
-        });
-        
-        // Routes publiques pour les paiements invités
-        Route::post('initiate', [App\Http\Controllers\Api\PaymentController::class, 'initiateGuestPayment']);
-        Route::post('push-ussd', [App\Http\Controllers\Api\PaymentController::class, 'pushUSSD']);
-        Route::post('kyc', [App\Http\Controllers\Api\PaymentController::class, 'checkKYC']);
+    // Routes de paiement (authentification requise)
+    Route::prefix('payments')->middleware('auth:sanctum')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\PaymentController::class, 'payments']);
+        Route::get('{id}', [App\Http\Controllers\Api\PaymentController::class, 'payment']);
     });
 
     // Routes des tickets
