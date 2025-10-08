@@ -66,11 +66,21 @@
               </div>
 
               <div class="flex justify-between">
-                <span class="text-gray-600">Montant payé :</span>
-                <span class="font-semibold text-green-600">{{ formatPrice(order.total_amount) }} FCFA</span>
+                <span class="text-gray-600">Prix des tickets :</span>
+                <span class="font-semibold">{{ formatPrice(order.subtotal_amount) }} FCFA</span>
               </div>
 
               <div class="flex justify-between">
+                <span class="text-gray-600">Frais et taxes :</span>
+                <span class="font-semibold text-gray-700">{{ formatPrice(order.total_amount - order.subtotal_amount) }} FCFA</span>
+              </div>
+
+              <div class="flex justify-between pt-2 border-t border-gray-300">
+                <span class="text-gray-800 font-semibold">Total payé :</span>
+                <span class="font-bold text-green-600 text-lg">{{ formatPrice(order.total_amount) }} FCFA</span>
+              </div>
+
+              <div class="flex justify-between mt-3">
                 <span class="text-gray-600">Date :</span>
                 <span class="font-semibold">{{ formatDate(order.created_at) }}</span>
               </div>
