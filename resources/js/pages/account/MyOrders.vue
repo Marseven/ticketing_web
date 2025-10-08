@@ -347,10 +347,10 @@ export default {
           id: order.id,
           reference: order.order_number,
           orderDate: new Date(order.created_at.replace(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})/, '$3-$2-$1T$4:$5:$6')),
-          status: order.status === 'paid' ? 'confirmed' : order.status,
+          status: order.status === 'paid' || order.status === 'completed' ? 'confirmed' : order.status,
           paymentMethod: 'airtel', // Par défaut
           transactionId: `TXN-${order.order_number}`,
-          total: order.total_amount,
+          total: parseFloat(order.total_amount) || 0,
           showDetails: false,
           tickets: [{
             id: order.id,
@@ -408,7 +408,7 @@ export default {
     const stats = computed(() => ({
       totalOrders: orders.value.length,
       confirmedOrders: orders.value.filter(o => o.status === 'confirmed').length,
-      totalSpent: orders.value.filter(o => o.status === 'confirmed').reduce((sum, o) => sum + o.total, 0),
+      totalSpent: orders.value.filter(o => o.status === 'confirmed').reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0),
       pendingOrders: orders.value.filter(o => o.status === 'pending').length
     }))
 
