@@ -101,10 +101,11 @@ class OrganizerController extends Controller
         }
 
         $organizerIds = $user->organizers->pluck('id');
-        
+
         // Statistiques globales
         $totalEvents = Event::whereIn('organizer_id', $organizerIds)->count();
-        $activeEvents = Event::whereIn('organizer_id', $organizerIds)->active()->count();
+        $publishedEvents = Event::whereIn('organizer_id', $organizerIds)->where('status', 'published')->count();
+        $draftEvents = Event::whereIn('organizer_id', $organizerIds)->where('status', 'draft')->count();
         
         $totalTickets = Ticket::whereHas('event', function ($query) use ($organizerIds) {
             $query->whereIn('organizer_id', $organizerIds);
@@ -162,8 +163,12 @@ class OrganizerController extends Controller
         return response()->json([
             'stats' => [
                 'total_events' => $totalEvents,
-                'active_events' => $activeEvents,
+                'published_events' => $publishedEvents,
+                'draft_events' => $draftEvents,
                 'total_tickets' => $totalTickets,
+                'tickets_sold' => $usedTickets + Ticket::whereHas('event', function ($query) use ($organizerIds) {
+                    $query->whereIn('organizer_id', $organizerIds);
+                })->where('status', 'issued')->count(),
                 'used_tickets' => $usedTickets,
                 'usage_rate' => $totalTickets > 0 ? round(($usedTickets / $totalTickets) * 100, 1) : 0,
                 'total_revenue' => round($totalRevenue, 2),
@@ -300,7 +305,10 @@ class OrganizerController extends Controller
         $organizerIds = $user->organizers->pluck('id');
 
         $query = Event::whereIn('organizer_id', $organizerIds)
-            ->with(['schedules', 'ticketTypes', 'venue', 'category'])
+            ->with(['schedules', 'ticketTypes', 'venue', 'category', 'tickets'])
+            ->withCount(['tickets as tickets_sold_count' => function($q) {
+                $q->whereIn('status', ['issued', 'used']);
+            }])
             ->orderBy('created_at', 'desc');
 
         // Filtres
@@ -309,6 +317,26 @@ class OrganizerController extends Controller
         }
 
         $events = $query->paginate(15);
+
+        // Ajouter les stats de vente à chaque événement
+        $events->getCollection()->transform(function($event) {
+            // Calculer les revenus pour cet événement
+            $revenue = \App\Models\Order::where('organizer_id', $event->organizer_id)
+                ->whereHas('tickets', function($query) use ($event) {
+                    $query->where('event_id', $event->id);
+                })
+                ->whereIn('status', ['completed', 'paid'])
+                ->sum('subtotal_amount');
+
+            // Calculer la capacité totale
+            $totalCapacity = $event->ticketTypes->sum('available_quantity');
+
+            $event->tickets_sold = $event->tickets_sold_count ?? 0;
+            $event->revenue = round($revenue, 2);
+            $event->total_capacity = $totalCapacity;
+
+            return $event;
+        });
 
         return response()->json([
             'success' => true,
@@ -501,14 +529,15 @@ class OrganizerController extends Controller
         }
 
         $organizerIds = $user->organizers->pluck('id');
-        
+
         $totalEvents = Event::whereIn('organizer_id', $organizerIds)->count();
-        $activeEvents = Event::whereIn('organizer_id', $organizerIds)->active()->count();
-        
+        $publishedEvents = Event::whereIn('organizer_id', $organizerIds)->where('status', 'published')->count();
+        $draftEvents = Event::whereIn('organizer_id', $organizerIds)->where('status', 'draft')->count();
+
         $ticketsSold = Ticket::whereHas('event', function ($query) use ($organizerIds) {
             $query->whereIn('organizer_id', $organizerIds);
         })->whereIn('status', ['issued', 'used'])->count();
-        
+
         // Calcul du revenu basé sur les commandes (subtotal_amount = net pour l'organisateur)
         $totalRevenue = DB::table('orders')
             ->whereIn('organizer_id', $organizerIds)
@@ -518,7 +547,8 @@ class OrganizerController extends Controller
         return response()->json([
             'data' => [
                 'total_events' => $totalEvents,
-                'active_events' => $activeEvents,
+                'published_events' => $publishedEvents,
+                'draft_events' => $draftEvents,
                 'tickets_sold' => $ticketsSold,
                 'total_revenue' => round($totalRevenue, 2)
             ]
@@ -541,19 +571,31 @@ class OrganizerController extends Controller
         $organizerIds = $user->organizers->pluck('id');
 
         $recentEvents = Event::whereIn('organizer_id', $organizerIds)
-            ->with(['venue:id,name', 'ticketTypes'])
+            ->with(['venue:id,name', 'ticketTypes', 'tickets'])
+            ->withCount(['tickets as tickets_sold_count' => function($query) {
+                $query->whereIn('status', ['issued', 'used']);
+            }])
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get()
             ->map(function ($event) {
+                // Calculer les revenus pour cet événement
+                $revenue = \App\Models\Order::where('organizer_id', $event->organizer_id)
+                    ->whereHas('tickets', function($query) use ($event) {
+                        $query->where('event_id', $event->id);
+                    })
+                    ->whereIn('status', ['completed', 'paid'])
+                    ->sum('subtotal_amount');
+
                 return [
                     'id' => $event->id,
                     'title' => $event->title,
                     'slug' => $event->slug,
                     'venue_name' => $event->venue->name ?? '',
                     'event_date' => $event->event_date,
-                    'status' => $event->is_active ? 'active' : 'draft',
-                    'tickets_sold' => $event->tickets()->whereIn('status', ['issued', 'used'])->count()
+                    'status' => $event->status, // Utiliser status au lieu de is_active
+                    'tickets_sold' => $event->tickets_sold_count ?? 0,
+                    'revenue' => round($revenue, 2)
                 ];
             });
 
