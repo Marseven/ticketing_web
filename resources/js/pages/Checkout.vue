@@ -297,13 +297,13 @@
                     <div class="bg-blue-50 border border-blue-200 rounded-primea-lg p-4 text-center">
                       <p class="text-blue-800 mb-4 font-semibold">Paiement Visa sécurisé</p>
                       <p class="text-blue-600 text-sm mb-4">Vous allez être redirigé vers notre partenaire de paiement sécurisé</p>
-                      <button 
-                        type="button"
-                        @click="redirectToVisaPayment"
-                        class="bg-blue-600 text-white px-6 py-3 rounded-primea-lg font-semibold hover:bg-blue-700 transition-all duration-200 flex items-center justify-center gap-2 mx-auto"
+                      <button
+                        type="submit"
+                        :disabled="loading || !isFormValid"
+                        class="bg-blue-600 text-white px-6 py-3 rounded-primea-lg font-semibold hover:bg-blue-700 transition-all duration-200 flex items-center justify-center gap-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <img 
-                          src="/images/visa-logo.png" 
+                        <img
+                          src="/images/visa-logo.png"
                           alt="Visa"
                           class="h-6 w-auto"
                           onerror="this.style.display='none'"
@@ -1353,7 +1353,6 @@ export default {
       loadEvent,
       validatePhoneNumber,
       selectPaymentMethod,
-      redirectToVisaPayment,
       processOrder,
       goBack,
       // Variables USSD Push
