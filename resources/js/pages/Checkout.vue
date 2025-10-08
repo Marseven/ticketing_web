@@ -366,6 +366,14 @@
                         </button>
 
                         <button
+                          v-if="currentPayment.payment_url && currentPayment.bill_id"
+                          @click="payViaWebPage"
+                          class="bg-green-600 text-white px-4 py-2 rounded-primea hover:bg-green-700 transition-colors"
+                        >
+                          Payer via page web
+                        </button>
+
+                        <button
                           @click="changeOperator"
                           :disabled="ussdCountdown > 0"
                           class="bg-gray-500 text-white px-4 py-2 rounded-primea hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1057,10 +1065,19 @@ export default {
               reference: order.reference,
               phone: orderForm.value.phoneNumber,
               gateway: orderForm.value.paymentMethod === 'airtel' ? 'airtelmoney' : 'moovmoney',
-              amount: totalAmount.value
+              amount: totalAmount.value,
+              bill_id: paymentResult.data.bill_id,
+              payment_url: paymentResult.data.payment_url
             })
           } else {
-            throw new Error(pushResult.message || 'Erreur lors de l\'envoi du push USSD')
+            // Si le push échoue (timeout ou erreur), proposer le paiement via page E-Billing
+            console.warn('Push USSD échoué, redirection vers page de paiement:', pushResult.message)
+
+            // Construire l'URL de paiement E-Billing
+            const eBillingUrl = `${paymentResult.data.payment_url}?invoice=${paymentResult.data.bill_id}`
+
+            // Rediriger vers la page de paiement E-Billing
+            window.location.href = eBillingUrl
           }
         } else {
           throw new Error('Erreur lors de la création de la facture E-Billing')
@@ -1255,6 +1272,16 @@ export default {
       }
     }
 
+    const payViaWebPage = () => {
+      if (!currentPayment.value?.payment_url || !currentPayment.value?.bill_id) {
+        console.error('URL de paiement manquante')
+        return
+      }
+
+      const eBillingUrl = `${currentPayment.value.payment_url}?invoice=${currentPayment.value.bill_id}`
+      window.location.href = eBillingUrl
+    }
+
     const changeOperator = () => {
       cancelUSSDPush()
       // Réinitialiser le formulaire pour permettre de choisir un autre opérateur
@@ -1334,6 +1361,7 @@ export default {
       startPaymentPolling,
       cancelUSSDPush,
       retryUSSDPush,
+      payViaWebPage,
       changeOperator,
       formatCountdown,
       formatPhoneForDisplay,
