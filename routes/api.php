@@ -42,14 +42,6 @@ Route::prefix('guest')->group(function () {
     Route::get('tickets/retrieve/{email}', [App\Http\Controllers\Guest\TicketController::class, 'retrieve']);
 });
 
-// Routes publiques pour les paiements (status checking et initiation accessibles sans auth)
-Route::prefix('payments')->group(function () {
-    Route::post('initiate', [App\Http\Controllers\Api\PaymentController::class, 'initiateGuestPayment']);
-    Route::post('push-ussd', [App\Http\Controllers\Api\PaymentController::class, 'pushUSSD']);
-    Route::post('kyc', [App\Http\Controllers\Api\PaymentController::class, 'checkKYC']);
-    Route::get('{id}/status', [App\Http\Controllers\Api\PaymentController::class, 'getPaymentStatus']);
-});
-
 Route::prefix('payment')->group(function () {
     Route::get('success/{reference}', function ($reference) {
         return redirect('/payment-success?reference=' . $reference);
@@ -120,6 +112,14 @@ Route::prefix('v1')->group(function () {
         Route::put('profile/password', [App\Http\Controllers\Api\ClientController::class, 'updatePassword']);
         Route::put('profile/preferences', [App\Http\Controllers\Api\ClientController::class, 'updatePreferences']);
         Route::delete('profile/account', [App\Http\Controllers\Api\ClientController::class, 'deleteAccount']);
+    });
+
+    // Routes publiques pour les paiements (status checking et initiation accessibles sans auth)
+    Route::prefix('payments')->group(function () {
+        Route::post('initiate', [App\Http\Controllers\Api\PaymentController::class, 'initiateGuestPayment']);
+        Route::post('push-ussd', [App\Http\Controllers\Api\PaymentController::class, 'pushUSSD']);
+        Route::post('kyc', [App\Http\Controllers\Api\PaymentController::class, 'checkKYC']);
+        Route::get('{id}/status', [App\Http\Controllers\Api\PaymentController::class, 'getPaymentStatus']);
     });
 
     // Routes de paiement (authentification requise)
