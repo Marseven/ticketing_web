@@ -105,11 +105,19 @@ class EBillingService
                 'payer_msisdn' => $msisdn
             ];
 
-            Log::info('E-Billing API Call - Push USSD', [
+            Log::info('🚀 E-Billing API Call - Push USSD', [
                 'url' => $url,
                 'bill_id' => $billId,
                 'payload' => $payload,
+                'auth_username' => $this->username,
+                'timeout' => 30,
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json',
+                ]
             ]);
+
+            $startTime = microtime(true);
 
             $response = Http::timeout(30) // Timeout de 30s pour le push USSD
                 ->withBasicAuth($this->username, $this->sharedKey)
@@ -119,12 +127,15 @@ class EBillingService
                 ])
                 ->post($url, $payload);
 
+            $duration = round((microtime(true) - $startTime) * 1000, 2);
+
             $status = $response->status();
             $responseBody = $response->body();
             $responseData = $response->json();
 
-            Log::info('E-Billing API Response - Push USSD', [
+            Log::info('✅ E-Billing API Response - Push USSD', [
                 'status' => $status,
+                'duration_ms' => $duration,
                 'response_raw' => $responseBody,
                 'response_json' => $responseData,
                 'response_headers' => $response->headers(),
@@ -153,12 +164,20 @@ class EBillingService
             ];
 
         } catch (\Exception $e) {
-            Log::error('E-Billing pushUSSD error', [
+            $isTimeout = str_contains($e->getMessage(), 'timeout') || str_contains($e->getMessage(), 'timed out');
+
+            Log::error('💥 E-Billing pushUSSD error' . ($isTimeout ? ' (TIMEOUT)' : ''), [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'error_type' => get_class($e),
+                'is_timeout' => $isTimeout,
                 'bill_id' => $billId,
+                'payment_system' => $paymentSystem,
+                'msisdn' => $msisdn,
+                'url' => $url ?? null,
+                'payload_sent' => $payload ?? null,
                 'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return [

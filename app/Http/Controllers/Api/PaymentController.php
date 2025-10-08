@@ -1202,7 +1202,23 @@ class PaymentController extends Controller
             }
 
             // Envoyer le push USSD
+            Log::info('📱 Envoi Push USSD', [
+                'payment_id' => $payment->id,
+                'bill_id' => $billId,
+                'payment_system' => $paymentSystem,
+                'formatted_phone' => $formattedPhone,
+                'gateway' => $request->gateway,
+                'order_reference' => $payment->order->reference ?? null
+            ]);
+
             $result = $eBillingService->pushUSSD($billId, $paymentSystem, $formattedPhone);
+
+            Log::info('📥 Résultat Push USSD', [
+                'payment_id' => $payment->id,
+                'bill_id' => $billId,
+                'success' => $result['success'] ?? false,
+                'result' => $result
+            ]);
 
             if ($result['success']) {
                 $payment->update([
