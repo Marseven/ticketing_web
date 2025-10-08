@@ -582,9 +582,14 @@ class PaymentController extends Controller
      * 
      * Vérifier le statut d'un paiement
      */
-    public function getPaymentStatus($id): JsonResponse
+    public function getPaymentStatus($idOrReference): JsonResponse
     {
-        $payment = Payment::find($id);
+        // Chercher par ID si c'est un nombre, sinon par référence
+        if (is_numeric($idOrReference)) {
+            $payment = Payment::find($idOrReference);
+        } else {
+            $payment = Payment::where('provider_txn_ref', $idOrReference)->first();
+        }
 
         if (!$payment) {
             return response()->json([
@@ -592,6 +597,9 @@ class PaymentController extends Controller
                 'message' => 'Paiement introuvable'
             ], 404);
         }
+
+        // Charger la relation order
+        $payment->load('order');
 
         // Vérifier si le paiement a expiré
         $expiredAt = isset($payment->payload['expired_at']) ? \Carbon\Carbon::parse($payment->payload['expired_at']) : null;
@@ -610,6 +618,10 @@ class PaymentController extends Controller
                     'gateway' => $this->getGatewayName($payment->provider),
                     'expires_at' => isset($payment->payload['expired_at']) ? \Carbon\Carbon::parse($payment->payload['expired_at'])->format('Y-m-d H:i:s') : null,
                     'paid_at' => $payment->paid_at?->format('Y-m-d H:i:s'),
+                    'order' => [
+                        'id' => $payment->order->id,
+                        'reference' => $payment->order->reference
+                    ]
                 ]
             ],
             'message' => 'Statut du paiement'

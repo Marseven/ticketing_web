@@ -17,6 +17,7 @@ const ResetPassword = () => import('./pages/auth/ResetPassword.vue');
 const TicketRetrieve = () => import('./pages/TicketRetrieve.vue');
 const TicketDownload = () => import('./pages/TicketDownload.vue');
 const TicketSuccess = () => import('./pages/TicketSuccess.vue');
+const PaymentSuccess = () => import('./pages/PaymentSuccess.vue');
 
 // Espace client
 const Account = () => import('./pages/account/Account.vue');
@@ -70,6 +71,7 @@ const routes = [
     { path: '/ticket/:id/download', component: TicketDownload, name: 'ticket-download' },
     { path: '/ticket/:id', component: TicketDownload, name: 'ticket-view' },
     { path: '/ticket-success', component: TicketSuccess, name: 'ticket-success' },
+    { path: '/payment-success', component: PaymentSuccess, name: 'payment-success' },
     
     // Routes espace client
     { 
