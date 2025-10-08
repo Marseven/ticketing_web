@@ -265,20 +265,22 @@ export default {
         
         // Transformer les achats en tickets pour l'affichage
         tickets.value = orders.value.flatMap(order => {
-          if (!order.event) return []
-          
-          return Array.from({ length: order.tickets_count || 1 }, (_, index) => ({
-            id: `${order.id}-${index}`,
-            reference: `${order.order_number}-${index + 1}`,
+          if (!order.event || !order.tickets) return []
+
+          return order.tickets.map((ticket, index) => ({
+            id: ticket.id,
+            code: ticket.code,
+            reference: ticket.code,
             event: {
               title: order.event.title,
+              slug: order.event.slug,
               date: order.schedule?.starts_at ? new Date(order.schedule.starts_at.replace(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})/, '$3-$2-$1T$4:$5:$6')) : new Date(),
               venue: `${order.event.venue_name}${order.event.venue_city ? ', ' + order.event.venue_city : ''}`,
-              image: '/images/default-event.jpg'
+              image: order.event.image || '/images/logo.png'
             },
-            type: 'Standard',
-            price: order.total_amount / (order.tickets_count || 1),
-            status: order.status === 'paid' ? 'active' : order.status === 'cancelled' ? 'expired' : 'active',
+            type: ticket.ticket_type?.name || 'Standard',
+            price: ticket.ticket_type?.price || (order.subtotal_amount / order.tickets_count),
+            status: order.status === 'paid' || order.status === 'completed' ? 'active' : order.status === 'cancelled' ? 'expired' : 'active',
             purchaseDate: new Date(order.created_at.replace(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})/, '$3-$2-$1T$4:$5:$6')),
             orderId: order.id
           }))
@@ -376,12 +378,16 @@ export default {
     }
 
     const viewTicket = (ticket) => {
-      router.push(`/ticket/${ticket.id}`)
+      router.push(`/ticket/${ticket.code}`)
     }
 
-    const downloadTicket = (ticket) => {
-      console.log('Télécharger le ticket:', ticket.reference)
-      // Logique de téléchargement
+    const downloadTicket = async (ticket) => {
+      try {
+        // Ouvrir le PDF dans un nouvel onglet
+        window.open(`/api/v1/tickets/${ticket.code}/pdf`, '_blank')
+      } catch (err) {
+        console.error('Erreur lors du téléchargement du ticket:', err)
+      }
     }
 
     return {

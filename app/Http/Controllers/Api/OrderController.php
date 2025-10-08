@@ -469,18 +469,21 @@ class OrderController extends Controller
             $firstTicket = $order->tickets->first();
             $event = $firstTicket?->event;
             $schedule = $firstTicket?->schedule;
-            
+
             return [
                 'id' => $order->id,
                 'order_number' => $order->reference,
                 'status' => $order->status === 'completed' ? 'paid' : $order->status,
                 'total_amount' => $order->total_amount,
+                'subtotal_amount' => $order->subtotal_amount,
                 'currency' => $order->currency ?? 'XAF',
                 'created_at' => $order->created_at->format('d/m/Y H:i:s'),
                 'paid_at' => $order->status === 'completed' ? $order->updated_at->format('d/m/Y H:i:s') : null,
                 'event' => $event ? [
                     'id' => $event->id,
                     'title' => $event->title,
+                    'slug' => $event->slug,
+                    'image' => $event->getImageUrl('medium'),
                     'venue_name' => $event->venue_name,
                     'venue_city' => $event->venue_city
                 ] : null,
@@ -488,6 +491,18 @@ class OrderController extends Controller
                     'id' => $schedule->id,
                     'starts_at' => $schedule->starts_at->format('d/m/Y H:i:s')
                 ] : null,
+                'tickets' => $order->tickets->map(function($ticket) {
+                    return [
+                        'id' => $ticket->id,
+                        'code' => $ticket->code,
+                        'status' => $ticket->status,
+                        'ticket_type' => $ticket->ticketType ? [
+                            'id' => $ticket->ticketType->id,
+                            'name' => $ticket->ticketType->name,
+                            'price' => $ticket->ticketType->price
+                        ] : null
+                    ];
+                }),
                 'tickets_count' => $order->tickets->count()
             ];
         });
