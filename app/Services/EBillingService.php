@@ -226,8 +226,8 @@ class EBillingService
     public function getPaymentSystemName(string $gateway): string
     {
         return match($gateway) {
-            'airtelmoney', 'airtel' => 'AM',
-            'moovmoney', 'moov' => 'MM', // Moov Money 
+            'airtelmoney', 'airtel' => 'airtelmoney',
+            'moovmoney', 'moov', 'moovmoney4' => 'moovmoney4',
             'visa', 'card' => 'VISA',
             default => strtoupper($gateway)
         };
