@@ -792,9 +792,16 @@ class PaymentController extends Controller
                 ]);
             }
 
+            Log::warning('Push USSD échoué', [
+                'payment_id' => $payment->id,
+                'result' => $result
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => $result['message'] ?? 'Erreur lors de l\'envoi du push USSD'
+                'message' => $result['message'] ?? 'Erreur lors de l\'envoi du push USSD',
+                'details' => $result['details'] ?? null,
+                'error_code' => $result['status'] ?? null
             ], 400);
 
         } catch (\Exception $e) {
@@ -802,12 +809,13 @@ class PaymentController extends Controller
                 'payment_id' => $payment->id,
                 'gateway' => $request->gateway,
                 'phone' => $request->phone,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur technique lors de l\'envoi du push USSD'
+                'message' => 'Erreur technique: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -1185,9 +1193,16 @@ class PaymentController extends Controller
                 ]);
             }
 
+            Log::warning('Push USSD échoué', [
+                'payment_id' => $payment->id,
+                'result' => $result
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => $result['message'] ?? 'Erreur lors de l\'envoi du push USSD'
+                'message' => $result['message'] ?? 'Erreur lors de l\'envoi du push USSD',
+                'details' => $result['details'] ?? null,
+                'error_code' => $result['status'] ?? null
             ], 400);
 
         } catch (\Exception $e) {
@@ -1195,12 +1210,13 @@ class PaymentController extends Controller
                 'payment_id' => $payment->id,
                 'gateway' => $request->gateway,
                 'phone' => $request->phone,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur technique lors de l\'envoi du push USSD'
+                'message' => 'Erreur technique: ' . $e->getMessage()
             ], 500);
         }
     }

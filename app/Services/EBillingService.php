@@ -137,21 +137,31 @@ class EBillingService
                 ];
             }
 
-            return [
-                'success' => false,
-                'message' => $responseData['message'] ?? 'Erreur lors du push USSD',
-                'status' => $status
-            ];
-
-        } catch (\Exception $e) {
-            Log::error('E-Billing pushUSSD error', [
-                'error' => $e->getMessage(),
+            Log::warning('E-Billing pushUSSD - Non-success status', [
+                'status' => $status,
+                'response' => $responseData,
                 'bill_id' => $billId
             ]);
 
             return [
                 'success' => false,
-                'message' => 'Erreur lors du push USSD',
+                'message' => $responseData['message'] ?? 'Erreur lors du push USSD',
+                'status' => $status,
+                'details' => $responseData
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('E-Billing pushUSSD error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'bill_id' => $billId,
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Erreur technique lors du push USSD: ' . $e->getMessage(),
                 'error' => $e->getMessage()
             ];
         }
