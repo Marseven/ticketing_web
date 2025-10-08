@@ -18,6 +18,21 @@ class Payment extends Model
         'status',
         'paid_at',
         'payload',
+        // E-Billing fields
+        'billing_id',
+        'merchant_id',
+        'customer_id',
+        'transaction_id',
+        'payer_id',
+        'payer_code',
+        'payment_system',
+        'sub_payment_system',
+        'payment_system_token',
+        'payer_name',
+        'payer_email',
+        'short_description',
+        'ebilling_created_at',
+        'ebilling_state',
     ];
 
     protected $casts = [
@@ -26,6 +41,7 @@ class Payment extends Model
         'payload' => 'array',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'ebilling_created_at' => 'datetime',
     ];
 
     /**
