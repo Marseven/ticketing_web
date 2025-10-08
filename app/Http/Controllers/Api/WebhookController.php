@@ -418,6 +418,24 @@ class WebhookController extends Controller
             'transaction_id' => $transactionId
         ]);
 
+        // Extraire et stocker les données E-Billing
+        $ebillingData = [
+            'billing_id' => $request->input('billingid'),
+            'merchant_id' => $request->input('merchantid'),
+            'customer_id' => $request->input('customerid'),
+            'transaction_id' => $transactionId,
+            'payer_id' => $request->input('payer_id'),
+            'payer_code' => $request->input('payer_code'),
+            'payment_system' => $paymentSystem,
+            'sub_payment_system' => $request->input('subpaymentsystem'),
+            'payment_system_token' => $request->input('paymentsystemtoken'),
+            'payer_name' => $request->input('payername'),
+            'payer_email' => $request->input('payeremail'),
+            'short_description' => $request->input('shortdescription'),
+            'ebilling_created_at' => $request->input('createdat') ? date('Y-m-d H:i:s', strtotime($request->input('createdat'))) : null,
+            'ebilling_state' => $request->input('state'),
+        ];
+
         // Pour E-Billing, la réception du webhook signifie que le paiement est réussi
         $webhookData = array_merge($request->all(), [
             'received_at' => now()->toISOString(),
@@ -425,7 +443,7 @@ class WebhookController extends Controller
         ]);
 
         // Traiter le paiement comme réussi
-        $this->processPaymentStatus($payment, 'success', $transactionId, $webhookData);
+        $this->processPaymentStatus($payment, 'success', $transactionId, $webhookData, $ebillingData);
 
         Log::info('Webhook E-Billing traité avec succès', [
             'payment_id' => $payment->id,
@@ -465,11 +483,11 @@ class WebhookController extends Controller
     /**
      * Traiter le statut du paiement
      */
-    private function processPaymentStatus(Payment $payment, string $status, ?string $transactionId, array $webhookData): void
+    private function processPaymentStatus(Payment $payment, string $status, ?string $transactionId, array $webhookData, array $ebillingData = []): void
     {
         // Mapper le statut du webhook vers notre statut interne
         $internalStatus = $this->mapWebhookStatus($status);
-        
+
         Log::info('Traitement paiement', [
             'payment_id' => $payment->id,
             'webhook_status' => $status,
@@ -480,14 +498,21 @@ class WebhookController extends Controller
         // Mettre à jour le paiement
         $updateData = [
             'status' => $internalStatus,
-            'webhook_data' => $webhookData,
+            'payload' => array_merge($payment->payload ?? [], ['webhook_data' => $webhookData]),
         ];
 
         if ($transactionId) {
             $updateData['transaction_id'] = $transactionId;
         }
 
-        if ($internalStatus === 'successful') {
+        // Ajouter les données E-Billing si présentes
+        if (!empty($ebillingData)) {
+            $updateData = array_merge($updateData, array_filter($ebillingData, function($value) {
+                return $value !== null && $value !== '';
+            }));
+        }
+
+        if ($internalStatus === 'success') {
             $updateData['paid_at'] = now();
 
             // Marquer la commande comme payée
@@ -503,7 +528,7 @@ class WebhookController extends Controller
 
                 Log::info('Commande payée et billets émis', ['order_id' => $order->id]);
             }
-        } elseif (in_array($internalStatus, ['failed', 'cancelled', 'expired'])) {
+        } elseif (in_array($internalStatus, ['failed', 'cancelled'])) {
             // Libérer les places réservées si le paiement échoue
             $order = Order::find($payment->order_id);
             if ($order) {
@@ -521,11 +546,11 @@ class WebhookController extends Controller
     private function mapWebhookStatus(string $webhookStatus): string
     {
         return match (strtolower($webhookStatus)) {
-            'success', 'completed', 'paid', 'successful' => 'successful',
+            'success', 'completed', 'paid', 'successful' => 'success',
             'failed', 'error', 'declined' => 'failed',
             'cancelled', 'canceled' => 'cancelled',
             'expired', 'timeout' => 'expired',
-            'pending', 'processing' => 'pending',
+            'pending', 'processing' => 'initiated',
             default => 'failed',
         };
     }
