@@ -169,8 +169,8 @@
                   </div>
                 </div>
 
-                <!-- Informations de l'acheteur -->
-                <div class="bg-primea-blue/5 rounded-primea-xl p-6 space-y-4">
+                <!-- Informations de l'acheteur (uniquement si non connecté) -->
+                <div v-if="!isAuthenticated" class="bg-primea-blue/5 rounded-primea-xl p-6 space-y-4">
                   <h4 class="text-lg font-semibold text-primea-blue mb-4">Vos informations</h4>
                   
                   <div>
@@ -509,6 +509,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useEventsStore } from '../stores/events'
+import { useAuthStore } from '../stores/auth'
 import { guestService } from '../services/api'
 import PhoneInput from '../components/PhoneInput.vue'
 import { 
@@ -536,6 +537,11 @@ export default {
     const route = useRoute()
     const router = useRouter()
     const eventsStore = useEventsStore()
+    const authStore = useAuthStore()
+
+    // Authentification
+    const isAuthenticated = computed(() => authStore.isAuthenticated)
+    const currentUser = computed(() => authStore.user)
 
     // État de l'événement et de l'achat
     const event = ref(null)
@@ -720,8 +726,8 @@ export default {
         return false
       }
 
-      // Vérifier les informations de l'invité (seulement le nom est obligatoire)
-      if (!orderForm.value.guestName) {
+      // Vérifier les informations de l'invité (seulement si non connecté)
+      if (!isAuthenticated.value && !orderForm.value.guestName) {
         return false
       }
 
@@ -999,9 +1005,9 @@ export default {
           event_slug: event.value.slug,
           ticket_type_id: orderForm.value.ticketTypeId,
           quantity: orderForm.value.quantity,
-          guest_name: orderForm.value.guestName,
-          guest_phone: orderForm.value.guestPhone || null,
-          guest_email: 'guest@primea.ga' // Email par défaut pour eBilling
+          guest_name: isAuthenticated.value ? currentUser.value.name : orderForm.value.guestName,
+          guest_phone: isAuthenticated.value ? currentUser.value.phone : (orderForm.value.guestPhone || null),
+          guest_email: isAuthenticated.value ? currentUser.value.email : 'guest@primea.ga'
         }
 
         const orderResponse = await guestService.createGuestOrder(orderData)
@@ -1102,9 +1108,9 @@ export default {
           event_slug: event.value.slug,
           ticket_type_id: orderForm.value.ticketTypeId,
           quantity: orderForm.value.quantity,
-          guest_name: orderForm.value.guestName,
-          guest_phone: orderForm.value.guestPhone || null,
-          guest_email: 'guest@primea.ga' // Email par défaut
+          guest_name: isAuthenticated.value ? currentUser.value.name : orderForm.value.guestName,
+          guest_phone: isAuthenticated.value ? currentUser.value.phone : (orderForm.value.guestPhone || null),
+          guest_email: isAuthenticated.value ? currentUser.value.email : 'guest@primea.ga'
         }
 
         const orderResponse = await guestService.createGuestOrder(orderData)
@@ -1309,6 +1315,13 @@ export default {
     // Lifecycle
     onMounted(() => {
       loadEvent()
+
+      // Pré-remplir les informations si l'utilisateur est connecté
+      if (isAuthenticated.value && currentUser.value) {
+        orderForm.value.guestName = currentUser.value.name || ''
+        orderForm.value.guestPhone = currentUser.value.phone || ''
+      }
+
       // startCountdown() est appelé dans loadEvent() après le chargement de l'événement
     })
 
@@ -1330,6 +1343,10 @@ export default {
     }
 
     return {
+      // Authentification
+      isAuthenticated,
+      currentUser,
+      // État
       event,
       eventLoading,
       eventError,
