@@ -1070,14 +1070,23 @@ export default {
               payment_url: paymentResult.data.payment_url
             })
           } else {
-            // Si le push échoue (timeout ou erreur), proposer le paiement via page E-Billing
-            console.warn('Push USSD échoué, redirection vers page de paiement:', pushResult.message)
+            // Si le push échoue, afficher l'erreur sans redirection
+            console.error('❌ Push USSD échoué:', {
+              message: pushResult.message,
+              error_code: pushResult.error_code,
+              details: pushResult.details,
+              payment_id: paymentResult.data.payment.id,
+              bill_id: paymentResult.data.bill_id,
+              phone: orderForm.value.phoneNumber,
+              gateway: orderForm.value.paymentMethod
+            })
 
-            // Construire l'URL de paiement E-Billing
-            const eBillingUrl = `${paymentResult.data.payment_url}?invoice=${paymentResult.data.bill_id}`
+            // Lever une erreur avec un message détaillé
+            const errorMessage = pushResult.details
+              ? `${pushResult.message}\nDétails: ${pushResult.details}`
+              : pushResult.message || 'Erreur lors de l\'envoi du push USSD'
 
-            // Rediriger vers la page de paiement E-Billing
-            window.location.href = eBillingUrl
+            throw new Error(errorMessage)
           }
         } else {
           throw new Error('Erreur lors de la création de la facture E-Billing')

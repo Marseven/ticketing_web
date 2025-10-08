@@ -767,6 +767,16 @@ class PaymentController extends Controller
             // Formater le numéro de téléphone
             $formattedPhone = $eBillingService->formatPhoneNumber($request->phone);
 
+            // Log avant l'envoi du push
+            Log::info('📱 Tentative push USSD', [
+                'payment_id' => $payment->id,
+                'bill_id' => $billId,
+                'payment_system' => $paymentSystem,
+                'phone' => $formattedPhone,
+                'gateway' => $request->gateway,
+                'amount' => $payment->amount
+            ]);
+
             // Envoyer le push USSD via E-Billing
             $result = $eBillingService->pushUSSD($billId, $paymentSystem, $formattedPhone);
 
@@ -777,6 +787,12 @@ class PaymentController extends Controller
                         'push_sent_at' => now()->toISOString(),
                         'push_response' => $result['data'] ?? []
                     ])
+                ]);
+
+                Log::info('✅ Push USSD envoyé avec succès', [
+                    'payment_id' => $payment->id,
+                    'bill_id' => $billId,
+                    'phone' => $formattedPhone
                 ]);
 
                 return response()->json([
@@ -792,9 +808,16 @@ class PaymentController extends Controller
                 ]);
             }
 
-            Log::warning('Push USSD échoué', [
+            Log::error('❌ Push USSD échoué', [
                 'payment_id' => $payment->id,
-                'result' => $result
+                'bill_id' => $billId,
+                'payment_system' => $paymentSystem,
+                'phone' => $formattedPhone,
+                'gateway' => $request->gateway,
+                'error_message' => $result['message'] ?? 'Erreur inconnue',
+                'error_details' => $result['details'] ?? null,
+                'error_status' => $result['status'] ?? null,
+                'full_result' => $result
             ]);
 
             return response()->json([
@@ -805,11 +828,14 @@ class PaymentController extends Controller
             ], 400);
 
         } catch (\Exception $e) {
-            Log::error('Erreur push USSD E-Billing', [
+            Log::error('💥 Exception initiate guest payment push USSD', [
                 'payment_id' => $payment->id,
+                'bill_id' => $payment->payload['ebilling_bill_id'] ?? $payment->transaction_id,
                 'gateway' => $request->gateway,
                 'phone' => $request->phone,
-                'error' => $e->getMessage(),
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
 
@@ -1193,9 +1219,16 @@ class PaymentController extends Controller
                 ]);
             }
 
-            Log::warning('Push USSD échoué', [
+            Log::error('❌ Push USSD retry échoué', [
                 'payment_id' => $payment->id,
-                'result' => $result
+                'bill_id' => $billId,
+                'payment_system' => $paymentSystem,
+                'phone' => $formattedPhone,
+                'gateway' => $request->gateway,
+                'error_message' => $result['message'] ?? 'Erreur inconnue',
+                'error_details' => $result['details'] ?? null,
+                'error_status' => $result['status'] ?? null,
+                'full_result' => $result
             ]);
 
             return response()->json([
@@ -1206,11 +1239,15 @@ class PaymentController extends Controller
             ], 400);
 
         } catch (\Exception $e) {
-            Log::error('Erreur push USSD E-Billing', [
+            Log::error('💥 Exception push USSD method', [
                 'payment_id' => $payment->id,
+                'bill_id' => $payment->payload['ebilling_bill_id'] ?? $payment->transaction_id,
                 'gateway' => $request->gateway,
                 'phone' => $request->phone,
-                'error' => $e->getMessage(),
+                'payment_system' => isset($paymentSystem) ? $paymentSystem : 'N/A',
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
 
