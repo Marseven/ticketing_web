@@ -177,8 +177,8 @@ export default {
         loading.value = true
         error.value = ''
 
-        // Récupérer la commande via l'API
-        const response = await fetch(`/api/guest/orders/${reference}`, {
+        // Récupérer la commande via l'API avec le préfixe v1
+        const response = await fetch(`/api/v1/guest/orders/${reference}`, {
           headers: {
             'Accept': 'application/json'
           }
