@@ -560,32 +560,60 @@ class TicketController extends Controller
      */
     public function downloadPDF($code)
     {
-        $ticket = Ticket::with(['event.venue', 'ticketType', 'buyer', 'schedule'])
-                       ->byCode($code)
-                       ->first();
+        try {
+            Log::info('📄 Début génération PDF', ['code' => $code]);
 
-        if (!$ticket) {
-            abort(404, 'Ticket non trouvé');
+            $ticket = Ticket::with(['event.venue', 'ticketType', 'buyer', 'schedule'])
+                           ->byCode($code)
+                           ->first();
+
+            if (!$ticket) {
+                Log::warning('❌ Ticket non trouvé pour PDF', ['code' => $code]);
+                abort(404, 'Ticket non trouvé');
+            }
+
+            Log::info('✅ Ticket trouvé', [
+                'ticket_id' => $ticket->id,
+                'event' => $ticket->event->title,
+                'buyer' => $ticket->buyer->name
+            ]);
+
+            // Générer le QR code
+            $qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" . urlencode($ticket->code);
+
+            // Préparer les données pour le PDF
+            $data = [
+                'ticket' => $ticket,
+                'qrCodeUrl' => $qrCodeUrl,
+                'event' => $ticket->event,
+                'ticketType' => $ticket->ticketType,
+                'buyer' => $ticket->buyer,
+                'schedule' => $ticket->schedule,
+                'venue' => $ticket->event->venue,
+            ];
+
+            Log::info('📝 Données PDF préparées', [
+                'has_ticket' => isset($data['ticket']),
+                'has_event' => isset($data['event']),
+                'has_qrCode' => !empty($qrCodeUrl)
+            ]);
+
+            // Générer le PDF
+            $pdf = Pdf::loadView('pdf.ticket', $data)
+                      ->setPaper('a4', 'portrait');
+
+            Log::info('✅ PDF généré avec succès', ['code' => $code]);
+
+            return $pdf->download('ticket-' . $ticket->code . '.pdf');
+
+        } catch (\Exception $e) {
+            Log::error('💥 Erreur génération PDF', [
+                'code' => $code,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            abort(500, 'Erreur lors de la génération du PDF: ' . $e->getMessage());
         }
-
-        // Générer le QR code
-        $qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" . urlencode($ticket->code);
-
-        // Préparer les données pour le PDF
-        $data = [
-            'ticket' => $ticket,
-            'qrCodeUrl' => $qrCodeUrl,
-            'event' => $ticket->event,
-            'ticketType' => $ticket->ticketType,
-            'buyer' => $ticket->buyer,
-            'schedule' => $ticket->schedule,
-            'venue' => $ticket->event->venue,
-        ];
-
-        // Générer le PDF
-        $pdf = Pdf::loadView('pdf.ticket', $data)
-                  ->setPaper('a4', 'portrait');
-
-        return $pdf->download('ticket-' . $ticket->code . '.pdf');
     }
 }
