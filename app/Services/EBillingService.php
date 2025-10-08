@@ -100,22 +100,24 @@ class EBillingService
         try {
             $url = rtrim($this->serverUrl, '/e_bills') . '/e_bills/' . $billId . '/ussd_push';
 
+            $payload = [
+                'payment_system_name' => $paymentSystem,
+                'payer_msisdn' => $msisdn
+            ];
+
             Log::info('E-Billing API Call - Push USSD', [
                 'url' => $url,
                 'bill_id' => $billId,
-                'payment_system' => $paymentSystem,
-                'msisdn' => $msisdn,
+                'payload' => $payload,
             ]);
 
-            $response = Http::withBasicAuth($this->username, $this->sharedKey)
+            $response = Http::timeout(15) // Timeout de 15s au lieu de 30s
+                ->withBasicAuth($this->username, $this->sharedKey)
                 ->withHeaders([
                     'Content-Type' => 'application/json',
                     'Accept' => 'application/json',
                 ])
-                ->post($url, [
-                    'payment_system_name' => $paymentSystem,
-                    'payer_msisdn' => $msisdn
-                ]);
+                ->post($url, $payload);
 
             $status = $response->status();
             $responseBody = $response->body();
@@ -292,7 +294,7 @@ class EBillingService
     {
         return match($gateway) {
             'airtelmoney', 'airtel' => 'airtelmoney',
-            'moovmoney', 'moov', 'moovmoney4' => 'moovmoney', // E-Billing attend probablement 'moovmoney' sans le 4
+            'moovmoney', 'moov', 'moovmoney4' => 'moovmoney4',
             'visa', 'card' => 'VISA',
             default => strtoupper($gateway)
         };
