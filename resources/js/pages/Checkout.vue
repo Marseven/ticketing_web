@@ -1174,12 +1174,12 @@ export default {
           if (response.ok) {
             const data = await response.json()
             const status = data.data?.payment?.status
-            
-            if (status === 'successful') {
+
+            if (status === 'success' || status === 'successful') {
               paymentStatus.value = 'successful'
               clearInterval(paymentPollingTimer.value)
               clearInterval(ussdTimer.value)
-              
+
               // Rediriger vers la page de ticket après 2 secondes
               setTimeout(() => {
                 router.push(`/ticket-success?reference=${currentPayment.value.reference}`)
@@ -1188,7 +1188,7 @@ export default {
               paymentStatus.value = status
               clearInterval(paymentPollingTimer.value)
               clearInterval(ussdTimer.value)
-              
+
               // Réinitialiser après 3 secondes
               setTimeout(() => {
                 cancelUSSDPush()
