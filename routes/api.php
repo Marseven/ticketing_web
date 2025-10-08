@@ -42,12 +42,16 @@ Route::prefix('guest')->group(function () {
     Route::get('tickets/retrieve/{email}', [App\Http\Controllers\Guest\TicketController::class, 'retrieve']);
 });
 
-// Routes publiques pour les paiements
+// Routes publiques pour les paiements (status checking accessible sans auth)
+Route::prefix('payments')->group(function () {
+    Route::get('{id}/status', [App\Http\Controllers\Api\PaymentController::class, 'getPaymentStatus']);
+});
+
 Route::prefix('payment')->group(function () {
     Route::get('success/{reference}', function ($reference) {
         return redirect('/payment-success?reference=' . $reference);
     })->name('payment.success');
-    
+
     Route::get('cancel/{reference}', function ($reference) {
         return redirect('/payment-cancel?reference=' . $reference);
     })->name('payment.cancel');
