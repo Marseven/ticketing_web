@@ -46,17 +46,11 @@
 
           <!-- Boutons d'actions -->
           <div class="flex flex-col sm:flex-row gap-6 justify-center items-center animate-slide-up" style="animation-delay: 0.4s;">
-            <router-link 
+            <router-link
               to="/events"
               class="bg-primea-yellow text-primea-blue px-10 py-4 rounded-primea-lg text-lg font-bold hover:bg-white hover:text-primea-blue transition-all duration-200 shadow-primea-lg transform hover:scale-105"
             >
               Explorer les événements
-            </router-link>
-            <router-link 
-              to="/organizer/register"
-              class="bg-transparent border-2 border-primea-yellow text-primea-yellow px-10 py-4 rounded-primea-lg text-lg font-bold hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200"
-            >
-              Créer un événement
             </router-link>
           </div>
         </div>
