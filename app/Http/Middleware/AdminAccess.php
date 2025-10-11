@@ -16,16 +16,43 @@ class AdminAccess
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Pour les requêtes API, retourner JSON
+        if ($request->expectsJson() || $request->is('api/*')) {
+            if (!Auth::check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Non authentifié. Veuillez vous connecter.'
+                ], 401);
+            }
+
+            $user = Auth::user();
+
+            // Vérifier si l'utilisateur peut accéder à l'admin
+            if (!$user->canAccessAdmin()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Accès refusé. Vous n\'avez pas les permissions nécessaires pour accéder à l\'administration.'
+                ], 403);
+            }
+
+            return $next($request);
+        }
+
+        // Pour les requêtes web (fallback, normalement pas utilisé dans une SPA)
         if (!Auth::check()) {
-            return redirect()->route('login')
-                           ->with('error', 'Vous devez vous connecter pour accéder à cette page.');
+            return response()->json([
+                'success' => false,
+                'message' => 'Non authentifié'
+            ], 401);
         }
 
         $user = Auth::user();
 
-        // Vérifier si l'utilisateur peut accéder à l'admin
         if (!$user->canAccessAdmin()) {
-            abort(403, 'Accès refusé. Vous n\'avez pas les permissions nécessaires pour accéder à l\'administration.');
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès refusé'
+            ], 403);
         }
 
         return $next($request);
