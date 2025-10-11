@@ -308,13 +308,31 @@ class EBillingService
 
     /**
      * Obtenir le nom du système de paiement à partir du gateway
+     *
+     * Note: Les noms retournés doivent correspondre à ceux acceptés par l'API E-Billing
+     * pour les appels push USSD et KYC.
+     *
+     * Codes E-Billing observés dans les webhooks:
+     * - AM = Airtel Money
+     * - MM = Moov Money (nouveau)
+     * - MC = MobiCash/Moov Money (ancien)
+     *
+     * @param string $gateway Le gateway interne (airtelmoney, moovmoney4, etc.)
+     * @return string Le nom du système de paiement pour E-Billing API
      */
     public function getPaymentSystemName(string $gateway): string
     {
         return match($gateway) {
+            // Airtel Money - fonctionne avec le nom complet
             'airtelmoney', 'airtel' => 'airtelmoney',
-            'moovmoney', 'moov', 'moovmoney4' => 'moovmoney4',
-            'visa', 'card' => 'VISA',
+
+            // Moov Money - essayer 'moovmoney' au lieu de 'moovmoney4'
+            // Si cela ne fonctionne pas, tester avec les codes courts: 'MM' ou 'MC'
+            'moovmoney', 'moov', 'moovmoney4' => 'moovmoney',
+
+            // Visa/Mastercard
+            'visa', 'card', 'ORABANK_NG' => 'VISA',
+
             default => strtoupper($gateway)
         };
     }
