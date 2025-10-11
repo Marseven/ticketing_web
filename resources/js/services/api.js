@@ -183,8 +183,9 @@ export const ticketApiService = {
   },
   
   // Récupérer les détails d'un ticket spécifique
-  getTicketDetails(ticketId) {
-    return api.get(`/tickets/${ticketId}`)
+  // Note: ticketCode doit être le code du ticket (ex: TKT-ABC123), pas l'ID numérique
+  getTicketDetails(ticketCode) {
+    return api.get(`/tickets/${ticketCode}`)
   }
 }
 
