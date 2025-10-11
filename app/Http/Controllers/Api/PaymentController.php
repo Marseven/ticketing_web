@@ -1130,89 +1130,56 @@ class PaymentController extends Controller
 
             $billId = $payment->billing_id;
 
-            // Si une facture existe déjà, vérifier son statut
-            if ($billId) {
-                $billStatus = $eBillingService->getBillStatus($billId);
-
-                if ($billStatus['success']) {
-                    $state = $billStatus['bill_status'];
-
-                    // Si la facture est payable (ready ou pending), on réessaie sur la même facture
-                    if (in_array($state, ['ready', 'pending'])) {
-                        Log::info('Réessai push sur facture existante', [
-                            'payment_id' => $payment->id,
-                            'bill_id' => $billId,
-                            'bill_status' => $state
-                        ]);
-
-                        $result = $eBillingService->pushUSSD($billId, $paymentSystem, $formattedPhone);
-
-                        if ($result['success']) {
-                            $payment->update([
-                                'payload' => array_merge($payment->payload ?? [], [
-                                    'push_resent_at' => now()->toIso8601String(),
-                                    'push_retry_count' => ($payment->payload['push_retry_count'] ?? 0) + 1
-                                ])
-                            ]);
-
-                            return response()->json([
-                                'success' => true,
-                                'message' => 'Push USSD renvoyé avec succès',
-                                'bill_id' => $billId
-                            ]);
-                        }
-                    } else {
-                        // Facture expirée, payée ou autre statut final → Créer nouvelle facture
-                        Log::info('Création nouvelle facture - Ancienne facture non payable', [
-                            'payment_id' => $payment->id,
-                            'old_bill_id' => $billId,
-                            'bill_status' => $state
-                        ]);
-
-                        $billId = null; // Forcer la création d'une nouvelle facture
-                    }
-                }
-            }
-
-            // Si pas de facture ou facture expirée, créer une nouvelle facture
+            // Vérifier que la facture E-Billing existe
             if (!$billId) {
-                Log::info('Création nouvelle facture E-Billing', [
-                    'payment_id' => $payment->id
+                Log::error('Billing ID manquant pour push USSD', [
+                    'payment_id' => $payment->id,
+                    'order_id' => $payment->order_id
                 ]);
 
-                $eBillingData = [
-                    'payer_email' => $payment->order->guest_email ?? 'customer@example.com',
-                    'payer_msisdn' => $formattedPhone,
-                    'amount' => (int) $payment->amount,
-                    'short_description' => 'Achat billet - ' . ($payment->order->tickets->first()->event->title ?? 'Event'),
-                    'external_reference' => $payment->provider_txn_ref,
-                    'payer_name' => $payment->order->guest_name ?? 'Client',
-                    'expiry_period' => 60, // 60 minutes
-                    'notification_url' => route('webhook.ebilling')
-                ];
-
-                $createResult = $eBillingService->createBill($eBillingData);
-
-                if (!$createResult['success']) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Erreur lors de la création de la nouvelle facture'
-                    ], 400);
-                }
-
-                $billId = $createResult['bill_id'];
-
-                // Mettre à jour le paiement avec le nouveau bill_id
-                $payment->update([
-                    'billing_id' => $billId,
-                    'transaction_id' => $billId,
-                    'payload' => array_merge($payment->payload ?? [], [
-                        'ebilling_bill_id' => $billId,
-                        'ebilling_post_url' => $createResult['post_url'],
-                        'ebilling_recreated_at' => now()->toIso8601String()
-                    ])
-                ]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Aucune facture E-Billing associée à ce paiement. Veuillez réinitier le paiement.'
+                ], 400);
             }
+
+            // Vérifier le statut de la facture avant d'envoyer le push
+            $billStatus = $eBillingService->getBillStatus($billId);
+
+            if (!$billStatus['success']) {
+                Log::error('Impossible de vérifier le statut de la facture', [
+                    'payment_id' => $payment->id,
+                    'bill_id' => $billId
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Impossible de vérifier le statut de la facture'
+                ], 400);
+            }
+
+            $state = $billStatus['bill_status'];
+
+            // Si la facture n'est pas payable, refuser le push
+            if (!in_array($state, ['ready', 'pending'])) {
+                Log::warning('Facture non payable pour push USSD', [
+                    'payment_id' => $payment->id,
+                    'bill_id' => $billId,
+                    'bill_status' => $state
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => "Cette facture n'est plus payable (statut: $state). Veuillez créer un nouveau paiement."
+                ], 400);
+            }
+
+            // Si la facture est payable, envoyer le push USSD
+            Log::info('Envoi push USSD sur facture existante', [
+                'payment_id' => $payment->id,
+                'bill_id' => $billId,
+                'bill_status' => $state
+            ]);
 
             // Envoyer le push USSD
             Log::info('📱 Envoi Push USSD', [
