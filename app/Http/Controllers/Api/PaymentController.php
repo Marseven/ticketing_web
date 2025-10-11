@@ -275,15 +275,44 @@ class PaymentController extends Controller
             ->whereIn('status', ['pending', 'initiated', 'processing'])
             ->first();
 
+        // Normaliser le provider pour correspondre à l'enum de la base
+        $provider = $this->normalizeProvider($request->gateway);
+
         if ($existingPayment) {
+            Log::info('♻️ Réutilisation paiement existant (user authentifié)', [
+                'payment_id' => $existingPayment->id,
+                'order_id' => $order->id,
+                'old_provider' => $existingPayment->provider,
+                'new_provider' => $provider,
+                'billing_id' => $existingPayment->billing_id
+            ]);
+
+            // Mettre à jour le provider si l'utilisateur change d'opérateur
+            if ($existingPayment->provider !== $provider) {
+                Log::info('🔄 Changement d\'opérateur détecté (user authentifié)', [
+                    'payment_id' => $existingPayment->id,
+                    'from' => $existingPayment->provider,
+                    'to' => $provider
+                ]);
+
+                $existingPayment->update([
+                    'provider' => $provider,
+                    'payload' => array_merge($existingPayment->payload ?? [], [
+                        'phone' => $request->phone,
+                        'operator' => $request->operator,
+                        'operator_changed_at' => now()->toIso8601String(),
+                        'previous_provider' => $existingPayment->provider,
+                        'gateway_requested' => $request->gateway
+                    ])
+                ]);
+            }
+
+            // Réutiliser le paiement existant avec la même facture E-Billing
             return $this->getPaymentStatus($existingPayment);
         }
 
         // Créer un nouveau paiement
         $reference = $this->generateReference();
-
-        // Normaliser le provider pour correspondre à l'enum de la base
-        $provider = $this->normalizeProvider($request->gateway);
 
         $payment = Payment::create([
             'order_id' => $order->id,
@@ -1025,36 +1054,91 @@ class PaymentController extends Controller
             ->whereIn('status', ['pending', 'initiated', 'processing'])
             ->first();
 
-        if ($existingPayment) {
-            return $this->getPaymentStatus($existingPayment);
-        }
-
-        // Créer un nouveau paiement
-        $reference = $this->generateReference();
-
         // Normaliser le provider pour correspondre à l'enum de la base
         $provider = $this->normalizeProvider($request->gateway);
 
-        $payment = Payment::create([
-            'order_id' => $order->id,
-            'provider' => $provider, // airtelmoney, moovmoney4, ou ORABANK_NG
-            'provider_txn_ref' => $reference,
-            'amount' => $request->amount,
-            'status' => 'initiated',
-            'payload' => [
-                'phone' => $request->phone,
-                'user_agent' => $request->header('User-Agent'),
-                'ip_address' => $request->ip(),
-                'expired_at' => now()->addMinutes(15)->toIso8601String(),
-                'gateway_requested' => $request->gateway // Garder trace du gateway demandé
-            ]
-        ]);
+        if ($existingPayment) {
+            Log::info('♻️ Réutilisation paiement existant', [
+                'payment_id' => $existingPayment->id,
+                'order_id' => $order->id,
+                'old_provider' => $existingPayment->provider,
+                'new_provider' => $provider,
+                'billing_id' => $existingPayment->billing_id
+            ]);
 
-        // Charger les relations nécessaires pour initiatePPayment
-        $payment->load('order.tickets.event');
+            // Mettre à jour le provider si l'utilisateur change d'opérateur
+            if ($existingPayment->provider !== $provider) {
+                Log::info('🔄 Changement d\'opérateur détecté', [
+                    'payment_id' => $existingPayment->id,
+                    'from' => $existingPayment->provider,
+                    'to' => $provider
+                ]);
 
-        // Initier le paiement selon la passerelle
-        $result = $this->initiatePPayment($payment, $request);
+                $existingPayment->update([
+                    'provider' => $provider,
+                    'payload' => array_merge($existingPayment->payload ?? [], [
+                        'phone' => $request->phone,
+                        'operator_changed_at' => now()->toIso8601String(),
+                        'previous_provider' => $existingPayment->provider,
+                        'gateway_requested' => $request->gateway
+                    ])
+                ]);
+            }
+
+            // Réutiliser le paiement existant avec la même facture E-Billing
+            $payment = $existingPayment;
+            $payment->load('order.tickets.event');
+
+            // Si une facture E-Billing existe déjà, la réutiliser
+            if ($payment->billing_id) {
+                Log::info('🔁 Réutilisation facture E-Billing existante', [
+                    'payment_id' => $payment->id,
+                    'billing_id' => $payment->billing_id
+                ]);
+
+                // Retourner directement sans créer de nouvelle facture
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Paiement réutilisé avec succès',
+                    'data' => [
+                        'payment' => [
+                            'id' => $payment->id,
+                            'reference' => $payment->provider_txn_ref,
+                        ],
+                        'bill_id' => $payment->billing_id,
+                        'redirect_url' => null, // Pas de redirection, utiliser push USSD
+                        'reused' => true
+                    ]
+                ]);
+            }
+
+            // Si pas de billing_id, initier normalement
+            $result = $this->initiatePPayment($payment, $request);
+        } else {
+            // Créer un nouveau paiement
+            $reference = $this->generateReference();
+
+            $payment = Payment::create([
+                'order_id' => $order->id,
+                'provider' => $provider, // airtelmoney, moovmoney4, ou ORABANK_NG
+                'provider_txn_ref' => $reference,
+                'amount' => $request->amount,
+                'status' => 'initiated',
+                'payload' => [
+                    'phone' => $request->phone,
+                    'user_agent' => $request->header('User-Agent'),
+                    'ip_address' => $request->ip(),
+                    'expired_at' => now()->addMinutes(15)->toIso8601String(),
+                    'gateway_requested' => $request->gateway // Garder trace du gateway demandé
+                ]
+            ]);
+
+            // Charger les relations nécessaires pour initiatePPayment
+            $payment->load('order.tickets.event');
+
+            // Initier le paiement selon la passerelle
+            $result = $this->initiatePPayment($payment, $request);
+        }
 
         if ($result['success']) {
             return response()->json([
