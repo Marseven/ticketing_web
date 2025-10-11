@@ -27,18 +27,32 @@ class AdminController extends Controller
     {
         try {
             // Statistiques générales
+            $ticketsVendus = DB::table('tickets')
+                ->whereIn('status', ['issued', 'used'])
+                ->count();
+
+            $ticketsScannes = DB::table('tickets')
+                ->where('status', 'used')
+                ->count();
+
+            $montantGlobal = Payment::where('status', 'success')
+                ->sum('amount');
+
+            $revenusTotal = Payment::where('status', 'success')
+                ->sum('amount');
+
             $stats = [
+                'total_events' => Event::count(),
+                'montant_global' => $montantGlobal,
+                'tickets_vendus' => $ticketsVendus,
+                'tickets_scannes' => $ticketsScannes,
+                'revenus_total' => $revenusTotal,
+
+                // Stats additionnelles pour compatibilité
                 'total_users' => User::count(),
                 'total_organizers' => Organizer::count(),
-                'total_events' => Event::count(),
                 'total_balance' => OrganizerBalance::sum('balance'),
                 'orders_today' => Order::whereDate('created_at', today())->count(),
-                'revenue_today' => Payment::where('status', 'success')
-                    ->whereDate('created_at', today())
-                    ->sum('amount'),
-                'tickets_sold' => DB::table('tickets')
-                    ->whereIn('status', ['issued', 'used'])
-                    ->count(),
                 'failed_payments' => Payment::where('status', 'failed')
                     ->whereDate('created_at', today())
                     ->count(),
