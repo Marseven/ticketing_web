@@ -592,6 +592,7 @@ export default {
         loading.value = true
         const token = localStorage.getItem('token')
 
+        console.log('Chargement des données du dashboard...')
         const response = await fetch('/api/v1/admin/dashboard', {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -599,11 +600,16 @@ export default {
           }
         })
 
+        console.log('Statut de la réponse:', response.status)
+
         if (!response.ok) {
-          throw new Error('Erreur lors du chargement des données')
+          const errorData = await response.json().catch(() => ({}))
+          console.error('Erreur API:', response.status, errorData)
+          throw new Error(`Erreur ${response.status}: ${errorData.message || 'Erreur serveur'}`)
         }
 
         const data = await response.json()
+        console.log('Données reçues:', data)
 
         if (data.success) {
           // Mapper les stats depuis l'API

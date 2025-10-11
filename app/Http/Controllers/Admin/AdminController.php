@@ -90,26 +90,27 @@ class AdminController extends Controller
                 ->get();
 
             // Top événements
-            $topEvents = Event::with(['organizer'])
-                ->withCount(['tickets as tickets_sold' => function ($query) {
-                    $query->whereIn('status', ['issued', 'used']);
-                }])
-                ->withSum(['tickets as revenue' => function ($query) {
-                    $query->join('ticket_types', 'tickets.ticket_type_id', '=', 'ticket_types.id')
-                        ->whereIn('tickets.status', ['issued', 'used']);
-                }], 'ticket_types.price')
-                ->orderBy('tickets_sold', 'desc')
-                ->limit(5)
+            $topEvents = Event::with(['organizer', 'tickets.ticketType'])
                 ->get()
                 ->map(function ($event) {
+                    $soldTickets = $event->tickets->whereIn('status', ['issued', 'used']);
+                    $ticketsSold = $soldTickets->count();
+                    $revenue = $soldTickets->sum(function ($ticket) {
+                        return $ticket->ticketType ? $ticket->ticketType->price : 0;
+                    });
+
                     return [
                         'id' => $event->id,
                         'title' => $event->title,
-                        'organizer_name' => $event->organizer->name,
-                        'tickets_sold' => $event->tickets_sold,
-                        'revenue' => $event->revenue ?: 0,
+                        'organizer_name' => $event->organizer ? $event->organizer->name : 'N/A',
+                        'tickets_sold' => $ticketsSold,
+                        'revenue' => $revenue,
+                        'cover_image' => $event->cover_image_url,
                     ];
-                });
+                })
+                ->sortByDesc('tickets_sold')
+                ->take(5)
+                ->values();
 
             return response()->json([
                 'success' => true,
