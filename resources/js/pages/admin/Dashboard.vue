@@ -611,16 +611,17 @@ export default {
         const data = await response.json()
         console.log('Données reçues:', data)
 
-        if (data.success) {
+        if (data.success && data.data) {
           // Mapper les stats depuis l'API
+          const apiStats = data.data.stats || {}
           stats.value = {
-            totalUsers: data.data.stats.total_users || 0,
-            activeEvents: data.data.stats.total_events || 0,
+            totalUsers: apiStats.total_users || 0,
+            activeEvents: apiStats.total_events || 0,
             pendingApprovals: 0, // À calculer si nécessaire
-            totalTicketsSold: data.data.stats.tickets_sold || 0,
+            totalTicketsSold: apiStats.tickets_sold || 0,
             ticketsThisMonth: 0, // À calculer si disponible
-            totalRevenue: data.data.stats.revenue_today || 0,
-            newUsersToday: data.data.stats.orders_today || 0
+            totalRevenue: apiStats.revenue_today || 0,
+            newUsersToday: apiStats.orders_today || 0
           }
 
           // Mapper les données de revenus pour le graphique
@@ -635,15 +636,17 @@ export default {
 
           // Mapper les événements récents/top events
           if (data.data.top_events && data.data.top_events.length > 0) {
-            recentEvents.value = data.data.top_events.map(event => ({
-              id: event.id,
-              title: event.title,
-              organizer: event.organizer_name,
-              status: 'approved',
-              ticketsSold: event.tickets_sold || 0,
-              revenue: parseFloat(event.revenue || 0),
-              image: event.cover_image || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=60'
-            }))
+            recentEvents.value = data.data.top_events
+              .filter(event => event && event.id) // Filtrer les événements invalides
+              .map(event => ({
+                id: event.id,
+                title: event.title || 'Sans titre',
+                organizer: event.organizer_name || 'N/A',
+                status: 'approved',
+                ticketsSold: event.tickets_sold || 0,
+                revenue: parseFloat(event.revenue || 0),
+                image: event.cover_image || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=60'
+              }))
           }
         }
       } catch (error) {
