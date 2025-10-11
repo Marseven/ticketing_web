@@ -513,11 +513,31 @@ class WebhookController extends Controller
         }
 
         if ($internalStatus === 'success') {
+            // Protection contre webhooks multiples: vérifier si déjà traité
+            if ($payment->status === 'success' && $payment->paid_at !== null) {
+                Log::warning('🔄 Webhook déjà traité (paiement déjà marqué success)', [
+                    'payment_id' => $payment->id,
+                    'order_id' => $payment->order_id,
+                    'paid_at' => $payment->paid_at
+                ]);
+                return; // Ne rien faire, déjà traité
+            }
+
             $updateData['paid_at'] = now();
 
             // Marquer la commande comme payée
             $order = Order::find($payment->order_id);
             if ($order) {
+                // Vérifier si la commande n'est pas déjà payée
+                if ($order->status === 'paid') {
+                    Log::warning('🔄 Commande déjà payée (webhook multiple détecté)', [
+                        'order_id' => $order->id,
+                        'payment_id' => $payment->id,
+                        'processed_at' => $order->processed_at
+                    ]);
+                    return; // Ne rien faire
+                }
+
                 $order->update([
                     'status' => 'paid',  // Utiliser 'paid' au lieu de 'completed' (enum MySQL)
                     'processed_at' => now(),
@@ -526,7 +546,7 @@ class WebhookController extends Controller
                 // Émettre les billets
                 $this->issueTickets($order);
 
-                Log::info('Commande payée et billets émis', ['order_id' => $order->id]);
+                Log::info('✅ Commande payée et billets émis', ['order_id' => $order->id]);
             }
         } elseif (in_array($internalStatus, ['failed', 'cancelled'])) {
             // Libérer les places réservées si le paiement échoue
