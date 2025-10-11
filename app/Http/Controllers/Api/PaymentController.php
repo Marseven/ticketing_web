@@ -270,9 +270,9 @@ class PaymentController extends Controller
             ], 400);
         }
 
-        // Vérifier si un paiement en cours existe déjà
+        // Vérifier si un paiement en cours existe déjà (tous statuts non finaux)
         $existingPayment = Payment::where('order_id', $order->id)
-            ->where('status', 'pending')
+            ->whereIn('status', ['pending', 'initiated', 'processing'])
             ->first();
 
         if ($existingPayment) {
@@ -290,7 +290,7 @@ class PaymentController extends Controller
             'provider_txn_ref' => $reference,
             'provider' => $provider,
             'amount' => $order->total_amount,
-            'status' => 'pending',
+            'status' => 'initiated',
             'payload' => [
                 'phone' => $request->phone,
                 'operator' => $request->operator,
@@ -1020,9 +1020,9 @@ class PaymentController extends Controller
             ], 400);
         }
 
-        // Vérifier si un paiement en cours existe déjà
+        // Vérifier si un paiement en cours existe déjà (tous statuts non finaux)
         $existingPayment = Payment::where('order_id', $order->id)
-            ->where('status', 'pending')
+            ->whereIn('status', ['pending', 'initiated', 'processing'])
             ->first();
 
         if ($existingPayment) {
