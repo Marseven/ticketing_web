@@ -181,6 +181,16 @@
 
       <!-- Contenu du dashboard -->
       <main class="p-6">
+        <!-- Indicateur de chargement -->
+        <div v-if="loading" class="flex items-center justify-center py-12">
+          <div class="flex flex-col items-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primea-blue"></div>
+            <p class="mt-4 text-gray-600">Chargement des statistiques...</p>
+          </div>
+        </div>
+
+        <!-- Contenu du dashboard -->
+        <div v-else>
         <!-- Statistiques principales -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-primea-blue">
@@ -258,22 +268,25 @@
               </select>
             </div>
             
-            <!-- Simulation d'un graphique -->
-            <div class="space-y-3">
+            <!-- Graphique des revenus -->
+            <div v-if="revenueChart.length > 0" class="space-y-3">
               <div v-for="(month, index) in revenueChart" :key="index" class="flex items-center">
                 <div class="w-16 text-sm text-gray-600">{{ month.month }}</div>
                 <div class="flex-1 mx-4">
                   <div class="bg-gray-200 rounded-full h-3">
-                    <div 
+                    <div
                       class="bg-gradient-to-r from-primea-blue to-primea-yellow h-3 rounded-full transition-all duration-1000"
                       :style="{ width: `${month.percentage}%` }"
                     ></div>
                   </div>
                 </div>
-                <div class="w-24 text-sm font-medium text-gray-900 text-right">
-                  {{ formatPrice(month.amount) }} FCFA
+                <div class="w-32 text-sm font-medium text-gray-900 text-right">
+                  {{ formatPrice(month.amount) }} XAF
                 </div>
               </div>
+            </div>
+            <div v-else class="text-center py-8 text-gray-500">
+              <p>Aucune donnée de revenus disponible</p>
             </div>
           </div>
 
@@ -285,11 +298,11 @@
                 Voir tous
               </router-link>
             </div>
-            
-            <div class="space-y-4">
-              <div v-for="event in recentEvents" :key="event.id" class="flex items-center p-3 border border-gray-200 rounded-lg">
-                <img 
-                  :src="event.image" 
+
+            <div v-if="recentEvents.length > 0" class="space-y-4">
+              <div v-for="event in recentEvents" :key="event.id" class="flex items-center p-3 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
+                <img
+                  :src="event.image"
                   :alt="event.title"
                   class="w-12 h-12 object-cover rounded-lg mr-4"
                 />
@@ -304,9 +317,12 @@
                 </div>
                 <div class="text-right">
                   <p class="text-sm font-medium text-gray-900">{{ event.ticketsSold }} tickets</p>
-                  <p class="text-xs text-gray-500">{{ formatPrice(event.revenue) }} FCFA</p>
+                  <p class="text-xs text-gray-500">{{ formatPrice(event.revenue) }} XAF</p>
                 </div>
               </div>
+            </div>
+            <div v-else class="text-center py-8 text-gray-500">
+              <p>Aucun événement récent</p>
             </div>
           </div>
         </div>
@@ -391,6 +407,7 @@
             </div>
           </div>
         </div>
+        </div>
       </main>
     </div>
   </div>
@@ -430,56 +447,22 @@ export default {
     const router = useRouter()
     const sidebarOpen = ref(window.innerWidth >= 1024)
     const userMenuOpen = ref(false)
+    const loading = ref(true)
 
-    // Données statiques
+    // Données réactives
     const stats = ref({
-      totalUsers: 1247,
-      activeEvents: 23,
-      pendingApprovals: 5,
-      totalTicketsSold: 8432,
-      ticketsThisMonth: 892,
-      totalRevenue: 126750000,
-      newUsersToday: 12
+      totalUsers: 0,
+      activeEvents: 0,
+      pendingApprovals: 0,
+      totalTicketsSold: 0,
+      ticketsThisMonth: 0,
+      totalRevenue: 0,
+      newUsersToday: 0
     })
 
-    const revenueChart = ref([
-      { month: 'Jan', amount: 15000000, percentage: 60 },
-      { month: 'Fév', amount: 18500000, percentage: 74 },
-      { month: 'Mar', amount: 22000000, percentage: 88 },
-      { month: 'Avr', amount: 25000000, percentage: 100 },
-      { month: 'Mai', amount: 21000000, percentage: 84 },
-      { month: 'Juin', amount: 25000000, percentage: 100 }
-    ])
+    const revenueChart = ref([])
 
-    const recentEvents = ref([
-      {
-        id: 1,
-        title: "L'OISEAU RARE",
-        organizer: 'MR GILLES',
-        status: 'approved',
-        ticketsSold: 85,
-        revenue: 850000,
-        image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=60'
-      },
-      {
-        id: 2,
-        title: 'Concert Jazz Night',
-        organizer: 'Jazz Club Libreville',
-        status: 'pending',
-        ticketsSold: 0,
-        revenue: 0,
-        image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=60'
-      },
-      {
-        id: 3,
-        title: 'Festival Arts',
-        organizer: 'Arts Center',
-        status: 'approved',
-        ticketsSold: 162,
-        revenue: 2430000,
-        image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=60'
-      }
-    ])
+    const recentEvents = ref([])
 
     const systemNotifications = ref([
       {
@@ -603,14 +586,79 @@ export default {
       }
     }
 
+    // Charger les données du dashboard depuis l'API
+    const loadDashboardData = async () => {
+      try {
+        loading.value = true
+        const token = localStorage.getItem('token')
+
+        const response = await fetch('/api/v1/admin/dashboard', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        })
+
+        if (!response.ok) {
+          throw new Error('Erreur lors du chargement des données')
+        }
+
+        const data = await response.json()
+
+        if (data.success) {
+          // Mapper les stats depuis l'API
+          stats.value = {
+            totalUsers: data.data.stats.total_users || 0,
+            activeEvents: data.data.stats.total_events || 0,
+            pendingApprovals: 0, // À calculer si nécessaire
+            totalTicketsSold: data.data.stats.tickets_sold || 0,
+            ticketsThisMonth: 0, // À calculer si disponible
+            totalRevenue: data.data.stats.revenue_today || 0,
+            newUsersToday: data.data.stats.orders_today || 0
+          }
+
+          // Mapper les données de revenus pour le graphique
+          if (data.data.revenue_data && data.data.revenue_data.length > 0) {
+            const maxAmount = Math.max(...data.data.revenue_data.map(r => parseFloat(r.amount || 0)))
+            revenueChart.value = data.data.revenue_data.map(item => ({
+              month: new Date(item.date).toLocaleDateString('fr-FR', { month: 'short' }),
+              amount: parseFloat(item.amount || 0),
+              percentage: maxAmount > 0 ? (parseFloat(item.amount || 0) / maxAmount) * 100 : 0
+            }))
+          }
+
+          // Mapper les événements récents/top events
+          if (data.data.top_events && data.data.top_events.length > 0) {
+            recentEvents.value = data.data.top_events.map(event => ({
+              id: event.id,
+              title: event.title,
+              organizer: event.organizer_name,
+              status: 'approved',
+              ticketsSold: event.tickets_sold || 0,
+              revenue: parseFloat(event.revenue || 0),
+              image: event.cover_image || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=60'
+            }))
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement du dashboard:', error)
+        // Les valeurs par défaut (0) resteront affichées en cas d'erreur
+      } finally {
+        loading.value = false
+      }
+    }
+
     // Lifecycle
     onMounted(() => {
+      // Charger les données au montage
+      loadDashboardData()
+
       // Adapter le sidebar à la taille de l'écran
       const handleResize = () => {
         sidebarOpen.value = window.innerWidth >= 1024
       }
       window.addEventListener('resize', handleResize)
-      
+
       // Écouter les clics pour fermer le menu
       document.addEventListener('click', handleClickOutside)
     })
@@ -622,6 +670,7 @@ export default {
     return {
       sidebarOpen,
       userMenuOpen,
+      loading,
       stats,
       revenueChart,
       recentEvents,
@@ -637,7 +686,8 @@ export default {
       getNotificationBorderClass,
       getNotificationIconClass,
       getNotificationTextClass,
-      logout
+      logout,
+      loadDashboardData
     }
   }
 }
@@ -646,6 +696,17 @@ export default {
 <style scoped>
 .admin-dashboard {
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+/* Animation de chargement */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
 
 /* Transitions pour la sidebar */
