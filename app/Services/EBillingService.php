@@ -326,9 +326,9 @@ class EBillingService
             // Airtel Money - fonctionne avec le nom complet
             'airtelmoney', 'airtel' => 'airtelmoney',
 
-            // Moov Money - essayer 'moovmoney' au lieu de 'moovmoney4'
-            // Si cela ne fonctionne pas, tester avec les codes courts: 'MM' ou 'MC'
-            'moovmoney', 'moov', 'moovmoney4' => 'moovmoney',
+            // Moov Money - utiliser 'moovmoney4' (confirmé par logs de production)
+            // L'API E-Billing timeout avec 'moovmoney', fonctionne avec 'moovmoney4'
+            'moovmoney', 'moov', 'moovmoney4' => 'moovmoney4',
 
             // Visa/Mastercard
             'visa', 'card', 'ORABANK_NG' => 'VISA',
