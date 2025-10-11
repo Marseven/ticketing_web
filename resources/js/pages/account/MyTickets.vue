@@ -264,27 +264,30 @@ export default {
         orders.value = response.data.orders || []
         
         // Transformer les achats en tickets pour l'affichage
-        tickets.value = orders.value.flatMap(order => {
-          if (!order.event || !order.tickets) return []
+        // Ne garder que les commandes payées
+        tickets.value = orders.value
+          .filter(order => order.status === 'paid' || order.status === 'completed')
+          .flatMap(order => {
+            if (!order.event || !order.tickets) return []
 
-          return order.tickets.map((ticket, index) => ({
-            id: ticket.id,
-            code: ticket.code,
-            reference: ticket.code,
-            event: {
-              title: order.event.title,
-              slug: order.event.slug,
-              date: order.schedule?.starts_at ? new Date(order.schedule.starts_at.replace(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})/, '$3-$2-$1T$4:$5:$6')) : new Date(),
-              venue: [order.event.venue_name, order.event.venue_city].filter(v => v && v !== 'null').join(', ') || 'Lieu à définir',
-              image: order.event.image || '/images/logo.png'
-            },
-            type: ticket.ticket_type?.name || 'Standard',
-            price: ticket.ticket_type?.price || (order.total_amount / order.tickets_count),
-            status: order.status === 'paid' || order.status === 'completed' ? 'active' : order.status === 'cancelled' ? 'expired' : 'active',
-            purchaseDate: new Date(order.created_at.replace(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})/, '$3-$2-$1T$4:$5:$6')),
-            orderId: order.id
-          }))
-        })
+            return order.tickets.map((ticket, index) => ({
+              id: ticket.id,
+              code: ticket.code,
+              reference: ticket.code,
+              event: {
+                title: order.event.title,
+                slug: order.event.slug,
+                date: order.schedule?.starts_at ? new Date(order.schedule.starts_at.replace(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})/, '$3-$2-$1T$4:$5:$6')) : new Date(),
+                venue: [order.event.venue_name, order.event.venue_city].filter(v => v && v !== 'null').join(', ') || 'Lieu à définir',
+                image: order.event.image || '/images/logo.png'
+              },
+              type: ticket.ticket_type?.name || 'Standard',
+              price: ticket.ticket_type?.price || (order.total_amount / order.tickets_count),
+              status: order.status === 'paid' || order.status === 'completed' ? 'active' : order.status === 'cancelled' ? 'expired' : 'active',
+              purchaseDate: new Date(order.created_at.replace(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})/, '$3-$2-$1T$4:$5:$6')),
+              orderId: order.id
+            }))
+          })
       } catch (err) {
         console.error('Erreur lors du chargement des tickets:', err)
         error.value = 'Impossible de charger vos tickets'
