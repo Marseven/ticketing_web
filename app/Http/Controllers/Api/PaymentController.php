@@ -1146,10 +1146,19 @@ class PaymentController extends Controller
             // Vérifier le statut de la facture avant d'envoyer le push
             $billStatus = $eBillingService->getBillStatus($billId);
 
+            Log::info('🔍 Vérification statut facture E-Billing', [
+                'payment_id' => $payment->id,
+                'bill_id' => $billId,
+                'billStatus_success' => $billStatus['success'] ?? false,
+                'billStatus_bill_status' => $billStatus['bill_status'] ?? null,
+                'billStatus_full' => $billStatus
+            ]);
+
             if (!$billStatus['success']) {
-                Log::error('Impossible de vérifier le statut de la facture', [
+                Log::error('❌ Impossible de vérifier le statut de la facture', [
                     'payment_id' => $payment->id,
-                    'bill_id' => $billId
+                    'bill_id' => $billId,
+                    'billStatus' => $billStatus
                 ]);
 
                 return response()->json([
@@ -1160,12 +1169,23 @@ class PaymentController extends Controller
 
             $state = $billStatus['bill_status'];
 
-            // Si la facture n'est pas payable, refuser le push
-            if (!in_array($state, ['ready', 'pending'])) {
-                Log::warning('Facture non payable pour push USSD', [
+            // Si le statut est vide/null, considérer la facture comme ready (optimiste)
+            if (empty($state)) {
+                Log::warning('⚠️ Statut facture vide, assume ready pour push USSD', [
                     'payment_id' => $payment->id,
                     'bill_id' => $billId,
-                    'bill_status' => $state
+                    'billStatus_data' => $billStatus['data'] ?? null
+                ]);
+                $state = 'ready'; // Assume ready si statut manquant
+            }
+
+            // Si la facture n'est pas payable, refuser le push
+            if (!in_array($state, ['ready', 'pending'])) {
+                Log::warning('❌ Facture non payable pour push USSD', [
+                    'payment_id' => $payment->id,
+                    'bill_id' => $billId,
+                    'bill_status' => $state,
+                    'accepted_statuses' => ['ready', 'pending']
                 ]);
 
                 return response()->json([
