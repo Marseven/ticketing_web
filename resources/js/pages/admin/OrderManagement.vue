@@ -4,8 +4,8 @@
     <div class="mb-8">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">Suivi des Commandes</h1>
-          <p class="text-gray-600">Gérer et suivre toutes les commandes de la plateforme</p>
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">Suivi des Achats</h1>
+          <p class="text-gray-600">Gérer et suivre tous les achats de la plateforme</p>
         </div>
         <button @click="exportOrders" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
           <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -26,7 +26,7 @@
             </svg>
           </div>
           <div class="ml-4">
-            <p class="text-sm text-gray-600">Total Commandes</p>
+            <p class="text-sm text-gray-600">Total Achats</p>
             <p class="text-2xl font-bold text-blue-600">{{ stats.total_orders || 0 }}</p>
           </div>
         </div>
@@ -143,16 +143,16 @@
     <!-- Orders List -->
     <div class="bg-white rounded-lg shadow">
       <div class="p-6 border-b">
-        <h2 class="text-xl font-bold">Liste des Commandes</h2>
+        <h2 class="text-xl font-bold">Liste des Achats</h2>
       </div>
-      
+
       <div v-if="loading" class="p-8 text-center">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
         <p class="mt-4 text-gray-600">Chargement...</p>
       </div>
-      
+
       <div v-else-if="orders.length === 0" class="p-8 text-center text-gray-500">
-        Aucune commande trouvée
+        Aucun achat trouvé
       </div>
       
       <div v-else class="overflow-x-auto">
@@ -225,7 +225,7 @@
       <div v-if="pagination && pagination.last_page > 1" class="p-6 border-t">
         <div class="flex justify-between items-center">
           <div class="text-sm text-gray-700">
-            Affichage {{ pagination.from }} à {{ pagination.to }} sur {{ pagination.total }} commandes
+            Affichage {{ pagination.from }} à {{ pagination.to }} sur {{ pagination.total }} achats
           </div>
           <div class="flex space-x-2">
             <button @click="changePage(pagination.current_page - 1)" 
@@ -487,7 +487,7 @@ export default {
             .reduce((sum, o) => sum + o.total_amount, 0)
         }
       } catch (error) {
-        console.error('Erreur chargement commandes:', error)
+        console.error('Erreur chargement achats:', error)
       } finally {
         loading.value = false
       }
@@ -629,7 +629,7 @@ export default {
           const url = window.URL.createObjectURL(blob)
           const a = document.createElement('a')
           a.href = url
-          a.download = `commandes-${new Date().toISOString().split('T')[0]}.csv`
+          a.download = `achats-${new Date().toISOString().split('T')[0]}.csv`
           document.body.appendChild(a)
           a.click()
           window.URL.revokeObjectURL(url)

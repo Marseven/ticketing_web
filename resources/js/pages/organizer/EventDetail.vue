@@ -219,7 +219,7 @@
 
             <!-- Recent orders -->
             <div class="bg-white rounded-primea shadow-primea p-6">
-              <h2 class="text-xl font-semibold text-primea-blue font-primea mb-6">Commandes récentes</h2>
+              <h2 class="text-xl font-semibold text-primea-blue font-primea mb-6">Achats récents</h2>
               <div v-if="recentOrders.length > 0" class="overflow-x-auto">
                 <table class="w-full">
                   <thead class="bg-gray-50">
@@ -418,7 +418,7 @@ const loadEvent = async () => {
       }));
     }
     
-    // Charger les commandes récentes (simulation pour l'instant)
+    // Charger les achats récents (simulation pour l'instant)
     if (event.value.tickets_sold > 0) {
       recentOrders.value = [
         {

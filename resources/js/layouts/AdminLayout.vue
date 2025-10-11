@@ -66,8 +66,8 @@
             Événements
           </router-link>
 
-          <!-- Suivi des Commandes -->
-          <router-link to="/admin/orders" 
+          <!-- Suivi des Achats -->
+          <router-link to="/admin/orders"
                        class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-colors duration-200"
                        :class="getMenuItemClass('/admin/orders')"
                        :style="getMenuItemStyle('/admin/orders')"
@@ -76,7 +76,7 @@
             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
             </svg>
-            Commandes
+            Achats
           </router-link>
 
           <!-- Suivi des Paiements -->
@@ -359,8 +359,8 @@ export default {
       },
       {
         id: 2,
-        title: 'Commande en attente',
-        message: '3 commandes nécessitent votre attention',
+        title: 'Achat en attente',
+        message: '3 achats nécessitent votre attention',
         read: false,
         created_at: new Date(Date.now() - 900000) // 15 minutes ago
       },
@@ -384,7 +384,7 @@ export default {
         '/admin/users': 'Gestion des Utilisateurs',
         '/admin/organizers': 'Gestion des Organisateurs',
         '/admin/events': 'Gestion des Événements',
-        '/admin/orders': 'Suivi des Commandes',
+        '/admin/orders': 'Suivi des Achats',
         '/admin/payments': 'Suivi des Paiements',
         '/admin/payouts': 'Gestion des Payouts',
         '/admin/balance-config': 'Configuration des Soldes',
@@ -413,7 +413,7 @@ export default {
         crumbs.push({ name: 'Événements', to: '/admin/events' })
       }
       if (path.startsWith('/admin/orders')) {
-        crumbs.push({ name: 'Commandes', to: '/admin/orders' })
+        crumbs.push({ name: 'Achats', to: '/admin/orders' })
       }
       if (path.startsWith('/admin/payments')) {
         crumbs.push({ name: 'Paiements', to: '/admin/payments' })
