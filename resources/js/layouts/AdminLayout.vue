@@ -27,17 +27,56 @@
             Tableau de Bord
           </router-link>
 
-          <!-- Gestion des Utilisateurs -->
-          <router-link to="/admin/users" 
+          <!-- Gestion des Admins -->
+          <router-link to="/admin/admins"
                        class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-colors duration-200"
-                       :class="getMenuItemClass('/admin/users')"
-                       :style="getMenuItemStyle('/admin/users')"
-                       @mouseover="handleMenuHover($event, '/admin/users')"
-                       @mouseleave="handleMenuLeave($event, '/admin/users')">
+                       :class="getMenuItemClass('/admin/admins')"
+                       :style="getMenuItemStyle('/admin/admins')"
+                       @mouseover="handleMenuHover($event, '/admin/admins')"
+                       @mouseleave="handleMenuLeave($event, '/admin/admins')">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+            Admins
+          </router-link>
+
+          <!-- Gestion des Clients -->
+          <router-link to="/admin/clients"
+                       class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-colors duration-200"
+                       :class="getMenuItemClass('/admin/clients')"
+                       :style="getMenuItemStyle('/admin/clients')"
+                       @mouseover="handleMenuHover($event, '/admin/clients')"
+                       @mouseleave="handleMenuLeave($event, '/admin/clients')">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+            Clients
+          </router-link>
+
+          <!-- Gestion des Organisateurs Users -->
+          <router-link to="/admin/organizers-users"
+                       class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-colors duration-200"
+                       :class="getMenuItemClass('/admin/organizers-users')"
+                       :style="getMenuItemStyle('/admin/organizers-users')"
+                       @mouseover="handleMenuHover($event, '/admin/organizers-users')"
+                       @mouseleave="handleMenuLeave($event, '/admin/organizers-users')">
             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
             </svg>
-            Utilisateurs
+            Organisateurs Users
+          </router-link>
+
+          <!-- Corbeille (Utilisateurs supprimés) -->
+          <router-link to="/admin/trashed-users"
+                       class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-colors duration-200"
+                       :class="getMenuItemClass('/admin/trashed-users')"
+                       :style="getMenuItemStyle('/admin/trashed-users')"
+                       @mouseover="handleMenuHover($event, '/admin/trashed-users')"
+                       @mouseleave="handleMenuLeave($event, '/admin/trashed-users')">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+            Corbeille
           </router-link>
 
           <!-- Gestion des Organisateurs -->
@@ -382,6 +421,13 @@ export default {
       const titles = {
         '/admin/dashboard': 'Tableau de Bord',
         '/admin/users': 'Gestion des Utilisateurs',
+        '/admin/admins': 'Gestion des Admins',
+        '/admin/clients': 'Gestion des Clients',
+        '/admin/organizers-users': 'Gestion des Utilisateurs Organisateurs',
+        '/admin/trashed-users': 'Corbeille - Utilisateurs Supprimés',
+        '/admin/user-types': 'Types d\'Utilisateurs',
+        '/admin/privileges': 'Privilèges',
+        '/admin/roles': 'Rôles',
         '/admin/organizers': 'Gestion des Organisateurs',
         '/admin/events': 'Gestion des Événements',
         '/admin/orders': 'Suivi des Achats',
@@ -400,11 +446,32 @@ export default {
     const breadcrumbs = computed(() => {
       const crumbs = []
       const path = route.path
-      
+
       if (path === '/admin/dashboard') return []
-      
-      if (path.startsWith('/admin/users')) {
-        crumbs.push({ name: 'Utilisateurs', to: '/admin/users' })
+
+      if (path === '/admin/users') {
+        crumbs.push({ name: 'Utilisateurs', to: null })
+      }
+      if (path === '/admin/admins') {
+        crumbs.push({ name: 'Admins', to: null })
+      }
+      if (path === '/admin/clients') {
+        crumbs.push({ name: 'Clients', to: null })
+      }
+      if (path === '/admin/organizers-users') {
+        crumbs.push({ name: 'Utilisateurs Organisateurs', to: null })
+      }
+      if (path === '/admin/trashed-users') {
+        crumbs.push({ name: 'Corbeille', to: null })
+      }
+      if (path === '/admin/user-types') {
+        crumbs.push({ name: 'Types d\'Utilisateurs', to: null })
+      }
+      if (path === '/admin/privileges') {
+        crumbs.push({ name: 'Privilèges', to: null })
+      }
+      if (path === '/admin/roles') {
+        crumbs.push({ name: 'Rôles', to: null })
       }
       if (path.startsWith('/admin/organizers')) {
         crumbs.push({ name: 'Organisateurs', to: '/admin/organizers' })
@@ -433,7 +500,7 @@ export default {
       if (path.startsWith('/admin/reports')) {
         crumbs.push({ name: 'Rapports', to: '/admin/reports' })
       }
-      
+
       return crumbs
     })
 
