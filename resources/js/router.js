@@ -55,6 +55,10 @@ const VenueManagement = () => import(/* webpackChunkName: "admin-venues" */ './p
 const UserTypes = () => import(/* webpackChunkName: "admin-users" */ './pages/admin/UserTypes.vue');
 const Privileges = () => import(/* webpackChunkName: "admin-users" */ './pages/admin/Privileges.vue');
 const Roles = () => import(/* webpackChunkName: "admin-users" */ './pages/admin/Roles.vue');
+const Admins = () => import(/* webpackChunkName: "admin-users" */ './pages/admin/Admins.vue');
+const Clients = () => import(/* webpackChunkName: "admin-users" */ './pages/admin/Clients.vue');
+const OrganizersUsers = () => import(/* webpackChunkName: "admin-users" */ './pages/admin/OrganizersUsers.vue');
+const TrashedUsers = () => import(/* webpackChunkName: "admin-users" */ './pages/admin/TrashedUsers.vue');
 
 // Scanner
 const ScannerApp = () => import('./pages/scanner/ScannerApp.vue');
@@ -120,6 +124,10 @@ const routes = [
             { path: 'user-types', component: UserTypes, name: 'admin-user-types' },
             { path: 'privileges', component: Privileges, name: 'admin-privileges' },
             { path: 'roles', component: Roles, name: 'admin-roles' },
+            { path: 'admins', component: Admins, name: 'admin-admins' },
+            { path: 'clients', component: Clients, name: 'admin-clients' },
+            { path: 'organizers-users', component: OrganizersUsers, name: 'admin-organizers-users' },
+            { path: 'trashed-users', component: TrashedUsers, name: 'admin-trashed-users' },
             { path: 'organizers', component: OrganizerManagement, name: 'admin-organizers' },
             { path: 'events', component: EventManagement, name: 'admin-events' },
             { path: 'orders', component: OrderManagement, name: 'admin-orders' },
