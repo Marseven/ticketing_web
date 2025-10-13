@@ -12,6 +12,9 @@ use App\Models\Payout;
 use App\Models\OrganizerBalance;
 use App\Models\Category;
 use App\Models\Venue;
+use App\Models\UserType;
+use App\Models\Privilege;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -1427,6 +1430,907 @@ class AdminController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur technique lors de la suppression'
+            ], 500);
+        }
+    }
+
+    // ===================================================================
+    // GESTION DES TYPES D'UTILISATEURS (lecture seule)
+    // ===================================================================
+
+    /**
+     * Liste des types d'utilisateurs
+     */
+    public function userTypes(Request $request): JsonResponse
+    {
+        try {
+            $query = UserType::with(['users']);
+
+            if ($request->filled('status')) {
+                $query->where('is_active', $request->status === 'active');
+            }
+
+            $userTypes = $query->withCount('users')
+                ->orderBy('name')
+                ->paginate($request->per_page ?? 20);
+
+            return response()->json([
+                'success' => true,
+                'data' => $userTypes
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur liste types utilisateurs', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors du chargement des types d\'utilisateurs'
+            ], 500);
+        }
+    }
+
+    /**
+     * Afficher un type d'utilisateur
+     */
+    public function showUserType($userTypeId): JsonResponse
+    {
+        try {
+            $userType = UserType::with(['users'])->withCount('users')->find($userTypeId);
+
+            if (!$userType) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Type d\'utilisateur introuvable'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => ['userType' => $userType]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur affichage type utilisateur', [
+                'user_type_id' => $userTypeId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique'
+            ], 500);
+        }
+    }
+
+    // ===================================================================
+    // GESTION DES PRIVILÈGES (lecture seule)
+    // ===================================================================
+
+    /**
+     * Liste des privilèges
+     */
+    public function privileges(Request $request): JsonResponse
+    {
+        try {
+            $query = Privilege::with(['roles']);
+
+            if ($request->filled('module')) {
+                $query->where('module', $request->module);
+            }
+
+            if ($request->filled('action')) {
+                $query->where('action', $request->action);
+            }
+
+            if ($request->filled('status')) {
+                $query->where('is_active', $request->status === 'active');
+            }
+
+            $privileges = $query->withCount('roles')
+                ->orderBy('module')
+                ->orderBy('action')
+                ->paginate($request->per_page ?? 50);
+
+            return response()->json([
+                'success' => true,
+                'data' => $privileges
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur liste privilèges', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors du chargement des privilèges'
+            ], 500);
+        }
+    }
+
+    /**
+     * Afficher un privilège
+     */
+    public function showPrivilege($privilegeId): JsonResponse
+    {
+        try {
+            $privilege = Privilege::with(['roles'])->withCount('roles')->find($privilegeId);
+
+            if (!$privilege) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Privilège introuvable'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => ['privilege' => $privilege]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur affichage privilège', [
+                'privilege_id' => $privilegeId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique'
+            ], 500);
+        }
+    }
+
+    // ===================================================================
+    // GESTION DES RÔLES
+    // ===================================================================
+
+    /**
+     * Liste des rôles
+     */
+    public function roles(Request $request): JsonResponse
+    {
+        try {
+            $query = Role::with(['users', 'privileges']);
+
+            if ($request->filled('type')) {
+                $query->where('type', $request->type);
+            }
+
+            if ($request->filled('status')) {
+                $query->where('is_active', $request->status === 'active');
+            }
+
+            $roles = $query->withCount(['users', 'privileges'])
+                ->orderBy('level', 'desc')
+                ->orderBy('name')
+                ->paginate($request->per_page ?? 20);
+
+            return response()->json([
+                'success' => true,
+                'data' => $roles
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur liste rôles', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors du chargement des rôles'
+            ], 500);
+        }
+    }
+
+    /**
+     * Afficher un rôle
+     */
+    public function showRole($roleId): JsonResponse
+    {
+        try {
+            $role = Role::with(['users', 'privileges'])
+                ->withCount(['users', 'privileges'])
+                ->find($roleId);
+
+            if (!$role) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Rôle introuvable'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => ['role' => $role]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur affichage rôle', [
+                'role_id' => $roleId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique'
+            ], 500);
+        }
+    }
+
+    /**
+     * Créer un rôle (uniquement pour les rôles de type admin/custom)
+     */
+    public function createRole(Request $request): JsonResponse
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'name' => 'required|string|max:255|unique:roles',
+            'description' => 'nullable|string',
+            'type' => 'required|in:custom', // Seulement custom, pas system
+            'level' => 'required|integer|min:0|max:100',
+            'privilege_ids' => 'nullable|array',
+            'privilege_ids.*' => 'exists:privileges,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $role = Role::create([
+                'name' => $request->name,
+                'slug' => Str::slug($request->name),
+                'description' => $request->description,
+                'type' => $request->type,
+                'level' => $request->level,
+                'is_active' => true,
+            ]);
+
+            // Assigner les privilèges
+            if ($request->filled('privilege_ids')) {
+                $role->privileges()->sync($request->privilege_ids);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Rôle créé avec succès',
+                'data' => ['role' => $role->load('privileges')]
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Erreur création rôle', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de la création'
+            ], 500);
+        }
+    }
+
+    /**
+     * Mettre à jour un rôle
+     */
+    public function updateRole(Request $request, $roleId): JsonResponse
+    {
+        $role = Role::find($roleId);
+        if (!$role) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Rôle introuvable'
+            ], 404);
+        }
+
+        // Empêcher la modification des rôles système
+        if ($role->type === Role::TYPE_SYSTEM) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Les rôles système ne peuvent pas être modifiés'
+            ], 403);
+        }
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'name' => 'sometimes|string|max:255|unique:roles,name,' . $role->id,
+            'description' => 'nullable|string',
+            'level' => 'sometimes|integer|min:0|max:100',
+            'is_active' => 'sometimes|boolean',
+            'privilege_ids' => 'nullable|array',
+            'privilege_ids.*' => 'exists:privileges,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $updateData = $request->only(['name', 'description', 'level', 'is_active']);
+
+            if ($request->filled('name')) {
+                $updateData['slug'] = Str::slug($request->name);
+            }
+
+            $role->update($updateData);
+
+            // Mettre à jour les privilèges
+            if ($request->has('privilege_ids')) {
+                $role->privileges()->sync($request->privilege_ids ?? []);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Rôle mis à jour avec succès',
+                'data' => ['role' => $role->fresh()->load('privileges')->loadCount(['users', 'privileges'])]
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Erreur mise à jour rôle', [
+                'role_id' => $roleId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de la mise à jour'
+            ], 500);
+        }
+    }
+
+    /**
+     * Supprimer un rôle
+     */
+    public function deleteRole($roleId): JsonResponse
+    {
+        try {
+            $role = Role::withCount('users')->find($roleId);
+
+            if (!$role) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Rôle introuvable'
+                ], 404);
+            }
+
+            // Empêcher la suppression des rôles système
+            if ($role->type === Role::TYPE_SYSTEM) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Les rôles système ne peuvent pas être supprimés'
+                ], 403);
+            }
+
+            // Vérifier s'il y a des utilisateurs avec ce rôle
+            if ($role->users_count > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Impossible de supprimer ce rôle car il est assigné à ' . $role->users_count . ' utilisateur(s)'
+                ], 400);
+            }
+
+            $role->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Rôle supprimé avec succès'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur suppression rôle', [
+                'role_id' => $roleId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de la suppression'
+            ], 500);
+        }
+    }
+
+    /**
+     * Assigner des privilèges à un rôle
+     */
+    public function assignPrivilegesToRole(Request $request, $roleId): JsonResponse
+    {
+        $role = Role::find($roleId);
+        if (!$role) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Rôle introuvable'
+            ], 404);
+        }
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'privilege_ids' => 'required|array',
+            'privilege_ids.*' => 'exists:privileges,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $role->privileges()->sync($request->privilege_ids);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Privilèges assignés avec succès',
+                'data' => ['role' => $role->fresh()->load('privileges')]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur assignation privilèges', [
+                'role_id' => $roleId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique'
+            ], 500);
+        }
+    }
+
+    // ===================================================================
+    // GESTION DES UTILISATEURS PAR TYPE
+    // ===================================================================
+
+    /**
+     * Liste des admins
+     */
+    public function admins(Request $request): JsonResponse
+    {
+        try {
+            $query = User::with(['roles', 'userType'])
+                ->whereHas('roles', function ($q) {
+                    $q->where('slug', Role::ADMIN);
+                });
+
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
+            }
+
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
+            $admins = $query->orderBy('created_at', 'desc')
+                ->paginate($request->per_page ?? 20);
+
+            return response()->json([
+                'success' => true,
+                'data' => $admins
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur liste admins', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors du chargement des administrateurs'
+            ], 500);
+        }
+    }
+
+    /**
+     * Liste des clients
+     */
+    public function clients(Request $request): JsonResponse
+    {
+        try {
+            $query = User::with(['roles', 'userType'])
+                ->where('is_organizer', false)
+                ->whereHas('roles', function ($q) {
+                    $q->where('slug', Role::CLIENT);
+                });
+
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
+            }
+
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
+            $clients = $query->withCount(['orders', 'tickets'])
+                ->orderBy('created_at', 'desc')
+                ->paginate($request->per_page ?? 20);
+
+            return response()->json([
+                'success' => true,
+                'data' => $clients
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur liste clients', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors du chargement des clients'
+            ], 500);
+        }
+    }
+
+    /**
+     * Liste des utilisateurs organisateurs
+     */
+    public function organizersUsers(Request $request): JsonResponse
+    {
+        try {
+            $query = User::with(['roles', 'userType', 'organizers'])
+                ->where('is_organizer', true);
+
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
+            }
+
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
+            $organizersUsers = $query->withCount(['organizers'])
+                ->orderBy('created_at', 'desc')
+                ->paginate($request->per_page ?? 20);
+
+            return response()->json([
+                'success' => true,
+                'data' => $organizersUsers
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur liste utilisateurs organisateurs', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors du chargement des utilisateurs organisateurs'
+            ], 500);
+        }
+    }
+
+    /**
+     * Liste des utilisateurs supprimés (corbeille)
+     */
+    public function trashedUsers(Request $request): JsonResponse
+    {
+        try {
+            $query = User::onlyTrashed()->with(['roles', 'userType']);
+
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
+            }
+
+            $trashedUsers = $query->orderBy('deleted_at', 'desc')
+                ->paginate($request->per_page ?? 20);
+
+            return response()->json([
+                'success' => true,
+                'data' => $trashedUsers
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur liste utilisateurs supprimés', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors du chargement des utilisateurs supprimés'
+            ], 500);
+        }
+    }
+
+    /**
+     * Afficher un utilisateur
+     */
+    public function showUser($userId): JsonResponse
+    {
+        try {
+            $user = User::with(['roles.privileges', 'userType', 'organizers', 'orders', 'tickets'])
+                ->withCount(['orders', 'tickets', 'organizers'])
+                ->find($userId);
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Utilisateur introuvable'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => ['user' => $user]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur affichage utilisateur', [
+                'user_id' => $userId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique'
+            ], 500);
+        }
+    }
+
+    /**
+     * Supprimer un utilisateur (soft delete)
+     */
+    public function deleteUser($userId): JsonResponse
+    {
+        try {
+            $user = User::find($userId);
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Utilisateur introuvable'
+                ], 404);
+            }
+
+            // Empêcher l'auto-suppression
+            if ($user->id === auth()->id()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vous ne pouvez pas supprimer votre propre compte'
+                ], 403);
+            }
+
+            $user->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Utilisateur supprimé avec succès (soft delete)'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur suppression utilisateur', [
+                'user_id' => $userId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de la suppression'
+            ], 500);
+        }
+    }
+
+    /**
+     * Restaurer un utilisateur supprimé
+     */
+    public function restoreUser($userId): JsonResponse
+    {
+        try {
+            $user = User::onlyTrashed()->find($userId);
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Utilisateur introuvable dans la corbeille'
+                ], 404);
+            }
+
+            $user->restore();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Utilisateur restauré avec succès',
+                'data' => ['user' => $user->fresh()->load('roles')]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur restauration utilisateur', [
+                'user_id' => $userId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de la restauration'
+            ], 500);
+        }
+    }
+
+    /**
+     * Assigner un rôle à un utilisateur
+     */
+    public function assignRoleToUser(Request $request, $userId): JsonResponse
+    {
+        $user = User::find($userId);
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Utilisateur introuvable'
+            ], 404);
+        }
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'role_id' => 'required|exists:roles,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $role = Role::find($request->role_id);
+
+            if ($user->hasRole($role->slug)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'L\'utilisateur a déjà ce rôle'
+                ], 400);
+            }
+
+            $user->roles()->attach($role->id, [
+                'assigned_at' => now(),
+                'assigned_by' => auth()->id(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Rôle assigné avec succès',
+                'data' => ['user' => $user->fresh()->load('roles')]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur assignation rôle', [
+                'user_id' => $userId,
+                'role_id' => $request->role_id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique'
+            ], 500);
+        }
+    }
+
+    /**
+     * Retirer un rôle d'un utilisateur
+     */
+    public function removeRoleFromUser(Request $request, $userId): JsonResponse
+    {
+        $user = User::find($userId);
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Utilisateur introuvable'
+            ], 404);
+        }
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'role_id' => 'required|exists:roles,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $role = Role::find($request->role_id);
+
+            if (!$user->hasRole($role->slug)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'L\'utilisateur n\'a pas ce rôle'
+                ], 400);
+            }
+
+            $user->roles()->detach($role->id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Rôle retiré avec succès',
+                'data' => ['user' => $user->fresh()->load('roles')]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur retrait rôle', [
+                'user_id' => $userId,
+                'role_id' => $request->role_id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique'
+            ], 500);
+        }
+    }
+
+    /**
+     * Activer/Désactiver un événement
+     */
+    public function toggleEventStatus($eventId): JsonResponse
+    {
+        try {
+            $event = Event::find($eventId);
+
+            if (!$event) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Événement introuvable'
+                ], 404);
+            }
+
+            $event->is_active = !$event->is_active;
+            $event->save();
+
+            $message = $event->is_active ? 'Événement activé avec succès' : 'Événement désactivé avec succès';
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'data' => ['event' => $event->fresh()]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur toggle statut événement', [
+                'event_id' => $eventId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors du changement de statut'
             ], 500);
         }
     }

@@ -197,14 +197,45 @@ Route::prefix('v1')->group(function () {
     Route::prefix('admin')->middleware(['auth:sanctum', 'admin.access'])->group(function () {
         // Dashboard
         Route::get('dashboard', [App\Http\Controllers\Admin\AdminController::class, 'dashboard']);
-        
+
+        // Gestion des types d'utilisateurs (lecture seule)
+        Route::prefix('user-types')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'userTypes']);
+            Route::get('{userType}', [App\Http\Controllers\Admin\AdminController::class, 'showUserType']);
+        });
+
+        // Gestion des privilèges (lecture seule)
+        Route::prefix('privileges')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'privileges']);
+            Route::get('{privilege}', [App\Http\Controllers\Admin\AdminController::class, 'showPrivilege']);
+        });
+
+        // Gestion des rôles
+        Route::prefix('roles')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'roles']);
+            Route::get('{role}', [App\Http\Controllers\Admin\AdminController::class, 'showRole']);
+            Route::post('/', [App\Http\Controllers\Admin\AdminController::class, 'createRole']); // Création rôles admin uniquement
+            Route::put('{role}', [App\Http\Controllers\Admin\AdminController::class, 'updateRole']);
+            Route::delete('{role}', [App\Http\Controllers\Admin\AdminController::class, 'deleteRole']);
+            Route::post('{role}/privileges', [App\Http\Controllers\Admin\AdminController::class, 'assignPrivilegesToRole']);
+        });
+
         // Gestion des utilisateurs
         Route::prefix('users')->group(function () {
             Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'users']);
+            Route::get('admins', [App\Http\Controllers\Admin\AdminController::class, 'admins']);
+            Route::get('clients', [App\Http\Controllers\Admin\AdminController::class, 'clients']);
+            Route::get('organizers-users', [App\Http\Controllers\Admin\AdminController::class, 'organizersUsers']);
+            Route::get('trashed', [App\Http\Controllers\Admin\AdminController::class, 'trashedUsers']);
+            Route::get('{user}', [App\Http\Controllers\Admin\AdminController::class, 'showUser']);
             Route::post('/', [App\Http\Controllers\Admin\AdminController::class, 'createUser']);
             Route::put('{user}', [App\Http\Controllers\Admin\AdminController::class, 'updateUser']);
+            Route::delete('{user}', [App\Http\Controllers\Admin\AdminController::class, 'deleteUser']); // Soft delete
+            Route::post('{user}/restore', [App\Http\Controllers\Admin\AdminController::class, 'restoreUser']);
             Route::post('{user}/toggle-status', [App\Http\Controllers\Admin\AdminController::class, 'toggleUserStatus']);
             Route::post('{user}/reset-password', [App\Http\Controllers\Admin\AdminController::class, 'resetUserPassword']);
+            Route::post('{user}/assign-role', [App\Http\Controllers\Admin\AdminController::class, 'assignRoleToUser']);
+            Route::post('{user}/remove-role', [App\Http\Controllers\Admin\AdminController::class, 'removeRoleFromUser']);
         });
         
         // Gestion des organisateurs

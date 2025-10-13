@@ -52,6 +52,9 @@ const AdminSettings = () => import(/* webpackChunkName: "admin-settings" */ './p
 const AdminProfile = () => import(/* webpackChunkName: "admin-settings" */ './pages/admin/Profile.vue');
 const CategoryManagement = () => import(/* webpackChunkName: "admin-categories" */ './pages/admin/CategoryManagement.vue');
 const VenueManagement = () => import(/* webpackChunkName: "admin-venues" */ './pages/admin/VenueManagement.vue');
+const UserTypes = () => import(/* webpackChunkName: "admin-users" */ './pages/admin/UserTypes.vue');
+const Privileges = () => import(/* webpackChunkName: "admin-users" */ './pages/admin/Privileges.vue');
+const Roles = () => import(/* webpackChunkName: "admin-users" */ './pages/admin/Roles.vue');
 
 // Scanner
 const ScannerApp = () => import('./pages/scanner/ScannerApp.vue');
@@ -114,6 +117,9 @@ const routes = [
             { path: '', redirect: '/admin/dashboard' },
             { path: 'dashboard', component: AdminDashboard, name: 'admin-dashboard' },
             { path: 'users', component: UserManagement, name: 'admin-users' },
+            { path: 'user-types', component: UserTypes, name: 'admin-user-types' },
+            { path: 'privileges', component: Privileges, name: 'admin-privileges' },
+            { path: 'roles', component: Roles, name: 'admin-roles' },
             { path: 'organizers', component: OrganizerManagement, name: 'admin-organizers' },
             { path: 'events', component: EventManagement, name: 'admin-events' },
             { path: 'orders', component: OrderManagement, name: 'admin-orders' },
