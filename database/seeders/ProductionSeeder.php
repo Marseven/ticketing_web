@@ -21,7 +21,7 @@ class ProductionSeeder extends Seeder
         $this->command->info('🎉 Base de données de production seedée avec succès !');
         $this->command->info('');
         $this->command->info('=== COMPTES DISPONIBLES ===');
-        $this->command->info('👑 ADMIN : admin@primea.ga / AdminPrimea2025!');
+        $this->command->info('👑 SUPER ADMIN : admin@primea.ga / AdminPrimea2025!');
         $this->command->info('🏢 ORGANISATEURS :');
         $this->command->info('   - marie@primea.ga / Organizer2025!');
         $this->command->info('   - jean@primea.ga / Organizer2025!');

@@ -14,24 +14,35 @@ class TestUsersSeeder extends Seeder
      */
     public function run(): void
     {
-        // Créer les rôles s'ils n'existent pas
-        $clientRole = Role::firstOrCreate(['slug' => Role::CLIENT], [
-            'name' => 'Client',
-            'level' => 1,
-            'description' => 'Utilisateur client standard'
-        ]);
+        // Récupérer les rôles créés par RoleSeeder
+        $clientRole = Role::where('slug', Role::CLIENT)->first();
+        $organizerRole = Role::where('slug', Role::ORGANIZER)->first();
+        $superAdminRole = Role::where('slug', 'super_admin')->first();
 
-        $organizerRole = Role::firstOrCreate(['slug' => Role::ORGANIZER], [
-            'name' => 'Organisateur',
-            'level' => 2,
-            'description' => 'Organisateur d\'événements'
-        ]);
+        // Si les rôles n'existent pas, créer des rôles par défaut
+        if (!$clientRole) {
+            $clientRole = Role::firstOrCreate(['slug' => Role::CLIENT], [
+                'name' => 'Client',
+                'level' => 1,
+                'description' => 'Utilisateur client standard'
+            ]);
+        }
 
-        $adminRole = Role::firstOrCreate(['slug' => Role::ADMIN], [
-            'name' => 'Administrateur',
-            'level' => 3,
-            'description' => 'Administrateur système'
-        ]);
+        if (!$organizerRole) {
+            $organizerRole = Role::firstOrCreate(['slug' => Role::ORGANIZER], [
+                'name' => 'Organisateur',
+                'level' => 2,
+                'description' => 'Organisateur d\'événements'
+            ]);
+        }
+
+        if (!$superAdminRole) {
+            $superAdminRole = Role::firstOrCreate(['slug' => 'super_admin'], [
+                'name' => 'Super Admin',
+                'level' => 100,
+                'description' => 'Accès complet au système'
+            ]);
+        }
 
         // Créer les utilisateurs de production
         $users = [
@@ -45,7 +56,7 @@ class TestUsersSeeder extends Seeder
                 'status' => 'active',
                 'email_verified_at' => now(),
                 'phone_verified_at' => null,
-                'role' => $adminRole
+                'role' => $superAdminRole
             ],
             // Organisateurs
             [
@@ -115,7 +126,7 @@ class TestUsersSeeder extends Seeder
 
         $this->command->info('Utilisateurs créés avec succès !');
         $this->command->info('Comptes disponibles :');
-        $this->command->info('- admin@primea.ga / +241011223344 : AdminPrimea2025! (Admin)');
+        $this->command->info('- admin@primea.ga / +241011223344 : AdminPrimea2025! (Super Admin)');
         $this->command->info('- marie@primea.ga / +241077889900 : Organizer2025! (Organisateur)');
         $this->command->info('- jean@primea.ga / +241066554433 : Organizer2025! (Organisateur)');
         $this->command->info('- alice@example.com / +241055667788 : Client2025! (Client)');
