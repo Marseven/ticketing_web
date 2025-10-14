@@ -16,8 +16,8 @@
       "assets/css/account-BTRhU8Td.css"
     ]
   },
-  "_admin-CSJjS7q2.js": {
-    "file": "assets/js/admin-CSJjS7q2.js",
+  "_admin-CCH9FOPj.js": {
+    "file": "assets/js/admin-CCH9FOPj.js",
     "name": "admin",
     "isDynamicEntry": true,
     "imports": [
@@ -103,7 +103,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-CsUmhHgR.js",
+    "file": "assets/js/app-CpnxqTkp.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -139,26 +139,26 @@
       "_organizer-rusHQjnK.js",
       "_organizer-rusHQjnK.js",
       "resources/js/layouts/AdminLayout.vue",
-      "_admin-CSJjS7q2.js",
-      "_admin-CSJjS7q2.js",
-      "_admin-CSJjS7q2.js",
-      "_admin-CSJjS7q2.js",
-      "_admin-CSJjS7q2.js",
-      "_admin-CSJjS7q2.js",
-      "_admin-CSJjS7q2.js",
-      "_admin-CSJjS7q2.js",
-      "_admin-CSJjS7q2.js",
-      "_admin-CSJjS7q2.js",
-      "_admin-CSJjS7q2.js",
-      "_admin-CSJjS7q2.js",
-      "_admin-CSJjS7q2.js",
-      "_admin-CSJjS7q2.js",
-      "_admin-CSJjS7q2.js",
-      "_admin-CSJjS7q2.js",
-      "_admin-CSJjS7q2.js",
-      "_admin-CSJjS7q2.js",
-      "_admin-CSJjS7q2.js",
-      "_admin-CSJjS7q2.js",
+      "_admin-CCH9FOPj.js",
+      "_admin-CCH9FOPj.js",
+      "_admin-CCH9FOPj.js",
+      "_admin-CCH9FOPj.js",
+      "_admin-CCH9FOPj.js",
+      "_admin-CCH9FOPj.js",
+      "_admin-CCH9FOPj.js",
+      "_admin-CCH9FOPj.js",
+      "_admin-CCH9FOPj.js",
+      "_admin-CCH9FOPj.js",
+      "_admin-CCH9FOPj.js",
+      "_admin-CCH9FOPj.js",
+      "_admin-CCH9FOPj.js",
+      "_admin-CCH9FOPj.js",
+      "_admin-CCH9FOPj.js",
+      "_admin-CCH9FOPj.js",
+      "_admin-CCH9FOPj.js",
+      "_admin-CCH9FOPj.js",
+      "_admin-CCH9FOPj.js",
+      "_admin-CCH9FOPj.js",
       "resources/js/pages/scanner/ScannerApp.vue"
     ],
     "css": [
@@ -197,7 +197,7 @@
     ]
   },
   "resources/js/pages/Checkout.vue": {
-    "file": "assets/js/Checkout-DxoCAfSU.js",
+    "file": "assets/js/Checkout-DFIn7EZf.js",
     "name": "Checkout",
     "src": "resources/js/pages/Checkout.vue",
     "isDynamicEntry": true,
@@ -229,7 +229,7 @@
     ]
   },
   "resources/js/pages/EventDetail.vue": {
-    "file": "assets/js/EventDetail-CdW72FK7.js",
+    "file": "assets/js/EventDetail-BL4MsN-f.js",
     "name": "EventDetail",
     "src": "resources/js/pages/EventDetail.vue",
     "isDynamicEntry": true,
@@ -246,7 +246,7 @@
     ]
   },
   "resources/js/pages/Events.vue": {
-    "file": "assets/js/Events-BjF0NTqe.js",
+    "file": "assets/js/Events-iGDxKX3E.js",
     "name": "Events",
     "src": "resources/js/pages/Events.vue",
     "isDynamicEntry": true,

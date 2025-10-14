@@ -224,7 +224,7 @@
               <p class="text-xs text-gray-500 mt-1">Plus le niveau est élevé, plus le rôle a de priorité</p>
             </div>
 
-            <div v-if="isEditMode">
+            <div>
               <label class="flex items-center">
                 <input v-model="formData.is_active" type="checkbox" class="mr-2">
                 <span class="text-sm font-medium text-gray-700">Actif</span>
@@ -669,6 +669,7 @@ export default {
         name: role.name,
         description: role.description,
         user_type_id: role.user_type_id,
+        type: role.type || 'custom',
         level: role.level,
         is_active: role.is_active,
         privilege_ids: role.privileges?.map(p => p.id) || [],
