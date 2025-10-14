@@ -165,24 +165,12 @@
 
             <div class="md:col-span-2">
               <label class="block text-sm font-medium text-gray-700 mb-2">Image du lieu</label>
-
-              <!-- Image actuelle -->
-              <div v-if="venueForm.imagePreview" class="mb-3">
-                <img :src="venueForm.imagePreview" alt="Prévisualisation" class="w-32 h-32 object-cover rounded-lg">
-                <button type="button" @click="removeImage" class="mt-2 text-sm text-red-600 hover:text-red-800">
-                  Supprimer l'image
-                </button>
-              </div>
-
-              <!-- Upload d'image -->
-              <input
-                ref="imageInput"
-                type="file"
-                accept="image/*"
-                @change="handleImageSelect"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                style="--tw-ring-color: #272d63;">
-              <p class="text-xs text-gray-500 mt-1">PNG, JPG, GIF, WEBP jusqu'à 5MB</p>
+              <ImageUpload
+                v-model="venueForm.image"
+                entity-type="venues"
+                size="medium"
+                alt-text="Image du lieu"
+              />
             </div>
             
             <div>
@@ -266,9 +254,13 @@
 
 <script>
 import { ref, reactive, computed, onMounted } from 'vue'
+import ImageUpload from '../../components/ImageUpload.vue'
 
 export default {
   name: 'VenueManagement',
+  components: {
+    ImageUpload
+  },
   setup() {
     const loading = ref(false)
     const showCreateModal = ref(false)
@@ -294,11 +286,8 @@ export default {
       phone: '',
       email: '',
       image: {},
-      imagePreview: null,
       status: 'active'
     })
-
-    const imageInput = ref(null)
 
     // Computed
     const filteredVenues = computed(() => {
@@ -465,12 +454,14 @@ export default {
         if (venueForm.email) formData.append('email', venueForm.email)
         if (venueForm.status) formData.append('status', venueForm.status)
 
-        // Gérer l'image
+        // Gérer l'image depuis ImageUpload
         if (venueForm.image.url) {
+          // URL externe fournie par l'utilisateur
           formData.append('image_url', venueForm.image.url)
-        } else if (venueForm.image.file) {
-          // Si on a un vrai fichier, l'ajouter
-          formData.append('cover_image', venueForm.image.file)
+        } else if (venueForm.image.filename) {
+          // Image uploadée via ImageUpload - utiliser le chemin construit
+          const imageUrl = `/storage/images/venues/medium_${venueForm.image.filename}`
+          formData.append('image_url', imageUrl)
         }
 
         const response = await fetch('/api/v1/admin/venues', {
@@ -517,18 +508,18 @@ export default {
     const editVenue = (venue) => {
       editingVenue.value = venue
 
-      // Préparer l'image preview
-      let imagePreview = null
+      // Préparer les données de l'image pour ImageUpload
+      let imageData = {}
       if (venue.image_url) {
-        imagePreview = venue.image_url
+        imageData = { url: venue.image_url }
       } else if (venue.image_file) {
-        imagePreview = `/storage/${venue.image_file}`
+        // Convertir le chemin de fichier en URL complète pour ImageUpload
+        imageData = { url: `/storage/${venue.image_file}` }
       }
 
       Object.assign(venueForm, {
         ...venue,
-        image: {},
-        imagePreview: imagePreview
+        image: imageData
       })
       showEditModal.value = true
     }
@@ -550,12 +541,14 @@ export default {
         if (venueForm.email) formData.append('email', venueForm.email)
         if (venueForm.status) formData.append('status', venueForm.status)
 
-        // Gérer l'image
+        // Gérer l'image depuis ImageUpload
         if (venueForm.image.url) {
+          // URL externe fournie par l'utilisateur
           formData.append('image_url', venueForm.image.url)
-        } else if (venueForm.image.file) {
-          // Si on a un vrai fichier, l'ajouter
-          formData.append('cover_image', venueForm.image.file)
+        } else if (venueForm.image.filename) {
+          // Image uploadée via ImageUpload - utiliser le chemin construit
+          const imageUrl = `/storage/images/venues/medium_${venueForm.image.filename}`
+          formData.append('image_url', imageUrl)
         }
 
         // Laravel ne supporte pas vraiment PUT avec FormData, on utilise POST avec _method
@@ -637,41 +630,8 @@ export default {
         phone: '',
         email: '',
         image: {},
-        imagePreview: null,
         status: 'active'
       })
-      if (imageInput.value) {
-        imageInput.value.value = ''
-      }
-    }
-
-    const handleImageSelect = (event) => {
-      const file = event.target.files[0]
-      if (file) {
-        // Validation de la taille (5MB max)
-        if (file.size > 5 * 1024 * 1024) {
-          alert('L\'image ne doit pas dépasser 5MB')
-          return
-        }
-
-        // Stocker le fichier
-        venueForm.image.file = file
-
-        // Créer une prévisualisation
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          venueForm.imagePreview = e.target.result
-        }
-        reader.readAsDataURL(file)
-      }
-    }
-
-    const removeImage = () => {
-      venueForm.image = {}
-      venueForm.imagePreview = null
-      if (imageInput.value) {
-        imageInput.value.value = ''
-      }
     }
 
     const getVenueImageUrl = (venue) => {
@@ -722,11 +682,8 @@ export default {
       updateVenue,
       deleteVenue,
       closeModals,
-      handleImageSelect,
-      removeImage,
       getVenueImageUrl,
-      handleImageError,
-      imageInput
+      handleImageError
     }
   }
 }
