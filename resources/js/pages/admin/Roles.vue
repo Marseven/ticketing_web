@@ -449,6 +449,7 @@
 
 <script>
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 export default {
   name: 'Roles',
@@ -546,7 +547,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur chargement rôles:', error);
-        this.$swal.fire({
+        Swal.fire({
           icon: 'error',
           title: 'Erreur',
           text: 'Impossible de charger les rôles',
@@ -582,7 +583,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur chargement privilèges:', error);
-        this.$swal.fire({
+        Swal.fire({
           icon: 'error',
           title: 'Erreur',
           text: 'Impossible de charger les privilèges',
@@ -612,7 +613,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur chargement privilèges:', error);
-        this.$swal.fire({
+        Swal.fire({
           icon: 'error',
           title: 'Erreur',
           text: 'Impossible de charger les privilèges',
@@ -709,7 +710,7 @@ export default {
         const response = await axios[method](url, payload);
 
         if (response.data.success) {
-          this.$swal.fire({
+          Swal.fire({
             icon: 'success',
             title: 'Succès',
             text: response.data.message,
@@ -720,7 +721,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur soumission formulaire:', error);
-        this.$swal.fire({
+        Swal.fire({
           icon: 'error',
           title: 'Erreur',
           text: error.response?.data?.message || 'Une erreur est survenue',
@@ -772,7 +773,7 @@ export default {
         );
 
         if (response.data.success) {
-          this.$swal.fire({
+          Swal.fire({
             icon: 'success',
             title: 'Succès',
             text: 'Privilèges mis à jour avec succès',
@@ -783,7 +784,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur sauvegarde privilèges:', error);
-        this.$swal.fire({
+        Swal.fire({
           icon: 'error',
           title: 'Erreur',
           text: error.response?.data?.message || 'Une erreur est survenue',
@@ -794,7 +795,7 @@ export default {
     },
 
     confirmDelete(role) {
-      this.$swal.fire({
+      Swal.fire({
         title: 'Supprimer ce rôle ?',
         html: `
           <p>Voulez-vous vraiment supprimer le rôle <strong>${role.name}</strong> ?</p>
@@ -818,7 +819,7 @@ export default {
         const response = await axios.delete(`/api/v1/admin/roles/${role.id}`);
 
         if (response.data.success) {
-          this.$swal.fire({
+          Swal.fire({
             icon: 'success',
             title: 'Supprimé',
             text: response.data.message,
@@ -828,7 +829,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur suppression rôle:', error);
-        this.$swal.fire({
+        Swal.fire({
           icon: 'error',
           title: 'Erreur',
           text: error.response?.data?.message || 'Impossible de supprimer ce rôle',
