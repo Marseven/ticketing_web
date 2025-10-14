@@ -738,7 +738,7 @@ class AdminController extends Controller
             'status' => 'required|in:draft,published,cancelled',
             'is_active' => 'boolean',
             'image_url' => 'nullable|url',
-            'image_file' => 'nullable|string',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'schedules' => 'nullable|array',
             'schedules.*.starts_at' => 'required|date',
             'schedules.*.ends_at' => 'required|date|after:schedules.*.starts_at',
@@ -772,6 +772,15 @@ class AdminController extends Controller
                 $venueId = $venue->id;
             }
 
+            // Gérer l'upload de l'image
+            $imageFile = null;
+            if ($request->hasFile('cover_image')) {
+                $file = $request->file('cover_image');
+                $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('events', $filename, 'public');
+                $imageFile = $path;
+            }
+
             // Créer l'événement
             $event = Event::create([
                 'title' => $request->title,
@@ -783,7 +792,7 @@ class AdminController extends Controller
                 'status' => $request->status,
                 'is_active' => $request->boolean('is_active', true),
                 'image_url' => $request->image_url,
-                'image_file' => $request->image_file,
+                'image_file' => $imageFile,
             ]);
 
             // Créer les horaires
@@ -884,7 +893,7 @@ class AdminController extends Controller
             'status' => 'sometimes|in:draft,published,cancelled',
             'is_active' => 'sometimes|boolean',
             'image_url' => 'nullable|url',
-            'image_file' => 'nullable|string',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'schedules' => 'nullable|array',
             'schedules.*.starts_at' => 'required|date',
             'schedules.*.ends_at' => 'required|date|after:schedules.*.starts_at',
@@ -926,17 +935,29 @@ class AdminController extends Controller
                 $venueId = $venue->id;
             }
 
+            // Gérer l'upload de la nouvelle image
+            if ($request->hasFile('cover_image')) {
+                // Supprimer l'ancienne image si elle existe
+                if ($event->image_file && \Storage::disk('public')->exists($event->image_file)) {
+                    \Storage::disk('public')->delete($event->image_file);
+                }
+
+                $file = $request->file('cover_image');
+                $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('events', $filename, 'public');
+                $event->image_file = $path;
+            }
+
             // Mettre à jour l'événement
             $updateData = $request->only([
-                'title', 'description', 'organizer_id', 
-                'category_id', 'status', 'is_active',
-                'image_url', 'image_file'
+                'title', 'description', 'organizer_id',
+                'category_id', 'status', 'is_active', 'image_url'
             ]);
-            
+
             if ($request->filled('title')) {
                 $updateData['slug'] = Str::slug($request->title);
             }
-            
+
             if ($venueId) {
                 $updateData['venue_id'] = $venueId;
             }
