@@ -17,19 +17,13 @@ class UserTypeSeeder extends Seeder
             [
                 'name' => 'admin',
                 'label' => 'Administrateur',
-                'description' => 'Utilisateur avec tous les privilèges d\'administration de la plateforme',
+                'description' => 'Type d\'utilisateur avec accès à l\'administration (super admin, admin, support)',
                 'is_active' => true,
             ],
             [
                 'name' => 'client',
                 'label' => 'Client',
-                'description' => 'Utilisateur client qui achète des billets pour des événements',
-                'is_active' => true,
-            ],
-            [
-                'name' => 'organizer',
-                'label' => 'Organisateur',
-                'description' => 'Utilisateur qui peut créer et gérer des événements',
+                'description' => 'Type d\'utilisateur client (organisateur ou client simple)',
                 'is_active' => true,
             ],
         ];

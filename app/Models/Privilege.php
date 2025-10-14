@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Privilege extends Model
 {
@@ -16,6 +17,7 @@ class Privilege extends Model
         'description',
         'module',
         'action',
+        'user_type_id',
         'is_active',
     ];
 
@@ -50,6 +52,14 @@ class Privilege extends Model
     {
         return $this->belongsToMany(Role::class, 'privilege_role')
                     ->withTimestamps();
+    }
+
+    /**
+     * Get the user type this privilege belongs to.
+     */
+    public function userType(): BelongsTo
+    {
+        return $this->belongsTo(UserType::class, 'user_type_id');
     }
 
     /**
