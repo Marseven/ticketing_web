@@ -70,8 +70,11 @@
            class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-200">
         <!-- Venue Image -->
         <div class="h-48 bg-gray-200 rounded-t-lg relative overflow-hidden">
-          <img v-if="venue.image" :src="venue.image" :alt="venue.name" 
-               class="w-full h-full object-cover">
+          <img v-if="getVenueImageUrl(venue)"
+               :src="getVenueImageUrl(venue)"
+               :alt="venue.name"
+               class="w-full h-full object-cover"
+               @error="handleImageError">
           <div v-else class="w-full h-full flex items-center justify-center">
             <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
@@ -614,6 +617,38 @@ export default {
       venueForm.image = imageData
     }
 
+    const getVenueImageUrl = (venue) => {
+      // Si c'est une URL externe directe
+      if (venue.image_url && (venue.image_url.startsWith('http://') || venue.image_url.startsWith('https://'))) {
+        return venue.image_url
+      }
+
+      // Si c'est un fichier stocké localement
+      if (venue.image_file) {
+        // Si le chemin commence déjà par storage/, on ajoute juste le slash
+        if (venue.image_file.startsWith('storage/')) {
+          return `/${venue.image_file}`
+        }
+        // Sinon on ajoute le préfixe /storage/
+        return `/storage/${venue.image_file}`
+      }
+
+      // Fallback sur venue.image (pour compatibilité avec les données mock)
+      if (venue.image) {
+        if (venue.image.startsWith('http://') || venue.image.startsWith('https://')) {
+          return venue.image
+        }
+        return `/storage/${venue.image}`
+      }
+
+      return null
+    }
+
+    const handleImageError = (event) => {
+      // En cas d'erreur de chargement, on cache l'image
+      event.target.style.display = 'none'
+    }
+
     // Lifecycle
     onMounted(() => {
       loadVenues()
@@ -634,7 +669,9 @@ export default {
       updateVenue,
       deleteVenue,
       closeModals,
-      handleImageChange
+      handleImageChange,
+      getVenueImageUrl,
+      handleImageError
     }
   }
 }
