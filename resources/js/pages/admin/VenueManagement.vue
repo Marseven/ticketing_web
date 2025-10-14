@@ -165,13 +165,24 @@
 
             <div class="md:col-span-2">
               <label class="block text-sm font-medium text-gray-700 mb-2">Image du lieu</label>
-              <ImageUpload 
-                v-model="venueForm.image"
-                entity-type="venues"
-                size="medium"
-                alt-text="Image du lieu"
-                @change="handleImageChange"
-              />
+
+              <!-- Image actuelle -->
+              <div v-if="venueForm.imagePreview" class="mb-3">
+                <img :src="venueForm.imagePreview" alt="Prévisualisation" class="w-32 h-32 object-cover rounded-lg">
+                <button type="button" @click="removeImage" class="mt-2 text-sm text-red-600 hover:text-red-800">
+                  Supprimer l'image
+                </button>
+              </div>
+
+              <!-- Upload d'image -->
+              <input
+                ref="imageInput"
+                type="file"
+                accept="image/*"
+                @change="handleImageSelect"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                style="--tw-ring-color: #272d63;">
+              <p class="text-xs text-gray-500 mt-1">PNG, JPG, GIF, WEBP jusqu'à 5MB</p>
             </div>
             
             <div>
@@ -255,13 +266,9 @@
 
 <script>
 import { ref, reactive, computed, onMounted } from 'vue'
-import ImageUpload from '../../components/ImageUpload.vue'
 
 export default {
   name: 'VenueManagement',
-  components: {
-    ImageUpload
-  },
   setup() {
     const loading = ref(false)
     const showCreateModal = ref(false)
@@ -287,8 +294,11 @@ export default {
       phone: '',
       email: '',
       image: {},
+      imagePreview: null,
       status: 'active'
     })
+
+    const imageInput = ref(null)
 
     // Computed
     const filteredVenues = computed(() => {
@@ -440,31 +450,38 @@ export default {
     
     const createVenue = async () => {
       try {
-        // Préparer les données avec les images
-        const formData = { ...venueForm }
-        
-        // Gérer les données d'image
+        // Créer un FormData pour l'upload de fichier
+        const formData = new FormData()
+
+        // Ajouter tous les champs du formulaire
+        formData.append('name', venueForm.name)
+        if (venueForm.description) formData.append('description', venueForm.description)
+        formData.append('address', venueForm.address)
+        formData.append('city', venueForm.city)
+        if (venueForm.postal_code) formData.append('postal_code', venueForm.postal_code)
+        if (venueForm.country) formData.append('country', venueForm.country)
+        if (venueForm.capacity) formData.append('capacity', venueForm.capacity)
+        if (venueForm.phone) formData.append('phone', venueForm.phone)
+        if (venueForm.email) formData.append('email', venueForm.email)
+        if (venueForm.status) formData.append('status', venueForm.status)
+
+        // Gérer l'image
         if (venueForm.image.url) {
-          formData.image_url = venueForm.image.url
-          formData.image_file = null
-        } else if (venueForm.image.filename) {
-          formData.image_file = venueForm.image.filename
-          formData.image_url = null
+          formData.append('image_url', venueForm.image.url)
+        } else if (venueForm.image.file) {
+          // Si on a un vrai fichier, l'ajouter
+          formData.append('cover_image', venueForm.image.file)
         }
-        
-        // Nettoyer les données
-        delete formData.image
 
         const response = await fetch('/api/v1/admin/venues', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Accept': 'application/json',
-            'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
             'X-Requested-With': 'XMLHttpRequest'
           },
-          body: JSON.stringify(formData)
+          body: formData
         })
         
         if (response.ok) {
@@ -499,49 +516,60 @@ export default {
     
     const editVenue = (venue) => {
       editingVenue.value = venue
-      
-      // Préparer les données d'image
-      let imageData = {}
+
+      // Préparer l'image preview
+      let imagePreview = null
       if (venue.image_url) {
-        imageData.url = venue.image_url
+        imagePreview = venue.image_url
       } else if (venue.image_file) {
-        imageData.filename = venue.image_file
+        imagePreview = `/storage/${venue.image_file}`
       }
-      
+
       Object.assign(venueForm, {
         ...venue,
-        image: imageData
+        image: {},
+        imagePreview: imagePreview
       })
       showEditModal.value = true
     }
     
     const updateVenue = async () => {
       try {
-        // Préparer les données avec les images
-        const formData = { ...venueForm }
-        
-        // Gérer les données d'image
+        // Créer un FormData pour l'upload de fichier
+        const formData = new FormData()
+
+        // Ajouter tous les champs du formulaire
+        formData.append('name', venueForm.name)
+        if (venueForm.description) formData.append('description', venueForm.description)
+        formData.append('address', venueForm.address)
+        formData.append('city', venueForm.city)
+        if (venueForm.postal_code) formData.append('postal_code', venueForm.postal_code)
+        if (venueForm.country) formData.append('country', venueForm.country)
+        if (venueForm.capacity) formData.append('capacity', venueForm.capacity)
+        if (venueForm.phone) formData.append('phone', venueForm.phone)
+        if (venueForm.email) formData.append('email', venueForm.email)
+        if (venueForm.status) formData.append('status', venueForm.status)
+
+        // Gérer l'image
         if (venueForm.image.url) {
-          formData.image_url = venueForm.image.url
-          formData.image_file = null
-        } else if (venueForm.image.filename) {
-          formData.image_file = venueForm.image.filename
-          formData.image_url = null
+          formData.append('image_url', venueForm.image.url)
+        } else if (venueForm.image.file) {
+          // Si on a un vrai fichier, l'ajouter
+          formData.append('cover_image', venueForm.image.file)
         }
-        
-        // Nettoyer les données
-        delete formData.image
+
+        // Laravel ne supporte pas vraiment PUT avec FormData, on utilise POST avec _method
+        formData.append('_method', 'PUT')
 
         const response = await fetch(`/api/v1/admin/venues/${editingVenue.value.id}`, {
-          method: 'PUT',
+          method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Accept': 'application/json',
-            'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
             'X-Requested-With': 'XMLHttpRequest'
           },
-          body: JSON.stringify(formData)
+          body: formData
         })
         
         if (response.ok) {
@@ -609,12 +637,41 @@ export default {
         phone: '',
         email: '',
         image: {},
+        imagePreview: null,
         status: 'active'
       })
+      if (imageInput.value) {
+        imageInput.value.value = ''
+      }
     }
 
-    const handleImageChange = (imageData) => {
-      venueForm.image = imageData
+    const handleImageSelect = (event) => {
+      const file = event.target.files[0]
+      if (file) {
+        // Validation de la taille (5MB max)
+        if (file.size > 5 * 1024 * 1024) {
+          alert('L\'image ne doit pas dépasser 5MB')
+          return
+        }
+
+        // Stocker le fichier
+        venueForm.image.file = file
+
+        // Créer une prévisualisation
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          venueForm.imagePreview = e.target.result
+        }
+        reader.readAsDataURL(file)
+      }
+    }
+
+    const removeImage = () => {
+      venueForm.image = {}
+      venueForm.imagePreview = null
+      if (imageInput.value) {
+        imageInput.value.value = ''
+      }
     }
 
     const getVenueImageUrl = (venue) => {
@@ -669,9 +726,11 @@ export default {
       updateVenue,
       deleteVenue,
       closeModals,
-      handleImageChange,
+      handleImageSelect,
+      removeImage,
       getVenueImageUrl,
-      handleImageError
+      handleImageError,
+      imageInput
     }
   }
 }

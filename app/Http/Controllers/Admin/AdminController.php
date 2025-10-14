@@ -1278,7 +1278,7 @@ class AdminController extends Controller
             'email' => 'nullable|email|max:255',
             'image' => 'nullable|string',
             'image_url' => 'nullable|url',
-            'image_file' => 'nullable|string',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'status' => 'nullable|string|in:active,inactive',
             'geo_lat' => 'nullable|numeric|between:-90,90',
             'geo_lng' => 'nullable|numeric|between:-180,180',
@@ -1295,7 +1295,7 @@ class AdminController extends Controller
         try {
             // Récupérer le premier organisateur par défaut
             $organizerId = $request->organizer_id ?? Organizer::first()?->id;
-            
+
             if (!$organizerId) {
                 // Créer un organisateur par défaut si aucun n'existe
                 $defaultOrganizer = Organizer::create([
@@ -1307,6 +1307,15 @@ class AdminController extends Controller
                     'is_active' => true,
                 ]);
                 $organizerId = $defaultOrganizer->id;
+            }
+
+            // Gérer l'upload de l'image
+            $imageFile = null;
+            if ($request->hasFile('cover_image')) {
+                $file = $request->file('cover_image');
+                $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('venues', $filename, 'public');
+                $imageFile = $path;
             }
 
             $venue = Venue::create([
@@ -1322,7 +1331,7 @@ class AdminController extends Controller
                 'email' => $request->email,
                 'image' => $request->image,
                 'image_url' => $request->image_url,
-                'image_file' => $request->image_file,
+                'image_file' => $imageFile,
                 'status' => $request->status ?? 'active',
                 'geo_lat' => $request->geo_lat,
                 'geo_lng' => $request->geo_lng,
@@ -1371,7 +1380,7 @@ class AdminController extends Controller
             'email' => 'nullable|email|max:255',
             'image' => 'nullable|string',
             'image_url' => 'nullable|url',
-            'image_file' => 'nullable|string',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'status' => 'nullable|string|in:active,inactive',
             'geo_lat' => 'nullable|numeric|between:-90,90',
             'geo_lng' => 'nullable|numeric|between:-180,180',
@@ -1386,10 +1395,23 @@ class AdminController extends Controller
         }
 
         try {
+            // Gérer l'upload de la nouvelle image
+            if ($request->hasFile('cover_image')) {
+                // Supprimer l'ancienne image si elle existe
+                if ($venue->image_file && \Storage::disk('public')->exists($venue->image_file)) {
+                    \Storage::disk('public')->delete($venue->image_file);
+                }
+
+                $file = $request->file('cover_image');
+                $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('venues', $filename, 'public');
+                $venue->image_file = $path;
+            }
+
             $venue->update($request->only([
                 'name', 'description', 'address', 'city', 'postal_code',
                 'country', 'capacity', 'phone', 'email', 'image', 'status',
-                'image_url', 'image_file',
+                'image_url',
                 'geo_lat', 'geo_lng'
             ]));
 
