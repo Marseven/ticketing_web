@@ -2,18 +2,9 @@
   <div class="clients-page p-6 bg-gray-50 min-h-screen">
     <!-- Header -->
     <div class="mb-8">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-3xl font-bold text-primea-blue mb-2">Gestion des Clients</h1>
-          <p class="text-gray-600">Créer et gérer les comptes clients</p>
-        </div>
-        <button @click="openCreateModal"
-                class="bg-primea-blue text-white px-4 py-2 rounded-lg hover:bg-blue-800">
-          <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-          </svg>
-          Créer un Client
-        </button>
+      <div>
+        <h1 class="text-3xl font-bold text-primea-blue mb-2">Gestion des Clients</h1>
+        <p class="text-gray-600">Gérer les comptes clients</p>
       </div>
     </div>
 
