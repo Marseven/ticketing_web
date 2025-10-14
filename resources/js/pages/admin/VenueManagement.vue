@@ -686,8 +686,12 @@ export default {
         if (venue.image_file.startsWith('storage/')) {
           return `/${venue.image_file}`
         }
-        // Sinon on ajoute le préfixe /storage/
-        return `/storage/${venue.image_file}`
+        // Si le chemin contient déjà venues/, on ajoute juste /storage/
+        if (venue.image_file.startsWith('venues/')) {
+          return `/storage/${venue.image_file}`
+        }
+        // Sinon c'est juste le nom du fichier, on ajoute /storage/venues/
+        return `/storage/venues/${venue.image_file}`
       }
 
       // Fallback sur venue.image (pour compatibilité avec les données mock)
@@ -695,7 +699,11 @@ export default {
         if (venue.image.startsWith('http://') || venue.image.startsWith('https://')) {
           return venue.image
         }
-        return `/storage/${venue.image}`
+        // Même logique pour venue.image
+        if (venue.image.startsWith('venues/')) {
+          return `/storage/${venue.image}`
+        }
+        return `/storage/venues/${venue.image}`
       }
 
       return null
