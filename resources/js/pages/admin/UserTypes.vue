@@ -193,6 +193,7 @@
 
 <script>
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 export default {
   name: 'UserTypes',
@@ -246,7 +247,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur chargement types utilisateurs:', error);
-        this.$swal.fire({
+        Swal.fire({
           icon: 'error',
           title: 'Erreur',
           text: 'Impossible de charger les types d\'utilisateurs',

@@ -198,6 +198,18 @@
                      class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primea-blue">
             </div>
 
+            <div v-if="!isEditMode">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Rôle Admin *</label>
+              <select v-model="formData.role_id" required
+                      class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primea-blue">
+                <option value="">Sélectionner un rôle</option>
+                <option v-for="role in availableRoles" :key="role.id" :value="role.id">
+                  {{ role.name }}
+                </option>
+              </select>
+              <p class="text-xs text-gray-500 mt-1">Rôles disponibles : Admin, Support (Super Admin exclu)</p>
+            </div>
+
             <div v-if="isEditMode">
               <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
               <select v-model="formData.status"
@@ -309,6 +321,7 @@
 
 <script>
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 export default {
   name: 'Admins',
@@ -316,6 +329,7 @@ export default {
   data() {
     return {
       admins: [],
+      availableRoles: [],
       loading: false,
       submitting: false,
       showFormModal: false,
@@ -330,6 +344,7 @@ export default {
       formData: {
         name: '',
         email: '',
+        role_id: '',
         status: 'active',
       },
       pagination: {
@@ -345,6 +360,7 @@ export default {
 
   mounted() {
     this.loadAdmins();
+    this.loadAdminRoles();
   },
 
   methods: {
@@ -372,13 +388,32 @@ export default {
         }
       } catch (error) {
         console.error('Erreur chargement admins:', error);
-        this.$swal.fire({
+        Swal.fire({
           icon: 'error',
           title: 'Erreur',
           text: 'Impossible de charger les administrateurs',
         });
       } finally {
         this.loading = false;
+      }
+    },
+
+    async loadAdminRoles() {
+      try {
+        const response = await axios.get('/api/v1/admin/roles', {
+          params: { per_page: 100 }
+        });
+
+        if (response.data.success) {
+          // Filtrer pour obtenir uniquement les rôles admin (excluant super_admin)
+          this.availableRoles = response.data.data.data.filter(role => {
+            return role.user_type &&
+                   role.user_type.name === 'admin' &&
+                   role.slug !== 'super_admin';
+          });
+        }
+      } catch (error) {
+        console.error('Erreur chargement rôles admin:', error);
       }
     },
 
@@ -408,6 +443,7 @@ export default {
       this.formData = {
         name: '',
         email: '',
+        role_id: '',
         status: 'active',
       };
       this.showFormModal = true;
@@ -434,6 +470,17 @@ export default {
       try {
         const data = { ...this.formData, is_admin: true };
 
+        // Pour la création, s'assurer que role_id est présent
+        if (!this.isEditMode && !data.role_id) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: 'Veuillez sélectionner un rôle admin',
+          });
+          this.submitting = false;
+          return;
+        }
+
         const url = this.isEditMode
           ? `/api/v1/admin/users/${this.selectedAdmin.id}`
           : '/api/v1/admin/users';
@@ -443,7 +490,7 @@ export default {
         const response = await axios[method](url, data);
 
         if (response.data.success) {
-          this.$swal.fire({
+          Swal.fire({
             icon: 'success',
             title: 'Succès',
             text: response.data.message,
@@ -454,7 +501,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur soumission formulaire:', error);
-        this.$swal.fire({
+        Swal.fire({
           icon: 'error',
           title: 'Erreur',
           text: error.response?.data?.message || 'Une erreur est survenue',
@@ -479,7 +526,7 @@ export default {
         const response = await axios.post(`/api/v1/admin/users/${admin.id}/toggle-status`);
 
         if (response.data.success) {
-          this.$swal.fire({
+          Swal.fire({
             icon: 'success',
             title: 'Succès',
             text: response.data.message,
@@ -489,7 +536,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur changement statut:', error);
-        this.$swal.fire({
+        Swal.fire({
           icon: 'error',
           title: 'Erreur',
           text: error.response?.data?.message || 'Une erreur est survenue',
@@ -498,7 +545,7 @@ export default {
     },
 
     confirmDelete(admin) {
-      this.$swal.fire({
+      Swal.fire({
         title: 'Supprimer cet administrateur ?',
         html: `<p>Voulez-vous vraiment supprimer <strong>${admin.name}</strong> ?</p><p class="text-sm text-gray-600 mt-2">Cette action effectue une suppression douce (soft delete). L'utilisateur peut être restauré.</p>`,
         icon: 'warning',
@@ -519,7 +566,7 @@ export default {
         const response = await axios.delete(`/api/v1/admin/users/${admin.id}`);
 
         if (response.data.success) {
-          this.$swal.fire({
+          Swal.fire({
             icon: 'success',
             title: 'Supprimé',
             text: response.data.message,
@@ -529,7 +576,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur suppression admin:', error);
-        this.$swal.fire({
+        Swal.fire({
           icon: 'error',
           title: 'Erreur',
           text: error.response?.data?.message || 'Impossible de supprimer cet administrateur',
@@ -538,7 +585,7 @@ export default {
     },
 
     async resetPassword(admin) {
-      this.$swal.fire({
+      Swal.fire({
         title: 'Réinitialiser le mot de passe ?',
         html: `<p>Un email de réinitialisation sera envoyé à <strong>${admin.email}</strong></p>`,
         icon: 'question',
@@ -551,14 +598,14 @@ export default {
             const response = await axios.post(`/api/v1/admin/users/${admin.id}/reset-password`);
 
             if (response.data.success) {
-              this.$swal.fire({
+              Swal.fire({
                 icon: 'success',
                 title: 'Email envoyé',
                 text: response.data.message,
               });
             }
           } catch (error) {
-            this.$swal.fire({
+            Swal.fire({
               icon: 'error',
               title: 'Erreur',
               text: error.response?.data?.message || 'Impossible d\'envoyer l\'email',

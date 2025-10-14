@@ -252,6 +252,7 @@
 
 <script>
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 export default {
   name: 'Privileges',
@@ -307,7 +308,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur chargement privilèges:', error);
-        this.$swal.fire({
+        Swal.fire({
           icon: 'error',
           title: 'Erreur',
           text: 'Impossible de charger les privilèges',

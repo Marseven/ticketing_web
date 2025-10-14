@@ -322,6 +322,7 @@
 
 <script>
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 export default {
   name: 'OrganizersUsers',
@@ -385,7 +386,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur chargement organisateurs users:', error);
-        this.$swal.fire({
+        Swal.fire({
           icon: 'error',
           title: 'Erreur',
           text: 'Impossible de charger les utilisateurs organisateurs',
@@ -456,7 +457,7 @@ export default {
         const response = await axios[method](url, data);
 
         if (response.data.success) {
-          this.$swal.fire({
+          Swal.fire({
             icon: 'success',
             title: 'Succès',
             text: response.data.message,
@@ -467,7 +468,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur soumission formulaire:', error);
-        this.$swal.fire({
+        Swal.fire({
           icon: 'error',
           title: 'Erreur',
           text: error.response?.data?.message || 'Une erreur est survenue',
@@ -492,7 +493,7 @@ export default {
         const response = await axios.post(`/api/v1/admin/users/${organizerUser.id}/toggle-status`);
 
         if (response.data.success) {
-          this.$swal.fire({
+          Swal.fire({
             icon: 'success',
             title: 'Succès',
             text: response.data.message,
@@ -502,7 +503,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur changement statut:', error);
-        this.$swal.fire({
+        Swal.fire({
           icon: 'error',
           title: 'Erreur',
           text: error.response?.data?.message || 'Une erreur est survenue',
@@ -511,7 +512,7 @@ export default {
     },
 
     confirmDelete(organizerUser) {
-      this.$swal.fire({
+      Swal.fire({
         title: 'Supprimer cet utilisateur organisateur ?',
         html: `<p>Voulez-vous vraiment supprimer <strong>${organizerUser.name}</strong> ?</p><p class="text-sm text-gray-600 mt-2">Cette action effectue une suppression douce (soft delete). L'utilisateur peut être restauré.</p>`,
         icon: 'warning',
@@ -532,7 +533,7 @@ export default {
         const response = await axios.delete(`/api/v1/admin/users/${organizerUser.id}`);
 
         if (response.data.success) {
-          this.$swal.fire({
+          Swal.fire({
             icon: 'success',
             title: 'Supprimé',
             text: response.data.message,
@@ -542,7 +543,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur suppression organisateur user:', error);
-        this.$swal.fire({
+        Swal.fire({
           icon: 'error',
           title: 'Erreur',
           text: error.response?.data?.message || 'Impossible de supprimer cet utilisateur organisateur',
@@ -551,7 +552,7 @@ export default {
     },
 
     async resetPassword(organizerUser) {
-      this.$swal.fire({
+      Swal.fire({
         title: 'Réinitialiser le mot de passe ?',
         html: `<p>Un email de réinitialisation sera envoyé à <strong>${organizerUser.email}</strong></p>`,
         icon: 'question',
@@ -564,14 +565,14 @@ export default {
             const response = await axios.post(`/api/v1/admin/users/${organizerUser.id}/reset-password`);
 
             if (response.data.success) {
-              this.$swal.fire({
+              Swal.fire({
                 icon: 'success',
                 title: 'Email envoyé',
                 text: response.data.message,
               });
             }
           } catch (error) {
-            this.$swal.fire({
+            Swal.fire({
               icon: 'error',
               title: 'Erreur',
               text: error.response?.data?.message || 'Impossible d\'envoyer l\'email',

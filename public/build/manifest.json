@@ -16,8 +16,12 @@
       "assets/css/account-BTRhU8Td.css"
     ]
   },
-  "_admin-CCH9FOPj.js": {
-    "file": "assets/js/admin-CCH9FOPj.js",
+  "_admin-DguxK6jp.css": {
+    "file": "assets/css/admin-DguxK6jp.css",
+    "src": "_admin-DguxK6jp.css"
+  },
+  "_admin-na7rrQgX.js": {
+    "file": "assets/js/admin-na7rrQgX.js",
     "name": "admin",
     "isDynamicEntry": true,
     "imports": [
@@ -28,10 +32,6 @@
     "css": [
       "assets/css/admin-DguxK6jp.css"
     ]
-  },
-  "_admin-DguxK6jp.css": {
-    "file": "assets/css/admin-DguxK6jp.css",
-    "src": "_admin-DguxK6jp.css"
   },
   "_organizer-gvyMp3fs.css": {
     "file": "assets/css/organizer-gvyMp3fs.css",
@@ -103,7 +103,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-CpnxqTkp.js",
+    "file": "assets/js/app-raHNi7TC.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -139,26 +139,26 @@
       "_organizer-rusHQjnK.js",
       "_organizer-rusHQjnK.js",
       "resources/js/layouts/AdminLayout.vue",
-      "_admin-CCH9FOPj.js",
-      "_admin-CCH9FOPj.js",
-      "_admin-CCH9FOPj.js",
-      "_admin-CCH9FOPj.js",
-      "_admin-CCH9FOPj.js",
-      "_admin-CCH9FOPj.js",
-      "_admin-CCH9FOPj.js",
-      "_admin-CCH9FOPj.js",
-      "_admin-CCH9FOPj.js",
-      "_admin-CCH9FOPj.js",
-      "_admin-CCH9FOPj.js",
-      "_admin-CCH9FOPj.js",
-      "_admin-CCH9FOPj.js",
-      "_admin-CCH9FOPj.js",
-      "_admin-CCH9FOPj.js",
-      "_admin-CCH9FOPj.js",
-      "_admin-CCH9FOPj.js",
-      "_admin-CCH9FOPj.js",
-      "_admin-CCH9FOPj.js",
-      "_admin-CCH9FOPj.js",
+      "_admin-na7rrQgX.js",
+      "_admin-na7rrQgX.js",
+      "_admin-na7rrQgX.js",
+      "_admin-na7rrQgX.js",
+      "_admin-na7rrQgX.js",
+      "_admin-na7rrQgX.js",
+      "_admin-na7rrQgX.js",
+      "_admin-na7rrQgX.js",
+      "_admin-na7rrQgX.js",
+      "_admin-na7rrQgX.js",
+      "_admin-na7rrQgX.js",
+      "_admin-na7rrQgX.js",
+      "_admin-na7rrQgX.js",
+      "_admin-na7rrQgX.js",
+      "_admin-na7rrQgX.js",
+      "_admin-na7rrQgX.js",
+      "_admin-na7rrQgX.js",
+      "_admin-na7rrQgX.js",
+      "_admin-na7rrQgX.js",
+      "_admin-na7rrQgX.js",
       "resources/js/pages/scanner/ScannerApp.vue"
     ],
     "css": [
@@ -197,7 +197,7 @@
     ]
   },
   "resources/js/pages/Checkout.vue": {
-    "file": "assets/js/Checkout-DFIn7EZf.js",
+    "file": "assets/js/Checkout-PMNVSM-R.js",
     "name": "Checkout",
     "src": "resources/js/pages/Checkout.vue",
     "isDynamicEntry": true,
@@ -229,7 +229,7 @@
     ]
   },
   "resources/js/pages/EventDetail.vue": {
-    "file": "assets/js/EventDetail-BL4MsN-f.js",
+    "file": "assets/js/EventDetail-kajMKJ7n.js",
     "name": "EventDetail",
     "src": "resources/js/pages/EventDetail.vue",
     "isDynamicEntry": true,
@@ -246,7 +246,7 @@
     ]
   },
   "resources/js/pages/Events.vue": {
-    "file": "assets/js/Events-iGDxKX3E.js",
+    "file": "assets/js/Events-C1cFg7GL.js",
     "name": "Events",
     "src": "resources/js/pages/Events.vue",
     "isDynamicEntry": true,

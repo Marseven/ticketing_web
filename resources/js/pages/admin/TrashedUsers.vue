@@ -214,6 +214,7 @@
 
 <script>
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 export default {
   name: 'TrashedUsers',
@@ -268,7 +269,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur chargement utilisateurs supprimés:', error);
-        this.$swal.fire({
+        Swal.fire({
           icon: 'error',
           title: 'Erreur',
           text: 'Impossible de charger les utilisateurs supprimés',
@@ -309,7 +310,7 @@ export default {
     },
 
     confirmRestore(user) {
-      this.$swal.fire({
+      Swal.fire({
         title: 'Restaurer cet utilisateur ?',
         html: `<p>Voulez-vous vraiment restaurer <strong>${user.name}</strong> ?</p><p class="text-sm text-gray-600 mt-2">L'utilisateur sera réactivé et pourra à nouveau accéder à son compte.</p>`,
         icon: 'question',
@@ -330,7 +331,7 @@ export default {
         const response = await axios.post(`/api/v1/admin/users/${user.id}/restore`);
 
         if (response.data.success) {
-          this.$swal.fire({
+          Swal.fire({
             icon: 'success',
             title: 'Restauré',
             text: response.data.message,
@@ -340,7 +341,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur restauration utilisateur:', error);
-        this.$swal.fire({
+        Swal.fire({
           icon: 'error',
           title: 'Erreur',
           text: error.response?.data?.message || 'Impossible de restaurer cet utilisateur',
