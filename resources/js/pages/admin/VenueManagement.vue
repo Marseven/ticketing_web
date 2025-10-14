@@ -456,11 +456,14 @@ export default {
 
         // Gérer l'image depuis ImageUpload
         if (venueForm.image.url) {
-          // URL externe fournie par l'utilisateur
+          // URL externe fournie par l'utilisateur ou image existante
           formData.append('image_url', venueForm.image.url)
+        } else if (venueForm.image.urls && venueForm.image.urls.medium) {
+          // Image uploadée via ImageUpload - utiliser l'URL medium retournée par l'API
+          formData.append('image_url', venueForm.image.urls.medium)
         } else if (venueForm.image.filename) {
-          // Image uploadée via ImageUpload - utiliser le chemin construit
-          const imageUrl = `/storage/images/venues/medium_${venueForm.image.filename}`
+          // Fallback: construire l'URL complète
+          const imageUrl = `${window.location.origin}/storage/images/venues/medium_${venueForm.image.filename}`
           formData.append('image_url', imageUrl)
         }
 
@@ -543,11 +546,14 @@ export default {
 
         // Gérer l'image depuis ImageUpload
         if (venueForm.image.url) {
-          // URL externe fournie par l'utilisateur
+          // URL externe fournie par l'utilisateur ou image existante
           formData.append('image_url', venueForm.image.url)
+        } else if (venueForm.image.urls && venueForm.image.urls.medium) {
+          // Image uploadée via ImageUpload - utiliser l'URL medium retournée par l'API
+          formData.append('image_url', venueForm.image.urls.medium)
         } else if (venueForm.image.filename) {
-          // Image uploadée via ImageUpload - utiliser le chemin construit
-          const imageUrl = `/storage/images/venues/medium_${venueForm.image.filename}`
+          // Fallback: construire l'URL complète
+          const imageUrl = `${window.location.origin}/storage/images/venues/medium_${venueForm.image.filename}`
           formData.append('image_url', imageUrl)
         }
 
