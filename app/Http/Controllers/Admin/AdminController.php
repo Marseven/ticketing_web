@@ -1593,7 +1593,7 @@ class AdminController extends Controller
     public function roles(Request $request): JsonResponse
     {
         try {
-            $query = Role::with(['users', 'privileges']);
+            $query = Role::with(['users', 'privileges', 'userType']);
 
             if ($request->filled('type')) {
                 $query->where('type', $request->type);
@@ -1601,6 +1601,11 @@ class AdminController extends Controller
 
             if ($request->filled('status')) {
                 $query->where('is_active', $request->status === 'active');
+            }
+
+            // Filtrer par user_type_id si fourni
+            if ($request->filled('user_type_id')) {
+                $query->where('user_type_id', $request->user_type_id);
             }
 
             $roles = $query->withCount(['users', 'privileges'])

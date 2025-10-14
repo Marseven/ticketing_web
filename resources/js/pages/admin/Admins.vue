@@ -404,13 +404,21 @@ export default {
           params: { per_page: 100 }
         });
 
+        console.log('Réponse API roles:', response.data);
+
         if (response.data.success) {
+          const allRoles = response.data.data.data;
+          console.log('Tous les rôles:', allRoles);
+
           // Filtrer pour obtenir uniquement les rôles admin (excluant super_admin)
-          this.availableRoles = response.data.data.data.filter(role => {
+          this.availableRoles = allRoles.filter(role => {
+            console.log('Vérification rôle:', role.name, 'user_type:', role.user_type);
             return role.user_type &&
                    role.user_type.name === 'admin' &&
                    role.slug !== 'super_admin';
           });
+
+          console.log('Rôles admin filtrés:', this.availableRoles);
         }
       } catch (error) {
         console.error('Erreur chargement rôles admin:', error);
