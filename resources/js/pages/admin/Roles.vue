@@ -192,6 +192,18 @@
         <form @submit.prevent="submitForm" class="p-6">
           <div class="space-y-4">
             <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Type d'utilisateur *</label>
+              <select v-model="formData.user_type_id" @change="loadPrivilegesForUserType" required
+                      class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primea-blue">
+                <option value="">Sélectionner un type</option>
+                <option v-for="userType in userTypes" :key="userType.id" :value="userType.id">
+                  {{ userType.label }}
+                </option>
+              </select>
+              <p class="text-xs text-gray-500 mt-1">Les privilèges disponibles dépendent du type d'utilisateur</p>
+            </div>
+
+            <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Nom du rôle *</label>
               <input v-model="formData.name" type="text" required
                      class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primea-blue"
@@ -212,20 +224,57 @@
               <p class="text-xs text-gray-500 mt-1">Plus le niveau est élevé, plus le rôle a de priorité</p>
             </div>
 
-            <div v-if="!isEditMode">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Type *</label>
-              <select v-model="formData.type" required
-                      class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primea-blue">
-                <option value="custom">Personnalisé</option>
-              </select>
-              <p class="text-xs text-gray-500 mt-1">Seuls les rôles personnalisés peuvent être créés</p>
-            </div>
-
             <div v-if="isEditMode">
               <label class="flex items-center">
                 <input v-model="formData.is_active" type="checkbox" class="mr-2">
                 <span class="text-sm font-medium text-gray-700">Actif</span>
               </label>
+            </div>
+
+            <!-- Privilèges Section -->
+            <div v-if="formData.user_type_id" class="border-t pt-4">
+              <label class="block text-sm font-medium text-gray-700 mb-3">
+                Privilèges ({{ formData.privilege_ids.length }} sélectionné(s))
+              </label>
+
+              <div v-if="loadingPrivileges" class="text-center py-4">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primea-blue mx-auto"></div>
+                <p class="mt-2 text-sm text-gray-600">Chargement...</p>
+              </div>
+
+              <div v-else-if="availablePrivileges.length === 0" class="text-center py-4 text-gray-500">
+                Aucun privilège disponible pour ce type d'utilisateur
+              </div>
+
+              <div v-else>
+                <div class="mb-3">
+                  <input v-model="privilegeSearch" type="text" placeholder="Rechercher un privilège..."
+                         class="w-full border rounded-lg px-3 py-2 text-sm">
+                </div>
+
+                <div class="space-y-2 max-h-80 overflow-y-auto border rounded-lg p-3">
+                  <div v-for="privilege in filteredAvailablePrivileges" :key="privilege.id"
+                       class="flex items-start p-2 hover:bg-gray-50 rounded">
+                    <input type="checkbox"
+                           :id="`priv-form-${privilege.id}`"
+                           :checked="formData.privilege_ids.includes(privilege.id)"
+                           @change="togglePrivilegeInForm(privilege.id)"
+                           class="mt-1 mr-3">
+                    <label :for="`priv-form-${privilege.id}`" class="flex-1 cursor-pointer">
+                      <div class="font-medium text-sm">{{ privilege.name }}</div>
+                      <div class="text-xs text-gray-500">{{ privilege.description || privilege.slug }}</div>
+                    </label>
+                    <div class="flex gap-1 ml-2">
+                      <span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded text-xs">
+                        {{ privilege.module }}
+                      </span>
+                      <span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded text-xs">
+                        {{ privilege.action }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -408,6 +457,8 @@ export default {
     return {
       roles: [],
       allPrivileges: [],
+      availablePrivileges: [],
+      userTypes: [],
       loading: false,
       loadingPrivileges: false,
       submitting: false,
@@ -425,9 +476,11 @@ export default {
       formData: {
         name: '',
         description: '',
+        user_type_id: '',
         type: 'custom',
         level: 10,
         is_active: true,
+        privilege_ids: [],
       },
       pagination: {
         current_page: 1,
@@ -451,10 +504,21 @@ export default {
         p.action.toLowerCase().includes(search)
       );
     },
+    filteredAvailablePrivileges() {
+      if (!this.privilegeSearch) return this.availablePrivileges;
+      const search = this.privilegeSearch.toLowerCase();
+      return this.availablePrivileges.filter(p =>
+        p.name.toLowerCase().includes(search) ||
+        p.slug.toLowerCase().includes(search) ||
+        p.module.toLowerCase().includes(search) ||
+        p.action.toLowerCase().includes(search)
+      );
+    },
   },
 
   mounted() {
     this.loadRoles();
+    this.loadUserTypes();
   },
 
   methods: {
@@ -492,6 +556,20 @@ export default {
       }
     },
 
+    async loadUserTypes() {
+      try {
+        const response = await axios.get('/api/v1/admin/user-types', {
+          params: { per_page: 100 }
+        });
+
+        if (response.data.success) {
+          this.userTypes = response.data.data.data;
+        }
+      } catch (error) {
+        console.error('Erreur chargement types utilisateurs:', error);
+      }
+    },
+
     async loadAllPrivileges() {
       this.loadingPrivileges = true;
       try {
@@ -514,6 +592,45 @@ export default {
       }
     },
 
+    async loadPrivilegesForUserType() {
+      if (!this.formData.user_type_id) {
+        this.availablePrivileges = [];
+        return;
+      }
+
+      this.loadingPrivileges = true;
+      try {
+        const response = await axios.get('/api/v1/admin/privileges', {
+          params: {
+            per_page: 1000,
+            user_type_id: this.formData.user_type_id
+          }
+        });
+
+        if (response.data.success) {
+          this.availablePrivileges = response.data.data.data;
+        }
+      } catch (error) {
+        console.error('Erreur chargement privilèges:', error);
+        this.$swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: 'Impossible de charger les privilèges',
+        });
+      } finally {
+        this.loadingPrivileges = false;
+      }
+    },
+
+    togglePrivilegeInForm(privilegeId) {
+      const index = this.formData.privilege_ids.indexOf(privilegeId);
+      if (index > -1) {
+        this.formData.privilege_ids.splice(index, 1);
+      } else {
+        this.formData.privilege_ids.push(privilegeId);
+      }
+    },
+
     resetFilters() {
       this.filters = {
         type: '',
@@ -528,28 +645,40 @@ export default {
       }
     },
 
-    openCreateModal() {
+    async openCreateModal() {
       this.isEditMode = false;
       this.formData = {
         name: '',
         description: '',
+        user_type_id: '',
         type: 'custom',
         level: 10,
         is_active: true,
+        privilege_ids: [],
       };
+      this.availablePrivileges = [];
+      this.privilegeSearch = '';
       this.showFormModal = true;
     },
 
-    openEditModal(role) {
+    async openEditModal(role) {
       this.isEditMode = true;
       this.selectedRole = role;
       this.formData = {
         name: role.name,
         description: role.description,
+        user_type_id: role.user_type_id,
         level: role.level,
         is_active: role.is_active,
+        privilege_ids: role.privileges?.map(p => p.id) || [],
       };
+      this.privilegeSearch = '';
       this.showFormModal = true;
+
+      // Charger les privilèges pour le type d'utilisateur
+      if (role.user_type_id) {
+        await this.loadPrivilegesForUserType();
+      }
     },
 
     closeFormModal() {
@@ -566,7 +695,18 @@ export default {
 
         const method = this.isEditMode ? 'put' : 'post';
 
-        const response = await axios[method](url, this.formData);
+        // Préparer les données
+        const payload = {
+          name: this.formData.name,
+          description: this.formData.description,
+          user_type_id: this.formData.user_type_id,
+          type: this.formData.type,
+          level: this.formData.level,
+          is_active: this.formData.is_active,
+          privilege_ids: this.formData.privilege_ids,
+        };
+
+        const response = await axios[method](url, payload);
 
         if (response.data.success) {
           this.$swal.fire({
