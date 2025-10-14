@@ -12,6 +12,7 @@ class ProductionSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            UserTypeSeeder::class,
             RoleSeeder::class,
             TestUsersSeeder::class,
             TestEventsSeeder::class,
