@@ -681,17 +681,9 @@ export default {
       }
 
       // Si c'est un fichier stocké localement
+      // Utiliser la même logique que dans editVenue qui fonctionne
       if (venue.image_file) {
-        // Si le chemin commence déjà par storage/, on ajoute juste le slash
-        if (venue.image_file.startsWith('storage/')) {
-          return `/${venue.image_file}`
-        }
-        // Si le chemin contient déjà venues/, on ajoute juste /storage/
-        if (venue.image_file.startsWith('venues/')) {
-          return `/storage/${venue.image_file}`
-        }
-        // Sinon c'est juste le nom du fichier, on ajoute /storage/venues/
-        return `/storage/venues/${venue.image_file}`
+        return `/storage/${venue.image_file}`
       }
 
       // Fallback sur venue.image (pour compatibilité avec les données mock)
@@ -699,11 +691,7 @@ export default {
         if (venue.image.startsWith('http://') || venue.image.startsWith('https://')) {
           return venue.image
         }
-        // Même logique pour venue.image
-        if (venue.image.startsWith('venues/')) {
-          return `/storage/${venue.image}`
-        }
-        return `/storage/venues/${venue.image}`
+        return `/storage/${venue.image}`
       }
 
       return null
