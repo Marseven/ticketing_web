@@ -402,6 +402,10 @@ export default {
   color: var(--primea-yellow);
 }
 
+.hover\:text-white:hover {
+  color: white !important;
+}
+
 .bg-primea-gradient {
   background: linear-gradient(135deg, var(--primea-blue) 0%, var(--primea-blue-dark) 100%);
 }
