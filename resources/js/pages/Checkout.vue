@@ -569,6 +569,7 @@ export default {
     const paymentPollingTimer = ref(null)
     const paymentStatus = ref('')
     const currentPayment = ref(null)
+    const createdOrder = ref(null) // Stocker la commande créée pour éviter les duplicatas
 
     // Formulaire d'achat
     const orderForm = ref({
@@ -1000,26 +1001,36 @@ export default {
 
     const processEBillingPayment = async () => {
       try {
-        // 1. Créer l'achat
-        const orderData = {
-          event_slug: event.value.slug,
-          ticket_type_id: orderForm.value.ticketTypeId,
-          quantity: orderForm.value.quantity,
-          guest_name: isAuthenticated.value ? currentUser.value.name : orderForm.value.guestName,
-          guest_phone: isAuthenticated.value ? currentUser.value.phone : (orderForm.value.guestPhone || null),
-          guest_email: isAuthenticated.value ? currentUser.value.email : 'guest@primea.ga'
-        }
+        let order
 
-        // Utiliser le service approprié selon l'authentification
-        const orderResponse = isAuthenticated.value
-          ? await orderService.createOrder(orderData)
-          : await guestService.createGuestOrder(orderData)
-        
-        if (!orderResponse.data.success) {
-          throw new Error(orderResponse.data.message || 'Erreur lors de la création de l\'achat')
-        }
+        // 1. Créer l'achat seulement si pas déjà créé
+        if (!createdOrder.value) {
+          const orderData = {
+            event_slug: event.value.slug,
+            ticket_type_id: orderForm.value.ticketTypeId,
+            quantity: orderForm.value.quantity,
+            guest_name: isAuthenticated.value ? currentUser.value.name : orderForm.value.guestName,
+            guest_phone: isAuthenticated.value ? currentUser.value.phone : (orderForm.value.guestPhone || null),
+            guest_email: isAuthenticated.value ? currentUser.value.email : 'guest@primea.ga'
+          }
 
-        const order = orderResponse.data.data.order
+          // Utiliser le service approprié selon l'authentification
+          const orderResponse = isAuthenticated.value
+            ? await orderService.createOrder(orderData)
+            : await guestService.createGuestOrder(orderData)
+
+          if (!orderResponse.data.success) {
+            throw new Error(orderResponse.data.message || 'Erreur lors de la création de l\'achat')
+          }
+
+          order = orderResponse.data.data.order
+          createdOrder.value = order // Stocker la commande créée
+          console.log('✅ Nouvelle commande créée:', order.reference)
+        } else {
+          // Réutiliser la commande existante
+          order = createdOrder.value
+          console.log('♻️ Réutilisation de la commande existante:', order.reference)
+        }
 
         // 2. Initier le paiement E-Billing
         const paymentData = {
@@ -1106,26 +1117,36 @@ export default {
 
     const processOrabankPayment = async () => {
       try {
-        // 1. Créer l'achat
-        const orderData = {
-          event_slug: event.value.slug,
-          ticket_type_id: orderForm.value.ticketTypeId,
-          quantity: orderForm.value.quantity,
-          guest_name: isAuthenticated.value ? currentUser.value.name : orderForm.value.guestName,
-          guest_phone: isAuthenticated.value ? currentUser.value.phone : (orderForm.value.guestPhone || null),
-          guest_email: isAuthenticated.value ? currentUser.value.email : 'guest@primea.ga'
-        }
+        let order
 
-        // Utiliser le service approprié selon l'authentification
-        const orderResponse = isAuthenticated.value
-          ? await orderService.createOrder(orderData)
-          : await guestService.createGuestOrder(orderData)
-        
-        if (!orderResponse.data.success) {
-          throw new Error(orderResponse.data.message || 'Erreur lors de la création de l\'achat')
-        }
+        // 1. Créer l'achat seulement si pas déjà créé
+        if (!createdOrder.value) {
+          const orderData = {
+            event_slug: event.value.slug,
+            ticket_type_id: orderForm.value.ticketTypeId,
+            quantity: orderForm.value.quantity,
+            guest_name: isAuthenticated.value ? currentUser.value.name : orderForm.value.guestName,
+            guest_phone: isAuthenticated.value ? currentUser.value.phone : (orderForm.value.guestPhone || null),
+            guest_email: isAuthenticated.value ? currentUser.value.email : 'guest@primea.ga'
+          }
 
-        const order = orderResponse.data.data.order
+          // Utiliser le service approprié selon l'authentification
+          const orderResponse = isAuthenticated.value
+            ? await orderService.createOrder(orderData)
+            : await guestService.createGuestOrder(orderData)
+
+          if (!orderResponse.data.success) {
+            throw new Error(orderResponse.data.message || 'Erreur lors de la création de l\'achat')
+          }
+
+          order = orderResponse.data.data.order
+          createdOrder.value = order // Stocker la commande créée
+          console.log('✅ Nouvelle commande créée:', order.reference)
+        } else {
+          // Réutiliser la commande existante
+          order = createdOrder.value
+          console.log('♻️ Réutilisation de la commande existante:', order.reference)
+        }
 
         // 2. Initier le paiement ORABANK_NG pour Visa/Mastercard
         const paymentData = {
@@ -1243,7 +1264,8 @@ export default {
       ussdCountdown.value = 90
       paymentStatus.value = ''
       currentPayment.value = null
-      
+      createdOrder.value = null // Réinitialiser la commande lors de l'annulation complète
+
       // Nettoyer les timers
       if (ussdTimer.value) {
         clearInterval(ussdTimer.value)
@@ -1301,10 +1323,26 @@ export default {
     }
 
     const changeOperator = () => {
-      cancelUSSDPush()
+      // Arrêter le push USSD sans réinitialiser la commande créée
+      ussdPushActive.value = false
+      ussdCountdown.value = 90
+      paymentStatus.value = ''
+      currentPayment.value = null
+
+      // Nettoyer les timers
+      if (ussdTimer.value) {
+        clearInterval(ussdTimer.value)
+      }
+      if (paymentPollingTimer.value) {
+        clearInterval(paymentPollingTimer.value)
+      }
+
       // Réinitialiser le formulaire pour permettre de choisir un autre opérateur
+      // MAIS garder createdOrder.value pour réutiliser la commande existante
       orderForm.value.paymentMethod = ''
       orderForm.value.phoneNumber = ''
+
+      console.log('🔄 Changement d\'opérateur - Commande conservée:', createdOrder.value?.reference)
     }
 
     const formatCountdown = (seconds) => {
