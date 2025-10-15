@@ -250,7 +250,7 @@ export default {
               title: apiTicket.event.title,
               date: apiTicket.schedule?.starts_at || new Date().toISOString(),
               venue_name: apiTicket.event.venue_name,
-              image: apiTicket.event.image_url || `${window.location.origin}/storage/${apiTicket.event.cover_image}` || null
+              image: apiTicket.event.image_url
             },
             ticketType: apiTicket.ticket_type?.name,
             price: apiTicket.ticket_type?.price,
@@ -281,7 +281,7 @@ export default {
               title: apiTicket.event.title,
               date: apiTicket.schedule?.starts_at || new Date().toISOString(),
               venue_name: apiTicket.event.venue_name,
-              image: apiTicket.event.image_url || `${window.location.origin}/storage/${apiTicket.event.cover_image}` || null
+              image: apiTicket.event.image_url
             },
             ticketType: apiTicket.ticket_type?.name,
             price: apiTicket.ticket_type?.price,
