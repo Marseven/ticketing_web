@@ -165,7 +165,7 @@
 
                 <div class="info-row">
                     <span class="info-label">Titulaire:</span>
-                    <span class="info-value">{{ $buyer->name }}</span>
+                    <span class="info-value">{{ $buyer ? $buyer->name : ($ticket->order->guest_name ?? 'Guest') }}</span>
                 </div>
             </div>
 
