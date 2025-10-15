@@ -176,7 +176,7 @@ class ClientController extends Controller
 
             return response()->json([
                 'message' => 'Avatar mis à jour avec succès',
-                'avatar_url' => $user->getImageUrl()
+                'avatar_url' => '/storage/images/users/' . $filename
             ]);
         }
 
