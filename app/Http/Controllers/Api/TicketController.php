@@ -162,7 +162,7 @@ class TicketController extends Controller
             
             if ($secureValidation['valid']) {
                 $ticket = $secureValidation['ticket'];
-                $ticket->load(['event', 'ticketType', 'buyer', 'schedule']);
+                $ticket->load(['event', 'ticketType', 'buyer', 'schedule', 'order']);
                 
                 Log::info('QR Code sécurisé validé avec succès', [
                     'ticket_id' => $ticket->id,
@@ -170,7 +170,7 @@ class TicketController extends Controller
                 ]);
             } else {
                 // Fallback vers l'ancienne méthode (code simple)
-                $ticket = Ticket::with(['event', 'ticketType', 'buyer', 'schedule'])
+                $ticket = Ticket::with(['event', 'ticketType', 'buyer', 'schedule', 'order'])
                                ->byCode($qrCode)
                                ->first();
                 
@@ -348,7 +348,7 @@ class TicketController extends Controller
      */
     public function show(Request $request, $code): JsonResponse
     {
-        $ticket = Ticket::with(['event.venue', 'ticketType', 'buyer', 'schedule', 'checkins'])
+        $ticket = Ticket::with(['event.venue', 'ticketType', 'buyer', 'schedule', 'checkins', 'order'])
                        ->byCode($code)
                        ->first();
 
@@ -451,7 +451,7 @@ class TicketController extends Controller
             $decoded = base64_decode($token);
             [$email, $reference] = explode(':', $decoded);
 
-            $tickets = Ticket::with(['event', 'ticketType', 'order', 'schedule'])
+            $tickets = Ticket::with(['event', 'ticketType', 'buyer', 'order', 'schedule'])
                            ->whereHas('order', function($query) use ($reference) {
                                $query->where('reference', $reference);
                            })
@@ -527,9 +527,12 @@ class TicketController extends Controller
                 'description' => $ticket->ticketType->description,
                 'price' => (float) $ticket->ticketType->price,
             ],
-            'buyer' => [
+            'buyer' => $ticket->buyer ? [
                 'name' => $ticket->buyer->name,
                 'email' => $ticket->buyer->email,
+            ] : [
+                'name' => $ticket->order->guest_name ?? 'Guest',
+                'email' => $ticket->order->guest_email ?? 'N/A',
             ],
             'issued_at' => $ticket->issued_at?->format('d/m/Y H:i:s'),
             'used_at' => $ticket->used_at?->format('d/m/Y H:i:s'),
@@ -564,7 +567,7 @@ class TicketController extends Controller
         try {
             Log::info('📄 Début génération PDF', ['code' => $code]);
 
-            $ticket = Ticket::with(['event.venue', 'ticketType', 'buyer', 'schedule'])
+            $ticket = Ticket::with(['event.venue', 'ticketType', 'buyer', 'schedule', 'order'])
                            ->byCode($code)
                            ->first();
 
@@ -576,7 +579,7 @@ class TicketController extends Controller
             Log::info('✅ Ticket trouvé', [
                 'ticket_id' => $ticket->id,
                 'event' => $ticket->event->title,
-                'buyer' => $ticket->buyer->name
+                'buyer' => $ticket->buyer ? $ticket->buyer->name : 'Guest'
             ]);
 
             // Générer le QR code en base64
