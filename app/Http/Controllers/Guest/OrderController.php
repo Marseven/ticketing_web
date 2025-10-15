@@ -7,12 +7,9 @@ use App\Models\Event;
 use App\Models\Order;
 use App\Models\Ticket;
 use App\Models\TicketType;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 
 class OrderController extends Controller
 {
@@ -166,12 +163,8 @@ class OrderController extends Controller
                 }
             }
 
-            // Créer ou récupérer un utilisateur guest
-            $guestUser = $this->createOrGetGuestUser(
-                $validated['guest_name'],
-                $validated['guest_email'],
-                $validated['guest_phone'] ?? null
-            );
+            // Pour les guests, on ne crée pas d'utilisateur
+            // Les informations seront stockées directement dans la table orders
 
             // Calculer les montants
             // Le prix affiché au client est le prix TTC (tout compris)
@@ -186,7 +179,7 @@ class OrderController extends Controller
             // Créer la commande
             $order = Order::create([
                 'organizer_id' => $event->organizer_id,
-                'buyer_id' => $guestUser->id,
+                'buyer_id' => null, // NULL pour les guests - les infos sont dans guest_name, guest_email, guest_phone
                 'currency' => 'XAF', // Franc CFA d'Afrique Centrale (CEMAC)
                 'subtotal_amount' => $subtotalAmount, // Net pour l'organisateur
                 'fees_amount' => $feesAmount, // Frais plateforme
@@ -208,7 +201,7 @@ class OrderController extends Controller
                     'event_id' => $event->id,
                     'ticket_type_id' => $ticketType->id,
                     'schedule_id' => $event->schedules->where('status', 'active')->first()?->id,
-                    'buyer_id' => $guestUser->id,
+                    'buyer_id' => null, // NULL pour les guests - les infos sont dans la table orders
                     'code' => $this->generateTicketCode(),
                     'status' => 'issued',
                     'issued_at' => now(),
@@ -370,37 +363,6 @@ class OrderController extends Controller
             'success' => true,
             'data' => ['order' => $orderData]
         ]);
-    }
-
-    /**
-     * Create or get a guest user
-     */
-    private function createOrGetGuestUser(string $name, string $email, ?string $phone = null): User
-    {
-        // Chercher un utilisateur existant avec cet email
-        $user = User::where('email', $email)->first();
-
-        if (!$user) {
-            // Créer un nouvel utilisateur guest
-            $user = User::create([
-                'name' => $name,
-                'email' => $email,
-                'phone' => $phone,
-                'password' => Hash::make(Str::random(32)), // Mot de passe aléatoire
-                'email_verified_at' => now(), // Auto-vérifié pour les guests
-                'is_organizer' => false,
-                'status' => 'active',
-                'is_guest' => true,
-            ]);
-        } else {
-            // Mettre à jour les informations si nécessaire
-            $user->update([
-                'name' => $name,
-                'phone' => $phone ?: $user->phone,
-            ]);
-        }
-
-        return $user;
     }
 
     /**
