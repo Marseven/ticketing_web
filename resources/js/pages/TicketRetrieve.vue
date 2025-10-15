@@ -249,17 +249,15 @@ export default {
           email: searchForm.value.email
         })
 
-        if (response.data?.tickets) {
+        if (response.data.data?.tickets) {
           // Transformer les données de l'API
-          foundTickets.value = response.data.tickets.map(apiTicket => ({
+          foundTickets.value = response.data.data.tickets.map(apiTicket => ({
             id: apiTicket.id,
             reference: apiTicket.code,
             event: {
               id: apiTicket.event.id,
               title: apiTicket.event.title,
-              date: apiTicket.schedule?.starts_at ? 
-                    new Date(apiTicket.schedule.starts_at.split('/').reverse().join('-')).toISOString() : 
-                    new Date().toISOString(),
+              date: apiTicket.schedule?.starts_at || new Date().toISOString(),
               venue_name: apiTicket.event.venue_name,
               image: apiTicket.event.image_url
             },
@@ -273,20 +271,18 @@ export default {
             issued_at: apiTicket.issued_at,
             used_at: apiTicket.used_at
           }))
-          
+
           success.value = `${foundTickets.value.length} ticket(s) trouvé(s) !`
-        } else if (response.data?.ticket) {
+        } else if (response.data.data?.ticket) {
           // Cas d'un seul ticket trouvé
-          const apiTicket = response.data.ticket
+          const apiTicket = response.data.data.ticket
           foundTickets.value = [{
             id: apiTicket.id,
             reference: apiTicket.code,
             event: {
               id: apiTicket.event.id,
               title: apiTicket.event.title,
-              date: apiTicket.schedule?.starts_at ? 
-                    new Date(apiTicket.schedule.starts_at.split('/').reverse().join('-')).toISOString() : 
-                    new Date().toISOString(),
+              date: apiTicket.schedule?.starts_at || new Date().toISOString(),
               venue_name: apiTicket.event.venue_name,
               image: apiTicket.event.image_url
             },
