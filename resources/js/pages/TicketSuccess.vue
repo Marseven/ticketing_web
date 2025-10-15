@@ -122,7 +122,7 @@
           <!-- Email Notification -->
           <div class="bg-blue-50 border border-blue-200 rounded-primea-lg p-4 mb-6 text-center">
             <p class="text-blue-800 text-sm">
-              📧 Un email de confirmation avec vos tickets a été envoyé à <strong>{{ order.guest_email || 'votre adresse email' }}</strong>
+              <span v-if="authStore.isAuthenticated && (order.guest_email || authStore.user?.email)">📧 </span>Un email de confirmation avec vos tickets a été envoyé à <strong>{{ order.guest_email || 'votre adresse email' }}</strong>
             </p>
           </div>
 
@@ -256,6 +256,7 @@ export default {
     })
 
     return {
+      authStore,
       loading,
       error,
       order,
