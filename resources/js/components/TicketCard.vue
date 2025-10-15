@@ -4,8 +4,8 @@
       
       <!-- Image de l'événement -->
       <div class="md:w-1/3">
-        <img 
-          :src="ticket.event.image" 
+        <img
+          :src="ticket.event.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800'"
           :alt="ticket.event.title"
           class="w-full h-48 md:h-full object-cover"
         />
@@ -28,17 +28,12 @@
 
             <div class="space-y-2 mb-4">
               <div class="flex items-center text-gray-600">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 8a4 4 0 11-8 0 4 4 0 018 0z"/>
-                </svg>
+                <CalendarIcon class="w-4 h-4 mr-2" />
                 {{ formatDate }}
               </div>
-              <div class="flex items-center text-gray-600">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-                {{ ticket.event.venue }}
+              <div v-if="ticket.event.venue_name" class="flex items-center text-gray-600">
+                <MapPinIcon class="w-4 h-4 mr-2" />
+                {{ ticket.event.venue_name }}
               </div>
             </div>
 
@@ -128,9 +123,14 @@
 
 <script>
 import { computed } from 'vue'
+import { CalendarIcon, MapPinIcon } from '@heroicons/vue/24/outline'
 
 export default {
   name: 'TicketCard',
+  components: {
+    CalendarIcon,
+    MapPinIcon
+  },
   props: {
     ticket: {
       type: Object,

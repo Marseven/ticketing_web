@@ -32,25 +32,6 @@
           </p>
         </div>
 
-        <!-- Exemple de transaction -->
-        <div class="bg-white/95 backdrop-blur-sm rounded-primea-xl shadow-primea-lg p-6 mb-8 animate-slide-up">
-          <h3 class="font-semibold text-primea-blue mb-4 font-primea">Exemple de référence :</h3>
-          <div class="bg-primea-blue/5 rounded-primea-lg p-4 border border-primea-blue/10">
-            <div class="flex items-center justify-between text-sm">
-              <span class="text-gray-600 font-primea">Transaction ID:</span>
-              <span class="font-mono text-primea-blue font-semibold">#TKT-2024-ABC123</span>
-            </div>
-            <div class="flex items-center justify-between text-sm mt-2">
-              <span class="text-gray-600 font-primea">Mobile Money:</span>
-              <span class="text-gray-800 font-primea">+241012345678</span>
-            </div>
-            <div class="flex items-center justify-between text-sm mt-2">
-              <span class="text-gray-600 font-primea">Montant:</span>
-              <span class="text-gray-800 font-primea">15,000 XAF</span>
-            </div>
-          </div>
-        </div>
-
         <!-- Formulaire de recherche -->
         <div class="bg-white/95 backdrop-blur-sm rounded-primea-xl shadow-primea-lg p-8 animate-slide-up">
           <form @submit.prevent="searchTicket" class="space-y-6">
@@ -250,8 +231,17 @@ export default {
         })
 
         if (response.data.data?.tickets) {
+          // Filtrer uniquement les tickets avec commande payée
+          const paidTickets = response.data.data.tickets.filter(apiTicket =>
+            apiTicket.order?.status === 'paid'
+          )
+
+          if (paidTickets.length === 0) {
+            throw new Error('Aucun ticket payé trouvé. Veuillez d\'abord finaliser le paiement.')
+          }
+
           // Transformer les données de l'API
-          foundTickets.value = response.data.data.tickets.map(apiTicket => ({
+          foundTickets.value = paidTickets.map(apiTicket => ({
             id: apiTicket.id,
             reference: apiTicket.code,
             event: {
@@ -276,6 +266,11 @@ export default {
         } else if (response.data.data?.ticket) {
           // Cas d'un seul ticket trouvé
           const apiTicket = response.data.data.ticket
+
+          // Vérifier si le ticket est payé
+          if (apiTicket.order?.status !== 'paid') {
+            throw new Error('Ce ticket n\'a pas encore été payé. Veuillez finaliser le paiement.')
+          }
           foundTickets.value = [{
             id: apiTicket.id,
             reference: apiTicket.code,
