@@ -379,12 +379,16 @@ export default {
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   margin-bottom: 1rem;
+  flex-shrink: 0;
+  display: inline-block;
 }
 
 .qr-image {
   width: 140px;
   height: 140px;
   display: block;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .qr-code-text {
@@ -500,8 +504,10 @@ export default {
 
   .qr-section {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 1.5rem;
+    justify-content: center;
+    gap: 1rem;
   }
 
   .qr-label {
@@ -510,6 +516,11 @@ export default {
 
   .qr-container {
     margin-bottom: 0;
+  }
+
+  .qr-image {
+    width: 120px;
+    height: 120px;
   }
 
   .ticket-actions {
