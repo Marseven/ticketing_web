@@ -233,7 +233,6 @@
 
 <script setup>
 import { computed, ref, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
 import { useAuthStore } from '../../stores/auth';
 import { 
   HomeIcon,
@@ -250,7 +249,6 @@ import {
   XMarkIcon
 } from '@heroicons/vue/24/outline';
 
-const router = useRouter();
 const authStore = useAuthStore();
 
 const dropdownOpen = ref(false);
@@ -286,7 +284,8 @@ const logout = async () => {
   await authStore.logout();
   closeDropdown();
   closeMobileMenu();
-  router.push({ name: 'home' });
+  // Forcer un refresh de page et rediriger à l'accueil
+  window.location.href = '/';
 };
 
 // Close dropdown on click outside

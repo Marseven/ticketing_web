@@ -578,7 +578,8 @@ export default {
         localStorage.removeItem('userRole')
         localStorage.removeItem('userName')
         localStorage.removeItem('userEmail')
-        router.push('/login')
+        // Forcer un refresh de page et rediriger à l'accueil
+        window.location.href = '/'
       }
     }
 
