@@ -22,20 +22,52 @@
       </div>
 
       <div class="container mx-auto px-4">
+        <!-- Barre de recherche Desktop -->
+        <div class="max-w-2xl mx-auto mb-12">
+          <form @submit.prevent="performSearch" class="relative">
+            <input
+              type="text"
+              v-model="searchQuery"
+              placeholder="Rechercher un événement par titre, lieu, organisateur..."
+              class="w-full px-6 py-4 rounded-primea-lg text-lg bg-white text-primea-blue placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primea-yellow shadow-primea border-2 border-transparent focus:border-primea-yellow transition-all"
+            />
+            <button
+              type="submit"
+              class="absolute right-3 top-1/2 transform -translate-y-1/2 bg-primea-yellow text-primea-blue p-3 rounded-primea hover:bg-primea-blue hover:text-white transition-all duration-200 shadow-primea"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </button>
+          </form>
+          <!-- Affichage du texte recherché -->
+          <div v-if="searchQuery && searchQuery.trim()" class="mt-4 text-center">
+            <p class="text-gray-600">
+              Résultats pour: <span class="font-bold text-primea-blue">"{{ searchQuery }}"</span>
+              <button
+                @click="clearSearch"
+                class="ml-2 text-primea-yellow hover:text-primea-blue font-semibold"
+              >
+                ✕ Effacer
+              </button>
+            </p>
+          </div>
+        </div>
+
         <!-- Section Filtres Desktop -->
         <div class="mb-12">
           <h2 class="text-2xl font-bold text-primea-blue text-center mb-8">
             Filtrer par catégorie
           </h2>
           <div class="flex flex-wrap justify-center gap-4">
-            <button 
-              v-for="category in categories" 
+            <button
+              v-for="category in categories"
               :key="category.id"
               @click="filterByCategory(category.id)"
               :class="[
                 'px-10 py-4 rounded-primea-lg text-lg font-bold transition-all duration-200 transform hover:scale-105 shadow-primea border-2',
-                selectedCategory === category.id 
-                  ? 'bg-primea-blue text-white border-primea-blue shadow-primea-lg scale-105' 
+                selectedCategory === category.id
+                  ? 'bg-primea-blue text-white border-primea-blue shadow-primea-lg scale-105'
                   : 'bg-white text-primea-blue border-primea-blue hover:bg-primea-blue hover:text-white'
               ]"
             >
@@ -108,11 +140,43 @@
         </div>
 
         <!-- Titre Mobile selon maquette -->
-        <div class="text-center mb-8">
+        <div class="text-center mb-6">
           <h1 class="text-2xl font-bold text-white mb-4">
             Tous les événements<br>
             <span class="text-primea-yellow">en cours</span>
           </h1>
+        </div>
+
+        <!-- Barre de recherche Mobile -->
+        <div class="mb-6">
+          <form @submit.prevent="performSearch" class="relative">
+            <input
+              type="text"
+              v-model="searchQuery"
+              placeholder="Rechercher un événement..."
+              class="w-full px-4 py-3 rounded-primea-lg bg-white text-primea-blue placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primea-yellow"
+            />
+            <button
+              type="submit"
+              class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primea-yellow text-primea-blue p-2 rounded-primea"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </button>
+          </form>
+          <!-- Affichage du texte recherché mobile -->
+          <div v-if="searchQuery && searchQuery.trim()" class="mt-3 text-center">
+            <p class="text-white text-sm">
+              Résultats pour: <span class="font-bold text-primea-yellow">"{{ searchQuery }}"</span>
+              <button
+                @click="clearSearch"
+                class="ml-2 text-primea-yellow hover:text-white font-semibold"
+              >
+                ✕
+              </button>
+            </p>
+          </div>
         </div>
 
         <!-- Liste des événements Mobile selon maquette -->
@@ -221,7 +285,7 @@
 
 <script>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useEventsStore } from '../stores/events'
 import EventCard from '../components/EventCard.vue'
 import { 
@@ -240,6 +304,7 @@ export default {
   },
   setup() {
     const router = useRouter()
+    const route = useRoute()
     const eventsStore = useEventsStore()
 
     // État des événements
@@ -247,18 +312,41 @@ export default {
     const loading = ref(true)
     const selectedCategory = ref('all')
     const categories = ref([])
+    const searchQuery = ref('')
 
     // Événements filtrés
     const filteredEvents = computed(() => {
-      if (selectedCategory.value === 'all') {
-        return events.value
+      let filtered = events.value
+
+      // Filtrer par catégorie
+      if (selectedCategory.value !== 'all') {
+        filtered = filtered.filter(event => {
+          const eventCategoryId = event.category?.id || event.category_id
+          return eventCategoryId === parseInt(selectedCategory.value)
+        })
       }
-      
-      return events.value.filter(event => {
-        // Utiliser l'ID de la catégorie pour filtrer
-        const eventCategoryId = event.category?.id || event.category_id
-        return eventCategoryId === parseInt(selectedCategory.value)
-      })
+
+      // Filtrer par recherche
+      if (searchQuery.value && searchQuery.value.trim()) {
+        const query = searchQuery.value.toLowerCase().trim()
+        filtered = filtered.filter(event => {
+          // Recherche dans le titre
+          const titleMatch = event.title?.toLowerCase().includes(query)
+          // Recherche dans la description
+          const descriptionMatch = event.description?.toLowerCase().includes(query)
+          // Recherche dans le lieu
+          const venueMatch = event.venue?.toLowerCase().includes(query)
+          // Recherche dans l'organisateur
+          const organizerMatch = event.organizer?.name?.toLowerCase().includes(query) ||
+                                  event.organizer?.toLowerCase().includes(query)
+          // Recherche dans la catégorie
+          const categoryMatch = event.category?.name?.toLowerCase().includes(query)
+
+          return titleMatch || descriptionMatch || venueMatch || organizerMatch || categoryMatch
+        })
+      }
+
+      return filtered
     })
 
 
@@ -339,8 +427,29 @@ export default {
       selectedCategory.value = categoryId.toString()
     }
 
+    const performSearch = () => {
+      // La recherche est automatiquement appliquée via le computed filteredEvents
+      // On peut simplement mettre à jour l'URL pour refléter la recherche
+      if (searchQuery.value && searchQuery.value.trim()) {
+        router.push({
+          path: '/events',
+          query: { search: searchQuery.value.trim() }
+        })
+      }
+    }
+
+    const clearSearch = () => {
+      searchQuery.value = ''
+      router.push({ path: '/events' })
+    }
+
     // Lifecycle
     onMounted(() => {
+      // Récupérer le paramètre de recherche de l'URL
+      if (route.query.search) {
+        searchQuery.value = route.query.search
+      }
+
       loadEvents()
       loadCategories()
     })
@@ -350,12 +459,15 @@ export default {
       loading,
       selectedCategory,
       categories,
+      searchQuery,
       filteredEvents,
       formatEventDate,
       formatPrice,
       goToEvent,
       goBack,
       filterByCategory,
+      performSearch,
+      clearSearch,
       loadEvents,
       loadCategories,
       eventsStore
