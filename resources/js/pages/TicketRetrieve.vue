@@ -60,11 +60,11 @@
               <label for="reference" class="block text-lg font-semibold text-primea-blue mb-3 font-primea">
                 Entrez votre référence de transaction
               </label>
-              <input 
+              <input
                 type="text"
                 id="reference"
                 v-model="searchForm.reference"
-                placeholder="Ex: TKT-2024-ABC123 ou +241012345678"
+                placeholder="Ex: TKT-2024-ABC123"
                 class="w-full px-6 py-4 text-lg border-2 border-gray-200 rounded-primea-lg focus:ring-2 focus:ring-primea-yellow focus:border-primea-blue transition-all duration-200 font-primea bg-white/90"
               />
               <p class="mt-2 text-sm text-gray-600 font-primea">
@@ -309,7 +309,14 @@ export default {
 
       } catch (err) {
         console.error('Erreur lors de la recherche:', err)
-        error.value = err.message || 'Erreur lors de la recherche'
+        // Extraire le message du serveur si disponible
+        if (err.response?.data?.message) {
+          error.value = err.response.data.message
+        } else if (err.message) {
+          error.value = err.message
+        } else {
+          error.value = 'Erreur lors de la recherche'
+        }
         foundTickets.value = []
       } finally {
         loading.value = false
