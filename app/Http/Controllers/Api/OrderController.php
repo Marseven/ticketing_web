@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @OA\Tag(
@@ -898,5 +900,128 @@ class OrderController extends Controller
         return response()->json([
             'message' => 'OrderController update method - À implémenter'
         ], 501);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/orders/{reference}/invoice",
+     *     operationId="downloadInvoice",
+     *     tags={"Orders"},
+     *     summary="Download order invoice as PDF",
+     *     description="Generates and downloads the invoice/receipt for an order",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="reference",
+     *         in="path",
+     *         required=true,
+     *         description="The order reference (e.g., ORD-ABC12345)",
+     *         @OA\Schema(type="string", example="ORD-ABC12345")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="PDF invoice downloaded successfully",
+     *         @OA\MediaType(
+     *             mediaType="application/pdf",
+     *             @OA\Schema(type="string", format="binary")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Access denied",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Vous n'êtes pas autorisé à accéder à cette facture")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Order not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Commande non trouvée")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error generating PDF",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Erreur lors de la génération de la facture")
+     *         )
+     *     )
+     * )
+     * Télécharger la facture/reçu d'une commande
+     */
+    public function downloadInvoice(Request $request, $reference)
+    {
+        try {
+            Log::info('📄 Début génération facture', ['reference' => $reference]);
+
+            $user = $request->user();
+
+            // Récupérer la commande avec toutes les relations nécessaires
+            $order = \App\Models\Order::with([
+                'user',
+                'event.venue',
+                'schedule',
+                'tickets.ticketType'
+            ])
+            ->where('reference', $reference)
+            ->first();
+
+            if (!$order) {
+                Log::warning('❌ Commande non trouvée pour facture', ['reference' => $reference]);
+                abort(404, 'Commande non trouvée');
+            }
+
+            // Vérifier que l'utilisateur a le droit d'accéder à cette facture
+            if ($user && $order->buyer_id !== $user->id) {
+                Log::warning('❌ Accès refusé à la facture', [
+                    'reference' => $reference,
+                    'user_id' => $user->id,
+                    'order_buyer_id' => $order->buyer_id
+                ]);
+                abort(403, 'Vous n\'êtes pas autorisé à accéder à cette facture');
+            }
+
+            Log::info('✅ Commande trouvée', [
+                'order_id' => $order->id,
+                'event' => $order->event->title,
+                'buyer' => $order->user ? $order->user->name : $order->guest_name
+            ]);
+
+            // Charger le logo en base64
+            $logoPath = public_path('images/logo.png');
+            $logoBase64 = '';
+            if (file_exists($logoPath)) {
+                $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+            }
+
+            // Préparer les données pour le PDF
+            $data = [
+                'order' => $order,
+                'logoBase64' => $logoBase64,
+            ];
+
+            Log::info('📝 Données PDF préparées', [
+                'has_order' => isset($data['order']),
+                'has_logo' => !empty($logoBase64),
+                'tickets_count' => $order->tickets->count()
+            ]);
+
+            // Générer le PDF
+            $pdf = Pdf::loadView('pdf.invoice', $data)
+                      ->setPaper('a4', 'portrait');
+
+            Log::info('✅ Facture PDF générée avec succès', ['reference' => $reference]);
+
+            return $pdf->download('facture-' . $order->reference . '.pdf');
+
+        } catch (\Exception $e) {
+            Log::error('💥 Erreur génération facture PDF', [
+                'reference' => $reference,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            abort(500, 'Erreur lors de la génération de la facture: ' . $e->getMessage());
+        }
     }
 }

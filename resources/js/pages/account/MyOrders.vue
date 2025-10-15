@@ -251,7 +251,9 @@
                 Finaliser le paiement
               </button>
 
-              <button 
+              <!-- Bouton d'annulation caché pour le moment -->
+              <!--
+              <button
                 v-if="order.status === 'confirmed' && canCancelOrder(order)"
                 @click="requestCancellation(order)"
                 class="px-4 py-2 border-2 border-red-500 text-red-500 rounded-primea hover:bg-red-500 hover:text-white font-medium transition-all duration-200 flex items-center justify-center gap-2"
@@ -259,6 +261,7 @@
                 <XCircleIcon class="w-4 h-4" />
                 Demander l'annulation
               </button>
+              -->
             </div>
           </div>
         </div>
@@ -538,7 +541,8 @@ export default {
 
     const downloadOrderReceipt = (order) => {
       console.log('Télécharger la facture:', order.reference)
-      // Logique de téléchargement de facture
+      // Ouvrir le PDF dans un nouvel onglet
+      window.open(`/api/v1/orders/${order.reference}/invoice`, '_blank')
     }
 
     const retryPayment = (order) => {
