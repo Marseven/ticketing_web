@@ -10,5 +10,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 // Planifier l'annulation automatique des commandes en attente depuis plus d'1 heure
-// Exécuté toutes les 30 minutes
-Schedule::job(new CancelPendingOrders)->everyThirtyMinutes();
+// Exécuté toutes les heures
+Schedule::job(new CancelPendingOrders)->hourly();
