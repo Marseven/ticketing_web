@@ -8,10 +8,25 @@
         <div class="max-w-4xl mx-auto">
           
           <!-- Header Desktop -->
-          <div class="text-center mb-12">
-            <img src="/images/logo.png" alt="Primea" class="h-16 mx-auto mb-6" />
-            <h1 class="text-4xl font-bold text-primea-blue mb-4">Finaliser votre achat</h1>
-            <p class="text-lg text-gray-600">Sélectionnez vos tickets et procédez au paiement</p>
+          <div class="mb-12">
+            <!-- Logo cliquable et bouton retour -->
+            <div class="flex items-center justify-between mb-6">
+              <button @click="goBack" class="flex items-center text-primea-blue hover:text-primea-yellow transition-colors">
+                <ChevronLeftIcon class="w-6 h-6 mr-2" />
+                <span class="font-medium">Retour</span>
+              </button>
+
+              <router-link to="/" class="flex-1 flex justify-center">
+                <img src="/images/logo.png" alt="Primea" class="h-16 hover:opacity-80 transition-opacity cursor-pointer" />
+              </router-link>
+
+              <div class="w-24"></div> <!-- Spacer pour centrer le logo -->
+            </div>
+
+            <div class="text-center">
+              <h1 class="text-4xl font-bold text-primea-blue mb-4">Finaliser votre achat</h1>
+              <p class="text-lg text-gray-600">Sélectionnez vos tickets et procédez au paiement</p>
+            </div>
           </div>
 
           <!-- États de chargement et d'erreur -->
@@ -482,15 +497,15 @@
           <button @click="goBack" class="text-gray-600 hover:text-gray-800">
             <ChevronLeftIcon class="w-6 h-6" />
           </button>
-          
-          <div class="text-center">
-            <img src="/images/logo.png" alt="Primea" class="h-8 mx-auto mb-2" />
+
+          <router-link to="/" class="text-center">
+            <img src="/images/logo.png" alt="Primea" class="h-8 mx-auto mb-2 hover:opacity-80 transition-opacity" />
             <div class="text-right">
               <div class="text-lg font-bold text-blue-600">La Billetterie</div>
               <div class="text-xs text-gray-500">Simple, Rapide et Sécurisée</div>
             </div>
-          </div>
-          
+          </router-link>
+
           <button class="text-gray-600">
             <Bars3Icon class="w-6 h-6" />
           </button>
