@@ -1,122 +1,99 @@
 <template>
-  <div class="ticket-card bg-white rounded-lg shadow-lg overflow-hidden">
-    <div class="flex flex-col md:flex-row">
-      
-      <!-- Image de l'événement -->
-      <div class="md:w-1/3">
-        <img
-          :src="ticket.event.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800'"
-          :alt="ticket.event.title"
-          class="w-full h-48 md:h-full object-cover"
-        />
-      </div>
+  <div class="ticket-wrapper">
+    <!-- Vrai design de ticket avec découpe -->
+    <div class="ticket-real">
+      <!-- Section gauche avec image et infos principales -->
+      <div class="ticket-left">
+        <!-- Image de l'événement -->
+        <div class="event-image-container">
+          <img
+            :src="ticket.event.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800'"
+            :alt="ticket.event.title"
+            class="event-image"
+          />
+          <div class="image-overlay"></div>
+        </div>
 
-      <!-- Détails du ticket -->
-      <div class="flex-1 p-6">
-        <div class="flex flex-col h-full justify-between">
-          
-          <!-- Informations de l'événement -->
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-bold text-gray-800">
-                {{ ticket.event.title }}
-              </h3>
-              <span :class="statusClasses" class="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide">
-                {{ statusText }}
-              </span>
+        <!-- Info principale -->
+        <div class="ticket-main-info">
+          <h3 class="event-title">{{ ticket.event.title }}</h3>
+
+          <div class="event-details">
+            <div class="detail-row">
+              <CalendarIcon class="detail-icon" />
+              <span class="detail-text">{{ formatDate }}</span>
             </div>
-
-            <div class="space-y-2 mb-4">
-              <div class="flex items-center text-gray-600">
-                <CalendarIcon class="w-4 h-4 mr-2" />
-                {{ formatDate }}
-              </div>
-              <div v-if="ticket.event.venue_name" class="flex items-center text-gray-600">
-                <MapPinIcon class="w-4 h-4 mr-2" />
-                {{ ticket.event.venue_name }}
-              </div>
-            </div>
-
-            <!-- Détails du ticket -->
-            <div class="bg-gray-50 rounded-lg p-4 mb-4">
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <span class="text-xs text-gray-500 block">Référence</span>
-                  <span class="font-mono text-sm font-semibold text-blue-600">
-                    {{ ticket.reference }}
-                  </span>
-                </div>
-                <div>
-                  <span class="text-xs text-gray-500 block">Type</span>
-                  <span class="text-sm font-medium">{{ ticket.ticketType }}</span>
-                </div>
-                <div>
-                  <span class="text-xs text-gray-500 block">Prix</span>
-                  <span class="text-sm font-bold text-green-600">
-                    {{ formatPrice(ticket.price) }} FCFA
-                  </span>
-                </div>
-                <div>
-                  <span class="text-xs text-gray-500 block">Status</span>
-                  <span :class="statusClasses" class="text-sm font-medium">
-                    {{ statusText }}
-                  </span>
-                </div>
-              </div>
+            <div v-if="ticket.event.venue_name" class="detail-row">
+              <MapPinIcon class="detail-icon" />
+              <span class="detail-text">{{ ticket.event.venue_name }}</span>
             </div>
           </div>
 
-          <!-- Actions -->
-          <div class="flex flex-col sm:flex-row gap-3">
-            <button 
-              @click="$emit('view', ticket)"
-              class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center"
-            >
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-              </svg>
-              Voir le ticket
-            </button>
-            
-            <button 
-              @click="$emit('download', ticket)"
-              class="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center justify-center"
-            >
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-              </svg>
-              Télécharger
-            </button>
+          <!-- Info ticket en grille -->
+          <div class="ticket-grid">
+            <div class="grid-item">
+              <span class="grid-label">Référence</span>
+              <span class="grid-value ticket-code">{{ ticket.reference }}</span>
+            </div>
+            <div class="grid-item">
+              <span class="grid-label">Type</span>
+              <span class="grid-value">{{ ticket.ticketType }}</span>
+            </div>
+            <div class="grid-item">
+              <span class="grid-label">Prix</span>
+              <span class="grid-value price">{{ formatPrice(ticket.price) }} XAF</span>
+            </div>
+            <div class="grid-item">
+              <span class="grid-label">Statut</span>
+              <span :class="statusClasses" class="status-badge">{{ statusText }}</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- QR Code (visible sur desktop) -->
-      <div class="hidden md:block w-32 p-6 bg-gray-50 border-l">
-        <div class="text-center">
-          <div class="bg-white p-2 rounded-lg shadow-sm mb-2">
-            <img 
-              :src="ticket.qrCode" 
+      <!-- Ligne de découpe perforée -->
+      <div class="ticket-perforation">
+        <div class="perforation-line"></div>
+      </div>
+
+      <!-- Section droite avec QR code -->
+      <div class="ticket-right">
+        <div class="qr-section">
+          <p class="qr-label">Scan à l'entrée</p>
+          <div class="qr-container">
+            <img
+              :src="ticket.qrCode"
               alt="QR Code"
-              class="w-20 h-20 mx-auto"
+              class="qr-image"
             />
           </div>
-          <span class="text-xs text-gray-500">QR Code</span>
+          <p class="qr-code-text">{{ ticket.reference }}</p>
         </div>
       </div>
     </div>
 
-    <!-- QR Code mobile (visible sur mobile) -->
-    <div class="md:hidden border-t bg-gray-50 p-4 text-center">
-      <div class="bg-white inline-block p-3 rounded-lg shadow-sm">
-        <img 
-          :src="ticket.qrCode" 
-          alt="QR Code"
-          class="w-16 h-16"
-        />
-      </div>
-      <p class="text-xs text-gray-500 mt-2">QR Code pour l'entrée</p>
+    <!-- Actions en dessous du ticket -->
+    <div class="ticket-actions">
+      <button
+        @click="$emit('view', ticket)"
+        class="action-btn btn-view"
+      >
+        <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+        </svg>
+        Voir le ticket
+      </button>
+
+      <button
+        @click="$emit('download', ticket)"
+        class="action-btn btn-download"
+      >
+        <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        Télécharger PDF
+      </button>
     </div>
   </div>
 </template>
@@ -204,358 +181,359 @@ export default {
 </script>
 
 <style scoped>
-.ticket-card {
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+/* Wrapper du ticket */
+.ticket-wrapper {
+  margin-bottom: 1.5rem;
 }
 
-.ticket-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-/* Classes utilitaires */
-.flex {
+/* Design du ticket réel */
+.ticket-real {
   display: flex;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(39, 45, 99, 0.15);
+  transition: all 0.3s ease;
+  position: relative;
 }
 
-.flex-col {
-  flex-direction: column;
+.ticket-real:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 50px rgba(39, 45, 99, 0.25);
 }
 
-.flex-1 {
+/* Section gauche du ticket */
+.ticket-left {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
-.items-center {
-  align-items: center;
-}
-
-.justify-between {
-  justify-content: space-between;
-}
-
-.justify-center {
-  justify-content: center;
-}
-
-.bg-white {
-  background-color: #ffffff;
-}
-
-.rounded-lg {
-  border-radius: 0.5rem;
-}
-
-.shadow-lg {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-.overflow-hidden {
+/* Container de l'image */
+.event-image-container {
+  position: relative;
+  height: 200px;
   overflow: hidden;
 }
 
-.w-full {
+.event-image {
   width: 100%;
-}
-
-.h-48 {
-  height: 12rem;
-}
-
-.object-cover {
+  height: 100%;
   object-fit: cover;
 }
 
-.p-6 {
+.image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(39, 45, 99, 0.1), rgba(39, 45, 99, 0.4));
+}
+
+/* Info principale du ticket */
+.ticket-main-info {
   padding: 1.5rem;
+  flex: 1;
 }
 
-.p-4 {
-  padding: 1rem;
-}
-
-.p-2 {
-  padding: 0.5rem;
-}
-
-.p-3 {
-  padding: 0.75rem;
-}
-
-.mb-4 {
-  margin-bottom: 1rem;
-}
-
-.mb-2 {
-  margin-bottom: 0.5rem;
-}
-
-.mr-2 {
-  margin-right: 0.5rem;
-}
-
-.mt-2 {
-  margin-top: 0.5rem;
-}
-
-.text-lg {
-  font-size: 1.125rem;
-}
-
-.text-sm {
-  font-size: 0.875rem;
-}
-
-.text-xs {
-  font-size: 0.75rem;
-}
-
-.font-bold {
+.event-title {
+  font-size: 1.5rem;
   font-weight: 700;
+  color: #272d63;
+  margin-bottom: 1rem;
+  font-family: 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-.font-semibold {
-  font-weight: 600;
+.event-details {
+  margin-bottom: 1.25rem;
 }
 
-.font-medium {
-  font-weight: 500;
-}
-
-.font-mono {
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
-}
-
-.text-gray-800 {
-  color: #1f2937;
-}
-
-.text-gray-600 {
+.detail-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
   color: #4b5563;
 }
 
-.text-gray-500 {
-  color: #6b7280;
+.detail-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-right: 0.5rem;
+  color: #fab511;
 }
 
-.text-blue-600 {
-  color: #2563eb;
+.detail-text {
+  font-size: 0.9375rem;
 }
 
-.text-green-600 {
-  color: #059669;
-}
-
-.text-white {
-  color: #ffffff;
-}
-
-.px-3 {
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-}
-
-.px-4 {
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-
-.py-1 {
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
-}
-
-.py-2 {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-}
-
-.rounded-full {
-  border-radius: 9999px;
-}
-
-.uppercase {
-  text-transform: uppercase;
-}
-
-.tracking-wide {
-  letter-spacing: 0.025em;
-}
-
-.space-y-2 > * + * {
-  margin-top: 0.5rem;
-}
-
-.bg-gray-50 {
-  background-color: #f9fafb;
-}
-
-.grid {
+/* Grille d'informations */
+.ticket-grid {
   display: grid;
-}
-
-.grid-cols-2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.gap-4 {
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
+  background: #f9fafb;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
 }
 
-.gap-3 {
-  gap: 0.75rem;
+.grid-item {
+  display: flex;
+  flex-direction: column;
 }
 
-.block {
-  display: block;
+.grid-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
 }
 
-.bg-blue-600 {
-  background-color: #2563eb;
+.grid-value {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1f2937;
 }
 
-.bg-green-600 {
-  background-color: #059669;
+.ticket-code {
+  font-family: 'Courier New', monospace;
+  color: #272d63;
+  letter-spacing: 0.05em;
 }
 
-.hover\:bg-blue-700:hover {
-  background-color: #1d4ed8;
+.price {
+  color: #059669;
+  font-size: 1.125rem;
 }
 
-.hover\:bg-green-700:hover {
-  background-color: #047857;
+/* Ligne de perforation */
+.ticket-perforation {
+  width: 2px;
+  background: white;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.transition-colors {
-  transition-property: color, background-color, border-color, fill, stroke;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
+.perforation-line {
+  width: 100%;
+  height: 100%;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    #e5e7eb 0px,
+    #e5e7eb 10px,
+    transparent 10px,
+    transparent 20px
+  );
 }
 
-.w-4 {
-  width: 1rem;
+.perforation-line::before,
+.perforation-line::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: #f3f4f6;
+  border-radius: 50%;
 }
 
-.h-4 {
-  height: 1rem;
+.perforation-line::before {
+  top: -10px;
 }
 
-.w-20 {
-  width: 5rem;
+.perforation-line::after {
+  bottom: -10px;
 }
 
-.h-20 {
-  height: 5rem;
+/* Section droite avec QR code */
+.ticket-right {
+  width: 200px;
+  background: linear-gradient(135deg, #272d63 0%, #1a1e47 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
 }
 
-.w-16 {
-  width: 4rem;
-}
-
-.h-16 {
-  height: 4rem;
-}
-
-.w-32 {
-  width: 8rem;
-}
-
-.mx-auto {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.hidden {
-  display: none;
-}
-
-.border-l {
-  border-left-width: 1px;
-}
-
-.border-t {
-  border-top-width: 1px;
-}
-
-.text-center {
+.qr-section {
   text-align: center;
 }
 
-.shadow-sm {
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+.qr-label {
+  color: #fab511;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
 }
 
-.inline-block {
+.qr-container {
+  background: white;
+  padding: 0.75rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+}
+
+.qr-image {
+  width: 140px;
+  height: 140px;
+  display: block;
+}
+
+.qr-code-text {
+  color: white;
+  font-size: 0.75rem;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+/* Badge de statut */
+.status-badge {
   display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-/* Status colors */
 .bg-green-100 {
   background-color: #dcfce7;
-}
-
-.text-green-800 {
   color: #166534;
 }
 
 .bg-yellow-100 {
   background-color: #fef3c7;
-}
-
-.text-yellow-800 {
   color: #854d0e;
 }
 
 .bg-gray-100 {
   background-color: #f3f4f6;
-}
-
-.text-gray-800 {
   color: #1f2937;
 }
 
 .bg-red-100 {
   background-color: #fee2e2;
-}
-
-.text-red-800 {
   color: #991b1b;
 }
 
 .bg-blue-100 {
   background-color: #dbeafe;
-}
-
-.text-blue-800 {
   color: #1e40af;
 }
 
+/* Actions en dessous du ticket */
+.ticket-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.875rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  font-family: 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.5rem;
+}
+
+.btn-view {
+  background-color: #272d63;
+  color: white;
+}
+
+.btn-view:hover {
+  background-color: #1a1e47;
+}
+
+.btn-download {
+  background-color: #fab511;
+  color: #272d63;
+}
+
+.btn-download:hover {
+  background-color: #e09f0e;
+}
+
 /* Responsive */
-@media (min-width: 768px) {
-  .md\:flex-row {
-    flex-direction: row;
+@media (max-width: 768px) {
+  .ticket-real {
+    flex-direction: column;
   }
-  
-  .md\:w-1\/3 {
-    width: 33.333333%;
-  }
-  
-  .md\:h-full {
-    height: 100%;
-  }
-  
-  .md\:block {
-    display: block;
-  }
-  
-  .md\:hidden {
+
+  .ticket-perforation {
     display: none;
+  }
+
+  .ticket-right {
+    width: 100%;
+    padding: 2rem;
+  }
+
+  .qr-section {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .qr-label {
+    margin-bottom: 0;
+  }
+
+  .qr-container {
+    margin-bottom: 0;
+  }
+
+  .ticket-actions {
+    flex-direction: column;
+  }
+
+  .event-image-container {
+    height: 180px;
   }
 }
 
-@media (min-width: 640px) {
-  .sm\:flex-row {
-    flex-direction: row;
+@media (max-width: 640px) {
+  .event-title {
+    font-size: 1.25rem;
+  }
+
+  .ticket-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .action-btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
   }
 }
 </style>
