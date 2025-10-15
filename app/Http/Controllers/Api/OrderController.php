@@ -958,9 +958,9 @@ class OrderController extends Controller
 
             // Récupérer la commande avec toutes les relations nécessaires
             $order = \App\Models\Order::with([
-                'user',
-                'event.venue',
-                'schedule',
+                'buyer',
+                'tickets.event.venue',
+                'tickets.schedule',
                 'tickets.ticketType'
             ])
             ->where('reference', $reference)
@@ -983,8 +983,8 @@ class OrderController extends Controller
 
             Log::info('✅ Commande trouvée', [
                 'order_id' => $order->id,
-                'event' => $order->event->title,
-                'buyer' => $order->user ? $order->user->name : $order->guest_name
+                'event' => $order->tickets->first()?->event?->title,
+                'buyer' => $order->buyer ? $order->buyer->name : $order->guest_name
             ]);
 
             // Charger le logo en base64

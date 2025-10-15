@@ -249,11 +249,11 @@
                 <div class="section-title">Informations client</div>
                 <div class="info-row">
                     <span class="info-label">Nom:</span>
-                    <span class="info-value">{{ $order->user ? $order->user->name : $order->guest_name }}</span>
+                    <span class="info-value">{{ $order->buyer ? $order->buyer->name : $order->guest_name }}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Email:</span>
-                    <span class="info-value">{{ $order->user ? $order->user->email : $order->guest_email }}</span>
+                    <span class="info-value">{{ $order->buyer ? $order->buyer->email : $order->guest_email }}</span>
                 </div>
                 @if($order->guest_phone)
                 <div class="info-row">
@@ -264,23 +264,30 @@
             </div>
 
             <!-- Event Information -->
+            @php
+                $firstTicket = $order->tickets->first();
+                $event = $firstTicket?->event;
+                $schedule = $firstTicket?->schedule;
+            @endphp
+            @if($event)
             <div class="section">
                 <div class="section-title">Détails de l'événement</div>
                 <div class="info-row">
                     <span class="info-label">Événement:</span>
-                    <span class="info-value">{{ $order->event->title }}</span>
+                    <span class="info-value">{{ $event->title }}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Lieu:</span>
-                    <span class="info-value">{{ $order->event->venue_name ?? 'À définir' }}</span>
+                    <span class="info-value">{{ $event->venue?->name ?? 'À définir' }}</span>
                 </div>
-                @if($order->schedule)
+                @if($schedule)
                 <div class="info-row">
                     <span class="info-label">Date:</span>
-                    <span class="info-value">{{ \Carbon\Carbon::parse($order->schedule->starts_at)->translatedFormat('l d F Y à H:i') }}</span>
+                    <span class="info-value">{{ \Carbon\Carbon::parse($schedule->starts_at)->translatedFormat('l d F Y à H:i') }}</span>
                 </div>
                 @endif
             </div>
+            @endif
 
             <!-- Tickets -->
             <div class="section">
