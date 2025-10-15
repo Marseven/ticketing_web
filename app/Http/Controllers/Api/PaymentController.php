@@ -270,9 +270,9 @@ class PaymentController extends Controller
             ], 400);
         }
 
-        // Vérifier si un paiement en cours existe déjà (tous statuts non finaux)
+        // Vérifier si un paiement en cours existe déjà (tous statuts non finaux, incluant failed pour permettre retry)
         $existingPayment = Payment::where('order_id', $order->id)
-            ->whereIn('status', ['pending', 'initiated', 'processing'])
+            ->whereIn('status', ['pending', 'initiated', 'processing', 'failed'])
             ->first();
 
         // Normaliser le provider pour correspondre à l'enum de la base
@@ -287,7 +287,10 @@ class PaymentController extends Controller
                 'billing_id' => $existingPayment->billing_id
             ]);
 
-            // Mettre à jour le provider si l'utilisateur change d'opérateur
+            // Mettre à jour le provider si l'utilisateur change d'opérateur, ou le téléphone s'il change
+            $needsUpdate = false;
+            $updateData = ['status' => 'initiated']; // Toujours remettre à initiated pour permettre retry
+
             if ($existingPayment->provider !== $provider) {
                 Log::info('🔄 Changement d\'opérateur détecté (user authentifié)', [
                     'payment_id' => $existingPayment->id,
@@ -295,17 +298,21 @@ class PaymentController extends Controller
                     'to' => $provider
                 ]);
 
-                $existingPayment->update([
-                    'provider' => $provider,
-                    'payload' => array_merge($existingPayment->payload ?? [], [
-                        'phone' => $request->phone,
-                        'operator' => $request->operator,
-                        'operator_changed_at' => now()->toIso8601String(),
-                        'previous_provider' => $existingPayment->provider,
-                        'gateway_requested' => $request->gateway
-                    ])
-                ]);
+                $updateData['provider'] = $provider;
+                $needsUpdate = true;
             }
+
+            // Toujours mettre à jour le téléphone dans le payload pour permettre le retry avec un autre numéro
+            $updateData['payload'] = array_merge($existingPayment->payload ?? [], [
+                'phone' => $request->phone,
+                'operator' => $request->operator,
+                'retry_at' => now()->toIso8601String(),
+                'operator_changed_at' => $needsUpdate ? now()->toIso8601String() : ($existingPayment->payload['operator_changed_at'] ?? null),
+                'previous_provider' => $needsUpdate ? $existingPayment->provider : ($existingPayment->payload['previous_provider'] ?? null),
+                'gateway_requested' => $request->gateway
+            ]);
+
+            $existingPayment->update($updateData);
 
             // Réutiliser le paiement existant avec la même facture E-Billing
             return $this->getPaymentStatus($existingPayment);
@@ -1049,9 +1056,9 @@ class PaymentController extends Controller
             ], 400);
         }
 
-        // Vérifier si un paiement en cours existe déjà (tous statuts non finaux)
+        // Vérifier si un paiement en cours existe déjà (tous statuts non finaux, incluant failed pour permettre retry)
         $existingPayment = Payment::where('order_id', $order->id)
-            ->whereIn('status', ['pending', 'initiated', 'processing'])
+            ->whereIn('status', ['pending', 'initiated', 'processing', 'failed'])
             ->first();
 
         // Normaliser le provider pour correspondre à l'enum de la base
@@ -1066,7 +1073,10 @@ class PaymentController extends Controller
                 'billing_id' => $existingPayment->billing_id
             ]);
 
-            // Mettre à jour le provider si l'utilisateur change d'opérateur
+            // Mettre à jour le provider si l'utilisateur change d'opérateur, ou le téléphone s'il change
+            $needsUpdate = false;
+            $updateData = ['status' => 'initiated']; // Toujours remettre à initiated pour permettre retry
+
             if ($existingPayment->provider !== $provider) {
                 Log::info('🔄 Changement d\'opérateur détecté', [
                     'payment_id' => $existingPayment->id,
@@ -1074,16 +1084,20 @@ class PaymentController extends Controller
                     'to' => $provider
                 ]);
 
-                $existingPayment->update([
-                    'provider' => $provider,
-                    'payload' => array_merge($existingPayment->payload ?? [], [
-                        'phone' => $request->phone,
-                        'operator_changed_at' => now()->toIso8601String(),
-                        'previous_provider' => $existingPayment->provider,
-                        'gateway_requested' => $request->gateway
-                    ])
-                ]);
+                $updateData['provider'] = $provider;
+                $needsUpdate = true;
             }
+
+            // Toujours mettre à jour le téléphone dans le payload pour permettre le retry avec un autre numéro
+            $updateData['payload'] = array_merge($existingPayment->payload ?? [], [
+                'phone' => $request->phone,
+                'retry_at' => now()->toIso8601String(),
+                'operator_changed_at' => $needsUpdate ? now()->toIso8601String() : ($existingPayment->payload['operator_changed_at'] ?? null),
+                'previous_provider' => $needsUpdate ? $existingPayment->provider : ($existingPayment->payload['previous_provider'] ?? null),
+                'gateway_requested' => $request->gateway
+            ]);
+
+            $existingPayment->update($updateData);
 
             // Réutiliser le paiement existant avec la même facture E-Billing
             $payment = $existingPayment;
