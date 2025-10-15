@@ -9,6 +9,7 @@ import Login from './pages/auth/Login.vue';
 const Events = () => import('./pages/Events.vue');
 const EventDetail = () => import('./pages/EventDetail.vue');
 const Checkout = () => import('./pages/Checkout.vue');
+const Payment = () => import('./pages/Payment.vue');
 const Register = () => import('./pages/auth/Register.vue');
 const EmailVerification = () => import('./pages/auth/EmailVerification.vue');
 const EmailVerificationResult = () => import('./pages/EmailVerificationResult.vue');
@@ -68,6 +69,7 @@ const routes = [
     { path: '/events', component: Events, name: 'events' },
     { path: '/events/:slug', component: EventDetail, name: 'event-detail' },
     { path: '/checkout/:eventSlug', component: Checkout, name: 'checkout' },
+    { path: '/payment/:reference', component: Payment, name: 'payment' },
     { path: '/login', component: Login, name: 'login' },
     { path: '/register', component: Register, name: 'register' },
     { path: '/email/verify/:id?/:hash?', component: EmailVerification, name: 'email-verification' },

@@ -547,7 +547,8 @@ export default {
 
     const retryPayment = (order) => {
       console.log('Relancer le paiement:', order.reference)
-      // Logique pour relancer le paiement
+      // Rediriger vers la page de paiement
+      router.push(`/payment/${order.reference}`)
     }
 
     const requestCancellation = (order) => {
