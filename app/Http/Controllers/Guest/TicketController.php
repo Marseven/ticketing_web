@@ -224,7 +224,7 @@ class TicketController extends Controller
             'email' => 'nullable|email',
         ]);
 
-        $query = Ticket::query()->with(['event.schedules', 'ticketType', 'buyer', 'order']);
+        $query = Ticket::query()->with(['event.schedules', 'event.venue', 'ticketType', 'buyer', 'order']);
 
         // Recherche par référence (code du ticket OU référence de la commande)
         if ($request->filled('reference')) {
@@ -284,8 +284,8 @@ class TicketController extends Controller
                     'id' => $ticket->event->id,
                     'title' => $ticket->event->title,
                     'slug' => $ticket->event->slug,
-                    'venue_name' => $ticket->event->venue_name,
-                    'image_url' => $ticket->event->image_url,
+                    'venue_name' => $ticket->event->venue?->name,
+                    'image_url' => $ticket->event->image,
                 ],
                 'schedule' => [
                     'starts_at' => $ticket->event->schedules->first()?->starts_at,
@@ -295,9 +295,9 @@ class TicketController extends Controller
                     'price' => $ticket->ticketType->price,
                 ],
                 'buyer' => [
-                    'name' => $ticket->buyer->name ?? $ticket->order->guest_name,
-                    'email' => $ticket->buyer->email ?? $ticket->order->guest_email,
-                    'phone' => $ticket->buyer->phone ?? $ticket->order->guest_phone,
+                    'name' => $ticket->buyer?->name ?? $ticket->order->guest_name,
+                    'email' => $ticket->buyer?->email ?? $ticket->order->guest_email,
+                    'phone' => $ticket->buyer?->phone ?? $ticket->order->guest_phone,
                 ],
                 'order' => [
                     'reference' => $ticket->order->reference,
