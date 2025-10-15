@@ -67,12 +67,12 @@
 
               <div class="flex justify-between pt-2 border-t border-gray-300">
                 <span class="text-gray-800 font-semibold">Montant payé :</span>
-                <span class="font-bold text-green-600 text-lg">{{ formatPrice(order.total_amount) }} FCFA</span>
+                <span class="font-bold text-green-600 text-lg">{{ formatPrice(order.total_amount) }} XAF</span>
               </div>
 
               <div class="flex justify-between">
                 <span class="text-xs text-gray-500">dont frais et taxes inclus :</span>
-                <span class="text-xs text-gray-500">{{ formatPrice(order.fees_amount + order.tax_amount) }} FCFA</span>
+                <span class="text-xs text-gray-500">{{ formatPrice(parseFloat(order.fees_amount || 0) + parseFloat(order.tax_amount || 0)) }} XAF</span>
               </div>
 
               <div class="flex justify-between mt-3">
@@ -122,7 +122,7 @@
           <!-- Email Notification -->
           <div class="bg-blue-50 border border-blue-200 rounded-primea-lg p-4 mb-6 text-center">
             <p class="text-blue-800 text-sm">
-              <span v-if="authStore.isAuthenticated && (order.guest_email || authStore.user?.email)">📧 </span>Un email de confirmation avec vos tickets a été envoyé à <strong>{{ order.guest_email || 'votre adresse email' }}</strong>
+              Un email de confirmation avec vos tickets a été envoyé à <strong>{{ order.guest_email || 'votre adresse email' }}</strong>
             </p>
           </div>
 
@@ -231,13 +231,45 @@ export default {
 
     const formatDate = (date) => {
       if (!date) return 'N/A'
-      return new Date(date).toLocaleDateString('fr-FR', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
+
+      try {
+        // Vérifier si la date est au format français (dd/mm/yyyy HH:mm:ss)
+        if (typeof date === 'string' && date.includes('/')) {
+          const [datePart, timePart] = date.split(' ')
+          const [day, month, year] = datePart.split('/')
+          const isoDate = `${year}-${month}-${day}${timePart ? 'T' + timePart : ''}`
+          const dateObj = new Date(isoDate)
+
+          if (isNaN(dateObj.getTime())) {
+            return 'N/A'
+          }
+
+          return dateObj.toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+        }
+
+        // Sinon, traiter comme une date ISO
+        const dateObj = new Date(date)
+        if (isNaN(dateObj.getTime())) {
+          return 'N/A'
+        }
+
+        return dateObj.toLocaleDateString('fr-FR', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      } catch (e) {
+        console.error('Erreur parsing date:', e)
+        return 'N/A'
+      }
     }
 
     const downloadAllTickets = () => {
