@@ -140,17 +140,19 @@ export default {
   emits: ['view', 'download'],
   setup(props) {
     
-    // Status du ticket
+    // Status de la commande
     const statusClasses = computed(() => {
       switch (props.ticket.status) {
-        case 'valid':
+        case 'paid':
           return 'bg-green-100 text-green-800'
-        case 'used':
-          return 'bg-gray-100 text-gray-800'
-        case 'expired':
+        case 'pending':
+          return 'bg-yellow-100 text-yellow-800'
+        case 'failed':
           return 'bg-red-100 text-red-800'
         case 'cancelled':
           return 'bg-red-100 text-red-800'
+        case 'refunded':
+          return 'bg-gray-100 text-gray-800'
         default:
           return 'bg-blue-100 text-blue-800'
       }
@@ -158,14 +160,16 @@ export default {
 
     const statusText = computed(() => {
       switch (props.ticket.status) {
-        case 'valid':
-          return 'Valide'
-        case 'used':
-          return 'Utilisé'
-        case 'expired':
-          return 'Expiré'
+        case 'paid':
+          return 'Payé'
+        case 'pending':
+          return 'En attente'
+        case 'failed':
+          return 'Échoué'
         case 'cancelled':
           return 'Annulé'
+        case 'refunded':
+          return 'Remboursé'
         default:
           return 'Inconnu'
       }
@@ -492,6 +496,14 @@ export default {
 
 .text-green-800 {
   color: #166534;
+}
+
+.bg-yellow-100 {
+  background-color: #fef3c7;
+}
+
+.text-yellow-800 {
+  color: #854d0e;
 }
 
 .bg-gray-100 {

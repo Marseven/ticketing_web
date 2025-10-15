@@ -243,19 +243,20 @@ export default {
           // Transformer les données de l'API
           foundTickets.value = paidTickets.map(apiTicket => ({
             id: apiTicket.id,
+            code: apiTicket.code,
             reference: apiTicket.code,
             event: {
               id: apiTicket.event.id,
               title: apiTicket.event.title,
               date: apiTicket.schedule?.starts_at || new Date().toISOString(),
               venue_name: apiTicket.event.venue_name,
-              image: apiTicket.event.image_url
+              image: apiTicket.event.image_url || `${window.location.origin}/storage/${apiTicket.event.cover_image}` || null
             },
             ticketType: apiTicket.ticket_type?.name,
             price: apiTicket.ticket_type?.price,
             currency: 'XAF',
-            qrCode: null, // Sera généré si nécessaire
-            status: apiTicket.status,
+            qrCode: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${apiTicket.code}`,
+            status: apiTicket.order?.status || 'unknown',
             buyer_name: apiTicket.buyer?.name,
             buyer_email: apiTicket.buyer?.email,
             issued_at: apiTicket.issued_at,
@@ -273,19 +274,20 @@ export default {
           }
           foundTickets.value = [{
             id: apiTicket.id,
+            code: apiTicket.code,
             reference: apiTicket.code,
             event: {
               id: apiTicket.event.id,
               title: apiTicket.event.title,
               date: apiTicket.schedule?.starts_at || new Date().toISOString(),
               venue_name: apiTicket.event.venue_name,
-              image: apiTicket.event.image_url
+              image: apiTicket.event.image_url || `${window.location.origin}/storage/${apiTicket.event.cover_image}` || null
             },
             ticketType: apiTicket.ticket_type?.name,
             price: apiTicket.ticket_type?.price,
             currency: 'XAF',
-            qrCode: null,
-            status: apiTicket.status,
+            qrCode: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${apiTicket.code}`,
+            status: apiTicket.order?.status || 'unknown',
             buyer_name: apiTicket.buyer?.name,
             buyer_email: apiTicket.buyer?.email,
             issued_at: apiTicket.issued_at,
@@ -316,12 +318,12 @@ export default {
 
     const downloadTicket = (ticket) => {
       // Rediriger vers la page de téléchargement
-      router.push(`/ticket/${ticket.id}/download`)
+      router.push(`/ticket/${ticket.code}/download`)
     }
 
     const viewTicket = (ticket) => {
       // Rediriger vers la page de visualisation
-      router.push(`/ticket/${ticket.id}`)
+      router.push(`/ticket/${ticket.code}`)
     }
 
     const clearForm = () => {
