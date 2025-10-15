@@ -257,13 +257,11 @@ export default {
             event: {
               id: apiTicket.event.id,
               title: apiTicket.event.title,
-              date: apiTicket.schedule?.starts_at ?
-                    new Date(apiTicket.schedule.starts_at.split('/').reverse().join('-')).toISOString() :
-                    '2025-07-27T20:00:00',
+              date: apiTicket.schedule?.starts_at || '2025-07-27T20:00:00',
               venue_name: apiTicket.event.venue_name || 'Entre Nous Bar',
               image: imageUrl,
               time: apiTicket.schedule?.door_time ?
-                    new Date(apiTicket.schedule.door_time.split('/').reverse().join('-')).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) :
+                    new Date(apiTicket.schedule.door_time).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) :
                     '13H'
             },
             ticketType: apiTicket.ticket_type?.name || 'Standard',
