@@ -1304,18 +1304,31 @@ class PaymentController extends Controller
                 'result' => $result
             ]);
 
-            if ($result['success']) {
+            // Vérifier si c'est un timeout
+            $isTimeout = isset($result['error']) && (
+                str_contains(strtolower($result['error']), 'timeout') ||
+                str_contains(strtolower($result['error']), 'timed out')
+            );
+
+            if ($result['success'] || $isTimeout) {
                 $payment->update([
                     'payload' => array_merge($payment->payload ?? [], [
                         'push_sent_at' => now()->toIso8601String(),
-                        'push_response' => $result['data'] ?? []
+                        'push_response' => $result['data'] ?? [],
+                        'push_timeout' => $isTimeout,
+                        'push_error' => $isTimeout ? ($result['error'] ?? null) : null
                     ])
                 ]);
 
+                // En cas de timeout, on retourne quand même un succès car le push peut avoir été envoyé
                 return response()->json([
                     'success' => true,
-                    'message' => 'Push USSD envoyé avec succès',
-                    'bill_id' => $billId
+                    'message' => $isTimeout
+                        ? 'Le push USSD est en cours d\'envoi. Veuillez vérifier votre téléphone dans quelques instants.'
+                        : 'Push USSD envoyé avec succès',
+                    'bill_id' => $billId,
+                    'timeout_occurred' => $isTimeout,
+                    'instructions' => 'Vérifiez votre téléphone et confirmez la transaction. Si vous ne recevez rien dans 2 minutes, essayez de cliquer à nouveau sur "Envoyer le Push".'
                 ]);
             }
 
