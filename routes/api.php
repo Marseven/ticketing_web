@@ -88,9 +88,11 @@ Route::prefix('v1')->group(function () {
         Route::post('/', [App\Http\Controllers\Api\OrderController::class, 'store']);
         Route::get('/', [App\Http\Controllers\Api\OrderController::class, 'index']);
         Route::get('{order}', [App\Http\Controllers\Api\OrderController::class, 'show']);
-        Route::get('{reference}/invoice', [App\Http\Controllers\Api\OrderController::class, 'downloadInvoice']);
         Route::post('{order}/pay', [App\Http\Controllers\Api\PaymentController::class, 'processPayment']);
     });
+
+    // Route publique pour télécharger la facture (authentification optionnelle)
+    Route::get('orders/{reference}/invoice', [App\Http\Controllers\Api\OrderController::class, 'downloadInvoice']);
 
     // Routes du profil client
     Route::middleware('auth:sanctum')->group(function () {

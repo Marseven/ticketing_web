@@ -68,9 +68,22 @@ class PayoutService
      */
     private function updateOrganizerBalance(Organizer $organizer, Payment $payment): OrganizerBalance
     {
+        // Vérifier que le gateway n'est pas null
+        $gateway = $payment->gateway ?? 'unknown';
+
+        if ($gateway === 'unknown' || empty($gateway)) {
+            Log::warning('Gateway null ou vide lors de la mise à jour du solde', [
+                'payment_id' => $payment->id,
+                'order_id' => $payment->order_id,
+                'gateway_original' => $payment->gateway
+            ]);
+            // Utiliser un gateway par défaut basé sur le mode de paiement
+            $gateway = 'airtelmoney'; // Par défaut
+        }
+
         $organizerBalance = OrganizerBalance::firstOrCreate([
             'organizer_id' => $organizer->id,
-            'gateway' => $payment->gateway,
+            'gateway' => $gateway,
         ], [
             'balance' => 0,
             'pending_balance' => 0,
