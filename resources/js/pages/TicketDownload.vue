@@ -251,17 +251,38 @@ export default {
           // L'image_url vient déjà de l'accesseur qui construit l'URL complète
           const imageUrl = apiTicket.event.image_url || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800'
 
+          // Convertir la date du format français (dd/mm/yyyy HH:mm:ss) au format ISO
+          let isoDate = '2025-07-27T20:00:00'
+          if (apiTicket.schedule?.starts_at) {
+            try {
+              // Format: "19/10/2025 07:26:00"
+              const [datePart, timePart] = apiTicket.schedule.starts_at.split(' ')
+              const [day, month, year] = datePart.split('/')
+              isoDate = `${year}-${month}-${day}T${timePart}`
+            } catch (e) {
+              console.error('Erreur parsing date:', e)
+            }
+          }
+
           ticket.value = {
             id: apiTicket.id,
             reference: apiTicket.code,
             event: {
               id: apiTicket.event.id,
               title: apiTicket.event.title,
-              date: apiTicket.schedule?.starts_at || '2025-07-27T20:00:00',
+              date: isoDate,
               venue_name: apiTicket.event.venue_name || 'Entre Nous Bar',
               image: imageUrl,
               time: apiTicket.schedule?.door_time ?
-                    new Date(apiTicket.schedule.door_time).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) :
+                    (() => {
+                      try {
+                        const [datePart, timePart] = apiTicket.schedule.door_time.split(' ')
+                        const [hours, minutes] = timePart.split(':')
+                        return `${hours}H${minutes}`
+                      } catch {
+                        return '13H'
+                      }
+                    })() :
                     '13H'
             },
             ticketType: apiTicket.ticket_type?.name || 'Standard',
