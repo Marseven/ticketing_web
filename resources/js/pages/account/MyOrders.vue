@@ -242,10 +242,10 @@
                 Télécharger la facture
               </button>
               
-              <button 
+              <button
                 v-if="order.status === 'pending'"
                 @click="retryPayment(order)"
-                class="px-4 py-2 border-2 border-primea-blue text-primea-blue rounded-primea hover:bg-primea-blue hover:text-white font-medium transition-all duration-200 flex items-center justify-center gap-2"
+                class="px-4 py-2 border-2 border-primea-blue text-primea-blue rounded-primea font-medium transition-all duration-200 flex items-center justify-center gap-2 retry-payment-btn"
               >
                 <CreditCardIcon class="w-4 h-4" />
                 Finaliser le paiement
@@ -641,5 +641,10 @@ export default {
 
 .rounded-primea-lg {
   border-radius: 16px;
+}
+
+.retry-payment-btn:hover {
+  background-color: #272d63;
+  color: white !important;
 }
 </style>
