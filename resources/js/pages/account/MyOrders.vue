@@ -352,8 +352,21 @@ export default {
           transactionId: `TXN-${order.order_number}`,
           total: parseFloat(order.total_amount) || 0,
           showDetails: false,
-          tickets: [{
+          tickets: order.tickets && order.tickets.length > 0 ? order.tickets.map(ticket => ({
+            id: ticket.id,
+            code: ticket.code, // Utiliser le code du ticket
+            event: {
+              title: order.event?.title || 'Événement sans titre',
+              date: order.schedule?.starts_at ? new Date(order.schedule.starts_at.replace(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})/, '$3-$2-$1T$4:$5:$6')) : new Date(),
+              venue: [order.event?.venue_name, order.event?.venue_city].filter(v => v && v !== 'null').join(', ') || 'Lieu à définir',
+              image: order.event?.image || '/images/logo.png'
+            },
+            type: ticket.ticket_type?.name || 'Standard',
+            price: parseFloat(ticket.ticket_type?.price) || 0,
+            quantity: 1 // Chaque ticket est individuel
+          })) : [{
             id: order.id,
+            code: null,
             event: {
               title: order.event?.title || 'Événement sans titre',
               date: order.schedule?.starts_at ? new Date(order.schedule.starts_at.replace(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})/, '$3-$2-$1T$4:$5:$6')) : new Date(),
@@ -516,7 +529,11 @@ export default {
     }
 
     const viewTicket = (ticket) => {
-      router.push(`/ticket/${ticket.id}`)
+      if (ticket.code) {
+        router.push(`/ticket/${ticket.code}`)
+      } else {
+        console.error('Ticket code manquant', ticket)
+      }
     }
 
     const downloadOrderReceipt = (order) => {
