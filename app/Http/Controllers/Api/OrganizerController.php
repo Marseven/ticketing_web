@@ -1399,30 +1399,14 @@ class OrganizerController extends Controller
         // Ajouter le revenu à l'événement
         $event->revenue = round($revenue, 2);
 
-        // Charger les achats récents (10 dernières commandes complétées)
-        // Debug: vérifier toutes les commandes pour cet événement
-        $allOrders = \App\Models\Order::whereHas('tickets', function($query) use ($event) {
-            $query->where('event_id', $event->id);
-        })->with('buyer', 'tickets')->get();
-
-        \Log::info('Debug Recent Orders', [
-            'event_id' => $event->id,
-            'organizer_id' => $event->organizer_id,
-            'total_orders_for_event' => $allOrders->count(),
-            'orders_details' => $allOrders->map(fn($o) => [
-                'id' => $o->id,
-                'status' => $o->status,
-                'organizer_id' => $o->organizer_id,
-                'tickets_count' => $o->tickets->count(),
-                'buyer' => $o->buyer ? $o->buyer->name : $o->guest_name
-            ])
-        ]);
-
+        // Charger les achats récents (10 dernières commandes payées)
         $recentOrders = \App\Models\Order::where('organizer_id', $event->organizer_id)
             ->whereHas('tickets', function($query) use ($event) {
                 $query->where('event_id', $event->id);
             })
-            ->with('buyer', 'tickets')
+            ->with(['buyer', 'tickets' => function($query) use ($event) {
+                $query->where('event_id', $event->id);
+            }])
             ->where('status', 'paid')
             ->orderBy('created_at', 'desc')
             ->limit(10)
