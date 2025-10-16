@@ -8,6 +8,8 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use App\Notifications\PaymentSuccessful;
+use App\Notifications\TicketsReady;
 
 /**
  * @OA\Tag(
@@ -547,6 +549,26 @@ class WebhookController extends Controller
                 $this->issueTickets($order);
 
                 Log::info('✅ Commande payée et billets émis', ['order_id' => $order->id]);
+
+                // Envoyer les notifications
+                try {
+                    $buyer = $order->buyer;
+                    if ($buyer) {
+                        // Notification de paiement réussi
+                        $buyer->notify(new PaymentSuccessful($payment));
+                        Log::info('Notification PaymentSuccessful envoyée', ['order_id' => $order->id, 'payment_id' => $payment->id]);
+
+                        // Notification de billets prêts
+                        $buyer->notify(new TicketsReady($order));
+                        Log::info('Notification TicketsReady envoyée', ['order_id' => $order->id]);
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Erreur envoi notifications paiement', [
+                        'order_id' => $order->id,
+                        'payment_id' => $payment->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
             }
         } elseif (in_array($internalStatus, ['failed', 'cancelled'])) {
             // Libérer les places réservées si le paiement échoue

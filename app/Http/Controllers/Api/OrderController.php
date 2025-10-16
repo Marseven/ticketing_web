@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
+use App\Notifications\OrderConfirmation;
 
 /**
  * @OA\Tag(
@@ -250,6 +251,17 @@ class OrderController extends Controller
             }
 
             \DB::commit();
+
+            // Envoyer la notification de confirmation de commande
+            try {
+                $user->notify(new OrderConfirmation($order));
+                Log::info('Notification OrderConfirmation envoyée', ['order_id' => $order->id, 'user_id' => $user->id]);
+            } catch (\Exception $e) {
+                Log::error('Erreur envoi notification OrderConfirmation', [
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
 
             // Préparer la réponse
             $orderData = [

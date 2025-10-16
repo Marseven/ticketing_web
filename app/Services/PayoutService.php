@@ -9,6 +9,9 @@ use App\Models\OrganizerBalance;
 use App\Models\Payout;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use App\Notifications\PayoutCreated;
+use App\Notifications\PayoutSuccessful;
+use App\Notifications\PayoutFailed;
 
 class PayoutService
 {
@@ -332,6 +335,23 @@ class PayoutService
             }
 
             DB::commit();
+
+            // Envoyer la notification PayoutCreated uniquement si le payout n'a pas échoué immédiatement
+            if ($payout && $payout->status !== 'failed') {
+                try {
+                    $organizer->user->notify(new PayoutCreated($payout));
+                    Log::info('Notification PayoutCreated envoyée', [
+                        'payout_id' => $payout->id,
+                        'organizer_id' => $organizer->id
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Erreur envoi notification PayoutCreated', [
+                        'payout_id' => $payout->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+
             return $payout;
 
         } catch (\Exception $e) {
@@ -387,6 +407,20 @@ class PayoutService
                     'amount' => $payout->amount,
                     'final_status' => 'success'
                 ]);
+
+                // Envoyer la notification PayoutSuccessful
+                try {
+                    $payout->organizer->user->notify(new PayoutSuccessful($payout));
+                    Log::info('Notification PayoutSuccessful envoyée', [
+                        'payout_id' => $payout->id,
+                        'organizer_id' => $payout->organizer_id
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Erreur envoi notification PayoutSuccessful', [
+                        'payout_id' => $payout->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
             } else {
                 // Remettre le montant dans le solde si le payout échoue
                 $organizerBalance = OrganizerBalance::where('organizer_id', $payout->organizer_id)
@@ -416,6 +450,20 @@ class PayoutService
                     'error_message' => 'Payout échoué côté SHAP',
                     'callback_data' => $callbackData
                 ]);
+
+                // Envoyer la notification PayoutFailed
+                try {
+                    $payout->organizer->user->notify(new PayoutFailed($payout));
+                    Log::info('Notification PayoutFailed envoyée', [
+                        'payout_id' => $payout->id,
+                        'organizer_id' => $payout->organizer_id
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Erreur envoi notification PayoutFailed', [
+                        'payout_id' => $payout->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
             }
 
         } catch (\Exception $e) {
