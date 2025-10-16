@@ -107,14 +107,14 @@
 
         <div class="bg-white rounded-lg shadow p-6">
           <div class="flex items-center">
-            <div class="p-2 bg-green-100 rounded-lg">
-              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-2 rounded-lg" style="background-color: rgba(39, 45, 99, 0.15);">
+              <svg class="w-6 h-6" style="color: #272d63;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
               </svg>
             </div>
             <div class="ml-4">
               <p class="text-sm text-gray-600">Commission Plateforme</p>
-              <p class="text-2xl font-bold text-green-600">{{ formatAmount(stats.platform_commission || 0) }} XAF</p>
+              <p class="text-2xl font-bold" style="color: #272d63;">{{ formatAmount(stats.platform_commission || 0) }} XAF</p>
             </div>
           </div>
         </div>
@@ -172,7 +172,18 @@
                     <td class="px-4 py-4 text-sm text-gray-900">{{ order.customer_name || order.customer_email }}</td>
                     <td class="px-4 py-4 text-sm font-medium text-gray-900">{{ formatAmount(order.total_amount) }} XAF</td>
                     <td class="px-4 py-4 text-sm">
-                      <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full" 
+                      <span v-if="order.status === 'pending'"
+                            class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                            style="background-color: rgba(250, 181, 17, 0.1); color: #fab511;">
+                        {{ getOrderStatusName(order.status) }}
+                      </span>
+                      <span v-else-if="order.status === 'paid'"
+                            class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                            style="background-color: rgba(39, 45, 99, 0.1); color: #272d63;">
+                        {{ getOrderStatusName(order.status) }}
+                      </span>
+                      <span v-else
+                            class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
                             :class="getOrderStatusClass(order.status)">
                         {{ getOrderStatusName(order.status) }}
                       </span>
@@ -193,14 +204,14 @@
             <div class="space-y-3">
               <div class="flex justify-between items-center">
                 <span class="text-sm text-gray-600">Paiements SHAP</span>
-                <span class="inline-flex px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                <span class="inline-flex px-2 py-1 text-xs rounded-full" style="background-color: rgba(39, 45, 99, 0.1); color: #272d63;">
                   Opérationnel
                 </span>
               </div>
-              
+
               <div class="flex justify-between items-center">
                 <span class="text-sm text-gray-600">Base de données</span>
-                <span class="inline-flex px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                <span class="inline-flex px-2 py-1 text-xs rounded-full" style="background-color: rgba(39, 45, 99, 0.1); color: #272d63;">
                   Opérationnel
                 </span>
               </div>
@@ -438,8 +449,6 @@ export default {
 
     const getOrderStatusClass = (status) => {
       const classes = {
-        pending: 'bg-yellow-100 text-yellow-800',
-        paid: 'bg-green-100 text-green-800',
         cancelled: 'bg-red-100 text-red-800',
         refunded: 'bg-gray-100 text-gray-800'
       }
@@ -447,13 +456,7 @@ export default {
     }
 
     const getActivityIconClass = (type) => {
-      const classes = {
-        order: 'bg-blue-100 text-blue-600',
-        payment: 'bg-green-100 text-green-600',
-        payout: 'bg-yellow-100 text-yellow-600',
-        user: 'bg-purple-100 text-purple-600'
-      }
-      return classes[type] || 'bg-gray-100 text-gray-600'
+      return 'text-gray-600'
     }
 
     // Simuler des données pour les paiements si l'API n'est pas disponible

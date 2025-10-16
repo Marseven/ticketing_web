@@ -39,14 +39,14 @@
       </div>
 
       <!-- Événements Actifs -->
-      <div class="bg-white rounded-primea shadow-primea p-6 border-l-4 border-green-500">
+      <div class="bg-white rounded-primea shadow-primea p-6 border-l-4 border-primea-blue">
         <div class="flex items-center">
-          <div class="p-2 bg-green-100 rounded-lg">
-            <PlayIcon class="w-6 h-6 text-green-600" />
+          <div class="p-2 rounded-lg" style="background-color: rgba(39, 45, 99, 0.15);">
+            <PlayIcon class="w-6 h-6 text-primea-blue" />
           </div>
           <div class="ml-4">
             <p class="text-sm text-gray-600 font-primea">Événements Actifs</p>
-            <p class="text-2xl font-bold text-green-600 font-primea">{{ stats.active_events }}</p>
+            <p class="text-2xl font-bold text-primea-blue font-primea">{{ stats.active_events }}</p>
           </div>
         </div>
       </div>
@@ -65,14 +65,14 @@
       </div>
 
       <!-- Revenus -->
-      <div class="bg-white rounded-primea shadow-primea p-6 border-l-4 border-purple-500">
+      <div class="bg-white rounded-primea shadow-primea p-6 border-l-4 border-primea-blue">
         <div class="flex items-center">
-          <div class="p-2 bg-purple-100 rounded-lg">
-            <CurrencyDollarIcon class="w-6 h-6 text-purple-600" />
+          <div class="p-2 rounded-lg" style="background-color: rgba(39, 45, 99, 0.2);">
+            <CurrencyDollarIcon class="w-6 h-6 text-primea-blue" />
           </div>
           <div class="ml-4">
             <p class="text-sm text-gray-600 font-primea">Revenus</p>
-            <p class="text-2xl font-bold text-purple-600 font-primea">{{ formatAmount(stats.total_revenue) }} XAF</p>
+            <p class="text-2xl font-bold text-primea-blue font-primea">{{ formatAmount(stats.total_revenue) }} XAF</p>
           </div>
         </div>
       </div>

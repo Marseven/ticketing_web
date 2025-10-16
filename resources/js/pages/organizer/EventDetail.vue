@@ -68,48 +68,48 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div class="bg-white rounded-primea shadow-primea p-6">
             <div class="flex items-center">
-              <div class="p-2 bg-blue-100 rounded-lg">
-                <TicketIcon class="w-6 h-6 text-blue-600" />
+              <div class="p-2 rounded-lg" style="background-color: rgba(39, 45, 99, 0.1);">
+                <TicketIcon class="w-6 h-6 text-primea-blue" />
               </div>
               <div class="ml-4">
                 <p class="text-sm text-gray-600 font-primea">Billets vendus</p>
-                <p class="text-2xl font-bold text-blue-600 font-primea">{{ event.tickets_sold || 0 }}</p>
+                <p class="text-2xl font-bold text-primea-blue font-primea">{{ event.tickets_sold || 0 }}</p>
               </div>
             </div>
           </div>
-          
+
           <div class="bg-white rounded-primea shadow-primea p-6">
             <div class="flex items-center">
-              <div class="p-2 bg-green-100 rounded-lg">
-                <CurrencyDollarIcon class="w-6 h-6 text-green-600" />
+              <div class="p-2 rounded-lg" style="background-color: rgba(39, 45, 99, 0.15);">
+                <CurrencyDollarIcon class="w-6 h-6 text-primea-blue" />
               </div>
               <div class="ml-4">
                 <p class="text-sm text-gray-600 font-primea">Revenus</p>
-                <p class="text-2xl font-bold text-green-600 font-primea">{{ formatAmount(event.total_revenue || 0) }} XAF</p>
+                <p class="text-2xl font-bold text-primea-blue font-primea">{{ formatAmount(event.total_revenue || 0) }} XAF</p>
               </div>
             </div>
           </div>
 
           <div class="bg-white rounded-primea shadow-primea p-6">
             <div class="flex items-center">
-              <div class="p-2 bg-yellow-100 rounded-lg">
-                <UsersIcon class="w-6 h-6 text-yellow-600" />
+              <div class="p-2 rounded-lg" style="background-color: rgba(250, 181, 17, 0.15);">
+                <UsersIcon class="w-6 h-6 text-primea-yellow" />
               </div>
               <div class="ml-4">
                 <p class="text-sm text-gray-600 font-primea">Capacité</p>
-                <p class="text-2xl font-bold text-yellow-600 font-primea">{{ getTotalCapacity() }}</p>
+                <p class="text-2xl font-bold text-primea-yellow font-primea">{{ getTotalCapacity() }}</p>
               </div>
             </div>
           </div>
 
           <div class="bg-white rounded-primea shadow-primea p-6">
             <div class="flex items-center">
-              <div class="p-2 bg-purple-100 rounded-lg">
-                <CalendarIcon class="w-6 h-6 text-purple-600" />
+              <div class="p-2 rounded-lg" style="background-color: rgba(39, 45, 99, 0.2);">
+                <CalendarIcon class="w-6 h-6 text-primea-blue" />
               </div>
               <div class="ml-4">
                 <p class="text-sm text-gray-600 font-primea">Date</p>
-                <p class="text-lg font-bold text-purple-600 font-primea">{{ getEventDate() }}</p>
+                <p class="text-lg font-bold text-primea-blue font-primea">{{ getEventDate() }}</p>
               </div>
             </div>
           </div>
