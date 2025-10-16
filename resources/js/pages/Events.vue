@@ -354,13 +354,16 @@ export default {
           const titleMatch = event.title?.toLowerCase().includes(query)
           // Recherche dans la description
           const descriptionMatch = event.description?.toLowerCase().includes(query)
-          // Recherche dans le lieu
-          const venueMatch = event.venue?.toLowerCase().includes(query)
-          // Recherche dans l'organisateur
-          const organizerMatch = event.organizer?.name?.toLowerCase().includes(query) ||
-                                  event.organizer?.toLowerCase().includes(query)
+          // Recherche dans le lieu (venue peut être un objet ou une chaîne)
+          const venueMatch = (event.venue_name?.toLowerCase().includes(query)) ||
+                            (event.venue?.name?.toLowerCase().includes(query)) ||
+                            (typeof event.venue === 'string' && event.venue?.toLowerCase().includes(query))
+          // Recherche dans l'organisateur (organizer peut être un objet ou une chaîne)
+          const organizerMatch = (event.organizer?.name?.toLowerCase().includes(query)) ||
+                                 (typeof event.organizer === 'string' && event.organizer?.toLowerCase().includes(query))
           // Recherche dans la catégorie
-          const categoryMatch = event.category?.name?.toLowerCase().includes(query)
+          const categoryMatch = event.category?.name?.toLowerCase().includes(query) ||
+                               event.category_name?.toLowerCase().includes(query)
 
           return titleMatch || descriptionMatch || venueMatch || organizerMatch || categoryMatch
         })

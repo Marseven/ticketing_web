@@ -103,7 +103,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-xHrF0LKe.js",
+    "file": "assets/js/app-DhxS68Um.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -198,7 +198,7 @@
     ]
   },
   "resources/js/pages/Checkout.vue": {
-    "file": "assets/js/Checkout-D4Qs1RXq.js",
+    "file": "assets/js/Checkout-BW9iMqpE.js",
     "name": "Checkout",
     "src": "resources/js/pages/Checkout.vue",
     "isDynamicEntry": true,
@@ -230,7 +230,7 @@
     ]
   },
   "resources/js/pages/EventDetail.vue": {
-    "file": "assets/js/EventDetail-BP_J21qr.js",
+    "file": "assets/js/EventDetail-IHKYtVaf.js",
     "name": "EventDetail",
     "src": "resources/js/pages/EventDetail.vue",
     "isDynamicEntry": true,
@@ -247,7 +247,7 @@
     ]
   },
   "resources/js/pages/Events.vue": {
-    "file": "assets/js/Events-D7leNpb4.js",
+    "file": "assets/js/Events-BHLe6n0F.js",
     "name": "Events",
     "src": "resources/js/pages/Events.vue",
     "isDynamicEntry": true,
@@ -259,7 +259,7 @@
       "_pinia-vendor-C7xpF7iQ.js"
     ],
     "css": [
-      "assets/css/Events-DEYnWix2.css",
+      "assets/css/Events-Bsdf4vY3.css",
       "assets/css/app-Co1L2rV7.css"
     ]
   },
