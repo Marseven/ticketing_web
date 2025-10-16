@@ -368,14 +368,15 @@ export default {
             title: event.title,
             image: event.image,
             image_url: event.image_url,
-            image_file: event.image_file
+            image_file: event.image_file,
+            revenue_from_api: event.revenue
           })
           return {
             ...event,
-            tickets_sold: event.tickets?.filter(t => ['issued', 'used'].includes(t.status)).length || 0,
-            total_tickets: event.ticket_types?.reduce((sum, tt) => sum + tt.capacity, 0) || 0,
-            revenue: event.tickets?.filter(t => ['issued', 'used'].includes(t.status))
-              .reduce((sum, t) => sum + (t.ticket_type?.price || 0), 0) || 0,
+            tickets_sold: event.tickets_sold_count || event.tickets?.filter(t => ['issued', 'used'].includes(t.status)).length || 0,
+            total_tickets: event.total_capacity || event.ticket_types?.reduce((sum, tt) => sum + tt.capacity, 0) || 0,
+            // Utiliser le revenu calculé par l'API (montant NET pour l'organisateur)
+            revenue: event.revenue || 0,
             venue: event.venue?.name || '',
             date: event.event_date || event.schedules?.[0]?.starts_at,
             isFavorite: false

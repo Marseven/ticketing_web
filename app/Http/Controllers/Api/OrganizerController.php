@@ -547,6 +547,7 @@ class OrganizerController extends Controller
         return response()->json([
             'data' => [
                 'total_events' => $totalEvents,
+                'active_events' => $publishedEvents, // Renommé pour correspondre au frontend
                 'published_events' => $publishedEvents,
                 'draft_events' => $draftEvents,
                 'tickets_sold' => $ticketsSold,
