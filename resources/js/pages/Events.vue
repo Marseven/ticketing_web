@@ -179,10 +179,30 @@
           </div>
         </div>
 
+        <!-- Filtres de catégorie Mobile -->
+        <div class="mb-6">
+          <h3 class="text-white text-sm font-bold mb-3">Catégories</h3>
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="category in categories"
+              :key="category.id"
+              @click="filterByCategory(category.id)"
+              :class="[
+                'px-4 py-2 rounded-primea text-sm font-bold transition-all duration-200',
+                selectedCategory === category.id
+                  ? 'bg-primea-yellow text-primea-blue'
+                  : 'bg-white/10 text-white border border-white/30 hover:bg-primea-yellow hover:text-primea-blue'
+              ]"
+            >
+              {{ category.name }}
+            </button>
+          </div>
+        </div>
+
         <!-- Liste des événements Mobile selon maquette -->
         <div class="space-y-4 mb-8">
-          <div 
-            v-for="event in events" 
+          <div
+            v-for="event in filteredEvents" 
             :key="event.id"
             @click="goToEvent(event)"
             class="bg-white rounded-primea-lg shadow-primea overflow-hidden cursor-pointer hover:shadow-primea-lg transition-all duration-300 transform hover:scale-105"
@@ -238,7 +258,7 @@
         </div>
 
         <!-- Message si aucun événement ou erreur Mobile -->
-        <div v-if="events.length === 0 && !loading" class="text-center py-12">
+        <div v-if="filteredEvents.length === 0 && !loading" class="text-center py-12">
           <div v-if="eventsStore.error" class="text-red-400 mb-4">
             <div class="text-lg font-semibold mb-2">⚠️ Erreur de connexion</div>
             <div class="text-sm">{{ eventsStore.error }}</div>
