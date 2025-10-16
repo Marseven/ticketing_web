@@ -365,7 +365,10 @@ const loadRecentPayouts = async () => {
       recentPayouts.value = response.data.data.payouts?.data || response.data.data.payouts || []
       console.log('Recent payouts loaded:', recentPayouts.value)
       stats.pending_payouts = recentPayouts.value.filter(p => ['pending', 'processing'].includes(p.status)).length
-      stats.total_payouts = recentPayouts.value.reduce((sum, p) => sum + (p.amount || 0), 0)
+      // Ne compter que les payouts réussis
+      stats.total_payouts = recentPayouts.value
+        .filter(p => p.status === 'success')
+        .reduce((sum, p) => sum + (p.amount || 0), 0)
       console.log('Stats calculated:', stats)
     } else {
       console.error('Payment History API Error:', response.data.message)
