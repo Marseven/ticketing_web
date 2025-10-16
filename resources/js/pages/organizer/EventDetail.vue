@@ -367,10 +367,19 @@ const loadEvent = async () => {
     
     // Déterminer si c'est un ID numérique ou un slug
     let eventData;
+    let recentOrdersData = [];
+
     if (/^\d+$/.test(identifier)) {
       // C'est un ID numérique
       const response = await organizerService.getEvent(identifier);
-      eventData = response.data.data;
+      // La structure de réponse a changé: {event: ..., recent_orders: ...}
+      if (response.data.data.event) {
+        eventData = response.data.data.event;
+        recentOrdersData = response.data.data.recent_orders || [];
+      } else {
+        // Fallback si l'API retourne l'ancienne structure
+        eventData = response.data.data;
+      }
     } else {
       // C'est un slug, on doit chercher par slug
       // Pour l'instant, on va essayer de récupérer tous les événements et chercher par slug
@@ -378,7 +387,7 @@ const loadEvent = async () => {
         const eventsResponse = await organizerService.getEvents();
         const events = eventsResponse.data.data.events.data || eventsResponse.data.data.events;
         eventData = events.find(e => e.slug === identifier);
-        
+
         if (!eventData) {
           throw new Error(`Événement avec le slug "${identifier}" non trouvé`);
         }
@@ -418,41 +427,8 @@ const loadEvent = async () => {
       }));
     }
     
-    // Charger les achats récents depuis les vraies données
-    if (eventData.tickets && eventData.tickets.length > 0) {
-      // Grouper les tickets par commande (order_id)
-      const orderGroups = {};
-
-      eventData.tickets.forEach(ticket => {
-        if (ticket.order_id && ['issued', 'used'].includes(ticket.status)) {
-          if (!orderGroups[ticket.order_id]) {
-            orderGroups[ticket.order_id] = {
-              id: ticket.order_id,
-              tickets: [],
-              customer_name: ticket.order?.buyer?.name || ticket.order?.guest_name || 'Client',
-              created_at: ticket.order?.created_at || ticket.created_at
-            };
-          }
-          orderGroups[ticket.order_id].tickets.push(ticket);
-        }
-      });
-
-      // Convertir en tableau et calculer les montants
-      recentOrders.value = Object.values(orderGroups)
-        .map(order => ({
-          id: order.id,
-          customer_name: order.customer_name,
-          ticket_quantity: order.tickets.length,
-          total_amount: order.tickets.reduce((sum, ticket) =>
-            sum + (ticket.ticket_type?.price || 0), 0
-          ),
-          created_at: order.created_at
-        }))
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-        .slice(0, 10); // Garder les 10 plus récents
-    } else {
-      recentOrders.value = [];
-    }
+    // Utiliser les achats récents retournés directement par l'API
+    recentOrders.value = recentOrdersData;
     
   } catch (err) {
     console.error('Erreur lors du chargement de l\'événement:', err);

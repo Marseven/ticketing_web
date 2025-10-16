@@ -1388,9 +1388,32 @@ class OrganizerController extends Controller
             $ticketType->remaining_quantity;
         });
 
+        // Charger les achats récents (10 dernières commandes complétées)
+        $recentOrders = \App\Models\Order::where('organizer_id', $event->organizer_id)
+            ->whereHas('tickets', function($query) use ($event) {
+                $query->where('event_id', $event->id);
+            })
+            ->with('buyer')
+            ->whereIn('status', ['completed', 'paid'])
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function($order) {
+                return [
+                    'id' => $order->id,
+                    'customer_name' => $order->buyer ? $order->buyer->name : $order->guest_name,
+                    'ticket_quantity' => $order->tickets->count(),
+                    'total_amount' => $order->total_amount,
+                    'created_at' => $order->created_at->toIso8601String()
+                ];
+            });
+
         return response()->json([
             'success' => true,
-            'data' => $event
+            'data' => [
+                'event' => $event,
+                'recent_orders' => $recentOrders
+            ]
         ]);
     }
 }
