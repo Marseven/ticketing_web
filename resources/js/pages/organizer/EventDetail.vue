@@ -391,6 +391,15 @@ const loadEvent = async () => {
         if (!eventData) {
           throw new Error(`Événement avec le slug "${identifier}" non trouvé`);
         }
+
+        // Charger les détails avec les recent_orders en utilisant l'ID trouvé
+        if (eventData.id) {
+          const detailResponse = await organizerService.getEvent(eventData.id);
+          if (detailResponse.data.data.event) {
+            eventData = detailResponse.data.data.event;
+            recentOrdersData = detailResponse.data.data.recent_orders || [];
+          }
+        }
       } catch (eventsError) {
         // Si la recherche par slug échoue, essayons directement avec l'ID si c'est un slug qui ressemble à un ID
         throw new Error(`Événement avec le slug "${identifier}" non trouvé`);
