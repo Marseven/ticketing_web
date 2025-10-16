@@ -302,6 +302,29 @@ Route::prefix('v1')->group(function () {
             Route::delete('{report}', [App\Http\Controllers\Admin\ReportController::class, 'destroy']);
             Route::delete('/', [App\Http\Controllers\Admin\ReportController::class, 'clear']);
         });
+
+        // Analytics avancées
+        Route::prefix('analytics')->group(function () {
+            // Dashboard analytics complet
+            Route::get('dashboard', [App\Http\Controllers\Admin\AnalyticsController::class, 'dashboard']);
+
+            // KPIs
+            Route::get('kpis', [App\Http\Controllers\Admin\AnalyticsController::class, 'kpis']);
+
+            // Graphiques
+            Route::get('revenue-chart', [App\Http\Controllers\Admin\AnalyticsController::class, 'revenueChart']);
+            Route::get('sales-by-category', [App\Http\Controllers\Admin\AnalyticsController::class, 'salesByCategory']);
+            Route::get('conversion-funnel', [App\Http\Controllers\Admin\AnalyticsController::class, 'conversionFunnel']);
+            Route::get('top-events', [App\Http\Controllers\Admin\AnalyticsController::class, 'topEvents']);
+
+            // Prédictions
+            Route::get('predictions', [App\Http\Controllers\Admin\AnalyticsController::class, 'predictions']);
+
+            // Exports Excel
+            Route::get('export/sales', [App\Http\Controllers\Admin\AnalyticsController::class, 'exportSales']);
+            Route::get('export/events', [App\Http\Controllers\Admin\AnalyticsController::class, 'exportEvents']);
+            Route::get('export/financial', [App\Http\Controllers\Admin\AnalyticsController::class, 'exportFinancial']);
+        });
     });
 });
 
