@@ -255,9 +255,12 @@ class OrganizerController extends Controller
 
         try {
             $payoutService = app(\App\Services\PayoutService::class);
-            
+
+            // Récupérer l'objet Organizer complet
+            $organizer = \App\Models\Organizer::findOrFail($balance->organizer_id);
+
             $result = $payoutService->createManualPayout(
-                $balance->organizer_id,
+                $organizer,
                 $request->gateway,
                 $request->amount,
                 $request->phone_number
