@@ -209,6 +209,19 @@
             </svg>
             Rapports
           </router-link>
+
+          <!-- Analytics -->
+          <router-link to="/admin/analytics"
+                       class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-colors duration-200"
+                       :class="getMenuItemClass('/admin/analytics')"
+                       :style="getMenuItemStyle('/admin/analytics')"
+                       @mouseover="handleMenuHover($event, '/admin/analytics')"
+                       @mouseleave="handleMenuLeave($event, '/admin/analytics')">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+            </svg>
+            Analytics
+          </router-link>
         </div>
       </nav>
     </div>
@@ -447,6 +460,7 @@ export default {
         '/admin/categories': 'Gestion des Catégories',
         '/admin/venues': 'Gestion des Lieux',
         '/admin/reports': 'Rapports et Analyses',
+        '/admin/analytics': 'Analytics Avancées',
         '/admin/profile': 'Mon Profil',
         '/admin/settings': 'Paramètres'
       }
@@ -509,6 +523,9 @@ export default {
       }
       if (path.startsWith('/admin/reports')) {
         crumbs.push({ name: 'Rapports', to: '/admin/reports' })
+      }
+      if (path.startsWith('/admin/analytics')) {
+        crumbs.push({ name: 'Analytics', to: '/admin/analytics' })
       }
 
       return crumbs

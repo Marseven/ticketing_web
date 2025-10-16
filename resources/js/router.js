@@ -60,6 +60,7 @@ const Admins = () => import(/* webpackChunkName: "admin-users" */ './pages/admin
 const Clients = () => import(/* webpackChunkName: "admin-users" */ './pages/admin/Clients.vue');
 const OrganizersUsers = () => import(/* webpackChunkName: "admin-users" */ './pages/admin/OrganizersUsers.vue');
 const TrashedUsers = () => import(/* webpackChunkName: "admin-users" */ './pages/admin/TrashedUsers.vue');
+const Analytics = () => import(/* webpackChunkName: "admin-analytics" */ './pages/admin/Analytics.vue');
 
 // Scanner
 const ScannerApp = () => import('./pages/scanner/ScannerApp.vue');
@@ -139,6 +140,7 @@ const routes = [
             { path: 'categories', component: CategoryManagement, name: 'admin-categories' },
             { path: 'venues', component: VenueManagement, name: 'admin-venues' },
             { path: 'reports', component: AdminReports, name: 'admin-reports' },
+            { path: 'analytics', component: Analytics, name: 'admin-analytics' },
             { path: 'settings', component: AdminSettings, name: 'admin-settings' },
             { path: 'profile', component: AdminProfile, name: 'admin-profile' },
         ]

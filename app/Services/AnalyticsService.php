@@ -210,9 +210,7 @@ class AnalyticsService
             $labels[] = $futureDate->format('d/m');
         }
 
-        // Calculer l'intervalle de confiance (simplif
-
-ié)
+        // Calculer l'intervalle de confiance (simplifié)
         $stdDev = $this->standardDeviation($y);
         $confidenceLower = array_map(fn($v) => max(0, $v - $stdDev), $predictions);
         $confidenceUpper = array_map(fn($v) => $v + $stdDev, $predictions);
