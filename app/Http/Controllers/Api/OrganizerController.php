@@ -7,9 +7,14 @@ use App\Models\Organizer;
 use App\Models\Event;
 use App\Models\Ticket;
 use App\Models\Checkin;
+use App\Models\EventRecurrenceRule;
+use App\Models\TicketPrice;
+use App\Models\EventSchedule;
+use App\Services\EventRecurrenceService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 /**
  * @OA\Tag(
@@ -1429,6 +1434,355 @@ class OrganizerController extends Controller
             'data' => [
                 'event' => $event,
                 'recent_orders' => $recentOrders
+            ]
+        ]);
+    }
+
+    /**
+     * Preview recurring schedules without creating them
+     */
+    public function previewRecurrence(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user->is_organizer) {
+            return response()->json([
+                'message' => 'Accès refusé.',
+            ], 403);
+        }
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'frequency' => 'required|in:daily,weekly,monthly,yearly',
+            'interval' => 'required|integer|min:1',
+            'by_day' => 'nullable|string',
+            'by_month_day' => 'nullable|string',
+            'by_month' => 'nullable|string',
+            'count' => 'nullable|integer|min:1',
+            'until' => 'nullable|date',
+            'start_time' => 'required|date',
+            'end_time' => 'required|date|after:start_time',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // Créer une règle temporaire (non sauvegardée)
+            $rule = new EventRecurrenceRule([
+                'frequency' => $request->frequency,
+                'interval' => $request->interval,
+                'by_day' => $request->by_day,
+                'by_month_day' => $request->by_month_day,
+                'by_month' => $request->by_month,
+                'count' => $request->count,
+                'until' => $request->until,
+            ]);
+
+            $service = app(EventRecurrenceService::class);
+            $preview = $service->previewSchedules(
+                $rule,
+                Carbon::parse($request->start_time),
+                Carbon::parse($request->end_time),
+                20 // Max 20 previews
+            );
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'dates' => $preview,
+                    'count' => count($preview)
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Erreur prévisualisation récurrence', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la prévisualisation'
+            ], 500);
+        }
+    }
+
+    /**
+     * Create or update event recurrence rule
+     */
+    public function manageRecurrence(Request $request, $eventId): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user->is_organizer) {
+            return response()->json([
+                'message' => 'Accès refusé.',
+            ], 403);
+        }
+
+        $organizerIds = $user->organizers->pluck('id');
+        $event = Event::whereIn('organizer_id', $organizerIds)->findOrFail($eventId);
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'enabled' => 'required|boolean',
+            'frequency' => 'required_if:enabled,true|in:daily,weekly,monthly,yearly',
+            'interval' => 'required_if:enabled,true|integer|min:1',
+            'by_day' => 'nullable|string',
+            'by_month_day' => 'nullable|string',
+            'by_month' => 'nullable|string',
+            'count' => 'nullable|integer|min:1',
+            'until' => 'nullable|date',
+            'exceptions' => 'nullable|array',
+            'base_schedule' => 'required_if:enabled,true|array',
+            'base_schedule.starts_at' => 'required_if:enabled,true|date',
+            'base_schedule.ends_at' => 'required_if:enabled,true|date',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            if (!$request->enabled) {
+                // Supprimer les règles de récurrence
+                $event->recurrenceRule()->delete();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Récurrence désactivée'
+                ]);
+            }
+
+            // Créer ou mettre à jour la règle
+            $rule = $event->recurrenceRule()->first();
+
+            if (!$rule) {
+                $rule = new EventRecurrenceRule(['event_id' => $event->id]);
+            }
+
+            $rule->fill([
+                'frequency' => $request->frequency,
+                'interval' => $request->interval,
+                'by_day' => $request->by_day,
+                'by_month_day' => $request->by_month_day,
+                'by_month' => $request->by_month,
+                'count' => $request->count,
+                'until' => $request->until,
+                'exceptions' => $request->exceptions,
+            ]);
+            $rule->save();
+
+            // Générer les schedules
+            $service = app(EventRecurrenceService::class);
+            $schedules = $service->generateSchedules(
+                $rule,
+                Carbon::parse($request->base_schedule['starts_at']),
+                Carbon::parse($request->base_schedule['ends_at']),
+                $event->venue_id
+            );
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => count($schedules) . ' occurrences créées',
+                'data' => [
+                    'rule' => $rule,
+                    'schedules_created' => count($schedules)
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Erreur gestion récurrence', [
+                'event_id' => $eventId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la gestion de la récurrence'
+            ], 500);
+        }
+    }
+
+    /**
+     * Manage variable pricing for ticket types
+     */
+    public function manageVariablePricing(Request $request, $eventId): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user->is_organizer) {
+            return response()->json([
+                'message' => 'Accès refusé.',
+            ], 403);
+        }
+
+        $organizerIds = $user->organizers->pluck('id');
+        $event = Event::whereIn('organizer_id', $organizerIds)->findOrFail($eventId);
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'enabled' => 'required|boolean',
+            'prices' => 'required_if:enabled,true|array',
+            'prices.*.ticket_type_id' => 'required|exists:ticket_types,id',
+            'prices.*.schedule_id' => 'nullable|exists:event_schedules,id',
+            'prices.*.venue_id' => 'nullable|exists:venues,id',
+            'prices.*.price' => 'required|numeric|min:0',
+            'prices.*.valid_from' => 'nullable|date',
+            'prices.*.valid_until' => 'nullable|date',
+            'prices.*.priority' => 'nullable|integer',
+            'prices.*.description' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Activer/désactiver la tarification variable
+            $event->use_variable_pricing = $request->enabled;
+            $event->save();
+
+            if (!$request->enabled) {
+                // Supprimer tous les prix variables
+                TicketPrice::whereHas('ticketType', function($q) use ($event) {
+                    $q->where('event_id', $event->id);
+                })->delete();
+
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Tarification variable désactivée'
+                ]);
+            }
+
+            // Supprimer les anciens prix
+            TicketPrice::whereHas('ticketType', function($q) use ($event) {
+                $q->where('event_id', $event->id);
+            })->delete();
+
+            // Créer les nouveaux prix
+            foreach ($request->prices as $priceData) {
+                TicketPrice::create([
+                    'ticket_type_id' => $priceData['ticket_type_id'],
+                    'schedule_id' => $priceData['schedule_id'] ?? null,
+                    'venue_id' => $priceData['venue_id'] ?? null,
+                    'price' => $priceData['price'],
+                    'valid_from' => $priceData['valid_from'] ?? null,
+                    'valid_until' => $priceData['valid_until'] ?? null,
+                    'priority' => $priceData['priority'] ?? 0,
+                    'description' => $priceData['description'] ?? null,
+                    'status' => 'active',
+                ]);
+            }
+
+            DB::commit();
+
+            $event->load('ticketTypes.ticketPrices');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tarification variable configurée',
+                'data' => [
+                    'event' => $event,
+                    'prices_count' => count($request->prices)
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Erreur gestion tarification variable', [
+                'event_id' => $eventId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la gestion de la tarification'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get event stats (for detail page)
+     */
+    public function getEventStats(Request $request, $eventId): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user->is_organizer) {
+            return response()->json([
+                'message' => 'Accès refusé.',
+            ], 403);
+        }
+
+        $organizerIds = $user->organizers->pluck('id');
+        $event = Event::whereIn('organizer_id', $organizerIds)
+            ->with(['ticketTypes', 'schedules', 'recurrenceRule'])
+            ->findOrFail($eventId);
+
+        // Stats de vente
+        $ticketsSold = Ticket::where('event_id', $event->id)
+            ->whereIn('status', ['issued', 'used'])
+            ->count();
+
+        $ticketsUsed = Ticket::where('event_id', $event->id)
+            ->where('status', 'used')
+            ->count();
+
+        $revenue = \App\Models\Order::where('organizer_id', $event->organizer_id)
+            ->whereHas('tickets', function($query) use ($event) {
+                $query->where('event_id', $event->id);
+            })
+            ->where('status', 'paid')
+            ->sum('subtotal_amount');
+
+        // Stats par schedule si récurrent
+        $scheduleStats = [];
+        if ($event->isRecurring()) {
+            $scheduleStats = $event->schedules->map(function($schedule) {
+                return [
+                    'schedule_id' => $schedule->id,
+                    'starts_at' => $schedule->starts_at,
+                    'tickets_sold' => Ticket::where('schedule_id', $schedule->id)
+                        ->whereIn('status', ['issued', 'used'])
+                        ->count(),
+                ];
+            });
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'stats' => [
+                    'tickets_sold' => $ticketsSold,
+                    'tickets_used' => $ticketsUsed,
+                    'total_capacity' => $event->ticketTypes->sum('available_quantity'),
+                    'revenue' => round($revenue, 2),
+                    'usage_rate' => $ticketsSold > 0 ? round(($ticketsUsed / $ticketsSold) * 100, 1) : 0,
+                ],
+                'schedule_stats' => $scheduleStats,
+                'is_recurring' => $event->isRecurring(),
+                'recurrence_rule' => $event->recurrenceRule()->first(),
+                'use_variable_pricing' => $event->use_variable_pricing,
             ]
         ]);
     }

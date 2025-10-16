@@ -23,6 +23,7 @@ class Event extends Model
         'image_url',
         'image_file',
         'status',
+        'use_variable_pricing',
         'published_at',
         'created_by',
         'updated_by',
@@ -30,6 +31,7 @@ class Event extends Model
 
     protected $casts = [
         'published_at' => 'datetime',
+        'use_variable_pricing' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -100,6 +102,22 @@ class Event extends Model
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * Get the recurrence rule for this event.
+     */
+    public function recurrenceRule(): HasMany
+    {
+        return $this->hasMany(EventRecurrenceRule::class, 'event_id');
+    }
+
+    /**
+     * Check if this event has recurrence rules.
+     */
+    public function isRecurring(): bool
+    {
+        return $this->recurrenceRule()->exists();
     }
 
     /**

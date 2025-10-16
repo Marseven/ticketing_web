@@ -165,6 +165,10 @@ Route::prefix('v1')->group(function () {
         Route::get('events/{id}', [App\Http\Controllers\Api\OrganizerController::class, 'getEvent']);
         Route::get('events/{id}/stats', [App\Http\Controllers\Api\OrganizerController::class, 'getEventStats']);
         Route::get('events/{eventId}/sales', [App\Http\Controllers\Api\OrganizerController::class, 'eventSales']);
+        // Récurrence et prix variables
+        Route::post('events/preview-recurrence', [App\Http\Controllers\Api\OrganizerController::class, 'previewRecurrence']);
+        Route::post('events/{eventId}/recurrence', [App\Http\Controllers\Api\OrganizerController::class, 'manageRecurrence']);
+        Route::post('events/{eventId}/variable-pricing', [App\Http\Controllers\Api\OrganizerController::class, 'manageVariablePricing']);
         Route::get('payments', [App\Http\Controllers\Api\OrganizerController::class, 'payments']);
         Route::get('balance', [App\Http\Controllers\Api\OrganizerController::class, 'getBalance']);
         Route::get('/', [App\Http\Controllers\Api\OrganizerController::class, 'index']);
@@ -256,6 +260,10 @@ Route::prefix('v1')->group(function () {
             Route::get('{event}', [App\Http\Controllers\Admin\AdminController::class, 'showEvent']);
             Route::put('{event}', [App\Http\Controllers\Admin\AdminController::class, 'updateEvent']);
             Route::post('{event}/toggle-status', [App\Http\Controllers\Admin\AdminController::class, 'toggleEventStatus']);
+            // Récurrence et prix variables (admin)
+            Route::post('preview-recurrence', [App\Http\Controllers\Api\OrganizerController::class, 'previewRecurrence']);
+            Route::post('{eventId}/recurrence', [App\Http\Controllers\Api\OrganizerController::class, 'manageRecurrence']);
+            Route::post('{eventId}/variable-pricing', [App\Http\Controllers\Api\OrganizerController::class, 'manageVariablePricing']);
         });
         
         // Gestion des payouts

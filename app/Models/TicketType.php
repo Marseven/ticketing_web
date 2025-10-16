@@ -67,6 +67,80 @@ class TicketType extends Model
     }
 
     /**
+     * Get ticket prices for this ticket type.
+     */
+    public function ticketPrices(): HasMany
+    {
+        return $this->hasMany(TicketPrice::class, 'ticket_type_id');
+    }
+
+    /**
+     * Get the price for a specific schedule and/or venue.
+     * Returns the most specific price match based on priority.
+     *
+     * @param int|null $scheduleId
+     * @param int|null $venueId
+     * @param string|null $date Date for validity check
+     * @return float
+     */
+    public function getPriceFor(?int $scheduleId = null, ?int $venueId = null, ?string $date = null): float
+    {
+        // Si l'événement n'utilise pas la tarification variable, retourner le prix de base
+        if (!$this->event->use_variable_pricing) {
+            return $this->price;
+        }
+
+        // Rechercher le prix le plus spécifique
+        $prices = $this->ticketPrices()
+            ->active()
+            ->validAt($date)
+            ->where(function ($query) use ($scheduleId, $venueId) {
+                // Prix exact (schedule + venue)
+                if ($scheduleId && $venueId) {
+                    $query->orWhere(function ($q) use ($scheduleId, $venueId) {
+                        $q->where('schedule_id', $scheduleId)
+                          ->where('venue_id', $venueId);
+                    });
+                }
+
+                // Prix par schedule
+                if ($scheduleId) {
+                    $query->orWhere(function ($q) use ($scheduleId) {
+                        $q->where('schedule_id', $scheduleId)
+                          ->whereNull('venue_id');
+                    });
+                }
+
+                // Prix par venue
+                if ($venueId) {
+                    $query->orWhere(function ($q) use ($venueId) {
+                        $q->where('venue_id', $venueId)
+                          ->whereNull('schedule_id');
+                    });
+                }
+
+                // Prix par défaut (ni schedule ni venue)
+                $query->orWhere(function ($q) {
+                    $q->whereNull('schedule_id')
+                      ->whereNull('venue_id');
+                });
+            })
+            ->get();
+
+        // Si aucun prix trouvé, retourner le prix de base
+        if ($prices->isEmpty()) {
+            return $this->price;
+        }
+
+        // Trouver le prix avec la plus haute spécificité
+        $bestPrice = $prices->sortByDesc(function ($price) {
+            return $price->specificity_level;
+        })->first();
+
+        return $bestPrice->price;
+    }
+
+    /**
      * Scope a query to only include active ticket types.
      */
     public function scopeActive($query)

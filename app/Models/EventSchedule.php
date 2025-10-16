@@ -12,6 +12,7 @@ class EventSchedule extends Model
 
     protected $fillable = [
         'event_id',
+        'venue_id',
         'starts_at',
         'ends_at',
         'door_time',
@@ -32,6 +33,22 @@ class EventSchedule extends Model
     public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class, 'event_id');
+    }
+
+    /**
+     * Get the venue for this schedule (if multi-venue event).
+     */
+    public function venue(): BelongsTo
+    {
+        return $this->belongsTo(Venue::class, 'venue_id');
+    }
+
+    /**
+     * Get ticket prices for this schedule.
+     */
+    public function ticketPrices()
+    {
+        return $this->hasMany(TicketPrice::class, 'schedule_id');
     }
 
     /**

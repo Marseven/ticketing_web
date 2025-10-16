@@ -50,7 +50,22 @@ class PayoutService
             // 2. Vérifier si un payout automatique doit être déclenché
             // Cette étape est indépendante - si elle échoue, le solde reste crédité
             if ($organizerBalance->shouldTriggerAutoPayout()) {
+                Log::info('🔔 Payout automatique déclenché - seuil atteint', [
+                    'organizer_id' => $organizer->id,
+                    'balance' => $organizerBalance->fresh()->balance,
+                    'threshold' => $organizerBalance->auto_payout_threshold,
+                    'gateway' => $payment->gateway
+                ]);
+
                 $this->triggerAutomaticPayout($organizerBalance);
+            } else {
+                Log::info('ℹ️ Payout automatique non déclenché', [
+                    'organizer_id' => $organizer->id,
+                    'balance' => $organizerBalance->fresh()->balance,
+                    'threshold' => $organizerBalance->auto_payout_threshold,
+                    'auto_payout_enabled' => $organizerBalance->auto_payout_enabled,
+                    'reason' => !$organizerBalance->auto_payout_enabled ? 'Auto-payout désactivé' : 'Seuil non atteint'
+                ]);
             }
 
         } catch (\Exception $e) {
@@ -251,6 +266,19 @@ class PayoutService
             }
 
             // 3. Créer le payout via SHAP
+            Log::info('🚀 SHAP API Call - Creating Payout via ShapPayoutService', [
+                'payout_id' => $payout->id,
+                'organizer_id' => $organizer->id,
+                'organizer_name' => $organizer->name,
+                'payment_system_name' => $payout->payment_system_name,
+                'payee_msisdn' => $payout->payee_msisdn,
+                'amount' => $payout->amount,
+                'external_reference' => $payout->external_reference,
+                'payout_type' => $payout->payout_type,
+                'gateway' => $gateway,
+                'is_automatic' => $isAutomatic
+            ]);
+
             $shapResult = $this->shapPayoutService->createPayout(
                 $payout->payment_system_name,
                 $payout->payee_msisdn,
@@ -258,6 +286,17 @@ class PayoutService
                 $payout->external_reference,
                 $payout->payout_type
             );
+
+            Log::info('📥 SHAP API Response - Payout Creation Result', [
+                'payout_id' => $payout->id,
+                'organizer_id' => $organizer->id,
+                'success' => $shapResult['success'] ?? false,
+                'is_synchronous' => $shapResult['is_synchronous'] ?? null,
+                'requires_status_check' => $shapResult['requires_status_check'] ?? false,
+                'shap_status' => $shapResult['shap_status'] ?? null,
+                'shap_payout_id' => $shapResult['data']['payout_id'] ?? null,
+                'full_response' => $shapResult
+            ]);
 
             if ($shapResult['success']) {
                 if ($shapResult['is_synchronous']) {
@@ -313,21 +352,41 @@ class PayoutService
     public function handlePayoutCallback(array $callbackData): void
     {
         try {
+            Log::info('📨 SHAP Webhook - Payout Callback Received', [
+                'external_reference' => $callbackData['external_reference'] ?? null,
+                'status' => $callbackData['status'] ?? null,
+                'full_callback_data' => $callbackData,
+                'timestamp' => now()->toIso8601String()
+            ]);
+
             $payout = Payout::where('external_reference', $callbackData['external_reference'])->first();
 
             if (!$payout) {
-                Log::warning('Payout non trouvé pour callback', $callbackData);
+                Log::warning('⚠️ SHAP Webhook - Payout Not Found', [
+                    'external_reference' => $callbackData['external_reference'] ?? null,
+                    'callback_data' => $callbackData
+                ]);
                 return;
             }
 
-            Log::info('Callback payout reçu', [
+            Log::info('✅ SHAP Webhook - Processing Payout Callback', [
                 'payout_id' => $payout->id,
-                'status' => $callbackData['status'],
+                'organizer_id' => $payout->organizer_id,
+                'current_status' => $payout->status,
+                'callback_status' => $callbackData['status'] ?? null,
+                'amount' => $payout->amount,
                 'callback_data' => $callbackData
             ]);
 
             if ($callbackData['status'] === 'success') {
                 $payout->markAsSuccess($callbackData);
+
+                Log::info('✅ SHAP Webhook - Payout Marked as Success', [
+                    'payout_id' => $payout->id,
+                    'organizer_id' => $payout->organizer_id,
+                    'amount' => $payout->amount,
+                    'final_status' => 'success'
+                ]);
             } else {
                 // Remettre le montant dans le solde si le payout échoue
                 $organizerBalance = OrganizerBalance::where('organizer_id', $payout->organizer_id)
@@ -335,16 +394,37 @@ class PayoutService
                     ->first();
 
                 if ($organizerBalance) {
+                    $oldBalance = $organizerBalance->balance;
                     $organizerBalance->addBalance($payout->amount);
+
+                    Log::info('💰 Payout Failed - Balance Refunded to Organizer', [
+                        'payout_id' => $payout->id,
+                        'organizer_id' => $payout->organizer_id,
+                        'refunded_amount' => $payout->amount,
+                        'old_balance' => $oldBalance,
+                        'new_balance' => $organizerBalance->fresh()->balance
+                    ]);
                 }
 
                 $payout->markAsFailed('Payout échoué côté SHAP', $callbackData);
+
+                Log::error('❌ SHAP Webhook - Payout Marked as Failed', [
+                    'payout_id' => $payout->id,
+                    'organizer_id' => $payout->organizer_id,
+                    'amount' => $payout->amount,
+                    'callback_status' => $callbackData['status'] ?? null,
+                    'error_message' => 'Payout échoué côté SHAP',
+                    'callback_data' => $callbackData
+                ]);
             }
 
         } catch (\Exception $e) {
-            Log::error('Erreur traitement callback payout', [
+            Log::error('💥 Exception - SHAP Webhook Callback Processing Failed', [
                 'callback_data' => $callbackData,
-                'error' => $e->getMessage()
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
             ]);
         }
     }
@@ -372,12 +452,38 @@ class PayoutService
     public function checkPayoutStatus(Payout $payout): array
     {
         try {
+            Log::info('🔍 SHAP API Call - Checking Payout Status', [
+                'payout_id' => $payout->id,
+                'organizer_id' => $payout->organizer_id,
+                'external_reference' => $payout->external_reference,
+                'payee_msisdn' => $payout->payee_msisdn,
+                'current_status' => $payout->status,
+                'amount' => $payout->amount
+            ]);
+
             $statusResult = $this->shapPayoutService->checkPayoutStatus(
                 $payout->payee_msisdn,
                 $payout->external_reference
             );
 
+            Log::info('📥 SHAP API Response - Payout Status Check Result', [
+                'payout_id' => $payout->id,
+                'organizer_id' => $payout->organizer_id,
+                'success' => $statusResult['success'] ?? false,
+                'shap_status' => $statusResult['shap_status'] ?? null,
+                'normalized_status' => $statusResult['normalized_status'] ?? null,
+                'is_final' => $statusResult['is_final'] ?? false,
+                'full_response' => $statusResult
+            ]);
+
             if (!$statusResult['success']) {
+                Log::warning('⚠️ SHAP API - Payout Status Check Failed', [
+                    'payout_id' => $payout->id,
+                    'external_reference' => $payout->external_reference,
+                    'error_message' => $statusResult['message'] ?? 'Unknown error',
+                    'full_response' => $statusResult
+                ]);
+
                 return [
                     'success' => false,
                     'message' => $statusResult['message']
@@ -386,7 +492,7 @@ class PayoutService
 
             $currentStatus = $payout->status;
             $newStatus = $statusResult['normalized_status'];
-            
+
             Log::info('Vérification statut payout', [
                 'payout_id' => $payout->id,
                 'current_status' => $currentStatus,
@@ -428,11 +534,26 @@ class PayoutService
         try {
             DB::beginTransaction();
 
+            Log::info('🔄 Updating Payout Status', [
+                'payout_id' => $payout->id,
+                'organizer_id' => $payout->organizer_id,
+                'old_status' => $payout->status,
+                'new_status' => $newStatus,
+                'amount' => $payout->amount,
+                'shap_data' => $shapData
+            ]);
+
             switch ($newStatus) {
                 case 'success':
                     $payout->markAsSuccess($shapData);
+
+                    Log::info('✅ Payout Status Updated - Success', [
+                        'payout_id' => $payout->id,
+                        'organizer_id' => $payout->organizer_id,
+                        'amount' => $payout->amount
+                    ]);
                     break;
-                
+
                 case 'failed':
                     // Remettre le montant dans le solde de l'organisateur
                     $organizerBalance = OrganizerBalance::where('organizer_id', $payout->organizer_id)
@@ -440,20 +561,44 @@ class PayoutService
                         ->first();
 
                     if ($organizerBalance) {
+                        $oldBalance = $organizerBalance->balance;
                         $organizerBalance->addBalance($payout->amount);
+
+                        Log::info('💰 Balance Refunded to Organizer', [
+                            'payout_id' => $payout->id,
+                            'organizer_id' => $payout->organizer_id,
+                            'refunded_amount' => $payout->amount,
+                            'old_balance' => $oldBalance,
+                            'new_balance' => $organizerBalance->fresh()->balance
+                        ]);
                     }
 
                     $payout->markAsFailed('Payout échoué côté SHAP', $shapData);
+
+                    Log::error('❌ Payout Status Updated - Failed', [
+                        'payout_id' => $payout->id,
+                        'organizer_id' => $payout->organizer_id,
+                        'amount' => $payout->amount,
+                        'shap_data' => $shapData
+                    ]);
                     break;
-                
+
                 case 'processing':
                     $payout->markAsProcessing($shapData);
-                    break;
-                
-                default:
-                    Log::warning('Statut payout non géré', [
+
+                    Log::info('⏳ Payout Status Updated - Processing', [
                         'payout_id' => $payout->id,
-                        'status' => $newStatus
+                        'organizer_id' => $payout->organizer_id,
+                        'amount' => $payout->amount
+                    ]);
+                    break;
+
+                default:
+                    Log::warning('⚠️ Unhandled Payout Status', [
+                        'payout_id' => $payout->id,
+                        'organizer_id' => $payout->organizer_id,
+                        'status' => $newStatus,
+                        'shap_data' => $shapData
                     ]);
             }
 
@@ -461,10 +606,15 @@ class PayoutService
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Erreur mise à jour statut payout', [
+            Log::error('💥 Exception - Payout Status Update Failed', [
                 'payout_id' => $payout->id,
-                'new_status' => $newStatus,
-                'error' => $e->getMessage()
+                'organizer_id' => $payout->organizer_id,
+                'old_status' => $payout->status,
+                'attempted_new_status' => $newStatus,
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
             ]);
         }
     }
