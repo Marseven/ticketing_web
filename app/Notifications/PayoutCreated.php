@@ -4,11 +4,10 @@ namespace App\Notifications;
 
 use App\Models\Payout;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class PayoutCreated extends Notification implements ShouldQueue
+class PayoutCreated extends Notification
 {
     use Queueable;
 
