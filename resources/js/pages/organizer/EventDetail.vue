@@ -418,24 +418,38 @@ const loadEvent = async () => {
       }));
     }
     
-    // Charger les achats récents (simulation pour l'instant)
-    if (event.value.tickets_sold > 0) {
-      recentOrders.value = [
-        {
-          id: 1,
-          customer_name: 'Kofi Asante',
-          ticket_quantity: 2,
-          total_amount: event.value.ticket_types?.[0]?.price * 2 || 50000,
-          created_at: new Date(Date.now() - 86400000).toISOString() // 1 jour avant
-        },
-        {
-          id: 2,
-          customer_name: 'Aminata Traore',
-          ticket_quantity: 1,
-          total_amount: event.value.ticket_types?.[0]?.price || 25000,
-          created_at: new Date(Date.now() - 172800000).toISOString() // 2 jours avant
+    // Charger les achats récents depuis les vraies données
+    if (eventData.tickets && eventData.tickets.length > 0) {
+      // Grouper les tickets par commande (order_id)
+      const orderGroups = {};
+
+      eventData.tickets.forEach(ticket => {
+        if (ticket.order_id && ['issued', 'used'].includes(ticket.status)) {
+          if (!orderGroups[ticket.order_id]) {
+            orderGroups[ticket.order_id] = {
+              id: ticket.order_id,
+              tickets: [],
+              customer_name: ticket.order?.buyer?.name || ticket.order?.guest_name || 'Client',
+              created_at: ticket.order?.created_at || ticket.created_at
+            };
+          }
+          orderGroups[ticket.order_id].tickets.push(ticket);
         }
-      ];
+      });
+
+      // Convertir en tableau et calculer les montants
+      recentOrders.value = Object.values(orderGroups)
+        .map(order => ({
+          id: order.id,
+          customer_name: order.customer_name,
+          ticket_quantity: order.tickets.length,
+          total_amount: order.tickets.reduce((sum, ticket) =>
+            sum + (ticket.ticket_type?.price || 0), 0
+          ),
+          created_at: order.created_at
+        }))
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, 10); // Garder les 10 plus récents
     } else {
       recentOrders.value = [];
     }

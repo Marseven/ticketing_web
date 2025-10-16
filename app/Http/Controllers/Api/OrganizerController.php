@@ -1370,7 +1370,14 @@ class OrganizerController extends Controller
         $organizerIds = $user->organizers->pluck('id');
         
         $event = Event::whereIn('organizer_id', $organizerIds)
-            ->with(['venue', 'category', 'schedules', 'ticketTypes', 'tickets'])
+            ->with([
+                'venue',
+                'category',
+                'schedules',
+                'ticketTypes',
+                'tickets.order.buyer',
+                'tickets.ticketType'
+            ])
             ->findOrFail($id);
 
         // S'assurer que les ticket_types ont leurs attributs calculés
