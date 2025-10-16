@@ -118,7 +118,7 @@ class OrganizerController extends Controller
         // Calcul du revenu basé sur les commandes (subtotal_amount = net pour l'organisateur)
         $totalRevenue = DB::table('orders')
             ->whereIn('organizer_id', $organizerIds)
-            ->whereIn('status', ['completed', 'paid'])
+            ->where('status', 'paid')
             ->sum('subtotal_amount');
 
         // Statistiques de scan des 7 derniers jours
@@ -325,7 +325,7 @@ class OrganizerController extends Controller
                 ->whereHas('tickets', function($query) use ($event) {
                     $query->where('event_id', $event->id);
                 })
-                ->whereIn('status', ['completed', 'paid'])
+                ->where('status', 'paid')
                 ->sum('subtotal_amount');
 
             // Calculer la capacité totale
@@ -373,7 +373,7 @@ class OrganizerController extends Controller
             ->whereHas('tickets', function($query) use ($event) {
                 $query->where('event_id', $event->id);
             })
-            ->whereIn('status', ['completed', 'paid'])
+            ->where('status', 'paid')
             ->sum('subtotal_amount');
 
         // Ventes par type de ticket
@@ -387,7 +387,7 @@ class OrganizerController extends Controller
                 ->whereHas('tickets', function($query) use ($type) {
                     $query->where('ticket_type_id', $type->id);
                 })
-                ->whereIn('status', ['completed', 'paid'])
+                ->where('status', 'paid')
                 ->get();
 
             $revenueForType = $orders->sum('subtotal_amount');
@@ -407,7 +407,7 @@ class OrganizerController extends Controller
             ->whereHas('tickets', function($query) use ($event) {
                 $query->where('event_id', $event->id);
             })
-            ->whereIn('status', ['completed', 'paid'])
+            ->where('status', 'paid')
             ->get()
             ->groupBy(function($order) {
                 return $order->created_at->format('Y-m-d');
@@ -541,7 +541,7 @@ class OrganizerController extends Controller
         // Calcul du revenu basé sur les commandes (subtotal_amount = net pour l'organisateur)
         $totalRevenue = DB::table('orders')
             ->whereIn('organizer_id', $organizerIds)
-            ->whereIn('status', ['completed', 'paid'])
+            ->where('status', 'paid')
             ->sum('subtotal_amount');
 
         return response()->json([
@@ -585,7 +585,7 @@ class OrganizerController extends Controller
                     ->whereHas('tickets', function($query) use ($event) {
                         $query->where('event_id', $event->id);
                     })
-                    ->whereIn('status', ['completed', 'paid'])
+                    ->where('status', 'paid')
                     ->sum('subtotal_amount');
 
                 return [
@@ -1393,7 +1393,7 @@ class OrganizerController extends Controller
             ->whereHas('tickets', function($query) use ($event) {
                 $query->where('event_id', $event->id);
             })
-            ->whereIn('status', ['completed', 'paid'])
+            ->where('status', 'paid')
             ->sum('subtotal_amount');
 
         // Ajouter le revenu à l'événement
@@ -1423,7 +1423,7 @@ class OrganizerController extends Controller
                 $query->where('event_id', $event->id);
             })
             ->with('buyer', 'tickets')
-            ->whereIn('status', ['completed', 'paid'])
+            ->where('status', 'paid')
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get()

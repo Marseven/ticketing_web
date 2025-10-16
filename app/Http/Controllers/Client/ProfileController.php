@@ -32,7 +32,7 @@ class ProfileController extends Controller
                 })
                 ->count(),
             'total_spent' => $user->orders()
-                ->where('status', 'completed')
+                ->where('status', 'paid')
                 ->sum('total_amount')
         ];
 

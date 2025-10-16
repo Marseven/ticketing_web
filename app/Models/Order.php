@@ -87,11 +87,19 @@ class Order extends Model
     }
 
     /**
-     * Scope a query to only include completed orders.
+     * Scope a query to only include paid orders.
      */
     public function scopeCompleted($query)
     {
-        return $query->where('status', 'completed');
+        return $query->where('status', 'paid');
+    }
+
+    /**
+     * Scope a query to only include paid orders.
+     */
+    public function scopePaid($query)
+    {
+        return $query->where('status', 'paid');
     }
 
     /**

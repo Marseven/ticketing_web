@@ -28,7 +28,7 @@ class ClientController extends Controller
                 })
                 ->count(),
             'total_spent' => $user->orders()
-                ->where('status', 'completed')
+                ->where('status', 'paid')
                 ->sum('total_amount')
         ];
 
@@ -213,7 +213,7 @@ class ClientController extends Controller
 
         // Récupérer les commandes récentes
         $recentOrders = $user->orders()
-            ->where('status', 'completed')
+            ->where('status', 'paid')
             ->orderBy('created_at', 'desc')
             ->limit(2)
             ->get();
