@@ -1388,6 +1388,17 @@ class OrganizerController extends Controller
             $ticketType->remaining_quantity;
         });
 
+        // Calculer le revenu pour cet événement (montant NET pour l'organisateur)
+        $revenue = \App\Models\Order::where('organizer_id', $event->organizer_id)
+            ->whereHas('tickets', function($query) use ($event) {
+                $query->where('event_id', $event->id);
+            })
+            ->whereIn('status', ['completed', 'paid'])
+            ->sum('subtotal_amount');
+
+        // Ajouter le revenu à l'événement
+        $event->revenue = round($revenue, 2);
+
         // Charger les achats récents (10 dernières commandes complétées)
         // Debug: vérifier toutes les commandes pour cet événement
         $allOrders = \App\Models\Order::whereHas('tickets', function($query) use ($event) {

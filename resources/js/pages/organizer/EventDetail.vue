@@ -417,8 +417,8 @@ const loadEvent = async () => {
       venue_address: eventData.venue?.address || '',
       category_name: eventData.category?.name || 'Non spécifiée',
       tickets_sold: eventData.tickets?.filter(t => ['issued', 'used'].includes(t.status)).length || 0,
-      total_revenue: eventData.tickets?.filter(t => ['issued', 'used'].includes(t.status))
-        .reduce((sum, ticket) => sum + (ticket.ticket_type?.price || 0), 0) || 0,
+      // Utiliser le revenu calculé par l'API (montant NET pour l'organisateur)
+      total_revenue: eventData.revenue || 0,
       is_public: eventData.is_active || false,
       sales_active: eventData.is_active || false,
       // Assurer que ticket_types est accessible
