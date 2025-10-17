@@ -1,30 +1,26 @@
 <template>
   <div id="app">
-    <!-- Header global: visible sur desktop uniquement, caché sur mobile -->
-    <div v-if="showHeader" class="hidden md:block">
-      <Header />
-    </div>
+    <!-- Header global: gère automatiquement mobile (avec burger) et desktop (menu normal) -->
+    <NewHeader v-if="showHeader" />
     <main>
       <router-view />
     </main>
-    <!-- Footer global: visible sur desktop uniquement, caché sur mobile -->
-    <div v-if="showFooter" class="hidden md:block">
-      <Footer />
-    </div>
+    <!-- Footer global: gère automatiquement mobile et desktop -->
+    <NewFooter v-if="showFooter" />
   </div>
 </template>
 
 <script>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import Header from './components/layout/Header.vue'
-import Footer from './components/layout/Footer.vue'
+import NewHeader from './components/layout/NewHeader.vue'
+import NewFooter from './components/layout/NewFooter.vue'
 
 export default {
   name: 'App',
   components: {
-    Header,
-    Footer
+    NewHeader,
+    NewFooter
   },
   setup() {
     const route = useRoute()
