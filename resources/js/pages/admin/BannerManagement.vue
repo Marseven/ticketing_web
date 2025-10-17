@@ -344,6 +344,18 @@ export default {
     })
 
     // Methods
+    const getCsrfToken = () => {
+      return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+    }
+
+    const getHeaders = () => {
+      return {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': getCsrfToken()
+      }
+    }
+
     const loadBanners = async () => {
       loading.value = true
       try {
@@ -352,10 +364,7 @@ export default {
         if (filters.is_active !== '') params.append('is_active', filters.is_active)
 
         const response = await fetch(`/api/v1/admin/banners?${params}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json'
-          }
+          headers: getHeaders()
         })
 
         if (response.ok) {
@@ -418,8 +427,8 @@ export default {
         const response = await fetch('/api/v1/admin/banners', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json'
+            ...getHeaders(),
+            // Ne pas inclure Content-Type pour FormData
           },
           body: formData
         })
@@ -471,8 +480,8 @@ export default {
         const response = await fetch(`/api/v1/admin/banners/${editingBanner.value.id}`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json'
+            ...getHeaders(),
+            // Ne pas inclure Content-Type pour FormData
           },
           body: formData
         })
@@ -495,10 +504,7 @@ export default {
       try {
         const response = await fetch(`/api/v1/admin/banners/${banner.id}/toggle-active`, {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json'
-          }
+          headers: getHeaders()
         })
 
         if (response.ok) {
@@ -518,10 +524,7 @@ export default {
       try {
         const response = await fetch(`/api/v1/admin/banners/${banner.id}`, {
           method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json'
-          }
+          headers: getHeaders()
         })
 
         if (response.ok) {
