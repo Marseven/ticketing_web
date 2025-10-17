@@ -82,7 +82,7 @@
         <h3 class="text-lg font-bold text-gray-800 mb-4 text-center">Filtrer par catégorie</h3>
         <!-- Container with vertical scroll -->
         <div class="max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-950 scrollbar-track-gray-200">
-          <div class="flex flex-wrap gap-2">
+          <div class="flex flex-wrap gap-2 justify-center">
             <button
               v-for="category in categories"
               :key="category.id"
