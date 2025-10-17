@@ -81,7 +81,7 @@
                 <router-link
                   v-for="category in categories"
                   :key="category.id"
-                  :to="{ name: 'events', query: { category: category.slug } }"
+                  :to="{ name: 'events', query: { category: category.id } }"
                   @click="closeEventsDropdown"
                   class="flex items-center px-4 py-2 text-sm text-blue-950 hover:bg-blue-950/10 transition-colors duration-200"
                 >
@@ -275,7 +275,7 @@
                 <router-link
                   v-for="category in categories"
                   :key="category.id"
-                  :to="{ name: 'events', query: { category: category.slug } }"
+                  :to="{ name: 'events', query: { category: category.id } }"
                   @click="closeMenu"
                   class="block text-white/80 text-sm py-2 hover:text-yellow-500 transition-colors"
                 >

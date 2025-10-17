@@ -233,7 +233,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useEventsStore } from '../stores/events'
 import EventCard from '../components/EventCard.vue'
@@ -392,13 +392,32 @@ export default {
 
     // Lifecycle
     onMounted(() => {
-      // Récupérer le paramètre de recherche de l'URL
+      // Récupérer les paramètres de l'URL
       if (route.query.search) {
         searchQuery.value = route.query.search
       }
 
+      if (route.query.category) {
+        selectedCategory.value = route.query.category.toString()
+      }
+
       loadEvents()
       loadCategories()
+    })
+
+    // Watcher pour surveiller les changements dans l'URL
+    watch(() => route.query, (newQuery) => {
+      if (newQuery.category) {
+        selectedCategory.value = newQuery.category.toString()
+      } else {
+        selectedCategory.value = 'all'
+      }
+
+      if (newQuery.search) {
+        searchQuery.value = newQuery.search
+      } else if (!newQuery.search && searchQuery.value) {
+        searchQuery.value = ''
+      }
     })
 
     return {
