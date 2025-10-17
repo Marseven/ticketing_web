@@ -51,14 +51,14 @@
     <!-- Contenu de la carte -->
     <div class="p-6">
       <!-- Métadonnées -->
-      <div class="flex items-center gap-4 mb-3 text-sm text-gray-500">
-        <div class="flex items-center gap-1">
+      <div class="flex flex-wrap items-center gap-2 md:gap-4 mb-3 text-sm text-gray-500">
+        <div class="flex items-center gap-1 whitespace-nowrap">
           <CalendarIcon size="sm" />
-          {{ formatDate(eventDate) }}
+          <span>{{ formatDate(eventDate) }}</span>
         </div>
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-1 whitespace-nowrap">
           <ClockIcon class="w-4 h-4" />
-          {{ formatTime(eventDate) }}
+          <span>{{ formatTime(eventDate) }}</span>
         </div>
       </div>
 
