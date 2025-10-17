@@ -45,7 +45,7 @@
           <!-- CTA Button -->
           <div class="mb-6">
             <router-link
-              to="/organizer/login"
+              to="/login"
               class="inline-block bg-blue-950 text-white px-8 py-4 rounded-lg text-base font-bold hover:bg-yellow-500 hover:text-blue-950 transition-colors shadow-lg"
             >
               Créateur d'événements
