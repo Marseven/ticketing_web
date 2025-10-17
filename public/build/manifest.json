@@ -129,7 +129,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-5tpdd3AE.js",
+    "file": "assets/js/app-Bsxl8jDj.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -190,7 +190,7 @@
       "resources/js/pages/scanner/ScannerApp.vue"
     ],
     "css": [
-      "assets/css/app-dbfuI1Qu.css",
+      "assets/css/app-DD4oMrd6.css",
       "assets/css/app-ku5bO4S3.css"
     ]
   },
@@ -395,7 +395,7 @@
     ]
   },
   "resources/js/pages/auth/Register.vue": {
-    "file": "assets/js/Register-X5Na_pDN.js",
+    "file": "assets/js/Register-RCbbArrV.js",
     "name": "Register",
     "src": "resources/js/pages/auth/Register.vue",
     "isDynamicEntry": true,
@@ -406,7 +406,7 @@
       "_pinia-vendor-CdH4T1Hh.js"
     ],
     "css": [
-      "assets/css/Register-Cqv-qtLn.css"
+      "assets/css/Register-B31fXl5r.css"
     ]
   },
   "resources/js/pages/auth/ResetPassword.vue": {

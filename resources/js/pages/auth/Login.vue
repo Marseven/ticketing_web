@@ -200,7 +200,7 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../../stores/auth.js'
 import PhoneInput from '../../components/PhoneInput.vue'
@@ -227,6 +227,24 @@ export default {
     if (route.query.message) {
       success.value = route.query.message
     }
+
+    // Redirect if already authenticated
+    onMounted(() => {
+      if (authStore.isAuthenticated && authStore.user) {
+        const accessLevel = authStore.user.access_level || 'client'
+
+        switch (accessLevel) {
+          case 'admin':
+            router.push('/admin/dashboard')
+            break
+          case 'organizer':
+            router.push('/organizer/dashboard')
+            break
+          default:
+            router.push('/')
+        }
+      }
+    })
 
     const loginForm = ref({
       login: '',

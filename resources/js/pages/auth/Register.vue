@@ -167,10 +167,11 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import PhoneInput from '../../components/PhoneInput.vue'
 import { authService } from '../../services/api.js'
+import { useAuthStore } from '../../stores/auth.js'
 
 export default {
   name: 'Register',
@@ -179,6 +180,7 @@ export default {
   },
   setup() {
     const router = useRouter()
+    const authStore = useAuthStore()
     const loading = ref(false)
     const error = ref('')
 
@@ -189,6 +191,24 @@ export default {
       password: '',
       password_confirmation: '',
       terms: false
+    })
+
+    // Redirect if already authenticated
+    onMounted(() => {
+      if (authStore.isAuthenticated && authStore.user) {
+        const accessLevel = authStore.user.access_level || 'client'
+
+        switch (accessLevel) {
+          case 'admin':
+            router.push('/admin/dashboard')
+            break
+          case 'organizer':
+            router.push('/organizer/dashboard')
+            break
+          default:
+            router.push('/')
+        }
+      }
     })
 
     const register = async () => {
