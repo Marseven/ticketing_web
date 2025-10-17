@@ -384,13 +384,9 @@ export default {
       router.push(`/ticket/${ticket.code}`)
     }
 
-    const downloadTicket = async (ticket) => {
-      try {
-        // Ouvrir le PDF dans un nouvel onglet
-        window.open(`/api/v1/tickets/${ticket.code}/pdf`, '_blank')
-      } catch (err) {
-        console.error('Erreur lors du téléchargement du ticket:', err)
-      }
+    const downloadTicket = (ticket) => {
+      // Naviguer vers la page de visualisation du ticket
+      router.push(`/ticket/${ticket.code}`)
     }
 
     return {
