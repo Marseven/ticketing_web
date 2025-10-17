@@ -70,11 +70,9 @@
           </div>
           
           <!-- Avertissement -->
-          <div class="text-xs text-red-600 leading-tight mb-4">
-            <strong>*ATTENTION:*</strong><br>
-            CE TICKET EST STRICTEMENT PERSONNEL ET À USAGE<br>
-            UNIQUE. IL NE PEUT ÊTRE NI VENDU NI DONNÉ À AUTRUI<br>
-            SOUS PEINE D'ÊTRE REFUSÉ À L'ENTRÉE.
+          <div class="text-xs text-red-600 leading-tight mb-4 text-justify">
+            <strong>*ATTENTION:*</strong>
+            CE TICKET EST STRICTEMENT PERSONNEL ET À USAGE UNIQUE. IL NE PEUT ÊTRE NI VENDU NI DONNÉ À AUTRUI SOUS PEINE D'ÊTRE REFUSÉ À L'ENTRÉE.
           </div>
           
           <!-- Logo Primea -->
