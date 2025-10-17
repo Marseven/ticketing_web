@@ -1,97 +1,97 @@
 <template>
-  <div class="ticket-wrapper">
-    <!-- Vrai design de ticket avec découpe -->
-    <div class="ticket-real">
-      <!-- Section gauche avec image et infos principales -->
-      <div class="ticket-left">
-        <!-- Image de l'événement -->
-        <div class="event-image-container">
-          <img
-            :src="ticket.event.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800'"
-            :alt="ticket.event.title"
-            class="event-image"
-          />
-          <div class="image-overlay"></div>
-        </div>
+  <div class="ticket-component bg-white rounded-primea-xl overflow-hidden font-primea max-w-sm shadow-primea-lg">
+    <!-- Image de l'événement -->
+    <div class="relative">
+      <div class="relative overflow-hidden bg-primea-gradient h-40">
+        <img
+          :src="ticket.event.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800'"
+          :alt="ticket.event.title"
+          class="w-full h-full object-cover"
+        />
+        <div class="absolute inset-0 bg-black/30"></div>
+      </div>
+    </div>
 
-        <!-- Info principale -->
-        <div class="ticket-main-info">
-          <h3 class="event-title">{{ ticket.event.title }}</h3>
-
-          <div class="event-details">
-            <div class="detail-row">
-              <CalendarIcon class="detail-icon" />
-              <span class="detail-text">{{ formatDate }}</span>
-            </div>
-            <div v-if="ticket.event.venue_name" class="detail-row">
-              <MapPinIcon class="detail-icon" />
-              <span class="detail-text">{{ ticket.event.venue_name }}</span>
-            </div>
+    <!-- Corps du ticket avec bordure pointillée -->
+    <div class="p-4 bg-gray-50 border-t-4 border-dashed border-gray-300 text-sm">
+      <div class="flex justify-between items-start">
+        <!-- Section gauche: Informations -->
+        <div class="flex-1">
+          <!-- Titre -->
+          <div class="mb-4">
+            <h3 class="font-bold text-primea-blue mb-2 text-lg">{{ ticket.event.title }}</h3>
           </div>
 
-          <!-- Info ticket en grille -->
-          <div class="ticket-grid">
-            <div class="grid-item">
-              <span class="grid-label">Référence</span>
-              <span class="grid-value ticket-code">{{ ticket.reference }}</span>
-            </div>
-            <div class="grid-item">
-              <span class="grid-label">Type</span>
-              <span class="grid-value">{{ ticket.ticketType }}</span>
-            </div>
-            <div class="grid-item">
-              <span class="grid-label">Prix</span>
-              <span class="grid-value price">{{ formatPrice(ticket.price) }} XAF</span>
-            </div>
-            <div class="grid-item">
-              <span class="grid-label">Statut</span>
-              <span :class="statusClasses" class="status-badge">{{ statusText }}</span>
-            </div>
+          <!-- Date et lieu -->
+          <div class="mb-4 space-y-1">
+            <div class="font-semibold text-gray-800">{{ formatDateUppercase }}</div>
+            <div class="text-gray-600 text-sm">À {{ (ticket.event.venue_name || 'LIEU À DÉFINIR').toUpperCase() }}</div>
+          </div>
+
+          <!-- Catégorie -->
+          <div class="mb-4">
+            <span class="text-sm text-gray-600">Catégorie : </span>
+            <span class="font-semibold text-gray-800">{{ ticket.ticketType }}</span>
+          </div>
+
+          <!-- Prix -->
+          <div class="mb-4">
+            <div class="font-bold text-primea-blue text-lg">{{ formatPrice(ticket.price) }} XAF</div>
+          </div>
+
+          <!-- Message d'avertissement -->
+          <div class="text-xs text-red-600 leading-tight mb-4">
+            <strong>*ATTENTION:*</strong><br>
+            CE TICKET EST STRICTEMENT PERSONNEL ET À USAGE<br>
+            UNIQUE. IL NE PEUT ÊTRE NI VENDU NI DONNÉ À AUTRUI<br>
+            SOUS PEINE D'ÊTRE REFUSÉ À L'ENTRÉE.
+          </div>
+
+          <!-- Logo Primea -->
+          <div class="flex justify-start">
+            <img src="/images/logo.png" alt="Primea" class="h-6" />
           </div>
         </div>
-      </div>
 
-      <!-- Ligne de découpe perforée -->
-      <div class="ticket-perforation">
-        <div class="perforation-line"></div>
-      </div>
+        <!-- Section droite: QR Code -->
+        <div class="ml-4 text-center w-20">
+          <!-- Code du ticket -->
+          <div class="mb-3">
+            <div class="font-bold text-primea-blue text-sm">{{ ticket.reference }}</div>
+          </div>
 
-      <!-- Section droite avec QR code -->
-      <div class="ticket-right">
-        <div class="qr-section">
-          <p class="qr-label">Scan à l'entrée</p>
-          <div class="qr-container">
+          <!-- QR Code -->
+          <div class="bg-white p-2 border-2 border-gray-300 rounded-primea">
             <img
               :src="ticket.qrCode"
               alt="QR Code"
-              class="qr-image"
+              class="object-contain mx-auto w-16 h-16"
             />
           </div>
-          <p class="qr-code-text">{{ ticket.reference }}</p>
+
+          <!-- Message sous le QR -->
+          <p class="text-xs text-gray-500 mt-2 leading-tight">
+            Ce QR Code est unique<br>
+            et ne peut être scanné<br>
+            qu'une seule fois
+          </p>
         </div>
       </div>
     </div>
 
     <!-- Actions en dessous du ticket -->
-    <div class="ticket-actions">
+    <div class="ticket-actions p-4 bg-white flex gap-3">
       <button
         @click="$emit('view', ticket)"
-        class="action-btn btn-view"
+        class="flex-1 bg-primea-blue text-white py-3 px-4 rounded-primea font-semibold text-sm hover:bg-primea-blue/90 transition-colors duration-200"
       >
-        <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-        </svg>
         Voir le ticket
       </button>
 
       <button
         @click="$emit('download', ticket)"
-        class="action-btn btn-download"
+        class="flex-1 bg-primea-yellow text-primea-blue py-3 px-4 rounded-primea font-semibold text-sm hover:bg-primea-yellow/90 transition-colors duration-200"
       >
-        <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-        </svg>
         Télécharger PDF
       </button>
     </div>
@@ -100,14 +100,9 @@
 
 <script>
 import { computed } from 'vue'
-import { CalendarIcon, MapPinIcon } from '@heroicons/vue/24/outline'
 
 export default {
   name: 'TicketCard',
-  components: {
-    CalendarIcon,
-    MapPinIcon
-  },
   props: {
     ticket: {
       type: Object,
@@ -116,53 +111,16 @@ export default {
   },
   emits: ['view', 'download'],
   setup(props) {
-    
-    // Status de la commande
-    const statusClasses = computed(() => {
-      switch (props.ticket.status) {
-        case 'paid':
-          return 'bg-green-100 text-green-800'
-        case 'pending':
-          return 'bg-yellow-100 text-yellow-800'
-        case 'failed':
-          return 'bg-red-100 text-red-800'
-        case 'cancelled':
-          return 'bg-red-100 text-red-800'
-        case 'refunded':
-          return 'bg-gray-100 text-gray-800'
-        default:
-          return 'bg-blue-100 text-blue-800'
-      }
-    })
 
-    const statusText = computed(() => {
-      switch (props.ticket.status) {
-        case 'paid':
-          return 'Payé'
-        case 'pending':
-          return 'En attente'
-        case 'failed':
-          return 'Échoué'
-        case 'cancelled':
-          return 'Annulé'
-        case 'refunded':
-          return 'Remboursé'
-        default:
-          return 'Inconnu'
-      }
-    })
-
-    // Format de la date
-    const formatDate = computed(() => {
+    // Format de la date en majuscules
+    const formatDateUppercase = computed(() => {
       const date = new Date(props.ticket.event.date)
       return date.toLocaleDateString('fr-FR', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
+        day: 'numeric'
+      }).toUpperCase()
     })
 
     // Format du prix
@@ -171,9 +129,7 @@ export default {
     }
 
     return {
-      statusClasses,
-      statusText,
-      formatDate,
+      formatDateUppercase,
       formatPrice
     }
   }
@@ -181,370 +137,59 @@ export default {
 </script>
 
 <style scoped>
-/* Wrapper du ticket */
-.ticket-wrapper {
-  margin-bottom: 1.5rem;
+/* Variables CSS */
+:root {
+  --primea-blue: #272d63;
+  --primea-yellow: #fab511;
 }
 
-/* Design du ticket réel */
-.ticket-real {
-  display: flex;
-  background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 10px 40px rgba(39, 45, 99, 0.15);
-  transition: all 0.3s ease;
-  position: relative;
+.text-primea-blue {
+  color: var(--primea-blue);
 }
 
-.ticket-real:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 15px 50px rgba(39, 45, 99, 0.25);
+.bg-primea-blue {
+  background-color: var(--primea-blue);
 }
 
-/* Section gauche du ticket */
-.ticket-left {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  position: relative;
+.bg-primea-yellow {
+  background-color: var(--primea-yellow);
 }
 
-/* Container de l'image */
-.event-image-container {
-  position: relative;
-  height: 200px;
-  overflow: hidden;
+.text-primea-blue {
+  color: var(--primea-blue);
 }
 
-.event-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.bg-primea-gradient {
+  background: linear-gradient(135deg, var(--primea-blue) 0%, #1a1f4a 100%);
 }
 
-.image-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(to bottom, rgba(39, 45, 99, 0.1), rgba(39, 45, 99, 0.4));
+.rounded-primea {
+  border-radius: 12px;
 }
 
-/* Info principale du ticket */
-.ticket-main-info {
-  padding: 1.5rem;
-  flex: 1;
+.rounded-primea-xl {
+  border-radius: 20px;
 }
 
-.event-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #272d63;
-  margin-bottom: 1rem;
+.shadow-primea-lg {
+  box-shadow: 0 8px 30px rgba(39, 45, 99, 0.15);
+}
+
+.font-primea {
   font-family: 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-.event-details {
-  margin-bottom: 1.25rem;
-}
-
-.detail-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 0.5rem;
-  color: #4b5563;
-}
-
-.detail-icon {
-  width: 1.125rem;
-  height: 1.125rem;
-  margin-right: 0.5rem;
-  color: #fab511;
-}
-
-.detail-text {
-  font-size: 0.9375rem;
-}
-
-/* Grille d'informations */
-.ticket-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  background: #f9fafb;
-  padding: 1rem;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-}
-
-.grid-item {
-  display: flex;
-  flex-direction: column;
-}
-
-.grid-label {
-  font-size: 0.75rem;
-  color: #6b7280;
-  text-transform: uppercase;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.25rem;
-}
-
-.grid-value {
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: #1f2937;
-}
-
-.ticket-code {
-  font-family: 'Courier New', monospace;
-  color: #272d63;
-  letter-spacing: 0.05em;
-}
-
-.price {
-  color: #059669;
-  font-size: 1.125rem;
-}
-
-/* Ligne de perforation */
-.ticket-perforation {
-  width: 2px;
-  background: white;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.perforation-line {
-  width: 100%;
-  height: 100%;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    #e5e7eb 0px,
-    #e5e7eb 10px,
-    transparent 10px,
-    transparent 20px
-  );
-}
-
-.perforation-line::before,
-.perforation-line::after {
-  content: '';
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  background: #f3f4f6;
-  border-radius: 50%;
-}
-
-.perforation-line::before {
-  top: -10px;
-}
-
-.perforation-line::after {
-  bottom: -10px;
-}
-
-/* Section droite avec QR code */
-.ticket-right {
-  width: 200px;
-  background: linear-gradient(135deg, #272d63 0%, #1a1e47 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-}
-
-.qr-section {
-  text-align: center;
-}
-
-.qr-label {
-  color: #fab511;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 1rem;
-}
-
-.qr-container {
-  background: white;
-  padding: 0.75rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  margin-bottom: 1rem;
-  flex-shrink: 0;
-  display: inline-block;
-}
-
-.qr-image {
-  width: 140px;
-  height: 140px;
-  display: block;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
-.qr-code-text {
-  color: white;
-  font-size: 0.75rem;
-  font-family: 'Courier New', monospace;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-}
-
-/* Badge de statut */
-.status-badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.bg-green-100 {
-  background-color: #dcfce7;
-  color: #166534;
-}
-
-.bg-yellow-100 {
-  background-color: #fef3c7;
-  color: #854d0e;
-}
-
-.bg-gray-100 {
-  background-color: #f3f4f6;
-  color: #1f2937;
-}
-
-.bg-red-100 {
-  background-color: #fee2e2;
-  color: #991b1b;
-}
-
-.bg-blue-100 {
-  background-color: #dbeafe;
-  color: #1e40af;
-}
-
-/* Actions en dessous du ticket */
-.ticket-actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.action-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.875rem 1.5rem;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 0.9375rem;
-  font-family: 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.action-btn:hover {
+/* Hover effects */
+.ticket-component:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12px 40px rgba(39, 45, 99, 0.2);
+  transition: all 0.3s ease;
 }
 
-.btn-icon {
-  width: 1.25rem;
-  height: 1.25rem;
-  margin-right: 0.5rem;
-}
-
-.btn-view {
-  background-color: #272d63;
-  color: white;
-}
-
-.btn-view:hover {
-  background-color: #1a1e47;
-}
-
-.btn-download {
-  background-color: #fab511;
-  color: #272d63;
-}
-
-.btn-download:hover {
-  background-color: #e09f0e;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .ticket-real {
-    flex-direction: column;
-  }
-
-  .ticket-perforation {
-    display: none;
-  }
-
-  .ticket-right {
-    width: 100%;
-    padding: 2rem;
-  }
-
-  .qr-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-  }
-
-  .qr-label {
-    margin-bottom: 0;
-  }
-
-  .qr-container {
-    margin-bottom: 0;
-  }
-
-  .qr-image {
-    width: 120px;
-    height: 120px;
-  }
-
-  .ticket-actions {
-    flex-direction: column;
-  }
-
-  .event-image-container {
-    height: 180px;
-  }
-}
-
+/* Responsive adjustments */
 @media (max-width: 640px) {
-  .event-title {
-    font-size: 1.25rem;
-  }
-
-  .ticket-grid {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-  }
-
-  .action-btn {
-    padding: 0.75rem 1rem;
-    font-size: 0.875rem;
+  .ticket-component {
+    max-width: 100%;
   }
 }
 </style>
