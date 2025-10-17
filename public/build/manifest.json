@@ -31,12 +31,8 @@
     "file": "assets/css/account-CqTyY6S0.css",
     "src": "_account-CqTyY6S0.css"
   },
-  "_admin-CYeLNFW5.css": {
-    "file": "assets/css/admin-CYeLNFW5.css",
-    "src": "_admin-CYeLNFW5.css"
-  },
-  "_admin-D8sZ3gwa.js": {
-    "file": "assets/js/admin-D8sZ3gwa.js",
+  "_admin-BNTq6eMc.js": {
+    "file": "assets/js/admin-BNTq6eMc.js",
     "name": "admin",
     "isDynamicEntry": true,
     "imports": [
@@ -45,8 +41,12 @@
       "_vendor-14XLBY50.js"
     ],
     "css": [
-      "assets/css/admin-CYeLNFW5.css"
+      "assets/css/admin-kYIXKvzl.css"
     ]
+  },
+  "_admin-kYIXKvzl.css": {
+    "file": "assets/css/admin-kYIXKvzl.css",
+    "src": "_admin-kYIXKvzl.css"
   },
   "_events-Nb93pzbe.js": {
     "file": "assets/js/events-Nb93pzbe.js",
@@ -129,7 +129,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-DylC2-aF.js",
+    "file": "assets/js/app-BSrMyapQ.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -166,28 +166,28 @@
       "_organizer-tVuX-KQi.js",
       "_organizer-tVuX-KQi.js",
       "resources/js/layouts/AdminLayout.vue",
-      "_admin-D8sZ3gwa.js",
-      "_admin-D8sZ3gwa.js",
-      "_admin-D8sZ3gwa.js",
-      "_admin-D8sZ3gwa.js",
-      "_admin-D8sZ3gwa.js",
-      "_admin-D8sZ3gwa.js",
-      "_admin-D8sZ3gwa.js",
-      "_admin-D8sZ3gwa.js",
-      "_admin-D8sZ3gwa.js",
-      "_admin-D8sZ3gwa.js",
-      "_admin-D8sZ3gwa.js",
-      "_admin-D8sZ3gwa.js",
-      "_admin-D8sZ3gwa.js",
-      "_admin-D8sZ3gwa.js",
-      "_admin-D8sZ3gwa.js",
-      "_admin-D8sZ3gwa.js",
-      "_admin-D8sZ3gwa.js",
-      "_admin-D8sZ3gwa.js",
-      "_admin-D8sZ3gwa.js",
-      "_admin-D8sZ3gwa.js",
-      "_admin-D8sZ3gwa.js",
-      "_admin-D8sZ3gwa.js",
+      "_admin-BNTq6eMc.js",
+      "_admin-BNTq6eMc.js",
+      "_admin-BNTq6eMc.js",
+      "_admin-BNTq6eMc.js",
+      "_admin-BNTq6eMc.js",
+      "_admin-BNTq6eMc.js",
+      "_admin-BNTq6eMc.js",
+      "_admin-BNTq6eMc.js",
+      "_admin-BNTq6eMc.js",
+      "_admin-BNTq6eMc.js",
+      "_admin-BNTq6eMc.js",
+      "_admin-BNTq6eMc.js",
+      "_admin-BNTq6eMc.js",
+      "_admin-BNTq6eMc.js",
+      "_admin-BNTq6eMc.js",
+      "_admin-BNTq6eMc.js",
+      "_admin-BNTq6eMc.js",
+      "_admin-BNTq6eMc.js",
+      "_admin-BNTq6eMc.js",
+      "_admin-BNTq6eMc.js",
+      "_admin-BNTq6eMc.js",
+      "_admin-BNTq6eMc.js",
       "resources/js/pages/scanner/ScannerApp.vue"
     ],
     "css": [

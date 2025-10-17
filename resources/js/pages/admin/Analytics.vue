@@ -449,12 +449,21 @@ export default {
           }
         })
 
+        if (!response.ok) {
+          console.error('Erreur API revenue-chart:', response.status)
+          Object.assign(revenueChartData, { labels: [], datasets: [] })
+          return
+        }
+
         const data = await response.json()
-        if (data.success) {
+        if (data.success && data.data) {
           Object.assign(revenueChartData, data.data)
+        } else {
+          Object.assign(revenueChartData, { labels: [], datasets: [] })
         }
       } catch (error) {
         console.error('Erreur chargement graphique revenus:', error)
+        Object.assign(revenueChartData, { labels: [], datasets: [] })
       }
     }
 
@@ -467,12 +476,24 @@ export default {
           }
         })
 
+        if (!response.ok) {
+          console.error('Erreur API sales-by-category:', response.status)
+          // Réinitialiser avec des valeurs par défaut
+          Object.assign(salesByCategoryData, { labels: [], datasets: [] })
+          return
+        }
+
         const data = await response.json()
-        if (data.success) {
+        if (data.success && data.data) {
           Object.assign(salesByCategoryData, data.data)
+        } else {
+          // Réinitialiser avec des valeurs par défaut
+          Object.assign(salesByCategoryData, { labels: [], datasets: [] })
         }
       } catch (error) {
         console.error('Erreur chargement ventes par catégorie:', error)
+        // Réinitialiser avec des valeurs par défaut en cas d'erreur
+        Object.assign(salesByCategoryData, { labels: [], datasets: [] })
       }
     }
 
@@ -485,13 +506,25 @@ export default {
           }
         })
 
+        if (!response.ok) {
+          console.error('Erreur API conversion-funnel:', response.status)
+          Object.assign(conversionFunnelData, { labels: [], datasets: [] })
+          conversionRates.value = null
+          return
+        }
+
         const data = await response.json()
-        if (data.success) {
+        if (data.success && data.data) {
           Object.assign(conversionFunnelData, data.data)
-          conversionRates.value = data.data.conversion_rates
+          conversionRates.value = data.data.conversion_rates || null
+        } else {
+          Object.assign(conversionFunnelData, { labels: [], datasets: [] })
+          conversionRates.value = null
         }
       } catch (error) {
         console.error('Erreur chargement funnel:', error)
+        Object.assign(conversionFunnelData, { labels: [], datasets: [] })
+        conversionRates.value = null
       }
     }
 
