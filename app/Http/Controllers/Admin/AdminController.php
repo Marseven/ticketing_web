@@ -120,11 +120,12 @@ class AdminController extends Controller
             });
 
             // Activité récente (simulée pour l'exemple)
+            $firstOrder = $recentOrders->first();
             $recentActivity = collect([
                 [
                     'id' => 1,
                     'type' => 'order',
-                    'description' => 'Nouvelle commande #' . $recentOrders->first()?->reference,
+                    'description' => 'Nouvelle commande #' . ($firstOrder['reference'] ?? 'N/A'),
                     'created_at' => now()->subMinutes(5),
                 ],
                 [
