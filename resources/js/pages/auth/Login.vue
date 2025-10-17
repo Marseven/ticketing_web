@@ -191,7 +191,7 @@
         <!-- Retrieve Ticket Link -->
         <div class="text-center mt-6 md:mt-8">
           <router-link
-            to="/ticket-retrieve"
+            to="/retrieve-ticket"
             class="text-blue-900 md:text-white/90 hover:text-yellow-500 md:hover:text-yellow-500 font-semibold text-sm transition-colors duration-200 bg-gray-100 md:bg-white/10 md:backdrop-blur-sm px-6 py-3 rounded-xl border border-gray-200 md:border-white/20 hover:border-yellow-500 inline-block"
           >
             Récupérer mon ticket perdu

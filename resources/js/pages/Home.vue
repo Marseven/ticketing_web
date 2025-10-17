@@ -55,7 +55,7 @@
           <!-- Links -->
           <div class="flex flex-col sm:flex-row items-center justify-center gap-4 text-white">
             <router-link
-              to="/ticket-retrieve"
+              to="/retrieve-ticket"
               class="text-sm underline hover:text-yellow-500 transition-colors"
             >
               Récupérer mon ticket perdu...
