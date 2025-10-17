@@ -175,34 +175,36 @@
               <div class="absolute inset-0 p-4 text-white">
                 <div class="flex justify-between items-start mb-4">
                   <div class="text-xs">
-                    <div class="bg-primea-yellow/20 backdrop-blur-sm rounded-primea px-2 py-1 mb-1 text-primea-yellow font-bold">CONCERT</div>
+                    <div class="bg-primea-yellow/20 backdrop-blur-sm rounded-primea px-2 py-1 mb-1 text-primea-yellow font-bold uppercase">
+                      {{ event.category?.name || event.category_name || 'ÉVÉNEMENT' }}
+                    </div>
                     <div class="font-bold">{{ event.title }}</div>
                   </div>
                   <div class="text-right text-xs">
                     <div class="bg-primea-yellow text-primea-blue px-2 py-1 rounded-primea mb-1 font-bold">
-                      {{ formatEventDate(event.date) }}
+                      {{ formatEventDate(event.event_date || event.date) }}
                     </div>
-                    <div class="bg-red-600 text-white px-2 py-1 rounded-primea font-bold">18</div>
+                    <div v-if="event.min_age" class="bg-red-600 text-white px-2 py-1 rounded-primea font-bold">{{ event.min_age }}+</div>
                   </div>
                 </div>
-                
+
                 <!-- Prix selon la maquette -->
                 <div class="absolute bottom-4 left-4 right-4">
                   <div class="flex justify-between items-end">
                     <div class="text-xs">
                       <div class="flex space-x-2 mb-2">
-                        <div class="bg-green-500 text-white px-2 py-1 rounded-primea text-xs font-bold">
-                          {{ formatPrice(event.minPrice) }}
+                        <div v-if="event.min_price && event.min_price > 0" class="bg-green-500 text-white px-2 py-1 rounded-primea text-xs font-bold">
+                          {{ formatPrice(event.min_price) }} XAF
                         </div>
-                        <div class="bg-primea-blue text-white px-2 py-1 rounded-primea text-xs font-bold">
-                          {{ formatPrice(event.maxPrice) }}
+                        <div v-if="event.max_price && event.max_price > 0 && event.max_price !== event.min_price" class="bg-primea-blue text-white px-2 py-1 rounded-primea text-xs font-bold">
+                          {{ formatPrice(event.max_price) }} XAF
                         </div>
                       </div>
-                      <div class="text-xs text-gray-200">{{ event.venue }}</div>
+                      <div class="text-xs text-gray-200">{{ event.venue?.name || event.venue_name || 'Lieu à confirmer' }}</div>
                     </div>
                     <div class="text-right">
-                      <div class="text-xs text-gray-200">Animation by</div>
-                      <div class="text-xs font-bold text-primea-yellow">{{ event.organizer || 'MR GILLES' }}</div>
+                      <div class="text-xs text-gray-200">Organisé par</div>
+                      <div class="text-xs font-bold text-primea-yellow">{{ event.organizer?.name || 'Organisateur' }}</div>
                     </div>
                   </div>
                 </div>
@@ -348,14 +350,19 @@ export default {
     }
 
     const formatEventDate = (dateString) => {
-      if (!dateString) return '27'
-      
-      const date = new Date(dateString)
-      return date.getDate().toString()
+      if (!dateString) return '--'
+
+      try {
+        const date = new Date(dateString)
+        if (isNaN(date.getTime())) return '--'
+        return date.getDate().toString().padStart(2, '0')
+      } catch (error) {
+        return '--'
+      }
     }
 
     const formatPrice = (price) => {
-      if (!price) return '5.000'
+      if (!price || price === 0) return 'Gratuit'
       return new Intl.NumberFormat('fr-FR').format(price)
     }
 
