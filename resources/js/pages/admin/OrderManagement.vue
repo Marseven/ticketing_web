@@ -458,16 +458,23 @@ export default {
             queryParams.append(key, filters[key])
           }
         })
-        
+
         const response = await fetch(`/api/v1/admin/orders?${queryParams}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Accept': 'application/json'
           }
         })
-        
+
+        if (!response.ok) {
+          console.error('Erreur API orders:', response.status)
+          orders.value = []
+          pagination.value = null
+          return
+        }
+
         const data = await response.json()
-        if (data.success) {
+        if (data.success && data.data && data.data.orders) {
           orders.value = data.data.orders.data
           pagination.value = {
             current_page: data.data.orders.current_page,
@@ -476,7 +483,7 @@ export default {
             to: data.data.orders.to,
             total: data.data.orders.total
           }
-          
+
           // Calculer les stats
           const allOrders = data.data.orders.data
           stats.total_orders = pagination.value.total
@@ -485,9 +492,14 @@ export default {
           stats.total_revenue = allOrders
             .filter(o => o.status === 'confirmed')
             .reduce((sum, o) => sum + o.total_amount, 0)
+        } else {
+          orders.value = []
+          pagination.value = null
         }
       } catch (error) {
         console.error('Erreur chargement achats:', error)
+        orders.value = []
+        pagination.value = null
       } finally {
         loading.value = false
       }
@@ -501,13 +513,22 @@ export default {
             'Accept': 'application/json'
           }
         })
-        
+
+        if (!response.ok) {
+          console.error('Erreur API organizers:', response.status)
+          organizers.value = []
+          return
+        }
+
         const data = await response.json()
-        if (data.success) {
+        if (data.success && data.data) {
           organizers.value = data.data.organizers.data || data.data.organizers
+        } else {
+          organizers.value = []
         }
       } catch (error) {
         console.error('Erreur chargement organisateurs:', error)
+        organizers.value = []
       }
     }
 
@@ -519,13 +540,22 @@ export default {
             'Accept': 'application/json'
           }
         })
-        
+
+        if (!response.ok) {
+          console.error('Erreur API events:', response.status)
+          events.value = []
+          return
+        }
+
         const data = await response.json()
-        if (data.success) {
+        if (data.success && data.data) {
           events.value = data.data.events.data || data.data.events
+        } else {
+          events.value = []
         }
       } catch (error) {
         console.error('Erreur chargement événements:', error)
+        events.value = []
       }
     }
 
@@ -565,14 +595,23 @@ export default {
             'Accept': 'application/json'
           }
         })
-        
+
+        if (!response.ok) {
+          console.error('Erreur API order details:', response.status)
+          alert('Impossible de charger les détails de la commande')
+          return
+        }
+
         const data = await response.json()
-        if (data.success) {
+        if (data.success && data.data) {
           selectedOrder.value = data.data.order
           showDetailsModal.value = true
+        } else {
+          alert('Erreur lors du chargement des détails')
         }
       } catch (error) {
         console.error('Erreur chargement détails commande:', error)
+        alert('Erreur technique lors du chargement des détails')
       }
     }
 
@@ -591,7 +630,13 @@ export default {
           },
           body: JSON.stringify({ status: newStatus })
         })
-        
+
+        if (!response.ok) {
+          console.error('Erreur API update status:', response.status)
+          alert('Erreur lors de la mise à jour du statut')
+          return
+        }
+
         const data = await response.json()
         if (data.success) {
           alert(`Commande ${newStatus === 'confirmed' ? 'confirmée' : 'annulée'} avec succès`)
