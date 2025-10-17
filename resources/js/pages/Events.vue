@@ -121,11 +121,11 @@
           </form>
           <!-- Affichage du texte recherché mobile -->
           <div v-if="searchQuery && searchQuery.trim()" class="mt-3 text-center">
-            <p class="text-white text-sm">
-              Résultats pour: <span class="font-bold text-primea-yellow">"{{ searchQuery }}"</span>
+            <p class="text-gray-800 text-sm">
+              Résultats pour: <span class="font-bold text-primea-blue">"{{ searchQuery }}"</span>
               <button
                 @click="clearSearch"
-                class="ml-2 text-primea-yellow hover:text-white font-semibold"
+                class="ml-2 text-primea-yellow hover:text-primea-blue font-semibold"
               >
                 ✕
               </button>
