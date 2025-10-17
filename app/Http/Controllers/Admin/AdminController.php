@@ -44,28 +44,76 @@ class AdminController extends Controller
             $revenusTotal = Payment::where('status', 'success')
                 ->sum('amount');
 
+            // Calculer les paiements par statut
+            $successfulPayments = Payment::where('status', 'success')->count();
+            $pendingPayments = Payment::where('status', 'pending')->count();
+            $failedPayments = Payment::where('status', 'failed')->count();
+
+            // Calculer la commission plateforme (par exemple 5% du total)
+            $platformCommission = $revenusTotal * 0.05;
+
+            // Compter les événements actifs (événements à venir)
+            $activeEvents = Event::where('status', 'published')
+                ->whereHas('schedules', function ($q) {
+                    $q->where('starts_at', '>', now());
+                })
+                ->count();
+
+            // Compter les utilisateurs actifs (connectés dans les 30 derniers jours)
+            $activeUsers = User::where('last_login_at', '>=', now()->subDays(30))
+                ->orWhere('created_at', '>=', now()->subDays(30))
+                ->count();
+
             $stats = [
-                'total_events' => Event::count(),
-                'montant_global' => $montantGlobal,
-                'tickets_vendus' => $ticketsVendus,
-                'tickets_scannes' => $ticketsScannes,
-                'revenus_total' => $revenusTotal,
+                // Principales stats
+                'total_revenue' => $revenusTotal,
+                'tickets_sold' => $ticketsVendus,
+                'active_events' => $activeEvents ?: Event::where('status', 'published')->count(),
+                'active_users' => $activeUsers ?: User::count(),
+
+                // Stats paiements
+                'successful_payments' => $successfulPayments,
+                'pending_payments' => $pendingPayments,
+                'failed_payments' => $failedPayments,
+                'platform_commission' => $platformCommission,
 
                 // Stats additionnelles pour compatibilité
+                'total_events' => Event::count(),
                 'total_users' => User::count(),
                 'total_organizers' => Organizer::count(),
                 'total_balance' => OrganizerBalance::sum('balance'),
                 'orders_today' => Order::whereDate('created_at', today())->count(),
-                'failed_payments' => Payment::where('status', 'failed')
+                'revenue_today' => Payment::where('status', 'success')
                     ->whereDate('created_at', today())
-                    ->count(),
+                    ->sum('amount'),
+                'tickets_scannes' => $ticketsScannes,
+
+                // Anciennes clés pour rétro-compatibilité
+                'montant_global' => $montantGlobal,
+                'tickets_vendus' => $ticketsVendus,
+                'revenus_total' => $revenusTotal,
             ];
 
-            // Commandes récentes
-            $recentOrders = Order::with(['event', 'organizer'])
+            // Commandes récentes avec mapping des champs
+            $recentOrders = Order::with(['event', 'organizer', 'buyer'])
                 ->orderBy('created_at', 'desc')
                 ->limit(10)
-                ->get();
+                ->get()
+                ->map(function ($order) {
+                    return [
+                        'id' => $order->id,
+                        'reference' => $order->reference,
+                        'customer_name' => $order->guest_name ?? ($order->buyer ? $order->buyer->name : 'N/A'),
+                        'customer_email' => $order->guest_email ?? ($order->buyer ? $order->buyer->email : 'N/A'),
+                        'total_amount' => $order->total_amount,
+                        'status' => $order->status,
+                        'created_at' => $order->created_at,
+                        'event' => $order->event ? [
+                            'id' => $order->event->id,
+                            'title' => $order->event->title,
+                        ] : null,
+                    ];
+                });
 
             // Activité récente (simulée pour l'exemple)
             $recentActivity = collect([
