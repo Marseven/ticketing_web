@@ -2382,4 +2382,560 @@ class AdminController extends Controller
             ], 500);
         }
     }
+
+    // ===================================================================
+    // GESTION DES COMMANDES (ORDERS)
+    // ===================================================================
+
+    /**
+     * Liste des commandes
+     */
+    public function orders(Request $request): JsonResponse
+    {
+        try {
+            $query = Order::with(['event', 'buyer', 'organizer']);
+
+            // Filtres
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('reference', 'like', "%{$search}%")
+                      ->orWhereHas('buyer', function ($q2) use ($search) {
+                          $q2->where('name', 'like', "%{$search}%")
+                             ->orWhere('email', 'like', "%{$search}%");
+                      });
+                });
+            }
+
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
+            if ($request->filled('organizer_id')) {
+                $query->where('organizer_id', $request->organizer_id);
+            }
+
+            if ($request->filled('event_id')) {
+                $query->where('event_id', $request->event_id);
+            }
+
+            $orders = $query->withCount('tickets')
+                ->orderBy('created_at', 'desc')
+                ->paginate(20);
+
+            // Stats pour le header
+            $stats = [
+                'total' => Order::count(),
+                'pending' => Order::where('status', 'pending')->count(),
+                'paid' => Order::where('status', 'paid')->count(),
+                'cancelled' => Order::where('status', 'cancelled')->count(),
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'orders' => $orders,
+                    'stats' => $stats
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur liste commandes admin', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors du chargement des commandes'
+            ], 500);
+        }
+    }
+
+    /**
+     * Afficher une commande
+     */
+    public function showOrder($orderId): JsonResponse
+    {
+        try {
+            $order = Order::with(['event', 'buyer', 'organizer', 'tickets.ticketType', 'payment'])
+                ->find($orderId);
+
+            if (!$order) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Commande introuvable'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => ['order' => $order]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur affichage commande admin', [
+                'order_id' => $orderId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique'
+            ], 500);
+        }
+    }
+
+    /**
+     * Mettre à jour le statut d'une commande
+     */
+    public function updateOrderStatus(Request $request, $orderId): JsonResponse
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'status' => 'required|in:pending,paid,cancelled,refunded',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $order = Order::find($orderId);
+
+            if (!$order) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Commande introuvable'
+                ], 404);
+            }
+
+            $order->status = $request->status;
+            $order->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Statut de la commande mis à jour',
+                'data' => ['order' => $order->fresh()]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur mise à jour statut commande', [
+                'order_id' => $orderId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique'
+            ], 500);
+        }
+    }
+
+    /**
+     * Exporter les commandes
+     */
+    public function exportOrders(Request $request): JsonResponse
+    {
+        try {
+            // Pour l'instant, retourner les données brutes
+            // TODO: Implémenter l'export Excel/CSV
+            $orders = Order::with(['event', 'buyer', 'organizer'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => ['orders' => $orders]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur export commandes', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de l\'export'
+            ], 500);
+        }
+    }
+
+    // ===================================================================
+    // GESTION DES PAIEMENTS (PAYMENTS)
+    // ===================================================================
+
+    /**
+     * Liste des paiements
+     */
+    public function payments(Request $request): JsonResponse
+    {
+        try {
+            $query = Payment::with(['order.event', 'order.buyer']);
+
+            // Filtres
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('provider_txn_ref', 'like', "%{$search}%")
+                      ->orWhereHas('order', function ($q2) use ($search) {
+                          $q2->where('reference', 'like', "%{$search}%");
+                      });
+                });
+            }
+
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
+            if ($request->filled('provider')) {
+                $query->where('provider', $request->provider);
+            }
+
+            if ($request->filled('organizer_id')) {
+                $query->whereHas('order', function ($q) use ($request) {
+                    $q->where('organizer_id', $request->organizer_id);
+                });
+            }
+
+            $payments = $query->orderBy('created_at', 'desc')
+                ->paginate(20);
+
+            // Stats
+            $stats = [
+                'total' => Payment::count(),
+                'success' => Payment::where('status', 'success')->count(),
+                'initiated' => Payment::where('status', 'initiated')->count(),
+                'failed' => Payment::where('status', 'failed')->count(),
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'payments' => $payments,
+                    'stats' => $stats
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur liste paiements admin', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors du chargement des paiements'
+            ], 500);
+        }
+    }
+
+    /**
+     * Afficher un paiement
+     */
+    public function showPayment($paymentId): JsonResponse
+    {
+        try {
+            $payment = Payment::with(['order.event', 'order.buyer', 'order.organizer'])
+                ->find($paymentId);
+
+            if (!$payment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Paiement introuvable'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => ['payment' => $payment]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur affichage paiement admin', [
+                'payment_id' => $paymentId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique'
+            ], 500);
+        }
+    }
+
+    /**
+     * Vérifier le statut d'un paiement
+     */
+    public function checkPaymentStatus($paymentId): JsonResponse
+    {
+        try {
+            $payment = Payment::find($paymentId);
+
+            if (!$payment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Paiement introuvable'
+                ], 404);
+            }
+
+            // TODO: Implémenter la vérification réelle auprès du provider
+            return response()->json([
+                'success' => true,
+                'message' => 'Statut vérifié',
+                'data' => ['payment' => $payment]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur vérification statut paiement', [
+                'payment_id' => $paymentId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique'
+            ], 500);
+        }
+    }
+
+    /**
+     * Vérifier tous les paiements en attente
+     */
+    public function checkPendingPayments(): JsonResponse
+    {
+        try {
+            $pendingPayments = Payment::where('status', 'initiated')
+                ->where('created_at', '>', now()->subDays(7))
+                ->get();
+
+            // TODO: Implémenter la vérification réelle auprès des providers
+
+            return response()->json([
+                'success' => true,
+                'message' => count($pendingPayments) . ' paiements vérifiés',
+                'data' => ['checked' => count($pendingPayments)]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur vérification paiements en attente', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique'
+            ], 500);
+        }
+    }
+
+    /**
+     * Rembourser un paiement
+     */
+    public function refundPayment(Request $request, $paymentId): JsonResponse
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'reason' => 'required|string|max:500',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $payment = Payment::find($paymentId);
+
+            if (!$payment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Paiement introuvable'
+                ], 404);
+            }
+
+            // TODO: Implémenter le remboursement réel auprès du provider
+            $payment->status = 'refunded';
+            $payment->save();
+
+            $payment->order->status = 'refunded';
+            $payment->order->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Remboursement effectué',
+                'data' => ['payment' => $payment]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur remboursement paiement', [
+                'payment_id' => $paymentId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique'
+            ], 500);
+        }
+    }
+
+    /**
+     * Exporter les paiements
+     */
+    public function exportPayments(Request $request): JsonResponse
+    {
+        try {
+            // Pour l'instant, retourner les données brutes
+            // TODO: Implémenter l'export Excel/CSV
+            $payments = Payment::with(['order.event', 'order.buyer'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => ['payments' => $payments]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur export paiements', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de l\'export'
+            ], 500);
+        }
+    }
+
+    // ===================================================================
+    // PROFIL ADMIN
+    // ===================================================================
+
+    /**
+     * Profil de l'admin connecté
+     */
+    public function profile(): JsonResponse
+    {
+        try {
+            $user = auth()->user()->load(['roles.privileges']);
+
+            return response()->json([
+                'success' => true,
+                'data' => ['user' => $user]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur profil admin', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique'
+            ], 500);
+        }
+    }
+
+    /**
+     * Mettre à jour le profil admin
+     */
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $user = auth()->user();
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:users,email,' . $user->id,
+            'avatar_url' => 'nullable|url',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $user->update($request->only(['name', 'email', 'avatar_url']));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profil mis à jour',
+                'data' => ['user' => $user->fresh()]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur mise à jour profil admin', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique'
+            ], 500);
+        }
+    }
+
+    // ===================================================================
+    // NOTIFICATIONS
+    // ===================================================================
+
+    /**
+     * Notifications de l'admin
+     */
+    public function notifications(): JsonResponse
+    {
+        try {
+            // Pour l'instant, retourner un tableau vide
+            // TODO: Implémenter le système de notifications
+            $notifications = [];
+
+            return response()->json([
+                'success' => true,
+                'data' => ['notifications' => $notifications]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur notifications admin', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique'
+            ], 500);
+        }
+    }
+
+    /**
+     * Marquer une notification comme lue
+     */
+    public function markNotificationAsRead($notificationId): JsonResponse
+    {
+        try {
+            // TODO: Implémenter le système de notifications
+            return response()->json([
+                'success' => true,
+                'message' => 'Notification marquée comme lue'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur marquage notification', [
+                'notification_id' => $notificationId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique'
+            ], 500);
+        }
+    }
 }

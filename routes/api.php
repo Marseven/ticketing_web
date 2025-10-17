@@ -336,6 +336,32 @@ Route::prefix('v1')->group(function () {
             Route::delete('{banner}', [App\Http\Controllers\Api\Admin\BannerController::class, 'destroy']);
             Route::post('{banner}/toggle-active', [App\Http\Controllers\Api\Admin\BannerController::class, 'toggleActive']);
         });
+
+        // Gestion des commandes (Orders)
+        Route::prefix('orders')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'orders']);
+            Route::get('export', [App\Http\Controllers\Admin\AdminController::class, 'exportOrders']);
+            Route::get('{order}', [App\Http\Controllers\Admin\AdminController::class, 'showOrder']);
+            Route::put('{order}/status', [App\Http\Controllers\Admin\AdminController::class, 'updateOrderStatus']);
+        });
+
+        // Gestion des paiements (Payments)
+        Route::prefix('payments')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'payments']);
+            Route::get('export', [App\Http\Controllers\Admin\AdminController::class, 'exportPayments']);
+            Route::get('{payment}', [App\Http\Controllers\Admin\AdminController::class, 'showPayment']);
+            Route::post('{payment}/status', [App\Http\Controllers\Admin\AdminController::class, 'checkPaymentStatus']);
+            Route::post('check-pending', [App\Http\Controllers\Admin\AdminController::class, 'checkPendingPayments']);
+            Route::post('{payment}/refund', [App\Http\Controllers\Admin\AdminController::class, 'refundPayment']);
+        });
+
+        // Profil admin
+        Route::get('profile', [App\Http\Controllers\Admin\AdminController::class, 'profile']);
+        Route::put('profile', [App\Http\Controllers\Admin\AdminController::class, 'updateProfile']);
+
+        // Notifications admin
+        Route::get('notifications', [App\Http\Controllers\Admin\AdminController::class, 'notifications']);
+        Route::put('notifications/{notification}/read', [App\Http\Controllers\Admin\AdminController::class, 'markNotificationAsRead']);
     });
 });
 
