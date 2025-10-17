@@ -489,31 +489,248 @@
     </div>
 
     <!-- Mobile Layout -->
-    <div class="md:hidden bg-gray-100 min-h-screen py-8 px-4">
+    <div class="md:hidden bg-white min-h-screen">
       <div class="max-w-md mx-auto">
-      
-        <!-- En-tête selon maquette achat.png -->
-        <div class="flex items-center justify-between mb-8">
-          <button @click="goBack" class="text-gray-600 hover:text-gray-800">
-            <ChevronLeftIcon class="w-6 h-6" />
-          </button>
 
-          <router-link to="/" class="text-center">
-            <img src="/images/logo.png" alt="Primea" class="h-8 mx-auto mb-2 hover:opacity-80 transition-opacity" />
-            <div class="text-right">
-              <div class="text-lg font-bold text-blue-600">La Billetterie</div>
-              <div class="text-xs text-gray-500">Simple, Rapide et Sécurisée</div>
-            </div>
-          </router-link>
-
-          <button class="text-gray-600">
-            <Bars3Icon class="w-6 h-6" />
-          </button>
+        <!-- Mobile Header -->
+        <div class="bg-blue-900 px-4 py-6 mb-6">
+          <div class="flex items-center justify-between mb-4">
+            <button @click="goBack" class="text-white hover:text-yellow-500">
+              <ChevronLeftIcon class="w-6 h-6" />
+            </button>
+            <img src="/images/logo_white.png" alt="Logo" class="h-10" />
+            <div class="w-6"></div>
+          </div>
+          <h1 class="text-xl font-bold text-white text-center">Commander vos tickets</h1>
         </div>
 
-        <!-- Contenu mobile complet ici... -->
-        <div class="text-center text-gray-500 py-8">
-          Version mobile en cours de développement
+        <!-- Loading/Error States -->
+        <div v-if="eventLoading" class="flex justify-center py-12 px-4">
+          <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-900 border-t-yellow-500"></div>
+        </div>
+
+        <div v-else-if="eventError" class="px-4">
+          <div class="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+            <ExclamationCircleIcon class="w-12 h-12 text-red-500 mx-auto mb-3" />
+            <p class="text-red-600 mb-4">{{ eventError }}</p>
+            <button @click="loadEvent" class="bg-blue-900 text-white px-6 py-2 rounded-lg font-semibold">
+              Réessayer
+            </button>
+          </div>
+        </div>
+
+        <!-- Event Content -->
+        <div v-else-if="event" class="px-4 pb-24">
+          <!-- Event Card -->
+          <div class="bg-white rounded-xl shadow-md overflow-hidden mb-6">
+            <div class="relative h-48">
+              <img v-if="eventImageUrl" :src="eventImageUrl" :alt="event.title" class="w-full h-full object-cover" @error="handleImageError" />
+              <div v-else class="w-full h-full bg-gradient-to-br from-blue-900 to-blue-800 flex items-center justify-center">
+                <PhotoIcon class="w-16 h-16 text-white/30" />
+              </div>
+              <div class="absolute inset-0 bg-blue-900/50"></div>
+              <div class="absolute bottom-0 left-0 right-0 p-4 text-white">
+                <h2 class="text-lg font-bold mb-1">{{ event.title }}</h2>
+                <div class="flex items-center gap-2 text-sm text-white/90">
+                  <ClockIcon class="w-4 h-4" />
+                  <span>{{ formatEventDate }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Event Passed Message -->
+          <div v-if="isEventPassed" class="bg-red-50 border border-red-200 rounded-xl p-6 text-center mb-6">
+            <ExclamationCircleIcon class="w-12 h-12 text-red-500 mx-auto mb-3" />
+            <h3 class="text-lg font-semibold text-red-800 mb-2">Événement terminé</h3>
+            <p class="text-red-600 text-sm mb-4">Cet événement s'est déjà déroulé.</p>
+            <router-link to="/events" class="bg-blue-900 text-white px-6 py-2 rounded-lg inline-block">
+              Voir d'autres événements
+            </router-link>
+          </div>
+
+          <!-- Order Form -->
+          <form v-if="!isEventPassed" @submit.prevent="processOrder" class="space-y-5">
+
+            <!-- Ticket Type Selection -->
+            <div>
+              <label class="block text-sm font-semibold text-blue-900 mb-2">Type de ticket</label>
+              <select v-model="orderForm.ticketTypeId" required
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-900 focus:outline-none bg-white text-base"
+                :disabled="availableTicketTypes.length === 0">
+                <option value="">Sélectionnez un type</option>
+                <option v-for="ticketType in availableTicketTypes" :key="ticketType.id" :value="ticketType.id">
+                  {{ ticketType.name }} - {{ formatPrice(ticketType.price) }} XAF
+                </option>
+              </select>
+            </div>
+
+            <!-- Quantity -->
+            <div>
+              <label class="block text-sm font-semibold text-blue-900 mb-2">Nombre de tickets</label>
+              <input type="number" v-model="orderForm.quantity" min="1" max="10" required
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-900 focus:outline-none text-base" />
+            </div>
+
+            <!-- Guest Info (if not authenticated) -->
+            <div v-if="!isAuthenticated" class="bg-blue-50 rounded-xl p-4 space-y-4">
+              <h4 class="text-sm font-semibold text-blue-900">Vos informations</h4>
+              <div>
+                <label class="block text-sm font-semibold text-blue-900 mb-2">Nom complet *</label>
+                <input type="text" v-model="orderForm.guestName" placeholder="Votre nom" required
+                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-900 focus:outline-none text-base" />
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-blue-900 mb-2">Téléphone</label>
+                <PhoneInput v-model="orderForm.guestPhone" placeholder="01 23 45 67" class="w-full" />
+              </div>
+            </div>
+
+            <!-- Total -->
+            <div v-if="orderForm.quantity && orderForm.ticketTypeId" class="bg-blue-50 rounded-xl p-4">
+              <div class="flex justify-between items-center">
+                <span class="font-semibold text-blue-900">Total:</span>
+                <span class="text-2xl font-bold text-blue-900">{{ formatPrice(totalAmount) }} XAF</span>
+              </div>
+            </div>
+
+            <!-- Payment Methods -->
+            <div>
+              <label class="block text-sm font-semibold text-blue-900 mb-3">Moyen de paiement</label>
+
+              <div class="grid grid-cols-3 gap-3 mb-4">
+                <button type="button" @click="selectPaymentMethod('airtel')"
+                  :class="['p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center',
+                    orderForm.paymentMethod === 'airtel' ? 'border-red-500 bg-red-50' : 'border-gray-200']">
+                  <img src="/images/am.png" alt="Airtel" class="h-8 w-auto" onerror="this.style.display='none'" />
+                  <span class="text-xs mt-1 font-semibold text-red-600">Airtel</span>
+                </button>
+
+                <button type="button" @click="selectPaymentMethod('moov')"
+                  :class="['p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center',
+                    orderForm.paymentMethod === 'moov' ? 'border-orange-500 bg-orange-50' : 'border-gray-200']">
+                  <img src="/images/mm.png" alt="Moov" class="h-8 w-auto" onerror="this.style.display='none'" />
+                  <span class="text-xs mt-1 font-semibold text-orange-600">Moov</span>
+                </button>
+
+                <button type="button" @click="selectPaymentMethod('visa')"
+                  :class="['p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center',
+                    orderForm.paymentMethod === 'visa' ? 'border-blue-500 bg-blue-50' : 'border-gray-200']">
+                  <img src="/images/vm.png" alt="Visa" class="h-8 w-auto" onerror="this.style.display='none'" />
+                  <span class="text-xs mt-1 font-semibold text-blue-600">Visa</span>
+                </button>
+              </div>
+
+              <!-- Phone Number Input for Mobile Money -->
+              <div v-if="orderForm.paymentMethod === 'airtel' || orderForm.paymentMethod === 'moov'">
+                <label class="block text-sm font-semibold text-blue-900 mb-2">
+                  Numéro {{ orderForm.paymentMethod === 'airtel' ? 'Airtel Money' : 'Moov Money' }}
+                </label>
+                <input type="tel" v-model="orderForm.phoneNumber" required maxlength="9" pattern="[0-9]{9}"
+                  :placeholder="orderForm.paymentMethod === 'airtel' ? '074123456' : '062123456'"
+                  @input="validatePhoneNumber"
+                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-900 focus:outline-none text-base" />
+                <p v-if="phoneError" class="mt-1 text-sm text-red-600">{{ phoneError }}</p>
+              </div>
+
+              <!-- Visa Info -->
+              <div v-if="orderForm.paymentMethod === 'visa'" class="bg-blue-50 rounded-xl p-4 text-center">
+                <p class="text-blue-800 font-semibold mb-2">Paiement Visa sécurisé</p>
+                <p class="text-blue-600 text-xs">Vous serez redirigé vers notre partenaire de paiement</p>
+              </div>
+            </div>
+
+            <!-- Error Message -->
+            <div v-if="error" class="bg-red-50 border-2 border-red-200 rounded-xl p-4">
+              <p class="text-red-600 text-sm">{{ error }}</p>
+            </div>
+
+            <!-- USSD Push Section -->
+            <div v-if="ussdPushActive" class="bg-blue-50 border-2 border-blue-200 rounded-xl p-6">
+              <div class="text-center space-y-4">
+                <div v-if="paymentStatus === 'pending'">
+                  <div class="w-12 h-12 border-4 border-blue-300 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+                  <h4 class="text-lg font-bold text-blue-800 mb-2">Push envoyé !</h4>
+                  <p class="text-blue-700 text-sm mb-4">
+                    Validez le paiement sur votre téléphone au {{ formatPhoneForDisplay(currentPayment?.phone) }}
+                  </p>
+                  <div class="bg-white rounded-xl p-4 mb-4">
+                    <div class="text-2xl font-bold text-blue-600">{{ formatCountdown(ussdCountdown) }}</div>
+                    <div class="text-xs text-blue-500 mt-1">Temps restant</div>
+                    <div class="w-full bg-blue-200 rounded-full h-2 mt-3">
+                      <div class="bg-blue-600 h-2 rounded-full transition-all" :style="{ width: (ussdCountdown / 90 * 100) + '%' }"></div>
+                    </div>
+                  </div>
+                  <div class="space-y-2">
+                    <button @click="retryUSSDPush" :disabled="loading || ussdCountdown > 0"
+                      class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold disabled:opacity-50">
+                      Renvoyer le push
+                    </button>
+                    <button v-if="currentPayment.payment_url" @click="payViaWebPage"
+                      class="w-full bg-green-600 text-white px-4 py-3 rounded-lg font-semibold">
+                      Payer via page web
+                    </button>
+                    <button @click="changeOperator" :disabled="ussdCountdown > 0"
+                      class="w-full bg-gray-500 text-white px-4 py-3 rounded-lg font-semibold disabled:opacity-50">
+                      Changer d'opérateur
+                    </button>
+                    <button @click="cancelUSSDPush" class="w-full bg-red-500 text-white px-4 py-3 rounded-lg font-semibold">
+                      Annuler
+                    </button>
+                  </div>
+                </div>
+
+                <div v-else-if="paymentStatus === 'successful'">
+                  <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </div>
+                  <h4 class="text-lg font-bold text-green-800 mb-2">Paiement réussi !</h4>
+                  <p class="text-green-700 text-sm">Redirection en cours...</p>
+                </div>
+
+                <div v-else-if="paymentStatus === 'failed' || paymentStatus === 'cancelled' || paymentStatus === 'expired'">
+                  <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                  </div>
+                  <h4 class="text-lg font-bold text-red-800 mb-2">Paiement échoué</h4>
+                  <p class="text-red-700 text-sm mb-4">{{ paymentStatus === 'cancelled' ? 'Paiement annulé' : paymentStatus === 'expired' ? 'Délai expiré' : 'Veuillez réessayer' }}</p>
+                  <div class="space-y-2">
+                    <button @click="retryUSSDPush" class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold">
+                      Réessayer
+                    </button>
+                    <button @click="changeOperator" class="w-full bg-gray-500 text-white px-4 py-3 rounded-lg font-semibold">
+                      Changer d'opérateur
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button v-if="!ussdPushActive" type="submit" :disabled="loading || !isFormValid"
+              class="w-full bg-blue-900 text-white py-4 px-6 rounded-xl text-base font-bold hover:bg-yellow-500 hover:text-blue-900 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+              <span v-if="loading" class="flex items-center justify-center">
+                <svg class="w-5 h-5 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25"/>
+                  <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" class="opacity-75"/>
+                </svg>
+                Traitement...
+              </span>
+              <span v-else>Finaliser le paiement</span>
+            </button>
+
+            <!-- Retrieve Ticket Link -->
+            <div class="text-center pt-4">
+              <router-link to="/ticket-retrieve" class="text-blue-900 hover:text-yellow-500 text-sm font-semibold">
+                Récupérer mon ticket perdu
+              </router-link>
+            </div>
+
+          </form>
         </div>
       </div>
     </div>

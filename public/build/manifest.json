@@ -1,60 +1,83 @@
 {
-  "_account-CqTyY6S0.css": {
-    "file": "assets/css/account-CqTyY6S0.css",
-    "src": "_account-CqTyY6S0.css"
+  "_EventCard-D2YGd7iT.js": {
+    "file": "assets/js/EventCard-D2YGd7iT.js",
+    "name": "EventCard",
+    "imports": [
+      "_vue-vendor-DP67WaqR.js",
+      "_account-CFnX3a8R.js"
+    ],
+    "css": [
+      "assets/css/EventCard-DN3VZdM2.css"
+    ]
   },
-  "_account-GfTEymhe.js": {
-    "file": "assets/js/account-GfTEymhe.js",
+  "_EventCard-DN3VZdM2.css": {
+    "file": "assets/css/EventCard-DN3VZdM2.css",
+    "src": "_EventCard-DN3VZdM2.css"
+  },
+  "_account-CFnX3a8R.js": {
+    "file": "assets/js/account-CFnX3a8R.js",
     "name": "account",
     "isDynamicEntry": true,
     "imports": [
-      "_vue-vendor-DBfH5c9i.js",
-      "_pinia-vendor-C0Mx1lJv.js",
+      "_vue-vendor-DP67WaqR.js",
+      "_pinia-vendor-Dwga0azm.js",
       "_vendor-14XLBY50.js"
     ],
     "css": [
       "assets/css/account-CqTyY6S0.css"
     ]
   },
+  "_account-CqTyY6S0.css": {
+    "file": "assets/css/account-CqTyY6S0.css",
+    "src": "_account-CqTyY6S0.css"
+  },
   "_admin-AWcDYV50.css": {
     "file": "assets/css/admin-AWcDYV50.css",
     "src": "_admin-AWcDYV50.css"
   },
-  "_admin-D7jODDNY.js": {
-    "file": "assets/js/admin-D7jODDNY.js",
+  "_admin-i7WvjLnr.js": {
+    "file": "assets/js/admin-i7WvjLnr.js",
     "name": "admin",
     "isDynamicEntry": true,
     "imports": [
-      "_vue-vendor-DBfH5c9i.js",
-      "_account-GfTEymhe.js",
+      "_vue-vendor-DP67WaqR.js",
+      "_account-CFnX3a8R.js",
       "_vendor-14XLBY50.js"
     ],
     "css": [
       "assets/css/admin-AWcDYV50.css"
     ]
   },
-  "_organizer-0ZwNa06v.js": {
-    "file": "assets/js/organizer-0ZwNa06v.js",
-    "name": "organizer",
-    "isDynamicEntry": true,
+  "_events-Br7Isw9C.js": {
+    "file": "assets/js/events-Br7Isw9C.js",
+    "name": "events",
     "imports": [
-      "_vue-vendor-DBfH5c9i.js",
-      "_account-GfTEymhe.js",
-      "_vendor-14XLBY50.js"
-    ],
-    "css": [
-      "assets/css/organizer-BPFsZtL7.css"
+      "_pinia-vendor-Dwga0azm.js",
+      "_vue-vendor-DP67WaqR.js"
     ]
   },
   "_organizer-BPFsZtL7.css": {
     "file": "assets/css/organizer-BPFsZtL7.css",
     "src": "_organizer-BPFsZtL7.css"
   },
-  "_pinia-vendor-C0Mx1lJv.js": {
-    "file": "assets/js/pinia-vendor-C0Mx1lJv.js",
+  "_organizer-CDvTV-Sr.js": {
+    "file": "assets/js/organizer-CDvTV-Sr.js",
+    "name": "organizer",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vue-vendor-DP67WaqR.js",
+      "_account-CFnX3a8R.js",
+      "_vendor-14XLBY50.js"
+    ],
+    "css": [
+      "assets/css/organizer-BPFsZtL7.css"
+    ]
+  },
+  "_pinia-vendor-Dwga0azm.js": {
+    "file": "assets/js/pinia-vendor-Dwga0azm.js",
     "name": "pinia-vendor",
     "imports": [
-      "_vue-vendor-DBfH5c9i.js"
+      "_vue-vendor-DP67WaqR.js"
     ]
   },
   "_vendor-14XLBY50.js": {
@@ -74,8 +97,8 @@
     "file": "assets/css/vendor-Cdh-HrC8.css",
     "src": "_vendor-Cdh-HrC8.css"
   },
-  "_vue-vendor-DBfH5c9i.js": {
-    "file": "assets/js/vue-vendor-DBfH5c9i.js",
+  "_vue-vendor-DP67WaqR.js": {
+    "file": "assets/js/vue-vendor-DP67WaqR.js",
     "name": "vue-vendor",
     "imports": [
       "_vendor-14XLBY50.js"
@@ -98,7 +121,7 @@
     "src": "node_modules/intl-tel-input/build/img/globe@2x.webp"
   },
   "resources/css/app.css": {
-    "file": "assets/css/app-Co1L2rV7.css",
+    "file": "assets/css/app-DJPUZ7U2.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [
@@ -106,15 +129,15 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-BeMLURnM.js",
+    "file": "assets/js/app-Btx8-B4S.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
       "_vendor-14XLBY50.js",
-      "_vue-vendor-DBfH5c9i.js",
-      "_pinia-vendor-C0Mx1lJv.js",
-      "_account-GfTEymhe.js"
+      "_vue-vendor-DP67WaqR.js",
+      "_pinia-vendor-Dwga0azm.js",
+      "_account-CFnX3a8R.js"
     ],
     "dynamicImports": [
       "resources/js/pages/Events.vue",
@@ -130,285 +153,284 @@
       "resources/js/pages/TicketDownload.vue",
       "resources/js/pages/TicketSuccess.vue",
       "resources/js/pages/PaymentSuccess.vue",
-      "_account-GfTEymhe.js",
-      "_account-GfTEymhe.js",
-      "_account-GfTEymhe.js",
-      "_account-GfTEymhe.js",
+      "_account-CFnX3a8R.js",
+      "_account-CFnX3a8R.js",
+      "_account-CFnX3a8R.js",
+      "_account-CFnX3a8R.js",
       "resources/js/layouts/OrganizerLayout.vue",
-      "_organizer-0ZwNa06v.js",
-      "_organizer-0ZwNa06v.js",
-      "_organizer-0ZwNa06v.js",
-      "_organizer-0ZwNa06v.js",
-      "_organizer-0ZwNa06v.js",
-      "_organizer-0ZwNa06v.js",
-      "_organizer-0ZwNa06v.js",
+      "_organizer-CDvTV-Sr.js",
+      "_organizer-CDvTV-Sr.js",
+      "_organizer-CDvTV-Sr.js",
+      "_organizer-CDvTV-Sr.js",
+      "_organizer-CDvTV-Sr.js",
+      "_organizer-CDvTV-Sr.js",
+      "_organizer-CDvTV-Sr.js",
       "resources/js/layouts/AdminLayout.vue",
-      "_admin-D7jODDNY.js",
-      "_admin-D7jODDNY.js",
-      "_admin-D7jODDNY.js",
-      "_admin-D7jODDNY.js",
-      "_admin-D7jODDNY.js",
-      "_admin-D7jODDNY.js",
-      "_admin-D7jODDNY.js",
-      "_admin-D7jODDNY.js",
-      "_admin-D7jODDNY.js",
-      "_admin-D7jODDNY.js",
-      "_admin-D7jODDNY.js",
-      "_admin-D7jODDNY.js",
-      "_admin-D7jODDNY.js",
-      "_admin-D7jODDNY.js",
-      "_admin-D7jODDNY.js",
-      "_admin-D7jODDNY.js",
-      "_admin-D7jODDNY.js",
-      "_admin-D7jODDNY.js",
-      "_admin-D7jODDNY.js",
-      "_admin-D7jODDNY.js",
-      "_admin-D7jODDNY.js",
+      "_admin-i7WvjLnr.js",
+      "_admin-i7WvjLnr.js",
+      "_admin-i7WvjLnr.js",
+      "_admin-i7WvjLnr.js",
+      "_admin-i7WvjLnr.js",
+      "_admin-i7WvjLnr.js",
+      "_admin-i7WvjLnr.js",
+      "_admin-i7WvjLnr.js",
+      "_admin-i7WvjLnr.js",
+      "_admin-i7WvjLnr.js",
+      "_admin-i7WvjLnr.js",
+      "_admin-i7WvjLnr.js",
+      "_admin-i7WvjLnr.js",
+      "_admin-i7WvjLnr.js",
+      "_admin-i7WvjLnr.js",
+      "_admin-i7WvjLnr.js",
+      "_admin-i7WvjLnr.js",
+      "_admin-i7WvjLnr.js",
+      "_admin-i7WvjLnr.js",
+      "_admin-i7WvjLnr.js",
+      "_admin-i7WvjLnr.js",
       "resources/js/pages/scanner/ScannerApp.vue"
     ],
     "css": [
-      "assets/css/app-BIWr7JQ-.css",
-      "assets/css/app-Co1L2rV7.css"
+      "assets/css/app-B3dyJkQK.css",
+      "assets/css/app-DJPUZ7U2.css"
     ]
   },
   "resources/js/layouts/AdminLayout.vue": {
-    "file": "assets/js/AdminLayout-DQXLCE25.js",
+    "file": "assets/js/AdminLayout-J3L-JSmw.js",
     "name": "AdminLayout",
     "src": "resources/js/layouts/AdminLayout.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_vue-vendor-DBfH5c9i.js",
-      "_account-GfTEymhe.js",
+      "_vue-vendor-DP67WaqR.js",
+      "_account-CFnX3a8R.js",
       "_vendor-14XLBY50.js",
-      "_pinia-vendor-C0Mx1lJv.js"
+      "_pinia-vendor-Dwga0azm.js"
     ],
     "css": [
       "assets/css/AdminLayout-DF4ZFvx3.css"
     ]
   },
   "resources/js/layouts/OrganizerLayout.vue": {
-    "file": "assets/js/OrganizerLayout-HBUbSIz3.js",
+    "file": "assets/js/OrganizerLayout-B_HW1ra-.js",
     "name": "OrganizerLayout",
     "src": "resources/js/layouts/OrganizerLayout.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_vue-vendor-DBfH5c9i.js",
-      "_account-GfTEymhe.js",
+      "_vue-vendor-DP67WaqR.js",
+      "_account-CFnX3a8R.js",
       "_vendor-14XLBY50.js",
-      "_pinia-vendor-C0Mx1lJv.js"
+      "_pinia-vendor-Dwga0azm.js"
     ],
     "css": [
       "assets/css/OrganizerLayout-BabJFmb7.css"
     ]
   },
   "resources/js/pages/Checkout.vue": {
-    "file": "assets/js/Checkout-D60lPhL3.js",
+    "file": "assets/js/Checkout-ByFMNSL9.js",
     "name": "Checkout",
     "src": "resources/js/pages/Checkout.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_vue-vendor-DBfH5c9i.js",
-      "resources/js/app.js",
-      "_account-GfTEymhe.js",
+      "_vue-vendor-DP67WaqR.js",
+      "_events-Br7Isw9C.js",
+      "_account-CFnX3a8R.js",
       "_vendor-14XLBY50.js",
-      "_pinia-vendor-C0Mx1lJv.js"
+      "_pinia-vendor-Dwga0azm.js"
     ],
     "css": [
-      "assets/css/Checkout-C0VYMsBf.css",
-      "assets/css/app-Co1L2rV7.css"
+      "assets/css/Checkout-DIP3iKoW.css"
     ]
   },
   "resources/js/pages/EmailVerificationResult.vue": {
-    "file": "assets/js/EmailVerificationResult-BYfn-fxo.js",
+    "file": "assets/js/EmailVerificationResult-4TkXEmiA.js",
     "name": "EmailVerificationResult",
     "src": "resources/js/pages/EmailVerificationResult.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_vue-vendor-DBfH5c9i.js",
-      "_account-GfTEymhe.js",
+      "_vue-vendor-DP67WaqR.js",
+      "_account-CFnX3a8R.js",
       "_vendor-14XLBY50.js",
-      "_pinia-vendor-C0Mx1lJv.js"
+      "_pinia-vendor-Dwga0azm.js"
     ],
     "css": [
       "assets/css/EmailVerificationResult-GuzdjnIR.css"
     ]
   },
   "resources/js/pages/EventDetail.vue": {
-    "file": "assets/js/EventDetail-C05-qQOm.js",
+    "file": "assets/js/EventDetail-C1Urle3d.js",
     "name": "EventDetail",
     "src": "resources/js/pages/EventDetail.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_vue-vendor-DBfH5c9i.js",
-      "resources/js/app.js",
-      "_account-GfTEymhe.js",
+      "_vue-vendor-DP67WaqR.js",
+      "_events-Br7Isw9C.js",
+      "_EventCard-D2YGd7iT.js",
+      "_account-CFnX3a8R.js",
       "_vendor-14XLBY50.js",
-      "_pinia-vendor-C0Mx1lJv.js"
+      "_pinia-vendor-Dwga0azm.js"
     ],
     "css": [
-      "assets/css/EventDetail-Coz3v2JU.css",
-      "assets/css/app-Co1L2rV7.css"
+      "assets/css/EventDetail-DoJR3l_o.css"
     ]
   },
   "resources/js/pages/Events.vue": {
-    "file": "assets/js/Events-BlWYWFd6.js",
+    "file": "assets/js/Events-CB8ztrwU.js",
     "name": "Events",
     "src": "resources/js/pages/Events.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_vue-vendor-DBfH5c9i.js",
-      "resources/js/app.js",
-      "_account-GfTEymhe.js",
+      "_vue-vendor-DP67WaqR.js",
+      "_events-Br7Isw9C.js",
+      "_EventCard-D2YGd7iT.js",
+      "_account-CFnX3a8R.js",
       "_vendor-14XLBY50.js",
-      "_pinia-vendor-C0Mx1lJv.js"
+      "_pinia-vendor-Dwga0azm.js"
     ],
     "css": [
-      "assets/css/Events-Bsdf4vY3.css",
-      "assets/css/app-Co1L2rV7.css"
+      "assets/css/Events-Bsdf4vY3.css"
     ]
   },
   "resources/js/pages/Payment.vue": {
-    "file": "assets/js/Payment-CfqpMMFg.js",
+    "file": "assets/js/Payment-CK4eCAXM.js",
     "name": "Payment",
     "src": "resources/js/pages/Payment.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_vue-vendor-DBfH5c9i.js",
-      "_account-GfTEymhe.js",
+      "_vue-vendor-DP67WaqR.js",
+      "_account-CFnX3a8R.js",
       "_vendor-14XLBY50.js",
-      "_pinia-vendor-C0Mx1lJv.js"
+      "_pinia-vendor-Dwga0azm.js"
     ],
     "css": [
       "assets/css/Payment-BzgyV6wf.css"
     ]
   },
   "resources/js/pages/PaymentSuccess.vue": {
-    "file": "assets/js/PaymentSuccess-BTFkZatz.js",
+    "file": "assets/js/PaymentSuccess-CKCtfXwP.js",
     "name": "PaymentSuccess",
     "src": "resources/js/pages/PaymentSuccess.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_vue-vendor-DBfH5c9i.js",
-      "_account-GfTEymhe.js",
+      "_vue-vendor-DP67WaqR.js",
+      "_account-CFnX3a8R.js",
       "_vendor-14XLBY50.js",
-      "_pinia-vendor-C0Mx1lJv.js"
+      "_pinia-vendor-Dwga0azm.js"
     ],
     "css": [
       "assets/css/PaymentSuccess-BpU_nbVf.css"
     ]
   },
   "resources/js/pages/TicketDownload.vue": {
-    "file": "assets/js/TicketDownload-BSnn753X.js",
+    "file": "assets/js/TicketDownload-svfPPJqw.js",
     "name": "TicketDownload",
     "src": "resources/js/pages/TicketDownload.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_vue-vendor-DBfH5c9i.js",
-      "_account-GfTEymhe.js",
+      "_vue-vendor-DP67WaqR.js",
+      "_account-CFnX3a8R.js",
       "_vendor-14XLBY50.js",
-      "_pinia-vendor-C0Mx1lJv.js"
+      "_pinia-vendor-Dwga0azm.js"
     ],
     "css": [
-      "assets/css/TicketDownload-CVUTL7fu.css"
+      "assets/css/TicketDownload-D1QtSSlp.css"
     ]
   },
   "resources/js/pages/TicketRetrieve.vue": {
-    "file": "assets/js/TicketRetrieve-Db-KMuRf.js",
+    "file": "assets/js/TicketRetrieve-ToGJ43Fy.js",
     "name": "TicketRetrieve",
     "src": "resources/js/pages/TicketRetrieve.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_vue-vendor-DBfH5c9i.js",
-      "_account-GfTEymhe.js",
+      "_vue-vendor-DP67WaqR.js",
+      "_account-CFnX3a8R.js",
       "_vendor-14XLBY50.js",
-      "_pinia-vendor-C0Mx1lJv.js"
+      "_pinia-vendor-Dwga0azm.js"
     ],
     "css": [
-      "assets/css/TicketRetrieve-Cj1eu_Ox.css"
+      "assets/css/TicketRetrieve-DGv4ZVcb.css"
     ]
   },
   "resources/js/pages/TicketSuccess.vue": {
-    "file": "assets/js/TicketSuccess-CH_EkPWO.js",
+    "file": "assets/js/TicketSuccess-CGv9Sjtr.js",
     "name": "TicketSuccess",
     "src": "resources/js/pages/TicketSuccess.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_vue-vendor-DBfH5c9i.js",
-      "_account-GfTEymhe.js",
+      "_vue-vendor-DP67WaqR.js",
+      "_account-CFnX3a8R.js",
       "_vendor-14XLBY50.js",
-      "_pinia-vendor-C0Mx1lJv.js"
+      "_pinia-vendor-Dwga0azm.js"
     ],
     "css": [
       "assets/css/TicketSuccess-DzbYFxZZ.css"
     ]
   },
   "resources/js/pages/auth/EmailVerification.vue": {
-    "file": "assets/js/EmailVerification-7IRCFRmF.js",
+    "file": "assets/js/EmailVerification-SOM8mLz5.js",
     "name": "EmailVerification",
     "src": "resources/js/pages/auth/EmailVerification.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_vue-vendor-DBfH5c9i.js",
-      "_account-GfTEymhe.js",
+      "_vue-vendor-DP67WaqR.js",
+      "_account-CFnX3a8R.js",
       "_vendor-14XLBY50.js",
-      "_pinia-vendor-C0Mx1lJv.js"
+      "_pinia-vendor-Dwga0azm.js"
     ],
     "css": [
       "assets/css/EmailVerification-Cjhn7MjH.css"
     ]
   },
   "resources/js/pages/auth/ForgotPassword.vue": {
-    "file": "assets/js/ForgotPassword-avtO3qbf.js",
+    "file": "assets/js/ForgotPassword-C08LXTo7.js",
     "name": "ForgotPassword",
     "src": "resources/js/pages/auth/ForgotPassword.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_vue-vendor-DBfH5c9i.js",
+      "_vue-vendor-DP67WaqR.js",
       "_vendor-14XLBY50.js",
-      "_account-GfTEymhe.js",
-      "_pinia-vendor-C0Mx1lJv.js"
+      "_account-CFnX3a8R.js",
+      "_pinia-vendor-Dwga0azm.js"
     ],
     "css": [
       "assets/css/ForgotPassword-GIBQ3cmO.css"
     ]
   },
   "resources/js/pages/auth/Register.vue": {
-    "file": "assets/js/Register-wHrOU7xi.js",
+    "file": "assets/js/Register-DEmNkNG4.js",
     "name": "Register",
     "src": "resources/js/pages/auth/Register.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_vue-vendor-DBfH5c9i.js",
-      "_account-GfTEymhe.js",
+      "_vue-vendor-DP67WaqR.js",
+      "_account-CFnX3a8R.js",
       "_vendor-14XLBY50.js",
-      "_pinia-vendor-C0Mx1lJv.js"
+      "_pinia-vendor-Dwga0azm.js"
     ],
     "css": [
-      "assets/css/Register-DUjYwgTV.css"
+      "assets/css/Register-an88f4VG.css"
     ]
   },
   "resources/js/pages/auth/ResetPassword.vue": {
-    "file": "assets/js/ResetPassword-VdsC7DHF.js",
+    "file": "assets/js/ResetPassword-BW-4PiPx.js",
     "name": "ResetPassword",
     "src": "resources/js/pages/auth/ResetPassword.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_vue-vendor-DBfH5c9i.js",
-      "_account-GfTEymhe.js",
+      "_vue-vendor-DP67WaqR.js",
+      "_account-CFnX3a8R.js",
       "_vendor-14XLBY50.js",
-      "_pinia-vendor-C0Mx1lJv.js"
+      "_pinia-vendor-Dwga0azm.js"
     ]
   },
   "resources/js/pages/scanner/ScannerApp.vue": {
-    "file": "assets/js/ScannerApp-Bo1qdCQM.js",
+    "file": "assets/js/ScannerApp-BCOgkAT7.js",
     "name": "ScannerApp",
     "src": "resources/js/pages/scanner/ScannerApp.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_vue-vendor-DBfH5c9i.js",
-      "_account-GfTEymhe.js",
+      "_vue-vendor-DP67WaqR.js",
+      "_account-CFnX3a8R.js",
       "_vendor-14XLBY50.js",
-      "_pinia-vendor-C0Mx1lJv.js"
+      "_pinia-vendor-Dwga0azm.js"
     ]
   }
 }

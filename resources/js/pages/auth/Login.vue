@@ -1,190 +1,210 @@
 <template>
-  <div class="login-page font-primea relative overflow-hidden min-h-screen">
-    <!-- Image de fond avec overlay -->
-    <div class="absolute inset-0">
-      <img 
-        src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
-        alt="Événements" 
-        class="w-full h-full object-cover opacity-40" 
+  <div class="login-page relative overflow-hidden min-h-screen bg-white md:bg-transparent">
+    <!-- Background Image (Desktop only) -->
+    <div class="hidden md:block absolute inset-0">
+      <img
+        src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+        alt="Événements"
+        class="w-full h-full object-cover opacity-40"
       />
-      <div class="absolute inset-0 bg-primea-blue/60"></div>
+      <div class="absolute inset-0 bg-blue-900/60"></div>
     </div>
 
-    <!-- Contenu principal -->
-    <div class="relative z-10 min-h-screen flex items-center justify-center px-4 py-12">
-      <div class="max-w-md w-full">
-        <!-- Logo Primea -->
-        <div class="text-center mb-8 animate-fade-in">
-          <img src="/images/logo_white.png" alt="Primea" class="h-16 mx-auto mb-6" />
+    <!-- Mobile: Simple top header with logo -->
+    <div class="md:hidden bg-blue-900 px-4 py-6">
+      <div class="flex items-center justify-between">
+        <router-link to="/" class="text-white hover:text-yellow-500 transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </router-link>
+        <img src="/images/logo_white.png" alt="Logo" class="h-10" />
+        <div class="w-6"></div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="relative z-10 min-h-screen md:flex md:items-center md:justify-center px-4 py-8 md:py-12">
+      <div class="max-w-md w-full mx-auto">
+        <!-- Desktop Logo -->
+        <div class="hidden md:block text-center mb-8 animate-fade-in">
+          <img src="/images/logo_white.png" alt="Logo" class="h-16 mx-auto mb-6" />
         </div>
 
-        <!-- Carte de connexion -->
-        <div class="bg-white/95 backdrop-blur-sm rounded-primea-xl shadow-primea-lg p-8 animate-slide-up">
-          
-          <!-- Titre -->
-          <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-primea-blue mb-2">
-              Connexion
+        <!-- Login Card -->
+        <div class="bg-white md:bg-white/95 md:backdrop-blur-sm rounded-2xl md:rounded-3xl shadow-lg md:shadow-2xl p-6 md:p-8">
+
+          <!-- Title -->
+          <div class="text-center mb-6 md:mb-8">
+            <h1 class="text-2xl md:text-3xl font-bold text-blue-900 mb-2">
+              Bienvenue
             </h1>
-            <p class="text-gray-600 font-primea">
-              Accédez à votre espace Primea
+            <p class="text-gray-600 text-sm md:text-base">
+              Connectez-vous à votre compte
             </p>
           </div>
 
-        <!-- Formulaire de connexion -->
-        <form @submit.prevent="handleLogin" class="space-y-6">
-          
-          <!-- Onglets Email/Téléphone -->
-          <div class="mb-6">
-            <div class="flex rounded-primea-lg bg-white/50 p-1 border-2 border-gray-200">
-              <button
-                type="button"
-                @click="switchLoginType('email')"
-                class="flex-1 py-3 px-4 text-sm font-semibold rounded-primea transition-all duration-200 font-primea"
-                :style="loginType === 'email' 
-                  ? { backgroundColor: '#272d63', color: '#ffffff' }
-                  : { backgroundColor: 'transparent', color: '#6b7280' }"
-                @mouseover="if (loginType !== 'email') { $event.currentTarget.style.backgroundColor='#fab511'; $event.currentTarget.style.color='#272d63'; }"
-                @mouseleave="if (loginType !== 'email') { $event.currentTarget.style.backgroundColor='transparent'; $event.currentTarget.style.color='#6b7280'; }"
-              >
-                Email
-              </button>
-              <button
-                type="button"
-                @click="switchLoginType('phone')"
-                class="flex-1 py-3 px-4 text-sm font-semibold rounded-primea transition-all duration-200 font-primea"
-                :style="loginType === 'phone' 
-                  ? { backgroundColor: '#272d63', color: '#ffffff' }
-                  : { backgroundColor: 'transparent', color: '#6b7280' }"
-                @mouseover="if (loginType !== 'phone') { $event.currentTarget.style.backgroundColor='#fab511'; $event.currentTarget.style.color='#272d63'; }"
-                @mouseleave="if (loginType !== 'phone') { $event.currentTarget.style.backgroundColor='transparent'; $event.currentTarget.style.color='#6b7280'; }"
-              >
-                Téléphone
-              </button>
+          <!-- Login Form -->
+          <form @submit.prevent="handleLogin" class="space-y-5 md:space-y-6">
+
+            <!-- Email/Phone Tabs -->
+            <div class="mb-4 md:mb-6">
+              <div class="flex rounded-xl bg-gray-100 p-1 border border-gray-200">
+                <button
+                  type="button"
+                  @click="switchLoginType('email')"
+                  class="flex-1 py-3 px-4 text-sm font-semibold rounded-lg transition-all duration-200"
+                  :class="loginType === 'email'
+                    ? 'bg-blue-900 text-white shadow-md'
+                    : 'bg-transparent text-gray-600 hover:bg-yellow-500 hover:text-blue-900'"
+                >
+                  Email
+                </button>
+                <button
+                  type="button"
+                  @click="switchLoginType('phone')"
+                  class="flex-1 py-3 px-4 text-sm font-semibold rounded-lg transition-all duration-200"
+                  :class="loginType === 'phone'
+                    ? 'bg-blue-900 text-white shadow-md'
+                    : 'bg-transparent text-gray-600 hover:bg-yellow-500 hover:text-blue-900'"
+                >
+                  Téléphone
+                </button>
+              </div>
             </div>
-          </div>
 
-          <!-- Champ Email -->
-          <div v-if="loginType === 'email'">
-            <label for="email" class="block text-sm font-semibold text-primea-blue mb-2 font-primea">
-              Adresse email
-            </label>
-            <input 
-              type="email"
-              id="email"
-              v-model="loginForm.login"
-              placeholder="votre.email@exemple.com"
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-primea-lg focus:ring-2 focus:ring-primea-yellow focus:border-primea-blue transition-all duration-200 font-primea bg-white/90"
-              required
-            />
-          </div>
-
-          <!-- Champ Téléphone -->
-          <div v-if="loginType === 'phone'">
-            <label class="block text-sm font-semibold text-primea-blue mb-2 font-primea">
-              Numéro de téléphone
-            </label>
-            <PhoneInput
-              v-model="loginForm.login"
-              placeholder="01 23 45 67"
-              class="w-full"
-              required
-            />
-          </div>
-
-          <!-- Mot de passe -->
-          <div>
-            <label for="password" class="block text-sm font-semibold text-primea-blue mb-2 font-primea">
-              Mot de passe
-            </label>
-            <div class="relative">
-              <input 
-                :type="showPassword ? 'text' : 'password'"
-                id="password"
-                v-model="loginForm.password"
-                placeholder="Votre mot de passe"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-primea-lg focus:ring-2 focus:ring-primea-yellow focus:border-primea-blue transition-all duration-200 pr-12 font-primea bg-white/90"
+            <!-- Email Field -->
+            <div v-if="loginType === 'email'">
+              <label for="email" class="block text-sm font-semibold text-blue-900 mb-2">
+                Adresse email
+              </label>
+              <input
+                type="email"
+                id="email"
+                v-model="loginForm.login"
+                placeholder="votre.email@exemple.com"
+                class="w-full px-4 py-3 md:py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-blue-900 transition-all duration-200 bg-white text-base"
                 required
               />
-              <button 
-                type="button"
-                @click="togglePasswordVisibility"
-                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primea-blue transition-colors"
-              >
-                <EyeIcon v-if="showPassword" class="w-5 h-5" />
-                <EyeSlashIcon v-else class="w-5 h-5" />
-              </button>
             </div>
-          </div>
 
-          <!-- Message d'erreur -->
-          <div v-if="error" class="bg-red-50 border border-red-200 rounded-primea-lg p-4">
-            <p class="text-red-600 text-sm font-primea">{{ error }}</p>
-          </div>
+            <!-- Phone Field -->
+            <div v-if="loginType === 'phone'">
+              <label class="block text-sm font-semibold text-blue-900 mb-2">
+                Numéro de téléphone
+              </label>
+              <PhoneInput
+                v-model="loginForm.login"
+                placeholder="01 23 45 67"
+                class="w-full"
+                required
+              />
+            </div>
 
-          <!-- Message d'information -->
-          <div v-if="info" class="bg-blue-50 border border-blue-200 rounded-primea-lg p-4">
-            <p class="text-blue-600 text-sm font-primea">{{ info }}</p>
-          </div>
+            <!-- Password Field -->
+            <div>
+              <label for="password" class="block text-sm font-semibold text-blue-900 mb-2">
+                Mot de passe
+              </label>
+              <div class="relative">
+                <input
+                  :type="showPassword ? 'text' : 'password'"
+                  id="password"
+                  v-model="loginForm.password"
+                  placeholder="Votre mot de passe"
+                  class="w-full px-4 py-3 md:py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-blue-900 transition-all duration-200 pr-12 bg-white text-base"
+                  required
+                />
+                <button
+                  type="button"
+                  @click="togglePasswordVisibility"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-900 transition-colors p-1"
+                >
+                  <svg v-if="showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                  <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
 
-          <!-- Message de succès -->
-          <div v-if="success" class="bg-green-50 border border-green-200 rounded-primea-lg p-4">
-            <p class="text-green-600 text-sm font-primea">{{ success }}</p>
-          </div>
+            <!-- Error Message -->
+            <div v-if="error" class="bg-red-50 border-2 border-red-200 rounded-xl p-4">
+              <p class="text-red-600 text-sm font-medium">{{ error }}</p>
+            </div>
 
-          <!-- Bouton Connexion -->
-          <button 
-            type="submit"
-            :disabled="loading"
-            class="w-full text-white py-4 px-6 rounded-primea-lg text-lg font-bold transition-all duration-200 shadow-primea-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none font-primea"
-            :style="{ backgroundColor: '#272d63', color: '#ffffff' }"
-            @mouseover="$event.currentTarget.style.backgroundColor='#fab511'; $event.currentTarget.style.color='#272d63'"
-            @mouseleave="$event.currentTarget.style.backgroundColor='#272d63'; $event.currentTarget.style.color='#ffffff'"
-          >
-            <span v-if="loading" class="flex items-center justify-center pointer-events-none">
-              <svg class="w-5 h-5 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25"/>
-                <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" class="opacity-75"/>
-              </svg>
-              Connexion en cours...
-            </span>
-            <span v-else class="pointer-events-none">Se connecter</span>
-          </button>
+            <!-- Info Message -->
+            <div v-if="info" class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+              <p class="text-blue-600 text-sm font-medium">{{ info }}</p>
+            </div>
 
-          <!-- Mot de passe oublié -->
-          <div class="text-center">
-            <router-link
-              to="/forgot-password"
-              class="text-sm text-primea-blue hover:text-primea-yellow font-semibold transition-colors duration-200 font-primea"
+            <!-- Success Message -->
+            <div v-if="success" class="bg-green-50 border-2 border-green-200 rounded-xl p-4">
+              <p class="text-green-600 text-sm font-medium">{{ success }}</p>
+            </div>
+
+            <!-- Submit Button -->
+            <button
+              type="submit"
+              :disabled="loading"
+              class="w-full bg-blue-900 text-white py-4 px-6 rounded-xl text-base md:text-lg font-bold transition-all duration-200 shadow-lg hover:bg-yellow-500 hover:text-blue-900 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-900 disabled:hover:text-white transform hover:scale-105 disabled:transform-none"
             >
-              Mot de passe oublié ?
+              <span v-if="loading" class="flex items-center justify-center">
+                <svg class="w-5 h-5 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25"/>
+                  <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" class="opacity-75"/>
+                </svg>
+                Connexion en cours...
+              </span>
+              <span v-else>Se connecter</span>
+            </button>
+
+            <!-- Forgot Password Link -->
+            <div class="text-center">
+              <router-link
+                to="/forgot-password"
+                class="text-sm text-blue-900 hover:text-yellow-500 font-semibold transition-colors duration-200 inline-block"
+              >
+                Mot de passe oublié ?
+              </router-link>
+            </div>
+
+          </form>
+
+          <!-- Create Account Link -->
+          <div class="mt-6 md:mt-8 pt-6 border-t border-gray-200 text-center">
+            <p class="text-sm text-gray-600 mb-3 md:mb-4">
+              Nouveau ici ?
+            </p>
+            <router-link
+              to="/register"
+              class="text-blue-900 hover:text-yellow-500 font-bold text-sm transition-colors duration-200 inline-block"
+            >
+              Créer un compte pour suivre mes achats !
             </router-link>
           </div>
-
-        </form>
-
-        <!-- Lien création de compte -->
-        <div class="mt-8 pt-6 border-t border-gray-200 text-center">
-          <p class="text-sm text-gray-600 mb-4 font-primea">
-            Nouveau sur Primea ?
-          </p>
-          <router-link 
-            to="/register"
-            class="text-primea-blue hover:text-primea-yellow font-bold text-sm transition-colors duration-200 font-primea"
-          >
-            Créer un compte pour suivre mes achats !
-          </router-link>
-        </div>
-        
         </div>
 
-        <!-- Lien récupérer ticket -->
-        <div class="text-center mt-8">
-          <router-link 
-            to="/retrieve-ticket"
-            class="text-white/90 hover:text-primea-yellow font-semibold text-sm transition-colors duration-200 font-primea bg-white/10 backdrop-blur-sm px-4 py-2 rounded-primea border border-white/20 hover:border-primea-yellow"
+        <!-- Retrieve Ticket Link -->
+        <div class="text-center mt-6 md:mt-8">
+          <router-link
+            to="/ticket-retrieve"
+            class="text-blue-900 md:text-white/90 hover:text-yellow-500 md:hover:text-yellow-500 font-semibold text-sm transition-colors duration-200 bg-gray-100 md:bg-white/10 md:backdrop-blur-sm px-6 py-3 rounded-xl border border-gray-200 md:border-white/20 hover:border-yellow-500 inline-block"
           >
             Récupérer mon ticket perdu
+          </router-link>
+        </div>
+
+        <!-- Event Creator Link (Mobile) -->
+        <div class="md:hidden text-center mt-4">
+          <router-link
+            to="/organizer/login"
+            class="text-blue-900 hover:text-yellow-500 font-semibold text-sm transition-colors duration-200 inline-block underline"
+          >
+            Vous êtes créateur d'événements ?
           </router-link>
         </div>
       </div>
@@ -197,22 +217,18 @@ import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../../stores/auth.js'
 import PhoneInput from '../../components/PhoneInput.vue'
-import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline'
-import authUtils from '../../utils/auth'
 
 export default {
   name: 'Login',
   components: {
-    PhoneInput,
-    EyeIcon,
-    EyeSlashIcon
+    PhoneInput
   },
   setup() {
     const router = useRouter()
     const route = useRoute()
     const authStore = useAuthStore()
 
-    // État réactif
+    // Reactive state
     const showPassword = ref(false)
     const loading = ref(false)
     const error = ref('')
@@ -220,7 +236,7 @@ export default {
     const success = ref('')
     const loginType = ref('email')
 
-    // Afficher le message de succès depuis les query params (après inscription)
+    // Show success message from query params (after registration)
     if (route.query.message) {
       success.value = route.query.message
     }
@@ -230,17 +246,17 @@ export default {
       password: ''
     })
 
-    // Méthodes
+    // Methods
     const togglePasswordVisibility = () => {
       showPassword.value = !showPassword.value
     }
 
     const switchLoginType = (type) => {
       loginType.value = type
-      loginForm.value.login = '' // Réinitialiser le champ
-      error.value = '' // Effacer les erreurs
-      info.value = '' // Effacer les messages d'info
-      success.value = '' // Effacer les messages de succès
+      loginForm.value.login = ''
+      error.value = ''
+      info.value = ''
+      success.value = ''
     }
 
     const handleLogin = async () => {
@@ -250,32 +266,31 @@ export default {
         info.value = ''
         success.value = ''
 
-        // Validation basique
+        // Basic validation
         if (!loginForm.value.login || !loginForm.value.password) {
           throw new Error('Veuillez remplir tous les champs')
         }
 
         try {
-          // Tentative de connexion avec l'API
+          // Attempt login with API
           const result = await authStore.login({
             login: loginForm.value.login,
             password: loginForm.value.password
           })
 
           if (result.success) {
-            // Afficher un message d'information si l'email n'est pas vérifié
+            // Show info message if email is not verified
             if (result.email_verification_required) {
               info.value = result.message || 'N\'oubliez pas de vérifier votre adresse email.'
             }
 
-            // Vérifier s'il y a une URL de redirection dans les query params
+            // Check if there's a redirect URL in query params
             const redirectUrl = route.query.redirect
 
             if (redirectUrl) {
-              // Si une URL de redirection existe, y aller directement
               router.push(redirectUrl)
             } else {
-              // Sinon, redirection basée sur le niveau d'accès
+              // Redirect based on access level
               const accessLevel = result.access_level || 'client'
 
               switch (accessLevel) {
@@ -290,50 +305,35 @@ export default {
               }
             }
           } else {
-            // Afficher le message d'erreur de l'API
             error.value = result.message || 'Identifiants incorrects'
             return
           }
         } catch (apiError) {
-          // Gestion des erreurs réseau ou serveur
           console.error('Erreur de connexion:', apiError)
 
-          // Analyser l'erreur pour afficher un message approprié
+          // Parse error to display appropriate message
           if (apiError.response) {
-            // Le serveur a répondu avec un code d'erreur
             const status = apiError.response.status
             const data = apiError.response.data
 
             if (status === 401 || status === 422) {
-              // Erreur d'authentification
               error.value = data.message || 'Email ou mot de passe incorrect'
             } else if (status === 403) {
-              // Compte inactif ou autre restriction
               error.value = data.message || 'Accès refusé. Votre compte est peut-être inactif.'
             } else if (status === 429) {
-              // Trop de tentatives
               error.value = 'Trop de tentatives de connexion. Veuillez réessayer dans quelques minutes.'
             } else if (status >= 500) {
-              // Erreur serveur
               error.value = 'Erreur du serveur. Veuillez réessayer plus tard.'
             } else {
               error.value = data.message || 'Une erreur est survenue lors de la connexion'
             }
           } else if (apiError.request) {
-            // La requête a été envoyée mais pas de réponse
             error.value = 'Impossible de se connecter au serveur. Vérifiez votre connexion internet.'
           } else {
-            // Erreur lors de la configuration de la requête
             error.value = apiError.message || 'Une erreur est survenue'
           }
 
           return
-        }
-
-        // Fallback: Si l'API n'est pas disponible, utiliser les comptes de test
-        if (false) { // Désactivé pour forcer l'utilisation de l'API réelle
-          console.warn('API non disponible, utilisation des comptes de test:', apiError)
-
         }
 
       } catch (err) {
@@ -360,114 +360,7 @@ export default {
 </script>
 
 <style scoped>
-/* Variables CSS Primea */
-:root {
-  --primea-blue: #272d63;
-  --primea-yellow: #fab511;
-  --primea-white: #ffffff;
-  --primea-blue-dark: #1a1e47;
-  --primea-yellow-dark: #e09f0e;
-  --font-primary: 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-/* Fond dégradé Primea */
-.bg-primea-gradient {
-  background: linear-gradient(135deg, var(--primea-blue) 0%, var(--primea-blue-dark) 100%);
-}
-
-/* Couleurs de texte Primea */
-.text-primea-blue {
-  color: var(--primea-blue);
-}
-
-.text-primea-yellow {
-  color: var(--primea-yellow);
-}
-
-/* Couleurs de fond Primea */
-.bg-primea-blue {
-  background-color: var(--primea-blue);
-}
-
-.bg-primea-yellow {
-  background-color: var(--primea-yellow);
-}
-
-/* States hover Primea */
-.hover\:bg-primea-yellow:hover {
-  background-color: var(--primea-yellow) !important;
-}
-
-.hover\:text-primea-blue:hover {
-  color: var(--primea-blue) !important;
-}
-
-.hover\:text-primea-yellow:hover {
-  color: var(--primea-yellow);
-}
-
-.hover\:border-primea-yellow:hover {
-  border-color: var(--primea-yellow);
-}
-
-/* Focus states */
-.focus\:ring-primea-yellow:focus {
-  --tw-ring-color: var(--primea-yellow);
-}
-
-.focus\:border-primea-blue:focus {
-  border-color: var(--primea-blue);
-}
-
-/* Coins arrondis Primea */
-.rounded-primea {
-  border-radius: 12px;
-}
-
-.rounded-primea-lg {
-  border-radius: 16px;
-}
-
-.rounded-primea-xl {
-  border-radius: 20px;
-}
-
-/* Ombres Primea */
-.shadow-primea {
-  box-shadow: 0 4px 20px rgba(39, 45, 99, 0.1);
-}
-
-.shadow-primea-lg {
-  box-shadow: 0 8px 30px rgba(39, 45, 99, 0.15);
-}
-
-/* Police Primea */
-.font-primea {
-  font-family: var(--font-primary);
-}
-
 /* Animations */
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.8s ease-out;
-}
-
-.animate-slide-up {
-  animation: slideUp 0.6s ease-out;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -479,29 +372,27 @@ export default {
   }
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out;
 }
 
-/* Transitions */
-.transition-all {
-  transition: all 0.2s ease-in-out;
-}
-
-.transition-colors {
-  transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-}
-
-/* Styles pour les inputs focus */
+/* Focus states */
 input:focus {
   outline: none;
 }
 
+/* Smooth transitions */
+* {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* Touch-friendly on mobile */
+@media (max-width: 768px) {
+  input,
+  button {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
 </style>

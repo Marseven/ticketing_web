@@ -1,68 +1,157 @@
 <template>
-  <div class="ticket-download-page font-primea min-h-screen">
-    
-    <!-- Desktop/Tablet Layout -->
-    <div class="hidden md:block bg-gray-50 min-h-screen">
-      <div class="container mx-auto px-4 py-12">
+  <div class="ticket-download-page min-h-screen bg-gray-50">
+
+    <!-- Mobile Header -->
+    <div class="md:hidden bg-blue-900 px-4 py-6 mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <button @click="goBack" class="text-white hover:text-yellow-500 transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <img src="/images/logo_white.png" alt="Logo" class="h-10" />
+        <div class="w-6"></div>
+      </div>
+      <h1 class="text-xl font-bold text-white text-center">Votre ticket électronique</h1>
+    </div>
+
+    <!-- Desktop Header -->
+    <div class="hidden md:block bg-white shadow-sm">
+      <div class="container mx-auto px-4 py-8 md:py-12">
         <div class="max-w-6xl mx-auto">
-          
-          <!-- Header Desktop -->
-          <div class="text-center mb-12">
-            <img src="/images/logo.png" alt="Primea" class="h-16 mx-auto mb-6" />
-            <h1 class="text-4xl font-bold text-primea-blue mb-4">Votre ticket électronique</h1>
+          <div class="text-center">
+            <img src="/images/logo.png" alt="Logo" class="h-16 mx-auto mb-6" />
+            <h1 class="text-3xl md:text-4xl font-bold text-blue-900 mb-4">Votre ticket électronique</h1>
             <p class="text-lg text-gray-600">Téléchargez ou capturez votre ticket pour l'événement</p>
           </div>
+        </div>
+      </div>
+    </div>
 
-          <!-- État de chargement -->
-          <div v-if="loading" class="text-center py-12">
-            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primea-blue"></div>
-            <p class="mt-4 text-gray-600">Chargement du ticket...</p>
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-6 md:py-12">
+      <div class="max-w-6xl mx-auto">
+
+        <!-- Loading State -->
+        <div v-if="loading" class="text-center py-12">
+          <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-900"></div>
+          <p class="mt-4 text-gray-600">Chargement du ticket...</p>
+        </div>
+
+        <!-- Error State -->
+        <div v-else-if="error" class="bg-red-50 border-2 border-red-200 rounded-2xl md:rounded-3xl p-6 text-center max-w-md mx-auto">
+          <div class="flex items-center justify-center mb-4">
+            <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
           </div>
+          <h3 class="text-lg font-semibold text-red-800 mb-2">Ticket introuvable</h3>
+          <p class="text-red-600 mb-4">{{ error }}</p>
+          <button @click="loadTicket" class="bg-blue-900 text-white px-6 py-3 rounded-xl hover:bg-yellow-500 hover:text-blue-900 transition-colors font-semibold">
+            Réessayer
+          </button>
+        </div>
 
-          <!-- Message d'erreur -->
-          <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-primea-xl p-6 text-center">
-            <div class="flex items-center justify-center mb-4">
-              <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
+        <!-- Ticket Content -->
+        <template v-else-if="ticket">
+
+          <!-- Mobile Layout -->
+          <div class="md:hidden max-w-md mx-auto">
+            <!-- Instructions -->
+            <div class="text-center mb-6">
+              <h2 class="text-base font-medium text-gray-700 mb-2">
+                Téléchargez ou capturez l'écran
+              </h2>
+              <p class="text-sm text-gray-600">
+                pour conserver votre ticket
+              </p>
             </div>
-            <h3 class="text-lg font-semibold text-red-800 mb-2">Ticket introuvable</h3>
-            <p class="text-red-600 mb-4">{{ error }}</p>
-            <button @click="loadTicket" class="bg-primea-blue text-white px-6 py-2 rounded-primea-lg hover:bg-primea-yellow hover:text-primea-blue transition-colors">
-              Réessayer
-            </button>
+
+            <!-- Section Title -->
+            <div class="text-center mb-6">
+              <h2 class="text-lg font-bold text-blue-900">VOTRE TICKET</h2>
+            </div>
+
+            <!-- Ticket Display -->
+            <div class="mb-6">
+              <TicketComponent :ticket="ticket" size="small" />
+            </div>
+
+            <!-- Download Button -->
+            <div class="mb-8">
+              <button
+                @click="downloadTicket"
+                class="w-full bg-yellow-500 text-blue-900 py-4 px-6 rounded-xl font-bold transition-all duration-200 shadow-lg hover:bg-yellow-600 transform hover:scale-105"
+              >
+                Télécharger
+              </button>
+            </div>
+
+            <!-- Ad Space -->
+            <div class="bg-gray-200 rounded-2xl p-8 text-center mb-6">
+              <div class="text-xl text-gray-400 font-light mb-4">ESPACE PUB</div>
+              <a href="#" class="text-blue-900 text-sm hover:text-yellow-500 font-semibold">En savoir plus...</a>
+            </div>
+
+            <!-- Footer with Social Icons -->
+            <div class="text-center">
+              <img src="/images/logo.png" alt="Logo" class="h-8 mx-auto mb-4" />
+              <div class="flex justify-center space-x-4">
+                <a href="#" class="text-green-500 hover:text-green-600 transition-colors">
+                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
+                  </svg>
+                </a>
+                <a href="#" class="text-blue-600 hover:text-blue-700 transition-colors">
+                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
+                  </svg>
+                </a>
+                <a href="#" class="text-pink-500 hover:text-pink-600 transition-colors">
+                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                  </svg>
+                </a>
+                <a href="#" class="text-gray-800 hover:text-gray-900 transition-colors">
+                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
           </div>
 
-          <!-- Contenu du ticket -->
-          <div v-else-if="ticket" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            <!-- Colonne gauche - Ticket -->
-            <div class="lg:col-span-2 flex justify-center">
+          <!-- Desktop Layout -->
+          <div class="hidden md:grid md:grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Ticket Column -->
+            <div class="lg:col-span-2 flex justify-center items-start">
               <TicketComponent :ticket="ticket" size="large" />
             </div>
 
-            <!-- Colonne droite - Instructions -->
+            <!-- Instructions & Actions Column -->
             <div class="lg:col-span-1 space-y-6">
-              <!-- Instructions -->
-              <div class="bg-white rounded-primea-xl shadow-primea p-6">
-                <h3 class="text-xl font-bold text-primea-blue mb-4">Comment utiliser votre ticket</h3>
+
+              <!-- Instructions Card -->
+              <div class="bg-white rounded-2xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-blue-900 mb-4">Comment utiliser votre ticket</h3>
                 <div class="space-y-4 text-gray-600">
                   <div class="flex items-start gap-3">
-                    <div class="rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mt-0.5 flex-shrink-0" style="background-color: #272d63; color: white;">1</div>
+                    <div class="rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold bg-blue-900 text-white flex-shrink-0">1</div>
                     <div>
                       <p class="font-semibold text-gray-800">Téléchargez votre ticket</p>
                       <p class="text-sm">Cliquez sur le bouton de téléchargement pour sauvegarder votre ticket en PDF</p>
                     </div>
                   </div>
                   <div class="flex items-start gap-3">
-                    <div class="rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mt-0.5 flex-shrink-0" style="background-color: #272d63; color: white;">2</div>
+                    <div class="rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold bg-blue-900 text-white flex-shrink-0">2</div>
                     <div>
                       <p class="font-semibold text-gray-800">Présentez le QR code</p>
                       <p class="text-sm">À l'entrée, montrez le QR code pour validation</p>
                     </div>
                   </div>
                   <div class="flex items-start gap-3">
-                    <div class="rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mt-0.5 flex-shrink-0" style="background-color: #fab511; color: #272d63;">!</div>
+                    <div class="rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold bg-yellow-500 text-blue-900 flex-shrink-0">!</div>
                     <div>
                       <p class="font-semibold text-red-600">Important</p>
                       <p class="text-sm">Ce ticket est personnel et à usage unique. Il ne peut être ni vendu ni donné</p>
@@ -71,23 +160,22 @@
                 </div>
               </div>
 
-              <!-- Actions -->
-              <div class="bg-white rounded-primea-xl shadow-primea p-6">
-                <h3 class="text-xl font-bold text-primea-blue mb-4">Actions</h3>
+              <!-- Actions Card -->
+              <div class="bg-white rounded-2xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-blue-900 mb-4">Actions</h3>
                 <div class="space-y-3">
-                  <button 
+                  <button
                     @click="downloadTicket"
-                    class="w-full py-3 px-6 rounded-primea-lg font-semibold transition-all duration-200 shadow-primea flex items-center justify-center gap-2"
-                    style="background-color: #fab511; color: #272d63;"
+                    class="w-full bg-yellow-500 text-blue-900 py-3 px-6 rounded-xl font-bold transition-all duration-200 shadow-lg hover:bg-yellow-600 transform hover:scale-105 flex items-center justify-center gap-2"
                   >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                     Télécharger le ticket PDF
                   </button>
-                  <button 
+                  <button
                     @click="goBack"
-                    class="w-full border-2 border-primea-blue text-primea-blue py-3 px-6 rounded-primea-lg font-semibold hover:bg-primea-blue hover:text-white transition-all duration-200"
+                    class="w-full border-2 border-blue-900 text-blue-900 py-3 px-6 rounded-xl font-semibold hover:bg-blue-900 hover:text-white transition-all duration-200"
                   >
                     Retour aux événements
                   </button>
@@ -95,118 +183,6 @@
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Mobile Layout -->
-    <div class="md:hidden bg-gray-100 min-h-screen py-8 px-4">
-      <div class="max-w-md mx-auto">
-        
-        <!-- État de chargement mobile -->
-        <div v-if="loading" class="text-center py-12">
-          <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primea-blue"></div>
-          <p class="mt-4 text-gray-600">Chargement du ticket...</p>
-        </div>
-
-        <!-- Message d'erreur mobile -->
-        <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-primea-xl p-6 text-center">
-          <div class="flex items-center justify-center mb-4">
-            <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-          </div>
-          <h3 class="text-lg font-semibold text-red-800 mb-2">Ticket introuvable</h3>
-          <p class="text-red-600 mb-4">{{ error }}</p>
-          <button @click="loadTicket" class="bg-primea-blue text-white px-6 py-2 rounded-primea-lg hover:bg-primea-yellow hover:text-primea-blue transition-colors">
-            Réessayer
-          </button>
-        </div>
-
-        <!-- Contenu mobile -->
-        <template v-else-if="ticket">
-        
-        <!-- En-tête mobile -->
-        <div class="flex items-center justify-between mb-8">
-          <button @click="goBack" class="text-gray-600 hover:text-gray-800">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-          </button>
-          
-          <div class="text-center">
-            <img src="/images/logo.png" alt="Primea" class="h-8 mx-auto mb-2" />
-            <div class="text-center">
-              <div class="text-lg font-bold text-primea-blue">La Billetterie</div>
-              <div class="text-xs text-gray-500">Simple, Rapide et Sécurisée</div>
-            </div>
-          </div>
-          
-          <button class="text-gray-600">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-            </svg>
-          </button>
-        </div>
-
-        <!-- Instructions mobile -->
-        <div class="text-center mb-8">
-          <h1 class="text-lg font-medium text-gray-700 mb-2">
-            Téléchargez ou capturez l'écran
-          </h1>
-          <p class="text-gray-600">
-            pour conserver votre ticket
-          </p>
-        </div>
-
-        <!-- Section VOTRE TICKET -->
-        <div class="text-center mb-6">
-          <h2 class="text-lg font-bold text-primea-blue">VOTRE TICKET</h2>
-        </div>
-
-        <!-- Ticket mobile avec le composant -->
-        <div class="mb-6">
-          <TicketComponent :ticket="ticket" size="small" />
-        </div>
-
-        <!-- Bouton Télécharger mobile -->
-        <div class="mb-8">
-          <button 
-            @click="downloadTicket"
-            class="w-full py-3 px-6 rounded-primea-lg font-semibold transition-colors duration-200"
-            style="background-color: #fab511; color: #272d63;"
-          >
-            Télécharger
-          </button>
-        </div>
-
-        <!-- Espace pub mobile -->
-        <div class="bg-gray-200 rounded-primea-lg p-8 text-center mb-6">
-          <div class="text-xl text-gray-400 font-light mb-4">ESPACE PUB</div>
-          <a href="#" class="text-primea-blue text-sm hover:text-primea-yellow">En savoir plus...</a>
-        </div>
-
-        <!-- Logo et réseaux sociaux mobile -->
-        <div class="text-center">
-          <img src="/images/logo.png" alt="Primea" class="h-8 mx-auto mb-4" />
-          <div class="flex justify-center space-x-4">
-            <a href="#" class="text-green-500 hover:text-green-600">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
-              </svg>
-            </a>
-            <a href="#" class="text-blue-600 hover:text-blue-700">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
-              </svg>
-            </a>
-            <a href="#" class="text-pink-500 hover:text-pink-600">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.347-.09.375-.293 1.199-.332 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.746-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001.012.001z"/>
-              </svg>
-            </a>
-          </div>
-        </div>
         </template>
       </div>
     </div>
@@ -228,12 +204,12 @@ export default {
     const route = useRoute()
     const router = useRouter()
 
-    // États réactifs
+    // Reactive state
     const ticket = ref(null)
     const loading = ref(true)
     const error = ref('')
 
-    // Charger les données du ticket depuis l'API
+    // Load ticket data from API
     const loadTicket = async () => {
       try {
         loading.value = true
@@ -241,17 +217,17 @@ export default {
 
         const ticketCode = route.params.id
 
-        // Utiliser directement le code du ticket (format: TKT-XXXXXXXX)
+        // Use ticket code directly (format: TKT-XXXXXXXX)
         const response = await ticketService.getTicket(ticketCode)
-        
+
         if (response.data?.ticket) {
-          // Transformer les données de l'API pour correspondre au format attendu
+          // Transform API data to expected format
           const apiTicket = response.data.ticket
 
-          // L'image_url vient déjà de l'accesseur qui construit l'URL complète
+          // Image URL comes from accessor that builds the full URL
           const imageUrl = apiTicket.event.image_url || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800'
 
-          // Convertir la date du format français (dd/mm/yyyy HH:mm:ss) au format ISO
+          // Convert date from French format (dd/mm/yyyy HH:mm:ss) to ISO
           let isoDate = '2025-07-27T20:00:00'
           if (apiTicket.schedule?.starts_at) {
             try {
@@ -260,7 +236,7 @@ export default {
               const [day, month, year] = datePart.split('/')
               isoDate = `${year}-${month}-${day}T${timePart}`
             } catch (e) {
-              console.error('Erreur parsing date:', e)
+              console.error('Error parsing date:', e)
             }
           }
 
@@ -296,10 +272,10 @@ export default {
           }
         }
       } catch (err) {
-        console.error('Erreur lors du chargement du ticket:', err)
+        console.error('Error loading ticket:', err)
         error.value = err.response?.data?.message || 'Erreur lors du chargement du ticket'
-        
-        // Fallback vers des données simulées si l'API échoue
+
+        // Fallback to mock data if API fails
         ticket.value = {
           id: route.params.id,
           reference: 'TKT-2024-ABC123',
@@ -322,7 +298,7 @@ export default {
     // Computed properties
     const formatEventDate = computed(() => {
       if (!ticket.value?.event?.date) return 'DIMANCHE 27 JUILLET 2025'
-      
+
       const date = new Date(ticket.value.event.date)
       return date.toLocaleDateString('fr-FR', {
         weekday: 'long',
@@ -332,7 +308,7 @@ export default {
       }).toUpperCase()
     })
 
-    // Méthodes
+    // Methods
     const formatPrice = (price) => {
       if (!price) return '10.000'
       return new Intl.NumberFormat('fr-FR').format(price)
@@ -342,10 +318,10 @@ export default {
       try {
         const ticketCode = route.params.id
 
-        // Ouvrir le lien de téléchargement PDF dans un nouvel onglet
+        // Open PDF download link in new tab
         window.open(`/api/v1/tickets/${ticketCode}/pdf`, '_blank')
       } catch (err) {
-        console.error('Erreur lors du téléchargement:', err)
+        console.error('Download error:', err)
         alert('Erreur lors du téléchargement du ticket')
       }
     }
@@ -354,7 +330,7 @@ export default {
       router.back()
     }
 
-    // Charger le ticket au montage du composant
+    // Load ticket on component mount
     onMounted(() => {
       loadTicket()
     })
@@ -374,79 +350,33 @@ export default {
 </script>
 
 <style scoped>
-/* Variables CSS Primea */
-:root {
-  --primea-blue: #272d63;
-  --primea-yellow: #fab511;
-  --primea-white: #ffffff;
-  --primea-blue-dark: #1a1e47;
-  --primea-yellow-dark: #e09f0e;
-  --font-primary: 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+/* Animations */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.ticket-download-page {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
 
-/* Classes Primea */
-.font-primea {
-  font-family: var(--font-primary);
+/* Transitions */
+* {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
 }
 
-.text-primea-blue {
-  color: var(--primea-blue);
-}
-
-.text-primea-yellow {
-  color: var(--primea-yellow);
-}
-
-.bg-primea-blue {
-  background-color: var(--primea-blue);
-}
-
-.bg-primea-yellow {
-  background-color: var(--primea-yellow);
-}
-
-.hover\:bg-primea-yellow:hover {
-  background-color: var(--primea-yellow) !important;
-}
-
-.hover\:text-primea-blue:hover {
-  color: var(--primea-blue) !important;
-}
-
-.hover\:text-primea-yellow:hover {
-  color: var(--primea-yellow);
-}
-
-.hover\:text-white:hover {
-  color: white !important;
-}
-
-.bg-primea-gradient {
-  background: linear-gradient(135deg, var(--primea-blue) 0%, var(--primea-blue-dark) 100%);
-}
-
-.rounded-primea {
-  border-radius: 12px;
-}
-
-.rounded-primea-lg {
-  border-radius: 16px;
-}
-
-.rounded-primea-xl {
-  border-radius: 20px;
-}
-
-.shadow-primea {
-  box-shadow: 0 4px 20px rgba(39, 45, 99, 0.1);
-}
-
-.shadow-primea-lg {
-  box-shadow: 0 8px 30px rgba(39, 45, 99, 0.15);
+/* Touch-friendly on mobile */
+@media (max-width: 768px) {
+  input,
+  button {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
 }
 
 /* Container */
@@ -454,24 +384,8 @@ export default {
   max-width: 1200px;
 }
 
-/* Transitions */
-.transition-colors {
-  transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-}
-
-.transition-all {
-  transition: all 0.2s ease-in-out;
-}
-
 /* Hover effects */
 button:hover {
   transform: translateY(-1px);
-}
-
-/* QR Code styling */
-.qr-code {
-  image-rendering: pixelated;
-  image-rendering: -moz-crisp-edges;
-  image-rendering: crisp-edges;
 }
 </style>
