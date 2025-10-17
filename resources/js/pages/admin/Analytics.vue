@@ -168,14 +168,14 @@
         <!-- Revenue Chart -->
         <div class="bg-white rounded-lg shadow p-6">
           <h3 class="text-lg font-bold mb-4 text-gray-900">Évolution des Revenus</h3>
-          <Line v-if="revenueChartData.labels.length > 0" :data="revenueChartData" :options="lineChartOptions" />
+          <Line v-if="revenueChartData.labels && revenueChartData.labels.length > 0" :data="revenueChartData" :options="lineChartOptions" />
           <div v-else class="text-center text-gray-500 py-12">Aucune donnée de revenus disponible</div>
         </div>
 
         <!-- Sales by Category -->
         <div class="bg-white rounded-lg shadow p-6">
           <h3 class="text-lg font-bold mb-4 text-gray-900">Ventes par Catégorie</h3>
-          <Doughnut v-if="salesByCategoryData.labels.length > 0" :data="salesByCategoryData" :options="doughnutChartOptions" />
+          <Doughnut v-if="salesByCategoryData.labels && salesByCategoryData.labels.length > 0" :data="salesByCategoryData" :options="doughnutChartOptions" />
           <div v-else class="text-center text-gray-500 py-12">Aucune donnée de catégorie disponible</div>
         </div>
       </div>
@@ -185,7 +185,7 @@
         <!-- Conversion Funnel -->
         <div class="bg-white rounded-lg shadow p-6">
           <h3 class="text-lg font-bold mb-4 text-gray-900">Funnel de Conversion</h3>
-          <Bar v-if="conversionFunnelData.labels.length > 0" :data="conversionFunnelData" :options="barChartOptions" />
+          <Bar v-if="conversionFunnelData.labels && conversionFunnelData.labels.length > 0" :data="conversionFunnelData" :options="barChartOptions" />
           <div v-else class="text-center text-gray-500 py-12">Aucune donnée de conversion disponible</div>
 
           <!-- Conversion Rates -->
@@ -218,7 +218,7 @@
               {{ predictions.trend === 'ascending' ? '↑ Croissance' : '↓ Décroissance' }}
             </span>
           </div>
-          <Line v-if="predictionsChartData.labels.length > 0" :data="predictionsChartData" :options="predictionsChartOptions" />
+          <Line v-if="predictionsChartData.labels && predictionsChartData.labels.length > 0" :data="predictionsChartData" :options="predictionsChartOptions" />
           <div v-else class="text-center text-gray-500 py-12">Pas assez de données pour les prédictions</div>
 
           <!-- Prediction Stats -->
@@ -451,19 +451,23 @@ export default {
 
         if (!response.ok) {
           console.error('Erreur API revenue-chart:', response.status)
-          Object.assign(revenueChartData, { labels: [], datasets: [] })
+          revenueChartData.labels = []
+          revenueChartData.datasets = []
           return
         }
 
         const data = await response.json()
         if (data.success && data.data) {
-          Object.assign(revenueChartData, data.data)
+          revenueChartData.labels = data.data.labels || []
+          revenueChartData.datasets = data.data.datasets || []
         } else {
-          Object.assign(revenueChartData, { labels: [], datasets: [] })
+          revenueChartData.labels = []
+          revenueChartData.datasets = []
         }
       } catch (error) {
         console.error('Erreur chargement graphique revenus:', error)
-        Object.assign(revenueChartData, { labels: [], datasets: [] })
+        revenueChartData.labels = []
+        revenueChartData.datasets = []
       }
     }
 
@@ -478,22 +482,23 @@ export default {
 
         if (!response.ok) {
           console.error('Erreur API sales-by-category:', response.status)
-          // Réinitialiser avec des valeurs par défaut
-          Object.assign(salesByCategoryData, { labels: [], datasets: [] })
+          salesByCategoryData.labels = []
+          salesByCategoryData.datasets = []
           return
         }
 
         const data = await response.json()
         if (data.success && data.data) {
-          Object.assign(salesByCategoryData, data.data)
+          salesByCategoryData.labels = data.data.labels || []
+          salesByCategoryData.datasets = data.data.datasets || []
         } else {
-          // Réinitialiser avec des valeurs par défaut
-          Object.assign(salesByCategoryData, { labels: [], datasets: [] })
+          salesByCategoryData.labels = []
+          salesByCategoryData.datasets = []
         }
       } catch (error) {
         console.error('Erreur chargement ventes par catégorie:', error)
-        // Réinitialiser avec des valeurs par défaut en cas d'erreur
-        Object.assign(salesByCategoryData, { labels: [], datasets: [] })
+        salesByCategoryData.labels = []
+        salesByCategoryData.datasets = []
       }
     }
 
@@ -508,22 +513,26 @@ export default {
 
         if (!response.ok) {
           console.error('Erreur API conversion-funnel:', response.status)
-          Object.assign(conversionFunnelData, { labels: [], datasets: [] })
+          conversionFunnelData.labels = []
+          conversionFunnelData.datasets = []
           conversionRates.value = null
           return
         }
 
         const data = await response.json()
         if (data.success && data.data) {
-          Object.assign(conversionFunnelData, data.data)
+          conversionFunnelData.labels = data.data.labels || []
+          conversionFunnelData.datasets = data.data.datasets || []
           conversionRates.value = data.data.conversion_rates || null
         } else {
-          Object.assign(conversionFunnelData, { labels: [], datasets: [] })
+          conversionFunnelData.labels = []
+          conversionFunnelData.datasets = []
           conversionRates.value = null
         }
       } catch (error) {
         console.error('Erreur chargement funnel:', error)
-        Object.assign(conversionFunnelData, { labels: [], datasets: [] })
+        conversionFunnelData.labels = []
+        conversionFunnelData.datasets = []
         conversionRates.value = null
       }
     }
