@@ -325,9 +325,23 @@ Route::prefix('v1')->group(function () {
             Route::get('export/events', [App\Http\Controllers\Admin\AnalyticsController::class, 'exportEvents']);
             Route::get('export/financial', [App\Http\Controllers\Admin\AnalyticsController::class, 'exportFinancial']);
         });
+
+        // Gestion des bannières publicitaires
+        Route::prefix('banners')->group(function () {
+            Route::get('/', [App\Http\Controllers\Api\Admin\BannerController::class, 'index']);
+            Route::post('/', [App\Http\Controllers\Api\Admin\BannerController::class, 'store']);
+            Route::get('{banner}', [App\Http\Controllers\Api\Admin\BannerController::class, 'show']);
+            Route::post('{banner}', [App\Http\Controllers\Api\Admin\BannerController::class, 'update']); // Pour FormData
+            Route::put('{banner}', [App\Http\Controllers\Api\Admin\BannerController::class, 'update']);
+            Route::delete('{banner}', [App\Http\Controllers\Api\Admin\BannerController::class, 'destroy']);
+            Route::post('{banner}/toggle-active', [App\Http\Controllers\Api\Admin\BannerController::class, 'toggleActive']);
+        });
     });
 });
 
 // Routes générales pour les ressources partagées
 Route::get('categories', [App\Http\Controllers\Api\CategoryController::class, 'index']);
 Route::get('venues', [App\Http\Controllers\Api\VenueController::class, 'index']);
+
+// Route publique pour les bannières
+Route::get('banners/active', [App\Http\Controllers\Api\BannerController::class, 'getActive']);

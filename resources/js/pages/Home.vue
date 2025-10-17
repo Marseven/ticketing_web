@@ -155,24 +155,15 @@
       </div>
     </section>
 
-    <!-- Espace Pub -->
-    <section class="py-12 bg-white w-full flex justify-center">
-      <div
-        class="w-96 h-32 bg-zinc-300 rounded-[10px] flex flex-col items-center justify-center cursor-pointer hover:opacity-90 transition-opacity bg-cover bg-center relative overflow-hidden"
-        :style="adBannerStyle"
-      >
-        <!-- Overlay pour assurer la lisibilité du texte avec image de fond -->
-        <div v-if="adBannerImage" class="absolute inset-0 bg-black bg-opacity-30 rounded-[10px]"></div>
-
-        <!-- Contenu de la bannière -->
-        <div class="relative z-10 text-center">
-          <h2 class="text-2xl font-bold mb-2" :class="adBannerImage ? 'text-white' : 'text-gray-600'">
-            ESPACE PUB
-          </h2>
-          <a href="#" class="text-sm hover:underline" :class="adBannerImage ? 'text-white' : 'text-blue-600'">
-            En savoir plus...
-          </a>
-        </div>
+    <!-- Bannières Publicitaires -->
+    <section class="py-8 md:py-12 bg-gray-50">
+      <div class="px-4 max-w-6xl mx-auto">
+        <BannerCarousel
+          position="home"
+          :auto-play="true"
+          :interval="5000"
+          :show-nav-buttons="true"
+        />
       </div>
     </section>
 
@@ -182,9 +173,13 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import BannerCarousel from '../components/BannerCarousel.vue'
 
 export default {
   name: 'Home',
+  components: {
+    BannerCarousel
+  },
   setup() {
     const router = useRouter()
 
@@ -193,13 +188,6 @@ export default {
     const events = ref([])
     const categories = ref([])
     const loading = ref(true)
-    // Image de fond pour la bannière pub (configurable)
-    // Pour configurer: adBannerImage.value = 'https://example.com/banner.jpg'
-    // Ou charger depuis une API/base de données
-    const adBannerImage = ref('')
-
-    // Exemple: définir une image par défaut (décommenter pour activer)
-    // adBannerImage.value = 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'
 
     // Filtered events
     const filteredEvents = computed(() => {
@@ -210,18 +198,6 @@ export default {
         const eventCategoryId = event.category?.id || event.category_id
         return eventCategoryId === parseInt(selectedCategory.value)
       })
-    })
-
-    // Style pour la bannière pub avec image de fond configurable
-    const adBannerStyle = computed(() => {
-      if (adBannerImage.value) {
-        return {
-          backgroundImage: `url(${adBannerImage.value})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }
-      }
-      return {}
     })
 
     // Methods
@@ -336,8 +312,6 @@ export default {
       categories,
       loading,
       filteredEvents,
-      adBannerImage,
-      adBannerStyle,
       searchEvents,
       filterByCategory,
       formatDate
