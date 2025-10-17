@@ -20,10 +20,18 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'permission' => \App\Http\Middleware\PermissionMiddleware::class,
         ]);
-        
+
         $middleware->api(prepend: [
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
+
+        // Gérer les utilisateurs non authentifiés pour les routes API
+        $middleware->redirectGuestsTo(function ($request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return null; // Retourner null pour les requêtes API (génère une réponse 401)
+            }
+            return route('spa'); // Rediriger vers la SPA pour les autres requêtes
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
