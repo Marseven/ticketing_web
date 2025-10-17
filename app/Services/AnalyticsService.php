@@ -66,12 +66,12 @@ class AnalyticsService
 
         $categoryData = DB::table('tickets')
             ->join('events', 'tickets.event_id', '=', 'events.id')
-            ->join('categories', 'events.category_id', '=', 'categories.id')
+            ->join('event_categories', 'events.category_id', '=', 'event_categories.id')
             ->join('orders', 'tickets.order_id', '=', 'orders.id')
             ->where('orders.status', 'paid')
             ->whereBetween('tickets.created_at', [$startDate, now()])
-            ->select('categories.name as category', DB::raw('COUNT(tickets.id) as count'))
-            ->groupBy('categories.id', 'categories.name')
+            ->select('event_categories.name as category', DB::raw('COUNT(tickets.id) as count'))
+            ->groupBy('event_categories.id', 'event_categories.name')
             ->get();
 
         return [
