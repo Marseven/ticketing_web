@@ -3,26 +3,12 @@
     
     <!-- Desktop/Tablet Layout -->
     <div class="hidden md:block bg-gray-50 min-h-screen">
-      
+
       <div class="container mx-auto px-4 py-12">
         <div class="max-w-4xl mx-auto">
-          
+
           <!-- Header Desktop -->
           <div class="mb-12">
-            <!-- Logo cliquable et bouton retour -->
-            <div class="flex items-center justify-between mb-6">
-              <button @click="goBack" class="flex items-center text-primea-blue hover:text-primea-yellow transition-colors">
-                <ChevronLeftIcon class="w-6 h-6 mr-2" />
-                <span class="font-medium">Retour</span>
-              </button>
-
-              <router-link to="/" class="flex-1 flex justify-center">
-                <img src="/images/logo.png" alt="Primea" class="h-16 hover:opacity-80 transition-opacity cursor-pointer" />
-              </router-link>
-
-              <div class="w-24"></div> <!-- Spacer pour centrer le logo -->
-            </div>
-
             <div class="text-center">
               <h1 class="text-4xl font-bold text-primea-blue mb-4">Finaliser votre achat</h1>
               <p class="text-lg text-gray-600">Sélectionnez vos tickets et procédez au paiement</p>
@@ -492,11 +478,6 @@
     <div class="md:hidden bg-white min-h-screen">
       <div class="max-w-md mx-auto">
 
-        <!-- Mobile Title -->
-        <div class="md:hidden px-4 pt-6 pb-4">
-          <h1 class="text-xl font-bold text-blue-900 text-center">Commander vos tickets</h1>
-        </div>
-
         <!-- Loading/Error States -->
         <div v-if="eventLoading" class="flex justify-center py-12 px-4">
           <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-900 border-t-yellow-500"></div>
@@ -737,14 +718,12 @@ import { useEventsStore } from '../stores/events'
 import { useAuthStore } from '../stores/auth'
 import { guestService, orderService } from '../services/api'
 import PhoneInput from '../components/PhoneInput.vue'
-import { 
+import {
   ExclamationCircleIcon,
   PhotoIcon,
   MapPinIcon,
   ClockIcon,
-  ArrowTopRightOnSquareIcon,
-  ChevronLeftIcon,
-  Bars3Icon
+  ArrowTopRightOnSquareIcon
 } from '@heroicons/vue/24/outline'
 export default {
   name: 'Checkout',
@@ -754,9 +733,7 @@ export default {
     PhotoIcon,
     MapPinIcon,
     ClockIcon,
-    ArrowTopRightOnSquareIcon,
-    ChevronLeftIcon,
-    Bars3Icon
+    ArrowTopRightOnSquareIcon
   },
   setup() {
     const route = useRoute()
@@ -1405,10 +1382,6 @@ export default {
       }
     }
 
-    const goBack = () => {
-      router.back()
-    }
-
     // Méthodes USSD Push
     const startUSSDPush = (paymentData) => {
       ussdPushActive.value = true
@@ -1640,7 +1613,6 @@ export default {
       validatePhoneNumber,
       selectPaymentMethod,
       processOrder,
-      goBack,
       // Variables USSD Push
       ussdPushActive,
       ussdCountdown,
