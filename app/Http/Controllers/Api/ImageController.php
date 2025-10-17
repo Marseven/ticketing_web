@@ -339,27 +339,37 @@ class ImageController extends Controller
     /**
      * Servir une image (fallback pour les serveurs qui ne servent pas les fichiers statiques)
      */
-    public function serve(Request $request, string $type, string $filename)
+    public function serve(Request $request, string $type, string $filename = null)
     {
-        // Vérifier que le type est supporté
-        if (!in_array($type, self::SUPPORTED_TYPES)) {
-            abort(404);
-        }
-
-        // Construire le chemin du fichier
-        $path = "images/{$type}/{$filename}";
-        
-        // Si le fichier n'existe pas, essayer avec l'extension .jpg
-        if (!Storage::disk('public')->exists($path)) {
-            $pathInfo = pathinfo($filename);
-            $filenameWithoutExt = $pathInfo['filename'];
-            $jpgPath = "images/{$type}/{$filenameWithoutExt}.jpg";
-            
-            if (Storage::disk('public')->exists($jpgPath)) {
-                $path = $jpgPath;
-            } else {
+        // Si filename est null, cela signifie que $type contient en fait le filename (pour les banners)
+        if ($filename === null) {
+            $path = "banners/{$type}"; // $type contient en fait le filename pour les banners
+        } else {
+            // Vérifier que le type est supporté
+            if (!in_array($type, self::SUPPORTED_TYPES)) {
                 abort(404);
             }
+
+            // Construire le chemin du fichier
+            $path = "images/{$type}/{$filename}";
+
+            // Si le fichier n'existe pas, essayer avec l'extension .jpg
+            if (!Storage::disk('public')->exists($path)) {
+                $pathInfo = pathinfo($filename);
+                $filenameWithoutExt = $pathInfo['filename'];
+                $jpgPath = "images/{$type}/{$filenameWithoutExt}.jpg";
+
+                if (Storage::disk('public')->exists($jpgPath)) {
+                    $path = $jpgPath;
+                } else {
+                    abort(404);
+                }
+            }
+        }
+
+        // Vérifier que le fichier existe
+        if (!Storage::disk('public')->exists($path)) {
+            abort(404);
         }
 
         // Obtenir le contenu du fichier

@@ -18,6 +18,11 @@ Route::get('storage/images/{type}/{filename}', [App\Http\Controllers\Api\ImageCo
     ->where('filename', '.*')
     ->middleware('throttle:1000,1');
 
+// Route pour servir les banners (fallback)
+Route::get('storage/banners/{filename}', [App\Http\Controllers\Api\ImageController::class, 'serve'])
+    ->where('filename', '.*')
+    ->middleware('throttle:1000,1');
+
 // Route catch-all pour Vue Router - DOIT être en dernier
 Route::get('/{any}', function () {
     return view('app');
