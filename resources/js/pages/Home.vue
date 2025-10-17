@@ -152,12 +152,10 @@
     </section>
 
     <!-- Espace Pub -->
-    <section class="py-12 bg-gray-200">
-      <div class="px-4 max-w-7xl mx-auto">
-        <div class="text-center">
-          <h2 class="text-4xl font-bold text-gray-400 mb-4">ESPACE PUB</h2>
-          <a href="#" class="text-blue-600 hover:underline">En savoir plus...</a>
-        </div>
+    <section class="py-12 bg-gray-200 w-full">
+      <div class="text-center">
+        <h2 class="text-4xl font-bold text-gray-400 mb-4">ESPACE PUB</h2>
+        <a href="#" class="text-blue-600 hover:underline">En savoir plus...</a>
       </div>
     </section>
 
@@ -210,6 +208,11 @@ export default {
 
         const data = await response.json()
         events.value = data.events || data.data || []
+
+        // Debug: Afficher le premier événement pour vérifier le format des données
+        if (events.value.length > 0) {
+          console.log('Premier événement chargé:', events.value[0])
+        }
       } catch (error) {
         console.error('Erreur:', error)
         events.value = []
@@ -265,13 +268,28 @@ export default {
     }
 
     const formatDate = (dateString) => {
-      const date = new Date(dateString)
-      return date.toLocaleDateString('fr-FR', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      })
+      if (!dateString) {
+        return 'Date à confirmer'
+      }
+
+      try {
+        const date = new Date(dateString)
+
+        // Vérifier si la date est valide
+        if (isNaN(date.getTime())) {
+          return 'Date à confirmer'
+        }
+
+        return date.toLocaleDateString('fr-FR', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })
+      } catch (error) {
+        console.error('Erreur de formatage de date:', error)
+        return 'Date à confirmer'
+      }
     }
 
     // Lifecycle

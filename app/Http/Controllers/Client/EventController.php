@@ -79,6 +79,7 @@ class EventController extends Controller
                     'image_url' => $event->image_url,
                     'image_file' => $event->image_file,
                     'image' => $event->image, // Accessor qui retourne l'URL complète
+                    'cover_image' => $event->image, // Alias pour compatibilité frontend
                     'status' => $event->status,
                     'is_active' => $event->is_active,
                     'published_at' => $event->published_at,
@@ -157,9 +158,12 @@ class EventController extends Controller
                     });
                     $eventArray['schedules'] = $schedules;
                     $eventArray['next_schedule'] = $schedules->first();
+                    // Ajouter event_date pour compatibilité frontend
+                    $eventArray['event_date'] = $event->schedules->first()->starts_at->toISOString();
                 } else {
                     $eventArray['schedules'] = [];
                     $eventArray['next_schedule'] = null;
+                    $eventArray['event_date'] = null;
                 }
 
                 // Ajouter des informations de venue formatées
@@ -251,6 +255,7 @@ class EventController extends Controller
                 'image_url' => $event->image_url,
                 'image_file' => $event->image_file,
                 'image' => $event->image, // Accessor qui retourne l'URL complète de l'image
+                'cover_image' => $event->image, // Alias pour compatibilité frontend
                 'status' => $event->status,
                 'is_active' => $event->is_active,
                 'published_at' => $event->published_at,
@@ -329,9 +334,12 @@ class EventController extends Controller
                 });
                 $enrichedEvent['schedules'] = $schedules->toArray();
                 $enrichedEvent['next_schedule'] = $schedules->first();
+                // Ajouter event_date pour compatibilité frontend
+                $enrichedEvent['event_date'] = $event->schedules->first()->starts_at->toISOString();
             } else {
                 $enrichedEvent['schedules'] = [];
                 $enrichedEvent['next_schedule'] = null;
+                $enrichedEvent['event_date'] = null;
             }
 
             // Ajouter les informations de venue formatées
