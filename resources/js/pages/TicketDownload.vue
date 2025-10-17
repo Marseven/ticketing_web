@@ -1,18 +1,9 @@
 <template>
   <div class="ticket-download-page min-h-screen bg-gray-50">
 
-    <!-- Mobile Header -->
-    <div class="md:hidden bg-blue-900 px-4 py-6 mb-6">
-      <div class="flex items-center justify-between mb-4">
-        <button @click="goBack" class="text-white hover:text-yellow-500 transition-colors">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-          </svg>
-        </button>
-        <img src="/images/logo_white.png" alt="Logo" class="h-10" />
-        <div class="w-6"></div>
-      </div>
-      <h1 class="text-xl font-bold text-white text-center">Votre ticket électronique</h1>
+    <!-- Mobile Title -->
+    <div class="md:hidden px-4 pt-6 pb-4">
+      <h1 class="text-xl font-bold text-blue-900 text-center">Votre ticket électronique</h1>
     </div>
 
     <!-- Desktop Header -->
