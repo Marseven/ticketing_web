@@ -121,7 +121,7 @@
     "src": "node_modules/intl-tel-input/build/img/globe@2x.webp"
   },
   "resources/css/app.css": {
-    "file": "assets/css/app-Cn7OfcIK.css",
+    "file": "assets/css/app-BDu4rh7f.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [
@@ -129,7 +129,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-W6sxTAmK.js",
+    "file": "assets/js/app-mlL6Q-68.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -190,8 +190,8 @@
       "resources/js/pages/scanner/ScannerApp.vue"
     ],
     "css": [
-      "assets/css/app-Xz5BmRU4.css",
-      "assets/css/app-Cn7OfcIK.css"
+      "assets/css/app-lIgAITtw.css",
+      "assets/css/app-BDu4rh7f.css"
     ]
   },
   "resources/js/layouts/AdminLayout.vue": {
@@ -256,7 +256,7 @@
     ]
   },
   "resources/js/pages/EventDetail.vue": {
-    "file": "assets/js/EventDetail-BbWS4STz.js",
+    "file": "assets/js/EventDetail-BKLFRztn.js",
     "name": "EventDetail",
     "src": "resources/js/pages/EventDetail.vue",
     "isDynamicEntry": true,
@@ -269,7 +269,7 @@
       "_pinia-vendor-CdH4T1Hh.js"
     ],
     "css": [
-      "assets/css/EventDetail-DoJR3l_o.css"
+      "assets/css/EventDetail-CI9FQMCt.css"
     ]
   },
   "resources/js/pages/Events.vue": {

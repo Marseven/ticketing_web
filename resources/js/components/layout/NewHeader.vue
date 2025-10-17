@@ -260,9 +260,29 @@
               Accueil
             </router-link>
 
-            <router-link :to="{ name: 'events' }" @click="closeMenu" class="block text-white text-lg py-3 hover:text-yellow-500 transition-colors">
-              Événements
-            </router-link>
+            <!-- Events with submenu -->
+            <div>
+              <button @click="toggleMobileEventsSubmenu" class="flex items-center justify-between w-full text-white text-lg py-3 hover:text-yellow-500 transition-colors">
+                <span>Événements</span>
+                <svg class="w-4 h-4 transition-transform" :class="{'rotate-180': mobileEventsSubmenuOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </button>
+              <div v-if="mobileEventsSubmenuOpen" class="ml-4 mt-2 space-y-2">
+                <router-link :to="{ name: 'events' }" @click="closeMenu" class="block text-white/80 text-base py-2 hover:text-yellow-500 transition-colors">
+                  Tous les événements
+                </router-link>
+                <router-link
+                  v-for="category in categories"
+                  :key="category.id"
+                  :to="{ name: 'events', query: { category: category.slug } }"
+                  @click="closeMenu"
+                  class="block text-white/80 text-sm py-2 hover:text-yellow-500 transition-colors"
+                >
+                  {{ category.name }}
+                </router-link>
+              </div>
+            </div>
 
             <router-link :to="{ name: 'ticket-retrieve' }" @click="closeMenu" class="block text-white text-lg py-3 hover:text-yellow-500 transition-colors">
               Récupérer mon ticket
@@ -369,6 +389,7 @@ const authStore = useAuthStore()
 const dropdownOpen = ref(false)
 const mobileMenuOpen = ref(false)
 const eventsDropdownOpen = ref(false)
+const mobileEventsSubmenuOpen = ref(false)
 const dropdown = ref(null)
 const eventsDropdown = ref(null)
 const userAvatar = ref(null)
@@ -433,6 +454,11 @@ const toggleMenu = () => {
 
 const closeMenu = () => {
   mobileMenuOpen.value = false
+  mobileEventsSubmenuOpen.value = false
+}
+
+const toggleMobileEventsSubmenu = () => {
+  mobileEventsSubmenuOpen.value = !mobileEventsSubmenuOpen.value
 }
 
 const goBack = () => {
