@@ -150,7 +150,7 @@
       <div class="mt-12 pt-8 border-t border-gray-700">
         <div class="flex flex-col md:flex-row justify-between items-center">
           <p class="text-gray-300 text-sm">
-            © 2025 Ticketing. Tous droits réservés.
+            © 2025 Primea. Tous droits réservés.
           </p>
           <p class="text-gray-300 text-sm mt-4 md:mt-0">
             Plateforme d'événements de référence
