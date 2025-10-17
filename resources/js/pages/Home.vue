@@ -82,13 +82,13 @@
         <h3 class="text-lg font-bold text-gray-800 mb-4 text-center">Filtrer par catégorie</h3>
         <!-- Container with vertical scroll -->
         <div class="max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-950 scrollbar-track-gray-200">
-          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 pr-2">
+          <div class="flex flex-wrap gap-2">
             <button
               v-for="category in categories"
               :key="category.id"
               @click="filterByCategory(category.id)"
               :class="[
-                'py-4 px-3 rounded-primea text-xs md:text-sm font-bold transition-all duration-200',
+                'px-4 py-2 rounded-primea text-sm font-bold transition-all duration-200',
                 selectedCategory === category.id
                   ? 'bg-primea-yellow text-primea-blue'
                   : 'bg-white text-primea-blue border-2 border-primea-blue hover:bg-primea-yellow hover:text-primea-blue'

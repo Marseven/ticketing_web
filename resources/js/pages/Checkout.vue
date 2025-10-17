@@ -492,16 +492,9 @@
     <div class="md:hidden bg-white min-h-screen">
       <div class="max-w-md mx-auto">
 
-        <!-- Mobile Header -->
-        <div class="bg-blue-900 px-4 py-6 mb-6">
-          <div class="flex items-center justify-between mb-4">
-            <button @click="goBack" class="text-white hover:text-yellow-500">
-              <ChevronLeftIcon class="w-6 h-6" />
-            </button>
-            <img src="/images/logo_white.png" alt="Logo" class="h-10" />
-            <div class="w-6"></div>
-          </div>
-          <h1 class="text-xl font-bold text-white text-center">Commander vos tickets</h1>
+        <!-- Mobile Title -->
+        <div class="md:hidden px-4 pt-6 pb-4">
+          <h1 class="text-xl font-bold text-blue-900 text-center">Commander vos tickets</h1>
         </div>
 
         <!-- Loading/Error States -->
