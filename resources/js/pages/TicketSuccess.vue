@@ -3,13 +3,6 @@
     <div class="container mx-auto px-4 py-12">
       <div class="max-w-2xl mx-auto">
 
-        <!-- En-tête -->
-        <div class="text-center mb-8">
-          <router-link to="/">
-            <img src="/images/logo.png" alt="Primea" class="h-16 mx-auto mb-6" />
-          </router-link>
-        </div>
-
         <!-- Loading State -->
         <div v-if="loading" class="bg-white rounded-primea-xl shadow-primea p-8 text-center">
           <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primea-blue mx-auto mb-4"></div>
