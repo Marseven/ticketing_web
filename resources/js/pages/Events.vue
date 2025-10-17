@@ -360,9 +360,10 @@ export default {
           date = new Date(dateString);
         } else if (dateString.includes('/')) {
           // Format français (27/07/2025 20:00:00)
-          const [datePart] = dateString.split(' ');
-          const [day, month, year] = datePart.split('/');
-          date = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
+          const parts = dateString.split(' ');
+          const [day, month, year] = parts[0].split('/');
+          const timePart = parts[1] || '00:00:00';
+          date = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${timePart}`);
         } else if (dateString.includes('-')) {
           // Format SQL (2024-03-15 20:00:00)
           date = new Date(dateString.replace(' ', 'T'));
@@ -372,10 +373,13 @@ export default {
 
         if (isNaN(date.getTime())) return '--'
 
-        // Retourner la date au format dd/mm
+        // Retourner la date au format dd/mm/yyyy hh:mm
         const day = date.getDate().toString().padStart(2, '0')
         const month = (date.getMonth() + 1).toString().padStart(2, '0')
-        return `${day}/${month}`
+        const year = date.getFullYear()
+        const hours = date.getHours().toString().padStart(2, '0')
+        const minutes = date.getMinutes().toString().padStart(2, '0')
+        return `${day}/${month}/${year} ${hours}:${minutes}`
       } catch (error) {
         return '--'
       }
