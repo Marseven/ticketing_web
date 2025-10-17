@@ -314,8 +314,12 @@ export default {
     }
 
     const downloadTicket = (ticket) => {
-      // Redirect to download page
-      router.push(`/ticket/${ticket.code}/download`)
+      // Télécharger directement le PDF
+      try {
+        window.open(`/api/v1/tickets/${ticket.code}/pdf`, '_blank')
+      } catch (err) {
+        console.error('Erreur lors du téléchargement:', err)
+      }
     }
 
     const viewTicket = (ticket) => {
