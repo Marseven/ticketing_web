@@ -79,7 +79,7 @@
     <!-- Categories Section -->
     <section class="py-6 bg-gray-50">
       <div class="px-4 max-w-7xl mx-auto">
-        <h3 class="text-lg font-bold text-blue-950 mb-4 text-center">Filtrer par catégorie</h3>
+        <h3 class="text-lg font-bold text-gray-800 mb-4 text-center">Filtrer par catégorie</h3>
         <!-- Container with vertical scroll -->
         <div class="max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-950 scrollbar-track-gray-200">
           <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 pr-2">
@@ -88,10 +88,10 @@
               :key="category.id"
               @click="filterByCategory(category.id)"
               :class="[
-                'py-4 px-3 rounded-lg text-xs md:text-sm font-bold transition-all',
+                'py-4 px-3 rounded-primea text-xs md:text-sm font-bold transition-all duration-200',
                 selectedCategory === category.id
-                  ? 'bg-blue-950 text-white shadow-lg scale-105'
-                  : 'bg-white text-blue-950 border-2 border-blue-950 hover:bg-yellow-500 hover:border-yellow-500'
+                  ? 'bg-primea-yellow text-primea-blue'
+                  : 'bg-white text-primea-blue border-2 border-primea-blue hover:bg-primea-yellow hover:text-primea-blue'
               ]"
             >
               {{ category.name }}
