@@ -353,9 +353,29 @@ export default {
       if (!dateString) return '--'
 
       try {
-        const date = new Date(dateString)
+        let date;
+
+        // Gérer différents formats de date
+        if (dateString.includes('T') || dateString.includes('Z')) {
+          date = new Date(dateString);
+        } else if (dateString.includes('/')) {
+          // Format français (27/07/2025 20:00:00)
+          const [datePart] = dateString.split(' ');
+          const [day, month, year] = datePart.split('/');
+          date = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
+        } else if (dateString.includes('-')) {
+          // Format SQL (2024-03-15 20:00:00)
+          date = new Date(dateString.replace(' ', 'T'));
+        } else {
+          date = new Date(dateString);
+        }
+
         if (isNaN(date.getTime())) return '--'
-        return date.getDate().toString().padStart(2, '0')
+
+        // Retourner la date au format dd/mm
+        const day = date.getDate().toString().padStart(2, '0')
+        const month = (date.getMonth() + 1).toString().padStart(2, '0')
+        return `${day}/${month}`
       } catch (error) {
         return '--'
       }
