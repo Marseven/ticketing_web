@@ -511,16 +511,25 @@ export default {
             queryParams.append(key, filters[key])
           }
         })
-        
+
         const response = await fetch(`/api/v1/admin/payments?${queryParams}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Accept': 'application/json'
           }
         })
-        
+
+        if (!response.ok) {
+          console.error('Erreur API payments:', response.status)
+          payments.value = []
+          pagination.value = null
+          gatewayStats.value = []
+          dailyStats.value = []
+          return
+        }
+
         const data = await response.json()
-        if (data.success) {
+        if (data.success && data.data && data.data.payments) {
           payments.value = data.data.payments.data
           pagination.value = {
             current_page: data.data.payments.current_page,
@@ -529,14 +538,23 @@ export default {
             to: data.data.payments.to,
             total: data.data.payments.total
           }
-          
+
           // Mettre à jour les stats
           Object.assign(stats, data.data.stats)
           gatewayStats.value = data.data.gateway_stats || []
           dailyStats.value = data.data.daily_stats || []
+        } else {
+          payments.value = []
+          pagination.value = null
+          gatewayStats.value = []
+          dailyStats.value = []
         }
       } catch (error) {
         console.error('Erreur chargement paiements:', error)
+        payments.value = []
+        pagination.value = null
+        gatewayStats.value = []
+        dailyStats.value = []
       } finally {
         loading.value = false
       }
@@ -550,13 +568,22 @@ export default {
             'Accept': 'application/json'
           }
         })
-        
+
+        if (!response.ok) {
+          console.error('Erreur API organizers:', response.status)
+          organizers.value = []
+          return
+        }
+
         const data = await response.json()
-        if (data.success) {
+        if (data.success && data.data) {
           organizers.value = data.data.organizers.data || data.data.organizers
+        } else {
+          organizers.value = []
         }
       } catch (error) {
         console.error('Erreur chargement organisateurs:', error)
+        organizers.value = []
       }
     }
 
@@ -600,14 +627,23 @@ export default {
             'Accept': 'application/json'
           }
         })
-        
+
+        if (!response.ok) {
+          console.error('Erreur API payment details:', response.status)
+          alert('Impossible de charger les détails du paiement')
+          return
+        }
+
         const data = await response.json()
-        if (data.success) {
+        if (data.success && data.data) {
           selectedPayment.value = data.data.payment
           showDetailsModal.value = true
+        } else {
+          alert('Erreur lors du chargement des détails')
         }
       } catch (error) {
         console.error('Erreur chargement détails paiement:', error)
+        alert('Erreur technique lors du chargement des détails')
       }
     }
 
@@ -620,9 +656,15 @@ export default {
             'Accept': 'application/json'
           }
         })
-        
+
+        if (!response.ok) {
+          console.error('Erreur API check payment status:', response.status)
+          alert('Erreur lors de la vérification du statut')
+          return
+        }
+
         const data = await response.json()
-        if (data.success) {
+        if (data.success && data.data) {
           alert(`Statut mis à jour: ${getStatusName(data.data.status)}`)
           loadPayments()
           if (showDetailsModal.value) {
@@ -651,9 +693,15 @@ export default {
             'Accept': 'application/json'
           }
         })
-        
+
+        if (!response.ok) {
+          console.error('Erreur API check pending:', response.status)
+          alert('Erreur lors de la vérification des paiements en attente')
+          return
+        }
+
         const data = await response.json()
-        if (data.success) {
+        if (data.success && data.data) {
           alert(`Vérification terminée. ${data.data.updated_count} paiement(s) mis à jour.`)
           loadPayments()
         } else {
@@ -685,7 +733,13 @@ export default {
           },
           body: JSON.stringify({ reason })
         })
-        
+
+        if (!response.ok) {
+          console.error('Erreur API refund:', response.status)
+          alert('Erreur lors du remboursement')
+          return
+        }
+
         const data = await response.json()
         if (data.success) {
           alert('Remboursement initié avec succès')
