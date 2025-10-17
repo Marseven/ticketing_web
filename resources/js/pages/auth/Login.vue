@@ -10,19 +10,6 @@
       <div class="absolute inset-0 bg-blue-900/60"></div>
     </div>
 
-    <!-- Mobile: Simple top header with logo -->
-    <div class="md:hidden bg-blue-900 px-4 py-6">
-      <div class="flex items-center justify-between">
-        <router-link to="/" class="text-white hover:text-yellow-500 transition-colors">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-          </svg>
-        </router-link>
-        <img src="/images/logo_white.png" alt="Logo" class="h-10" />
-        <div class="w-6"></div>
-      </div>
-    </div>
-
     <!-- Main Content -->
     <div class="relative z-10 min-h-screen md:flex md:items-center md:justify-center px-4 py-8 md:py-12">
       <div class="max-w-md w-full mx-auto">
