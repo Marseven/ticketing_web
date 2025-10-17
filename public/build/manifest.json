@@ -121,7 +121,7 @@
     "src": "node_modules/intl-tel-input/build/img/globe@2x.webp"
   },
   "resources/css/app.css": {
-    "file": "assets/css/app-BDu4rh7f.css",
+    "file": "assets/css/app-CwSWi3Vl.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [
@@ -129,7 +129,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-Df-c2zlg.js",
+    "file": "assets/js/app-y9ZkTnkQ.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -191,7 +191,7 @@
     ],
     "css": [
       "assets/css/app-C5p24ga3.css",
-      "assets/css/app-BDu4rh7f.css"
+      "assets/css/app-CwSWi3Vl.css"
     ]
   },
   "resources/js/layouts/AdminLayout.vue": {
@@ -273,7 +273,7 @@
     ]
   },
   "resources/js/pages/Events.vue": {
-    "file": "assets/js/Events-sanbpsuA.js",
+    "file": "assets/js/Events-Co4FYC_I.js",
     "name": "Events",
     "src": "resources/js/pages/Events.vue",
     "isDynamicEntry": true,
@@ -286,7 +286,7 @@
       "_pinia-vendor-CdH4T1Hh.js"
     ],
     "css": [
-      "assets/css/Events-DeKICGGX.css"
+      "assets/css/Events-_KWPwr8m.css"
     ]
   },
   "resources/js/pages/Payment.vue": {

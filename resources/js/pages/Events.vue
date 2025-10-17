@@ -135,7 +135,7 @@
 
         <!-- Filtres de catégorie Mobile -->
         <div class="mb-6">
-          <h3 class="text-white text-sm font-bold mb-3">Catégories</h3>
+          <h3 class="text-gray-800 text-sm font-bold mb-3">Catégories</h3>
           <div class="flex flex-wrap gap-2">
             <button
               v-for="category in categories"
@@ -145,7 +145,7 @@
                 'px-4 py-2 rounded-primea text-sm font-bold transition-all duration-200',
                 selectedCategory === category.id
                   ? 'bg-primea-yellow text-primea-blue'
-                  : 'bg-white/10 text-white border border-white/30 hover:bg-primea-yellow hover:text-primea-blue'
+                  : 'bg-white text-primea-blue border-2 border-primea-blue hover:bg-primea-yellow hover:text-primea-blue'
               ]"
             >
               {{ category.name }}
