@@ -55,12 +55,41 @@
             Accueil
           </router-link>
 
-          <router-link
-            :to="{ name: 'events' }"
-            class="text-blue-950 hover:text-yellow-500 font-semibold transition-colors duration-200"
-          >
-            Événements
-          </router-link>
+          <!-- Events Dropdown -->
+          <div class="relative" ref="eventsDropdown">
+            <button
+              @click="toggleEventsDropdown"
+              class="flex items-center space-x-1 text-blue-950 hover:text-yellow-500 font-semibold transition-colors duration-200"
+            >
+              <span>Événements</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+
+            <!-- Categories Dropdown -->
+            <transition name="dropdown">
+              <div v-if="eventsDropdownOpen" class="absolute left-0 mt-2 w-56 bg-white rounded-xl shadow-2xl py-2 border border-gray-100">
+                <router-link
+                  :to="{ name: 'events' }"
+                  @click="closeEventsDropdown"
+                  class="flex items-center px-4 py-2 text-blue-950 hover:bg-blue-950/10 transition-colors duration-200 font-semibold"
+                >
+                  Tous les événements
+                </router-link>
+                <div class="border-t border-gray-200 my-2"></div>
+                <router-link
+                  v-for="category in categories"
+                  :key="category.id"
+                  :to="{ name: 'events', query: { category: category.slug } }"
+                  @click="closeEventsDropdown"
+                  class="flex items-center px-4 py-2 text-sm text-blue-950 hover:bg-blue-950/10 transition-colors duration-200"
+                >
+                  {{ category.name }}
+                </router-link>
+              </div>
+            </transition>
+          </div>
 
           <router-link
             :to="{ name: 'ticket-retrieve' }"
@@ -339,8 +368,11 @@ const authStore = useAuthStore()
 
 const dropdownOpen = ref(false)
 const mobileMenuOpen = ref(false)
+const eventsDropdownOpen = ref(false)
 const dropdown = ref(null)
+const eventsDropdown = ref(null)
 const userAvatar = ref(null)
+const categories = ref([])
 
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 const user = computed(() => authStore.user)
@@ -387,6 +419,14 @@ const closeDropdown = () => {
   dropdownOpen.value = false
 }
 
+const toggleEventsDropdown = () => {
+  eventsDropdownOpen.value = !eventsDropdownOpen.value
+}
+
+const closeEventsDropdown = () => {
+  eventsDropdownOpen.value = false
+}
+
 const toggleMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value
 }
@@ -397,6 +437,25 @@ const closeMenu = () => {
 
 const goBack = () => {
   router.back()
+}
+
+const loadCategories = async () => {
+  try {
+    const response = await fetch('/api/client/categories', {
+      headers: { 'Accept': 'application/json' }
+    })
+    if (!response.ok) throw new Error('Erreur de chargement')
+    const data = await response.json()
+    if (data.success && data.categories) {
+      categories.value = data.categories.map(cat => ({
+        id: cat.id,
+        name: cat.name,
+        slug: cat.slug
+      }))
+    }
+  } catch (error) {
+    console.error('Erreur:', error)
+  }
 }
 
 const logout = async () => {
@@ -410,12 +469,16 @@ const handleClickOutside = (event) => {
   if (dropdown.value && !dropdown.value.contains(event.target)) {
     closeDropdown()
   }
+  if (eventsDropdown.value && !eventsDropdown.value.contains(event.target)) {
+    closeEventsDropdown()
+  }
 }
 
 onMounted(async () => {
   document.addEventListener('click', handleClickOutside)
   await authStore.initialize()
   loadUserAvatar()
+  loadCategories()
 })
 
 watch(user, () => {

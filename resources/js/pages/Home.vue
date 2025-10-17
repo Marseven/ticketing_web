@@ -79,20 +79,24 @@
     <!-- Categories Section -->
     <section class="py-6 bg-gray-50">
       <div class="px-4 max-w-7xl mx-auto">
-        <div class="grid grid-cols-3 gap-3 md:gap-4">
-          <button
-            v-for="category in mainCategories"
-            :key="category.id"
-            @click="filterByCategory(category.id)"
-            :class="[
-              'py-4 px-3 rounded-lg text-xs md:text-sm font-bold transition-all',
-              selectedCategory === category.id
-                ? 'bg-blue-950 text-white shadow-lg scale-105'
-                : 'bg-white text-blue-950 border-2 border-blue-950 hover:bg-yellow-500 hover:border-yellow-500'
-            ]"
-          >
-            {{ category.name }}
-          </button>
+        <h3 class="text-lg font-bold text-blue-950 mb-4 text-center">Filtrer par catégorie</h3>
+        <!-- Container with vertical scroll -->
+        <div class="max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-950 scrollbar-track-gray-200">
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 pr-2">
+            <button
+              v-for="category in categories"
+              :key="category.id"
+              @click="filterByCategory(category.id)"
+              :class="[
+                'py-4 px-3 rounded-lg text-xs md:text-sm font-bold transition-all',
+                selectedCategory === category.id
+                  ? 'bg-blue-950 text-white shadow-lg scale-105'
+                  : 'bg-white text-blue-950 border-2 border-blue-950 hover:bg-yellow-500 hover:border-yellow-500'
+              ]"
+            >
+              {{ category.name }}
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -196,11 +200,6 @@ export default {
 
     // Exemple: définir une image par défaut (décommenter pour activer)
     // adBannerImage.value = 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'
-
-    // Main categories for buttons
-    const mainCategories = computed(() => {
-      return categories.value.slice(0, 3)
-    })
 
     // Filtered events
     const filteredEvents = computed(() => {
@@ -336,7 +335,6 @@ export default {
       events,
       categories,
       loading,
-      mainCategories,
       filteredEvents,
       adBannerImage,
       adBannerStyle,
@@ -354,5 +352,26 @@ export default {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Custom scrollbar for categories */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thumb-blue-950::-webkit-scrollbar-thumb {
+  background-color: #172554;
+  border-radius: 3px;
+}
+
+.scrollbar-track-gray-200::-webkit-scrollbar-track {
+  background-color: #e5e7eb;
+  border-radius: 3px;
+}
+
+/* Firefox scrollbar */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #172554 #e5e7eb;
 }
 </style>
