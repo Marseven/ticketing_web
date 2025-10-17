@@ -52,24 +52,24 @@ class AdminController extends Controller
             // Calculer la commission plateforme (par exemple 5% du total)
             $platformCommission = $revenusTotal * 0.05;
 
-            // Compter les événements actifs (événements à venir)
-            $activeEvents = Event::where('status', 'published')
-                ->whereHas('schedules', function ($q) {
-                    $q->where('starts_at', '>', now());
-                })
+            // Compter les événements actifs (événements publiés)
+            $activeEvents = Event::where('status', 'published')->count();
+
+            // Compter les utilisateurs actifs (inscrits dans les 30 derniers jours ou ayant une commande récente)
+            $activeUsers = User::where('created_at', '>=', now()->subDays(30))
                 ->count();
 
-            // Compter les utilisateurs actifs (connectés dans les 30 derniers jours)
-            $activeUsers = User::where('last_login_at', '>=', now()->subDays(30))
-                ->orWhere('created_at', '>=', now()->subDays(30))
-                ->count();
+            // Si aucun utilisateur récent, compter tous les utilisateurs
+            if ($activeUsers === 0) {
+                $activeUsers = User::count();
+            }
 
             $stats = [
                 // Principales stats
                 'total_revenue' => $revenusTotal,
                 'tickets_sold' => $ticketsVendus,
-                'active_events' => $activeEvents ?: Event::where('status', 'published')->count(),
-                'active_users' => $activeUsers ?: User::count(),
+                'active_events' => $activeEvents,
+                'active_users' => $activeUsers,
 
                 // Stats paiements
                 'successful_payments' => $successfulPayments,
@@ -81,11 +81,11 @@ class AdminController extends Controller
                 'total_events' => Event::count(),
                 'total_users' => User::count(),
                 'total_organizers' => Organizer::count(),
-                'total_balance' => OrganizerBalance::sum('balance'),
+                'total_balance' => OrganizerBalance::sum('balance') ?? 0,
                 'orders_today' => Order::whereDate('created_at', today())->count(),
                 'revenue_today' => Payment::where('status', 'success')
                     ->whereDate('created_at', today())
-                    ->sum('amount'),
+                    ->sum('amount') ?? 0,
                 'tickets_scannes' => $ticketsScannes,
 
                 // Anciennes clés pour rétro-compatibilité
@@ -95,25 +95,29 @@ class AdminController extends Controller
             ];
 
             // Commandes récentes avec mapping des champs
-            $recentOrders = Order::with(['event', 'organizer', 'buyer'])
+            $recentOrdersQuery = Order::with(['tickets.event', 'organizer', 'buyer'])
                 ->orderBy('created_at', 'desc')
                 ->limit(10)
-                ->get()
-                ->map(function ($order) {
-                    return [
-                        'id' => $order->id,
-                        'reference' => $order->reference,
-                        'customer_name' => $order->guest_name ?? ($order->buyer ? $order->buyer->name : 'N/A'),
-                        'customer_email' => $order->guest_email ?? ($order->buyer ? $order->buyer->email : 'N/A'),
-                        'total_amount' => $order->total_amount,
-                        'status' => $order->status,
-                        'created_at' => $order->created_at,
-                        'event' => $order->event ? [
-                            'id' => $order->event->id,
-                            'title' => $order->event->title,
-                        ] : null,
-                    ];
-                });
+                ->get();
+
+            $recentOrders = $recentOrdersQuery->map(function ($order) {
+                // Obtenir l'événement via le premier ticket
+                $event = $order->tickets->first()?->event;
+
+                return [
+                    'id' => $order->id,
+                    'reference' => $order->reference,
+                    'customer_name' => $order->guest_name ?? ($order->buyer?->name ?? 'N/A'),
+                    'customer_email' => $order->guest_email ?? ($order->buyer?->email ?? 'N/A'),
+                    'total_amount' => $order->total_amount,
+                    'status' => $order->status,
+                    'created_at' => $order->created_at,
+                    'event' => $event ? [
+                        'id' => $event->id,
+                        'title' => $event->title,
+                    ] : null,
+                ];
+            });
 
             // Activité récente (simulée pour l'exemple)
             $recentActivity = collect([
