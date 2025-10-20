@@ -33,7 +33,7 @@
           </div>
           <div class="ml-4">
             <p class="text-sm text-gray-600 font-primea">Événements Total</p>
-            <p class="text-2xl font-bold text-primea-blue font-primea">{{ stats.total_events }}</p>
+            <p class="text-2xl font-bold text-primea-blue font-primea">{{ stats.total_events || 0 }}</p>
           </div>
         </div>
       </div>
@@ -46,7 +46,7 @@
           </div>
           <div class="ml-4">
             <p class="text-sm text-gray-600 font-primea">Événements Actifs</p>
-            <p class="text-2xl font-bold text-primea-blue font-primea">{{ stats.active_events }}</p>
+            <p class="text-2xl font-bold text-primea-blue font-primea">{{ stats.active_events || 0 }}</p>
           </div>
         </div>
       </div>
@@ -59,7 +59,7 @@
           </div>
           <div class="ml-4">
             <p class="text-sm text-gray-600 font-primea">Billets Vendus</p>
-            <p class="text-2xl font-bold text-primea-yellow font-primea">{{ stats.tickets_sold }}</p>
+            <p class="text-2xl font-bold text-primea-yellow font-primea">{{ stats.tickets_sold || 0 }}</p>
           </div>
         </div>
       </div>
@@ -72,7 +72,7 @@
           </div>
           <div class="ml-4">
             <p class="text-sm text-gray-600 font-primea">Revenus</p>
-            <p class="text-2xl font-bold text-primea-blue font-primea">{{ formatAmount(stats.total_revenue) }} XAF</p>
+            <p class="text-2xl font-bold text-primea-blue font-primea">{{ formatAmount(stats.total_revenue || 0) }} XAF</p>
           </div>
         </div>
       </div>
@@ -204,7 +204,9 @@
                   {{ getEventStatusName(event.status) }}
                 </span>
               </td>
-              <td class="px-6 py-4 text-sm text-gray-900 font-primea">{{ event.tickets_sold || 0 }}</td>
+              <td class="px-6 py-4 text-sm text-gray-900 font-primea">
+                <span class="font-semibold">{{ event.tickets_sold || 0 }}</span>
+              </td>
               <td class="px-6 py-4 text-sm">
                 <router-link 
                   :to="{ name: 'organizer-event-detail', params: { slug: event.slug } }"
@@ -306,7 +308,8 @@ const loadDashboardData = async () => {
 
 // Utilitaires
 const formatAmount = (amount) => {
-  return new Intl.NumberFormat('fr-FR').format(amount);
+  const value = amount || 0;
+  return new Intl.NumberFormat('fr-FR').format(value);
 };
 
 const formatDate = (date) => {

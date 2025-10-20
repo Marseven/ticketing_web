@@ -36,52 +36,64 @@
         <div class="bg-white md:bg-white/95 md:backdrop-blur-sm rounded-2xl md:rounded-3xl shadow-lg md:shadow-2xl p-6 md:p-8">
           <form @submit.prevent="searchTicket" class="space-y-5 md:space-y-6">
 
-            <!-- Reference Field -->
-            <div>
-              <label for="reference" class="block text-base md:text-lg font-semibold text-blue-900 mb-2 md:mb-3">
-                Entrez votre référence du ticket
-              </label>
-              <input
-                type="text"
-                id="reference"
-                v-model="searchForm.reference"
-                placeholder="Ex: TKT-2024-ABC123"
-                class="w-full px-4 md:px-6 py-3 md:py-4 text-base md:text-lg border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-blue-900 transition-all duration-200 bg-white"
-              />
-              <p class="mt-2 text-xs md:text-sm text-gray-600">
-                Vous pouvez utiliser votre ID de transaction ou le numéro de téléphone utilisé pour l'achat
-              </p>
-            </div>
+            <!-- Main Search Options -->
+            <div class="space-y-5">
+              <div>
+                <label class="block text-base md:text-lg font-semibold text-blue-900 mb-4">
+                  Choisissez une méthode de recherche
+                </label>
+                <p class="text-xs md:text-sm text-gray-600 mb-4">
+                  Utilisez l'une des options ci-dessous pour retrouver votre ticket
+                </p>
+              </div>
 
-            <!-- Alternative Search Methods -->
-            <div class="border-t border-gray-200 pt-5 md:pt-6">
-              <h4 class="font-semibold text-blue-900 mb-4 text-sm md:text-base">Ou rechercher par :</h4>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Reference Field -->
+              <div>
+                <label for="reference" class="block text-sm font-semibold text-blue-900 mb-2">
+                  Référence du ticket <span class="text-xs font-normal text-gray-500">(si disponible)</span>
+                </label>
+                <input
+                  type="text"
+                  id="reference"
+                  v-model="searchForm.reference"
+                  placeholder="Ex: TKT-2024-ABC123 ou ID de transaction"
+                  class="w-full px-4 md:px-6 py-3 md:py-4 text-base border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-blue-900 transition-all duration-200 bg-white"
+                />
+              </div>
 
-                <!-- Phone Number -->
-                <div>
-                  <label for="phone" class="block text-sm font-semibold text-blue-900 mb-2">
-                    Numéro de téléphone
-                  </label>
-                  <PhoneInput
-                    v-model="searchForm.phone"
-                    placeholder="Numéro de téléphone"
-                    :required="false"
-                  />
+              <!-- Alternative Search Methods -->
+              <div class="relative">
+                <div class="absolute inset-x-0 top-3 flex items-center">
+                  <div class="flex-1 border-t border-gray-200"></div>
+                  <span class="px-3 text-xs font-medium text-gray-500 bg-white">OU</span>
+                  <div class="flex-1 border-t border-gray-200"></div>
                 </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-10">
+                  <!-- Phone Number -->
+                  <div>
+                    <label for="phone" class="block text-sm font-semibold text-blue-900 mb-2">
+                      Numéro de téléphone <span class="text-xs font-normal text-gray-500">(utilisé pour l'achat)</span>
+                    </label>
+                    <PhoneInput
+                      v-model="searchForm.phone"
+                      placeholder="Entrez votre numéro"
+                      :required="false"
+                    />
+                  </div>
 
-                <!-- Email -->
-                <div>
-                  <label for="email" class="block text-sm font-semibold text-blue-900 mb-2">
-                    Adresse email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    v-model="searchForm.email"
-                    placeholder="votre@email.com"
-                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-blue-900 transition-all duration-200 bg-white text-base"
-                  />
+                  <!-- Email -->
+                  <div>
+                    <label for="email" class="block text-sm font-semibold text-blue-900 mb-2">
+                      Adresse email <span class="text-xs font-normal text-gray-500">(utilisée pour l'achat)</span>
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      v-model="searchForm.email"
+                      placeholder="votre@email.com"
+                      class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-blue-900 transition-all duration-200 bg-white text-base"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

@@ -129,6 +129,38 @@
               </label>
             </div>
 
+            <!-- Organizer Account Option -->
+            <div class="bg-blue-50 rounded-xl p-4 border-2 border-blue-100">
+              <div class="flex items-start">
+                <input
+                  id="is_organizer"
+                  v-model="form.is_organizer"
+                  type="checkbox"
+                  class="h-4 w-4 mt-0.5 text-blue-900 focus:ring-yellow-500 border-gray-300 rounded flex-shrink-0"
+                />
+                <label for="is_organizer" class="ml-2 block text-sm font-semibold text-blue-900">
+                  Je suis un organisateur d'événements
+                </label>
+              </div>
+
+              <!-- Organization Name (conditional) -->
+              <div v-if="form.is_organizer" class="mt-4 animate-fade-in">
+                <label for="organization_name" class="block text-sm font-semibold text-blue-900 mb-2">
+                  Nom de l'organisation <span class="text-gray-400 text-xs font-normal">(optionnel)</span>
+                </label>
+                <input
+                  id="organization_name"
+                  v-model="form.organization_name"
+                  type="text"
+                  class="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-blue-900 transition-all duration-200 bg-white text-base"
+                  placeholder="Nom de votre organisation ou entreprise"
+                />
+                <p class="mt-2 text-xs text-gray-600">
+                  Votre compte sera vérifié par notre équipe avant activation.
+                </p>
+              </div>
+            </div>
+
             <!-- Error Message -->
             <div v-if="error" class="bg-red-50 border-2 border-red-200 rounded-xl p-4">
               <p class="text-red-600 text-sm font-medium">{{ error }}</p>
@@ -151,13 +183,15 @@
             </button>
 
             <!-- Login Link -->
-            <div class="text-center pt-2">
-              <p class="text-sm text-gray-600">
-                Vous avez déjà un compte ?
-                <router-link to="/login" class="font-bold text-blue-900 hover:text-yellow-500 transition-colors duration-200">
-                  Se connecter
-                </router-link>
-              </p>
+            <div class="text-center pt-4">
+              <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+                <p class="text-base text-gray-700">
+                  Vous avez déjà un compte ?
+                  <router-link to="/login" class="font-bold text-blue-900 hover:text-yellow-500 transition-colors duration-200 text-lg underline">
+                    Se connecter
+                  </router-link>
+                </p>
+              </div>
             </div>
           </form>
         </div>
@@ -190,7 +224,9 @@ export default {
       phone: '',
       password: '',
       password_confirmation: '',
-      terms: false
+      terms: false,
+      is_organizer: false,
+      organization_name: ''
     })
 
     // Redirect if already authenticated
@@ -243,14 +279,15 @@ export default {
       loading.value = true
 
       try {
-        // Prepare registration data with explicit client role
+        // Prepare registration data
         const registrationData = {
           name: form.value.name,
           email: form.value.email || undefined, // Only send if filled
           phone: form.value.phone,
           password: form.value.password,
           password_confirmation: form.value.password_confirmation,
-          role: 'client' // Explicitly set role as client
+          is_organizer: form.value.is_organizer || false,
+          organization_name: form.value.is_organizer && form.value.organization_name ? form.value.organization_name : undefined
         }
 
         const response = await authService.register(registrationData)

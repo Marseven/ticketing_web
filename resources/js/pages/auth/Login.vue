@@ -184,16 +184,6 @@
             Récupérer mon ticket perdu
           </router-link>
         </div>
-
-        <!-- Event Creator Link (Mobile) -->
-        <div class="md:hidden text-center mt-4">
-          <router-link
-            to="/organizer/login"
-            class="text-blue-900 hover:text-yellow-500 font-semibold text-sm transition-colors duration-200 inline-block underline"
-          >
-            Vous êtes créateur d'événements ?
-          </router-link>
-        </div>
       </div>
     </div>
   </div>

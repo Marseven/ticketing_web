@@ -36,21 +36,21 @@
             </div>
           </div>
 
-          <!-- Slogan -->
-          <h1 class="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-8 leading-tight uppercase">
-            SE PROCURER UN TICKET<br>
-            N'A JAMAIS ÉTÉ AUSSI SIMPLE !
-          </h1>
-
           <!-- CTA Button -->
-          <div class="mb-6">
+          <div class="mb-8">
             <router-link
               to="/login"
-              class="inline-block bg-blue-950 text-white px-8 py-4 rounded-lg text-base font-bold hover:bg-yellow-500 hover:text-blue-950 transition-colors shadow-lg"
+              class="inline-block bg-white text-blue-950 px-8 py-4 rounded-lg text-base font-bold hover:bg-yellow-500 hover:text-blue-950 transition-colors shadow-lg border-2 border-white"
             >
               Créateur d'événements
             </router-link>
           </div>
+
+          <!-- Slogan -->
+          <h1 class="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight uppercase">
+            SE PROCURER UN TICKET<br>
+            N'A JAMAIS ÉTÉ AUSSI SIMPLE !
+          </h1>
 
           <!-- Links -->
           <div class="flex flex-col sm:flex-row items-center justify-center gap-4 text-white">

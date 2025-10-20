@@ -57,14 +57,35 @@
           </div>
         </div>
 
-        <!-- Grid Events Desktop -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 mb-16">
-          <EventCard 
-            v-for="event in filteredEvents" 
-            :key="event.id" 
-            :event="event"
-            class="transform hover:scale-105 transition-all duration-300"
-          />
+        <!-- Grid Events Desktop - À venir -->
+        <div v-if="filteredEvents.length > 0" class="mb-16">
+          <h2 class="text-2xl font-bold text-primea-blue mb-8">Événements à venir</h2>
+          <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+            <EventCard
+              v-for="event in filteredEvents"
+              :key="event.id"
+              :event="event"
+              class="transform hover:scale-105 transition-all duration-300"
+            />
+          </div>
+        </div>
+
+        <!-- Grid Events Desktop - Passés -->
+        <div v-if="pastEvents.length > 0" class="mb-16">
+          <h2 class="text-2xl font-bold text-gray-600 mb-8 flex items-center gap-2">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Événements passés
+          </h2>
+          <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 opacity-75">
+            <EventCard
+              v-for="event in pastEvents"
+              :key="event.id"
+              :event="event"
+              class="transform hover:scale-105 transition-all duration-300 grayscale hover:grayscale-0"
+            />
+          </div>
         </div>
 
         <!-- Message si aucun événement Desktop -->
@@ -153,10 +174,12 @@
           </div>
         </div>
 
-        <!-- Liste des événements Mobile selon maquette -->
-        <div class="space-y-4 mb-8">
-          <div
-            v-for="event in filteredEvents" 
+        <!-- Liste des événements Mobile selon maquette - À venir -->
+        <div v-if="filteredEvents.length > 0" class="mb-8">
+          <h3 class="text-gray-800 text-lg font-bold mb-4">Événements à venir</h3>
+          <div class="space-y-4">
+            <div
+              v-for="event in filteredEvents" 
             :key="event.id"
             @click="goToEvent(event)"
             class="bg-white rounded-primea-lg shadow-primea overflow-hidden cursor-pointer hover:shadow-primea-lg transition-all duration-300 transform hover:scale-105"
@@ -212,6 +235,75 @@
             </div>
           </div>
         </div>
+        </div>
+
+        <!-- Liste des événements Mobile - Passés -->
+        <div v-if="pastEvents.length > 0" class="mb-8">
+          <h3 class="text-gray-600 text-lg font-bold mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Événements passés
+          </h3>
+          <div class="space-y-4 opacity-75">
+            <div
+              v-for="event in pastEvents"
+            :key="event.id"
+            @click="goToEvent(event)"
+            class="bg-white rounded-primea-lg shadow-primea overflow-hidden cursor-pointer hover:shadow-primea-lg transition-all duration-300 transform hover:scale-105 grayscale hover:grayscale-0"
+          >
+            <!-- Image de l'événement avec overlay comme dans la maquette -->
+            <div class="h-48 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 relative overflow-hidden">
+              <img
+                v-if="event.image || event.image_url || event.image_file"
+                :src="event.image_url || event.image || event.image_file"
+                :alt="event.title"
+                class="w-full h-full object-cover"
+              />
+              <div class="absolute inset-0 bg-primea-blue/40"></div>
+
+              <!-- Contenu sur l'image selon maquette -->
+              <div class="absolute inset-0 p-4 text-white">
+                <div class="flex justify-between items-start mb-4">
+                  <div class="text-xs">
+                    <div class="bg-primea-yellow/20 backdrop-blur-sm rounded-primea px-2 py-1 mb-1 text-primea-yellow font-bold uppercase">
+                      {{ event.category?.name || event.category_name || 'ÉVÉNEMENT' }}
+                    </div>
+                    <div class="font-bold">{{ event.title }}</div>
+                  </div>
+                  <div class="text-right text-xs">
+                    <div class="bg-primea-yellow text-primea-blue px-2 py-1 rounded-primea mb-1 font-bold">
+                      {{ formatEventDate(event.event_date || event.date) }}
+                    </div>
+                    <div v-if="event.min_age" class="bg-red-600 text-white px-2 py-1 rounded-primea font-bold">{{ event.min_age }}+</div>
+                  </div>
+                </div>
+
+                <!-- Prix selon la maquette -->
+                <div class="absolute bottom-4 left-4 right-4">
+                  <div class="flex justify-between items-end">
+                    <div class="text-xs">
+                      <div class="flex space-x-2 mb-2">
+                        <div v-if="event.min_price && event.min_price > 0" class="bg-green-500 text-white px-2 py-1 rounded-primea text-xs font-bold">
+                          {{ formatPrice(event.min_price) }} XAF
+                        </div>
+                        <div v-if="event.max_price && event.max_price > 0 && event.max_price !== event.min_price" class="bg-primea-blue text-white px-2 py-1 rounded-primea text-xs font-bold">
+                          {{ formatPrice(event.max_price) }} XAF
+                        </div>
+                      </div>
+                      <div class="text-xs text-gray-200">{{ event.venue?.name || event.venue_name || 'Lieu à confirmer' }}</div>
+                    </div>
+                    <div class="text-right">
+                      <div class="text-xs text-gray-200">Organisé par</div>
+                      <div class="text-xs font-bold text-primea-yellow">{{ event.organizer?.name || 'Organisateur' }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        </div>
 
         <!-- Message si aucun événement ou erreur Mobile -->
         <div v-if="filteredEvents.length === 0 && !loading" class="text-center py-12">
@@ -257,7 +349,18 @@ export default {
     const categories = ref([])
     const searchQuery = ref('')
 
-    // Événements filtrés
+    // Fonction pour vérifier si un événement est passé
+    const isEventPast = (event) => {
+      try {
+        const eventDate = event.event_date || event.date
+        if (!eventDate) return false
+        return new Date(eventDate) < new Date()
+      } catch {
+        return false
+      }
+    }
+
+    // Événements filtrés (à venir uniquement)
     const filteredEvents = computed(() => {
       let filtered = events.value
 
@@ -292,7 +395,40 @@ export default {
         })
       }
 
-      return filtered
+      return filtered.filter(event => !isEventPast(event))
+    })
+
+    // Événements passés filtrés
+    const pastEvents = computed(() => {
+      let filtered = events.value
+
+      // Filtrer par catégorie
+      if (selectedCategory.value !== 'all') {
+        filtered = filtered.filter(event => {
+          const eventCategoryId = event.category?.id || event.category_id
+          return eventCategoryId === parseInt(selectedCategory.value)
+        })
+      }
+
+      // Filtrer par recherche
+      if (searchQuery.value && searchQuery.value.trim()) {
+        const query = searchQuery.value.toLowerCase().trim()
+        filtered = filtered.filter(event => {
+          const titleMatch = event.title?.toLowerCase().includes(query)
+          const descriptionMatch = event.description?.toLowerCase().includes(query)
+          const venueMatch = (event.venue_name?.toLowerCase().includes(query)) ||
+                            (event.venue?.name?.toLowerCase().includes(query)) ||
+                            (typeof event.venue === 'string' && event.venue?.toLowerCase().includes(query))
+          const organizerMatch = (event.organizer?.name?.toLowerCase().includes(query)) ||
+                                 (typeof event.organizer === 'string' && event.organizer?.toLowerCase().includes(query))
+          const categoryMatch = event.category?.name?.toLowerCase().includes(query) ||
+                               event.category_name?.toLowerCase().includes(query)
+
+          return titleMatch || descriptionMatch || venueMatch || organizerMatch || categoryMatch
+        })
+      }
+
+      return filtered.filter(event => isEventPast(event))
     })
 
 
@@ -451,6 +587,7 @@ export default {
       categories,
       searchQuery,
       filteredEvents,
+      pastEvents,
       formatEventDate,
       formatPrice,
       goToEvent,

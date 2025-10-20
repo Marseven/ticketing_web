@@ -211,15 +211,22 @@ class OrderController extends Controller
                 }
             }
 
-            // Calculer les montants
-            // Le prix affiché au client est le prix TTC (tout compris)
+            // Calculer les montants - Modèle: Frais ajoutés au checkout
+            // Prix de base = ce que définit l'organisateur
             $unitPrice = $ticketType->price ?? 0;
-            $totalAmount = $unitPrice * $validated['quantity']; // Ce que le client paie
+            $baseAmount = $unitPrice * $validated['quantity']; // Prix base total
 
-            // Les frais et taxes sont déduits du montant total pour calculer le net organisateur
-            $feesAmount = $this->calculateFees($totalAmount);
-            $taxAmount = $this->calculateTaxes($totalAmount);
-            $subtotalAmount = $totalAmount - $feesAmount - $taxAmount; // Net reversé à l'organisateur
+            // Frais de service (5% du prix de base, ajoutés au total)
+            $feesAmount = $this->calculateFees($baseAmount);
+
+            // TVA (18% sur les frais uniquement - payée par la plateforme)
+            $taxAmount = $this->calculateTaxes($feesAmount);
+
+            // Montant total payé par le client
+            $totalAmount = $baseAmount + $feesAmount + $taxAmount;
+
+            // Montant net reversé à l'organisateur (100% du prix de base)
+            $subtotalAmount = $baseAmount;
 
             // Créer la commande pour l'utilisateur authentifié
             $order = \App\Models\Order::create([
@@ -309,11 +316,12 @@ class OrderController extends Controller
 
     /**
      * Calculate taxes for the order
+     * TVA appliquée uniquement sur les frais de service
      */
-    private function calculateTaxes(float $subtotal): float
+    private function calculateTaxes(float $feesAmount): float
     {
-        // TVA de 18% au Gabon
-        return $subtotal * 0.18;
+        // TVA de 18% au Gabon (appliquée sur les frais)
+        return $feesAmount * 0.18;
     }
 
     /**

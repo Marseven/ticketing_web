@@ -58,6 +58,7 @@ class AuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'phone' => 'required|string|max:20|unique:users',
             'is_organizer' => 'nullable|boolean',
+            'organization_name' => 'nullable|string|max:255',
         ], [
             'name.required' => 'Le nom complet est obligatoire',
             'name.min' => 'Le nom doit contenir au moins 2 caractères',
@@ -70,35 +71,90 @@ class AuthController extends Controller
             'phone.unique' => 'Ce numéro de téléphone est déjà utilisé',
         ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'phone' => $request->phone,
-            'is_organizer' => $request->is_organizer ?? false,
-            'status' => 'active',
-            'email_verified_at' => null, // L'email n'est pas encore vérifié
-        ]);
+        \DB::beginTransaction();
 
-        // Envoyer l'email de vérification
-        $user->sendEmailVerificationNotification();
+        try {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'phone' => $request->phone,
+                'is_organizer' => $request->is_organizer ?? false,
+                'status' => 'active',
+                'email_verified_at' => null, // L'email n'est pas encore vérifié
+            ]);
 
-        // Créer un token pour l'utilisateur non vérifié
-        $token = $user->createToken('auth_token')->plainTextToken;
+            // Si l'utilisateur est un organisateur, créer automatiquement son organisation
+            if ($user->is_organizer) {
+                $organizerName = $request->organization_name ?? $request->name;
 
-        return response()->json([
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'phone' => $user->phone,
-                'is_organizer' => $user->is_organizer,
-                'email_verified_at' => $user->email_verified_at,
-            ],
-            'token' => $token,
-            'message' => 'Inscription réussie. Un email de vérification a été envoyé.',
-            'email_verification_required' => true,
-        ], 201);
+                $organizer = \App\Models\Organizer::create([
+                    'name' => $organizerName,
+                    'slug' => \Illuminate\Support\Str::slug($organizerName . '-' . time()),
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                    'description' => null,
+                    'is_active' => true,
+                    'is_verified' => false, // Nécessite vérification admin
+                ]);
+
+                // Associer l'utilisateur à l'organisation comme owner
+                $organizer->users()->attach($user->id, ['role' => 'owner']);
+
+                // Créer le balance pour l'organisateur
+                \App\Models\OrganizerBalance::create([
+                    'organizer_id' => $organizer->id,
+                    'balance' => 0,
+                    'pending_balance' => 0,
+                    'auto_payout_enabled' => false,
+                ]);
+
+                \Log::info('Organisation créée automatiquement lors de l\'inscription', [
+                    'user_id' => $user->id,
+                    'organizer_id' => $organizer->id,
+                    'organizer_name' => $organizer->name
+                ]);
+            }
+
+            // Envoyer l'email de vérification
+            $user->sendEmailVerificationNotification();
+
+            // Créer un token pour l'utilisateur non vérifié
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            \DB::commit();
+
+            $message = $user->is_organizer
+                ? 'Inscription réussie. Votre compte organisateur a été créé et est en attente de vérification. Un email de confirmation a été envoyé.'
+                : 'Inscription réussie. Un email de vérification a été envoyé.';
+
+            return response()->json([
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                    'is_organizer' => $user->is_organizer,
+                    'email_verified_at' => $user->email_verified_at,
+                ],
+                'token' => $token,
+                'message' => $message,
+                'email_verification_required' => true,
+            ], 201);
+
+        } catch (\Exception $e) {
+            \DB::rollBack();
+
+            \Log::error('Erreur lors de l\'inscription', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'message' => 'Erreur lors de l\'inscription',
+                'error' => config('app.debug') ? $e->getMessage() : 'Une erreur est survenue'
+            ], 500);
+        }
     }
 
     /**
