@@ -15,13 +15,13 @@
           </button>
 
           <!-- Logo and Title Center -->
-          <div class="flex-1 flex items-center justify-center">
-            <img src="/images/logo.png" alt="Logo" class="h-14 w-auto" />
+          <router-link :to="{ name: 'home' }" class="flex-1 flex items-center justify-center group">
+            <img src="/images/logo.png" alt="Logo" class="h-14 w-auto transition-transform duration-200 group-hover:scale-105" />
             <div class="ml-3 text-left">
               <h1 class="text-blue-950 text-2xl font-black leading-tight">La Billetterie</h1>
               <p class="text-blue-950 text-xs font-medium">Simple, Rapide et Sécurisée</p>
             </div>
-          </div>
+          </router-link>
 
           <!-- Burger Menu -->
           <button
