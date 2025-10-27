@@ -176,7 +176,7 @@ class OrganizerController extends Controller
                 })->where('status', 'issued')->count(),
                 'used_tickets' => $usedTickets,
                 'usage_rate' => $totalTickets > 0 ? round(($usedTickets / $totalTickets) * 100, 1) : 0,
-                'total_revenue' => round($totalRevenue, 2),
+                'total_revenue' => round($totalRevenue),
             ],
             'scan_stats' => $scanStats->map(function ($stat) {
                 return [
@@ -340,7 +340,7 @@ class OrganizerController extends Controller
             $totalCapacity = $event->ticketTypes->sum('available_quantity');
 
             $event->tickets_sold = $event->tickets_sold_count ?? 0;
-            $event->revenue = round($revenue, 2);
+            $event->revenue = round($revenue);
             $event->total_capacity = $totalCapacity;
 
             return $event;
@@ -406,7 +406,7 @@ class OrganizerController extends Controller
                 'total_capacity' => $type->available_quantity,
                 'sold' => $soldCount,
                 'used' => $tickets->where('status', 'used')->count(),
-                'revenue' => round($revenueForType, 2),
+                'revenue' => round($revenueForType),
             ];
         });
 
@@ -428,7 +428,7 @@ class OrganizerController extends Controller
                 return [
                     'date' => $date,
                     'count' => $ticketsCount,
-                    'revenue' => round($orders->sum('subtotal_amount'), 2),
+                    'revenue' => round($orders->sum('subtotal_amount')),
                 ];
             })->values();
 
@@ -559,7 +559,7 @@ class OrganizerController extends Controller
                 'published_events' => $publishedEvents,
                 'draft_events' => $draftEvents,
                 'tickets_sold' => $ticketsSold,
-                'total_revenue' => round($totalRevenue, 2)
+                'total_revenue' => round($totalRevenue)
             ]
         ]);
     }
@@ -604,7 +604,7 @@ class OrganizerController extends Controller
                     'event_date' => $event->event_date,
                     'status' => $event->status, // Utiliser status au lieu de is_active
                     'tickets_sold' => $event->tickets_sold_count ?? 0,
-                    'revenue' => round($revenue, 2)
+                    'revenue' => round($revenue)
                 ];
             });
 
@@ -1405,7 +1405,7 @@ class OrganizerController extends Controller
             ->sum('subtotal_amount');
 
         // Ajouter le revenu à l'événement
-        $event->revenue = round($revenue, 2);
+        $event->revenue = round($revenue);
 
         // Charger les achats récents (10 dernières commandes payées)
         $recentOrders = \App\Models\Order::where('organizer_id', $event->organizer_id)
@@ -1776,7 +1776,7 @@ class OrganizerController extends Controller
                     'tickets_sold' => $ticketsSold,
                     'tickets_used' => $ticketsUsed,
                     'total_capacity' => $event->ticketTypes->sum('available_quantity'),
-                    'revenue' => round($revenue, 2),
+                    'revenue' => round($revenue),
                     'usage_rate' => $ticketsSold > 0 ? round(($ticketsUsed / $ticketsSold) * 100, 1) : 0,
                 ],
                 'schedule_stats' => $scheduleStats,
