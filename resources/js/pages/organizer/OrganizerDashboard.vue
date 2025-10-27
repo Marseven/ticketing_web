@@ -24,55 +24,55 @@
     </div>
 
     <!-- Cartes de statistiques -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-8">
       <!-- Total Événements -->
-      <div class="bg-white rounded-primea shadow-primea p-6 border-l-4 border-primea-blue">
-        <div class="flex items-center">
-          <div class="p-2 bg-primea-blue/10 rounded-lg">
-            <CalendarIcon class="w-6 h-6 text-primea-blue" />
+      <div class="bg-white rounded-primea shadow-primea p-3 md:p-6 border-l-4 border-primea-blue aspect-square flex flex-col justify-center">
+        <div class="flex flex-col items-center text-center md:flex-row md:items-center md:text-left">
+          <div class="p-1.5 md:p-2 bg-primea-blue/10 rounded-lg mb-2 md:mb-0">
+            <CalendarIcon class="w-4 h-4 md:w-6 md:h-6 text-primea-blue" />
           </div>
-          <div class="ml-4">
-            <p class="text-sm text-gray-600 font-primea">Événements Total</p>
-            <p class="text-2xl font-bold text-primea-blue font-primea">{{ stats.total_events || 0 }}</p>
+          <div class="md:ml-4">
+            <p class="text-xs md:text-sm text-gray-600 font-primea">Événements Total</p>
+            <p class="text-lg md:text-2xl font-bold text-primea-blue font-primea">{{ stats.total_events || 0 }}</p>
           </div>
         </div>
       </div>
 
       <!-- Événements Actifs -->
-      <div class="bg-white rounded-primea shadow-primea p-6 border-l-4 border-primea-blue">
-        <div class="flex items-center">
-          <div class="p-2 rounded-lg" style="background-color: rgba(39, 45, 99, 0.15);">
-            <PlayIcon class="w-6 h-6 text-primea-blue" />
+      <div class="bg-white rounded-primea shadow-primea p-3 md:p-6 border-l-4 border-primea-blue aspect-square flex flex-col justify-center">
+        <div class="flex flex-col items-center text-center md:flex-row md:items-center md:text-left">
+          <div class="p-1.5 md:p-2 rounded-lg mb-2 md:mb-0" style="background-color: rgba(39, 45, 99, 0.15);">
+            <PlayIcon class="w-4 h-4 md:w-6 md:h-6 text-primea-blue" />
           </div>
-          <div class="ml-4">
-            <p class="text-sm text-gray-600 font-primea">Événements Actifs</p>
-            <p class="text-2xl font-bold text-primea-blue font-primea">{{ stats.active_events || 0 }}</p>
+          <div class="md:ml-4">
+            <p class="text-xs md:text-sm text-gray-600 font-primea">Événements Actifs</p>
+            <p class="text-lg md:text-2xl font-bold text-primea-blue font-primea">{{ stats.active_events || 0 }}</p>
           </div>
         </div>
       </div>
 
       <!-- Billets Vendus -->
-      <div class="bg-white rounded-primea shadow-primea p-6 border-l-4 border-primea-yellow">
-        <div class="flex items-center">
-          <div class="p-2 bg-primea-yellow/10 rounded-lg">
-            <TicketIcon class="w-6 h-6 text-primea-yellow" />
+      <div class="bg-white rounded-primea shadow-primea p-3 md:p-6 border-l-4 border-primea-yellow aspect-square flex flex-col justify-center">
+        <div class="flex flex-col items-center text-center md:flex-row md:items-center md:text-left">
+          <div class="p-1.5 md:p-2 bg-primea-yellow/10 rounded-lg mb-2 md:mb-0">
+            <TicketIcon class="w-4 h-4 md:w-6 md:h-6 text-primea-yellow" />
           </div>
-          <div class="ml-4">
-            <p class="text-sm text-gray-600 font-primea">Billets Vendus</p>
-            <p class="text-2xl font-bold text-primea-yellow font-primea">{{ stats.tickets_sold || 0 }}</p>
+          <div class="md:ml-4">
+            <p class="text-xs md:text-sm text-gray-600 font-primea">Billets Vendus</p>
+            <p class="text-lg md:text-2xl font-bold text-primea-yellow font-primea">{{ stats.tickets_sold || 0 }}</p>
           </div>
         </div>
       </div>
 
       <!-- Revenus -->
-      <div class="bg-white rounded-primea shadow-primea p-6 border-l-4 border-primea-blue">
-        <div class="flex items-center">
-          <div class="p-2 rounded-lg" style="background-color: rgba(39, 45, 99, 0.2);">
-            <CurrencyDollarIcon class="w-6 h-6 text-primea-blue" />
+      <div class="bg-white rounded-primea shadow-primea p-3 md:p-6 border-l-4 border-primea-blue aspect-square flex flex-col justify-center">
+        <div class="flex flex-col items-center text-center md:flex-row md:items-center md:text-left">
+          <div class="p-1.5 md:p-2 rounded-lg mb-2 md:mb-0" style="background-color: rgba(39, 45, 99, 0.2);">
+            <CurrencyDollarIcon class="w-4 h-4 md:w-6 md:h-6 text-primea-blue" />
           </div>
-          <div class="ml-4">
-            <p class="text-sm text-gray-600 font-primea">Revenus</p>
-            <p class="text-2xl font-bold text-primea-blue font-primea">{{ formatAmount(stats.total_revenue || 0) }} XAF</p>
+          <div class="md:ml-4">
+            <p class="text-xs md:text-sm text-gray-600 font-primea leading-tight">Revenus</p>
+            <p class="text-sm md:text-2xl font-bold text-primea-blue font-primea leading-tight">{{ formatAmount(stats.total_revenue || 0) }} XAF</p>
           </div>
         </div>
       </div>
