@@ -129,7 +129,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-Cl_WEtmn.js",
+    "file": "assets/js/app-DzD5iMcM.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -397,7 +397,7 @@
     ]
   },
   "resources/js/pages/auth/Register.vue": {
-    "file": "assets/js/Register-j-cbTjvE.js",
+    "file": "assets/js/Register-BC30QXJ7.js",
     "name": "Register",
     "src": "resources/js/pages/auth/Register.vue",
     "isDynamicEntry": true,
@@ -408,7 +408,7 @@
       "_pinia-vendor-DSZd9EMP.js"
     ],
     "css": [
-      "assets/css/Register-BPVvHy7c.css"
+      "assets/css/Register-CSgqkOTV.css"
     ]
   },
   "resources/js/pages/auth/RegisterOrganizer.vue": {

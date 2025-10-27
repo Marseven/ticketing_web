@@ -76,6 +76,20 @@
               />
             </div>
 
+            <!-- Phone Confirmation -->
+            <div>
+              <label for="phone_confirmation" class="block text-sm font-semibold text-blue-900 mb-2">
+                Confirmer le numéro de téléphone <span class="text-red-500">*</span>
+              </label>
+              <PhoneInput
+                id="phone_confirmation"
+                v-model="form.phone_confirmation"
+                placeholder="XX XX XX XX"
+                :required="true"
+                default-country="GA"
+              />
+            </div>
+
             <!-- Password -->
             <div>
               <label for="password" class="block text-sm font-semibold text-blue-900 mb-2">
@@ -191,6 +205,7 @@ export default {
       name: '',
       email: '',
       phone: '',
+      phone_confirmation: '',
       password: '',
       password_confirmation: '',
       terms: false
@@ -225,6 +240,16 @@ export default {
 
       if (!form.value.phone) {
         error.value = 'Le numéro de téléphone est obligatoire'
+        return
+      }
+
+      if (!form.value.phone_confirmation) {
+        error.value = 'La confirmation du numéro de téléphone est obligatoire'
+        return
+      }
+
+      if (form.value.phone !== form.value.phone_confirmation) {
+        error.value = 'Les numéros de téléphone ne correspondent pas'
         return
       }
 
