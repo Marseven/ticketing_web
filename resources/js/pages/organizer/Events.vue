@@ -2,18 +2,18 @@
   <div class="organizer-events min-h-screen" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)">
       <!-- En-tête de la page -->
       <div class="bg-white shadow-sm border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div class="flex items-center justify-between">
             <div>
-              <h1 class="text-2xl font-bold text-primea-blue font-primea">Mes Événements</h1>
-              <p class="text-gray-600 mt-1 font-primea">Gérez tous vos événements en un seul endroit</p>
+              <h1 class="text-xl font-bold text-primea-blue font-primea">Mes Événements</h1>
+              <p class="text-gray-600 text-sm font-primea">Gérez tous vos événements en un seul endroit</p>
             </div>
-        
-            <router-link 
-              :to="{ name: 'organizer-event-create' }" 
-              class="bg-primea-blue text-white px-4 py-2 rounded-primea hover:bg-primea-yellow hover:text-primea-blue font-semibold font-primea transition-all duration-200 shadow-primea"
+
+            <router-link
+              :to="{ name: 'organizer-event-create' }"
+              class="bg-primea-blue text-white px-3 py-1.5 rounded-primea hover:bg-primea-yellow hover:text-primea-blue text-sm font-semibold font-primea transition-all duration-200 shadow-primea"
             >
-              <PlusIcon class="w-4 h-4 inline mr-2" />
+              <PlusIcon class="w-4 h-4 inline mr-1" />
               Nouvel événement
             </router-link>
           </div>
@@ -72,20 +72,20 @@
         </div>
 
         <!-- Statistiques rapides -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="text-center">
+        <div class="flex gap-4 overflow-x-auto pb-2">
+          <div class="text-center flex-shrink-0 min-w-[140px]">
             <p class="text-2xl font-bold text-blue-600">{{ stats.published }}</p>
             <p class="text-sm text-gray-600">Publiés</p>
           </div>
-          <div class="text-center">
+          <div class="text-center flex-shrink-0 min-w-[140px]">
             <p class="text-2xl font-bold text-yellow-600">{{ stats.draft }}</p>
             <p class="text-sm text-gray-600">Brouillons</p>
           </div>
-          <div class="text-center">
+          <div class="text-center flex-shrink-0 min-w-[140px]">
             <p class="text-2xl font-bold text-green-600">{{ stats.totalTicketsSold }}</p>
             <p class="text-sm text-gray-600">Tickets vendus</p>
           </div>
-          <div class="text-center">
+          <div class="text-center flex-shrink-0 min-w-[180px]">
             <p class="text-2xl font-bold text-purple-600">{{ formatPrice(stats.totalRevenue) }} XAF</p>
             <p class="text-sm text-gray-600">Revenus</p>
           </div>
