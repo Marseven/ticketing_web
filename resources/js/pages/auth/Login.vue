@@ -163,26 +163,16 @@
 
           <!-- Create Account Link -->
           <div class="mt-6 md:mt-8 pt-6 border-t border-gray-200 text-center">
-            <p class="text-sm text-gray-600 mb-3 md:mb-4">
-              Nouveau ici ?
+            <p class="text-sm text-gray-600">
+              Vous n'avez pas de compte ?
+              <router-link
+                to="/register"
+                class="text-blue-900 hover:text-yellow-500 font-bold transition-colors duration-200 ml-1"
+              >
+                Créer un compte
+              </router-link>
             </p>
-            <router-link
-              to="/register"
-              class="text-blue-900 hover:text-yellow-500 font-bold text-sm transition-colors duration-200 inline-block"
-            >
-              Créer un compte pour suivre mes achats !
-            </router-link>
           </div>
-        </div>
-
-        <!-- Retrieve Ticket Link -->
-        <div class="text-center mt-6 md:mt-8">
-          <router-link
-            to="/retrieve-ticket"
-            class="text-blue-900 md:text-white/90 hover:text-yellow-500 md:hover:text-yellow-500 font-semibold text-sm transition-colors duration-200 bg-gray-100 md:bg-white/10 md:backdrop-blur-sm px-6 py-3 rounded-xl border border-gray-200 md:border-white/20 hover:border-yellow-500 inline-block"
-          >
-            Récupérer mon ticket perdu
-          </router-link>
         </div>
       </div>
     </div>
