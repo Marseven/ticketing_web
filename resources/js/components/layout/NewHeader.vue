@@ -348,7 +348,7 @@
 
           <!-- Menu Footer -->
           <div class="absolute bottom-0 left-0 right-0 p-6 flex flex-col items-center gap-3">
-            <img src="/images/logo.png" alt="Primea Logo" class="h-12 opacity-40 grayscale" />
+            <img src="/images/logo.png" alt="Primea Logo" class="h-12" style="filter: brightness(0) invert(1) opacity(0.9);" />
             <div class="flex items-center gap-4 text-white/60">
               <a href="https://wa.me/237" target="_blank" class="hover:text-white transition-colors">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
