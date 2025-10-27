@@ -11,6 +11,7 @@ const EventDetail = () => import('./pages/EventDetail.vue');
 const Checkout = () => import('./pages/Checkout.vue');
 const Payment = () => import('./pages/Payment.vue');
 const Register = () => import('./pages/auth/Register.vue');
+const RegisterOrganizer = () => import('./pages/auth/RegisterOrganizer.vue');
 const EmailVerification = () => import('./pages/auth/EmailVerification.vue');
 const EmailVerificationResult = () => import('./pages/EmailVerificationResult.vue');
 const ForgotPassword = () => import('./pages/auth/ForgotPassword.vue');
@@ -74,6 +75,7 @@ const routes = [
     { path: '/payment/:reference', component: Payment, name: 'payment' },
     { path: '/login', component: Login, name: 'login' },
     { path: '/register', component: Register, name: 'register' },
+    { path: '/register-organizer', component: RegisterOrganizer, name: 'register-organizer' },
     { path: '/email/verify/:id?/:hash?', component: EmailVerification, name: 'email-verification' },
     { path: '/email-verification-result', component: EmailVerificationResult, name: 'email-verification-result' },
     { path: '/forgot-password', component: ForgotPassword, name: 'forgot-password' },

@@ -121,7 +121,7 @@
     "src": "node_modules/intl-tel-input/build/img/globe@2x.webp"
   },
   "resources/css/app.css": {
-    "file": "assets/css/app-C4nm8E52.css",
+    "file": "assets/css/app-BgfVnZyj.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [
@@ -129,7 +129,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-C6ojTi1H.js",
+    "file": "assets/js/app-BS-7gFqx.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -145,6 +145,7 @@
       "resources/js/pages/Checkout.vue",
       "resources/js/pages/Payment.vue",
       "resources/js/pages/auth/Register.vue",
+      "resources/js/pages/auth/RegisterOrganizer.vue",
       "resources/js/pages/auth/EmailVerification.vue",
       "resources/js/pages/EmailVerificationResult.vue",
       "resources/js/pages/auth/ForgotPassword.vue",
@@ -191,8 +192,8 @@
       "resources/js/pages/scanner/ScannerApp.vue"
     ],
     "css": [
-      "assets/css/app-DBxr30-5.css",
-      "assets/css/app-C4nm8E52.css"
+      "assets/css/app-Dsk1u4fy.css",
+      "assets/css/app-BgfVnZyj.css"
     ]
   },
   "resources/js/layouts/AdminLayout.vue": {
@@ -408,6 +409,21 @@
     ],
     "css": [
       "assets/css/Register-CVx0hB3q.css"
+    ]
+  },
+  "resources/js/pages/auth/RegisterOrganizer.vue": {
+    "file": "assets/js/RegisterOrganizer-BNTYjns3.js",
+    "name": "RegisterOrganizer",
+    "src": "resources/js/pages/auth/RegisterOrganizer.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vue-vendor-DL4qlPdi.js",
+      "_account-D3HL21EZ.js",
+      "_vendor-14XLBY50.js",
+      "_pinia-vendor-DSZd9EMP.js"
+    ],
+    "css": [
+      "assets/css/RegisterOrganizer-tn0RQdqM.css"
     ]
   },
   "resources/js/pages/auth/ResetPassword.vue": {
