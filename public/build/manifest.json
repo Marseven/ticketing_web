@@ -129,7 +129,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-BE4Ay_va.js",
+    "file": "assets/js/app-CY6HOWX2.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -258,7 +258,7 @@
     ]
   },
   "resources/js/pages/EventDetail.vue": {
-    "file": "assets/js/EventDetail-BkXqCqhI.js",
+    "file": "assets/js/EventDetail-B296Qp-q.js",
     "name": "EventDetail",
     "src": "resources/js/pages/EventDetail.vue",
     "isDynamicEntry": true,
@@ -271,7 +271,7 @@
       "_pinia-vendor-DSZd9EMP.js"
     ],
     "css": [
-      "assets/css/EventDetail-iXqyT3mg.css"
+      "assets/css/EventDetail-HEPCT1IQ.css"
     ]
   },
   "resources/js/pages/Events.vue": {

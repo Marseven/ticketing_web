@@ -82,6 +82,26 @@
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
             <!-- Main Content (Left Column on Desktop) -->
             <div class="lg:col-span-2 space-y-6">
+              <!-- Description - Mobile Only (before tickets) -->
+              <div class="md:hidden bg-white p-4 rounded-2xl border border-gray-200">
+                <h2 class="text-lg font-bold text-blue-900 mb-4 flex items-center gap-2">
+                  <div class="bg-blue-100 p-2 rounded-lg">
+                    <svg class="w-5 h-5 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                  </div>
+                  À propos de cet événement
+                </h2>
+                <div class="text-gray-700 leading-relaxed space-y-3 text-sm">
+                  <p v-for="(paragraph, index) in descriptionParagraphs" :key="index">
+                    {{ paragraph }}
+                  </p>
+                  <div v-if="!descriptionParagraphs.length" class="text-gray-500 italic">
+                    Aucune description disponible pour cet événement.
+                  </div>
+                </div>
+              </div>
+
               <!-- Ticket Types Section -->
               <div class="bg-gray-50 p-4 md:p-6 rounded-2xl">
                 <h3 class="text-lg md:text-xl font-bold text-blue-900 mb-4 flex items-center gap-2">
@@ -145,8 +165,8 @@
                 </div>
               </div>
 
-              <!-- Description -->
-              <div class="bg-white p-4 md:p-6 rounded-2xl border border-gray-200">
+              <!-- Description - Desktop Only (after tickets) -->
+              <div class="hidden md:block bg-white p-4 md:p-6 rounded-2xl border border-gray-200">
                 <h2 class="text-lg md:text-xl font-bold text-blue-900 mb-4 flex items-center gap-2">
                   <div class="bg-blue-100 p-2 rounded-lg">
                     <svg class="w-5 h-5 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
