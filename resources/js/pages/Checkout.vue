@@ -458,9 +458,9 @@
 
                 <!-- Lien récupérer ticket Desktop -->
                 <div class="text-center pt-4">
-                  <router-link 
+                  <router-link
                     to="/retrieve-ticket"
-                    class="text-primea-blue hover:text-primea-yellow transition-colors"
+                    class="text-primea-blue hover:text-primea-yellow transition-colors underline"
                   >
                     Récupérer mon ticket perdu
                   </router-link>
