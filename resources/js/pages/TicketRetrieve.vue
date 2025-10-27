@@ -49,11 +49,14 @@
                 />
               </div>
 
-               <div class="absolute inset-x-0 top-3 flex items-center">
-                  <div class="flex-1 border-t border-gray-200"></div>
-                  <span class="px-3 text-xs font-medium text-gray-500 bg-white">OU</span>
-                  <div class="flex-1 border-t border-gray-200"></div>
+            <div class="relative">
+                <div class="absolute inset-x-0 top-3 flex items-center">
+                    <div class="flex-1 border-t border-gray-200"></div>
+                    <span class="px-3 text-xs font-medium text-gray-500 bg-white">OU</span>
+                    <div class="flex-1 border-t border-gray-200"></div>
                 </div>
+            </div>
+
 
               <!-- Alternative Search Methods -->
               <div class="relative">
