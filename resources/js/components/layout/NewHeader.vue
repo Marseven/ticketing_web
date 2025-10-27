@@ -340,7 +340,7 @@
             </template>
 
             <div class="pt-6">
-              <router-link to="/organizer/login" @click="closeMenu" class="block bg-blue-950 text-white text-center py-3 px-6 rounded-lg font-bold hover:bg-yellow-500 hover:text-blue-950 transition-colors">
+              <router-link to="/register" @click="closeMenu" class="block bg-blue-950 text-white text-center py-3 px-6 rounded-lg font-bold hover:bg-yellow-500 hover:text-blue-950 transition-colors">
                 Créateur d'événements
               </router-link>
             </div>

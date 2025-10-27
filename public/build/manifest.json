@@ -129,7 +129,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-Csrd8AKT.js",
+    "file": "assets/js/app-C6ojTi1H.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -191,7 +191,7 @@
       "resources/js/pages/scanner/ScannerApp.vue"
     ],
     "css": [
-      "assets/css/app-D91j_aLu.css",
+      "assets/css/app-DBxr30-5.css",
       "assets/css/app-C4nm8E52.css"
     ]
   },
