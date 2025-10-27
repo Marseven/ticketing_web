@@ -55,6 +55,8 @@
                     <span class="px-3 text-xs font-medium text-gray-500 bg-white">OU</span>
                     <div class="flex-1 border-t border-gray-200"></div>
                 </div>
+                <br>
+                <br>
             </div>
 
 

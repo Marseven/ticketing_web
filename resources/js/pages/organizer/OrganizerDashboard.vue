@@ -371,7 +371,7 @@ onMounted(() => {
 /* Style personnalisé pour le dashboard organisateur */
 .organizer-dashboard {
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  font-family: 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* Couleurs Primea */
@@ -427,6 +427,6 @@ onMounted(() => {
 
 /* Police Primea */
 .font-primea {
-  font-family: 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 </style>

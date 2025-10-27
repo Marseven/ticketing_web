@@ -275,7 +275,7 @@ export default {
 }
 
 .country-code {
-  font-family: 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-weight: 600;
   color: #272d63;
   font-size: 0.875rem;
@@ -297,7 +297,7 @@ export default {
   border: 2px solid #e5e7eb;
   border-left: none;
   border-radius: 0 16px 16px 0;
-  font-family: 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 1rem;
   transition: all 0.2s;
   background: rgba(255, 255, 255, 0.9);
@@ -335,7 +335,7 @@ export default {
   padding: 0.5rem 1rem;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
-  font-family: 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 0.875rem;
   transition: all 0.2s;
 }
@@ -370,13 +370,13 @@ export default {
 
 .country-name {
   flex: 1;
-  font-family: 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #272d63;
   font-size: 0.875rem;
 }
 
 .country-dial {
-  font-family: 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #6b7280;
   font-size: 0.875rem;
   font-weight: 600;

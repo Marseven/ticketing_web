@@ -727,7 +727,7 @@ onMounted(() => {
 <style scoped>
 /* Style personnalisé pour la création d'événement */
 .event-create {
-  font-family: 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* Couleurs Primea */
@@ -779,6 +779,6 @@ onMounted(() => {
 
 /* Police Primea */
 .font-primea {
-  font-family: 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 </style>

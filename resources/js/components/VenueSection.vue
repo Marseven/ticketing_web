@@ -127,7 +127,7 @@ export default {
         // Ajouter une infobulle
         const infoWindow = new google.maps.InfoWindow({
           content: `
-            <div style="font-family: 'Myriad Pro', sans-serif;">
+            <div style="font-family: 'Inter', 'Myriad Pro', sans-serif;">
               <h3 style="color: #272d63; margin: 0 0 8px 0;">${props.event.venue_name}</h3>
               <p style="margin: 0; color: #666;">${props.event.venue_address}</p>
               <p style="margin: 0; color: #666;">${props.event.venue_city}</p>

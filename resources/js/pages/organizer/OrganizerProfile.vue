@@ -773,7 +773,7 @@ onMounted(() => {
 <style scoped>
 /* Police Primea */
 .font-primea {
-  font-family: 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* Couleurs Primea */
