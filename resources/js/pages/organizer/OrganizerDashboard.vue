@@ -184,8 +184,9 @@
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase font-primea">Événement</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase font-primea">Date</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase font-primea">Capacité</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase font-primea">Billets vendus</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase font-primea">Statut</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase font-primea">Billets</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase font-primea">Actions</th>
             </tr>
           </thead>
@@ -198,17 +199,20 @@
                 </div>
               </td>
               <td class="px-6 py-4 text-sm text-gray-900 font-primea">{{ formatDate(event.event_date) }}</td>
-              <td class="px-6 py-4">
-                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full" 
-                      :class="getEventStatusClass(event.status)">
-                  {{ getEventStatusName(event.status) }}
-                </span>
+              <td class="px-6 py-4 text-sm text-gray-900 font-primea">
+                <span class="font-semibold">{{ event.venue_capacity || 'N/A' }}</span>
               </td>
               <td class="px-6 py-4 text-sm text-gray-900 font-primea">
                 <span class="font-semibold">{{ event.tickets_sold || 0 }}</span>
               </td>
+              <td class="px-6 py-4">
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                      :class="getEventStatusClass(event.status)">
+                  {{ getEventStatusName(event.status) }}
+                </span>
+              </td>
               <td class="px-6 py-4 text-sm">
-                <router-link 
+                <router-link
                   :to="{ name: 'organizer-event-detail', params: { slug: event.slug } }"
                   class="text-primea-blue hover:text-primea-yellow font-primea"
                 >

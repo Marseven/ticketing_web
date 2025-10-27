@@ -580,7 +580,7 @@ class OrganizerController extends Controller
         $organizerIds = $user->organizers->pluck('id');
 
         $recentEvents = Event::whereIn('organizer_id', $organizerIds)
-            ->with(['venue:id,name', 'ticketTypes', 'tickets'])
+            ->with(['venue:id,name,capacity', 'ticketTypes', 'tickets'])
             ->withCount(['tickets as tickets_sold_count' => function($query) {
                 $query->whereIn('status', ['issued', 'used']);
             }])
@@ -601,6 +601,7 @@ class OrganizerController extends Controller
                     'title' => $event->title,
                     'slug' => $event->slug,
                     'venue_name' => $event->venue->name ?? '',
+                    'venue_capacity' => $event->venue->capacity ?? null,
                     'event_date' => $event->event_date,
                     'status' => $event->status, // Utiliser status au lieu de is_active
                     'tickets_sold' => $event->tickets_sold_count ?? 0,
