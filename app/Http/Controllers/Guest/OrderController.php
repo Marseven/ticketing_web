@@ -166,21 +166,28 @@ class OrderController extends Controller
             // Pour les guests, on ne crée pas d'utilisateur
             // Les informations seront stockées directement dans la table orders
 
-            // Calculer les montants - Modèle: Frais ajoutés au checkout
-            // Prix de base = ce que définit l'organisateur
+            // ============================================
+            // MODÈLE DE CALCUL DES REVENUS - NE PAS MODIFIER
+            // ============================================
+            // L'organisateur reçoit 100% du prix qu'il définit
+            // Les frais (5%) et la TVA (18%) sont AJOUTÉS au total payé par le client
+            //
+            // Exemple: Billet à 1000 XAF, quantité 4
+            // - baseAmount (organisateur reçoit) = 4 × 1000 = 4000 XAF
+            // - feesAmount (frais plateforme) = 5% de 4000 = 200 XAF
+            // - taxAmount (TVA sur frais) = 18% de 200 = 36 XAF
+            // - totalAmount (client paie) = 4000 + 200 + 36 = 4236 XAF
+            // - subtotalAmount (organisateur reçoit) = 4000 XAF ✓
+            // ============================================
+
             $unitPrice = $ticketType->price ?? 0;
-            $baseAmount = $unitPrice * $validated['quantity']; // Prix base total
+            $baseAmount = $unitPrice * $validated['quantity'];
 
-            // Frais de service (5% du prix de base, ajoutés au total)
             $feesAmount = $this->calculateFees($baseAmount);
-
-            // TVA (18% sur les frais uniquement - payée par la plateforme)
             $taxAmount = $this->calculateTaxes($feesAmount);
-
-            // Montant total payé par le client
             $totalAmount = $baseAmount + $feesAmount + $taxAmount;
 
-            // Montant net reversé à l'organisateur (100% du prix de base)
+            // IMPORTANT: subtotal_amount = 100% du prix de base pour l'organisateur
             $subtotalAmount = $baseAmount;
 
             // Créer la commande

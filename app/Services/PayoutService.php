@@ -109,8 +109,11 @@ class PayoutService
             'auto_payout_threshold' => 0,
         ]);
 
-        // Utiliser le subtotal_amount de la commande (net après frais plateforme et taxes)
-        // Au lieu de calculer des frais supplémentaires sur le payment->amount
+        // IMPORTANT: subtotal_amount = montant BRUT que l'organisateur reçoit
+        // C'est 100% du prix de base (prix × quantité) défini par l'organisateur
+        // Les frais (5%) et la TVA (18%) sont ajoutés au total payé par le client
+        // Exemple: 4 billets × 1000 XAF = 4000 XAF pour l'organisateur
+        //         Client paie: 4000 + (5% frais) + (18% TVA sur frais) = 4236 XAF
         $order = $payment->order;
         $netAmount = floatval($order->subtotal_amount);
 
