@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use App\Models\Role;
+use App\Models\UserType;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -14,6 +15,10 @@ class TestUsersSeeder extends Seeder
      */
     public function run(): void
     {
+        // Récupérer les user types
+        $adminUserType = UserType::where('name', 'admin')->first();
+        $clientUserType = UserType::where('name', 'client')->first();
+
         // Récupérer les rôles créés par RoleSeeder
         $clientRole = Role::where('slug', Role::CLIENT)->first();
         $organizerRole = Role::where('slug', Role::ORGANIZER)->first();
@@ -52,6 +57,7 @@ class TestUsersSeeder extends Seeder
                 'email' => 'admin@primea.ga',
                 'phone' => '+241011223344',
                 'password' => Hash::make('AdminPrimea2025!'),
+                'user_type_id' => $adminUserType?->id,
                 'is_organizer' => false,
                 'status' => 'active',
                 'email_verified_at' => now(),
@@ -64,6 +70,7 @@ class TestUsersSeeder extends Seeder
                 'email' => 'marie@primea.ga',
                 'phone' => '+241077889900',
                 'password' => Hash::make('Organizer2025!'),
+                'user_type_id' => $clientUserType?->id,
                 'is_organizer' => true,
                 'status' => 'active',
                 'email_verified_at' => now(),
@@ -75,6 +82,7 @@ class TestUsersSeeder extends Seeder
                 'email' => 'jean@primea.ga',
                 'phone' => '+241066554433',
                 'password' => Hash::make('Organizer2025!'),
+                'user_type_id' => $clientUserType?->id,
                 'is_organizer' => true,
                 'status' => 'active',
                 'email_verified_at' => now(),
@@ -87,6 +95,7 @@ class TestUsersSeeder extends Seeder
                 'email' => 'alice@example.com',
                 'phone' => '+241055667788',
                 'password' => Hash::make('Client2025!'),
+                'user_type_id' => $clientUserType?->id,
                 'is_organizer' => false,
                 'status' => 'active',
                 'email_verified_at' => now(),
@@ -98,6 +107,7 @@ class TestUsersSeeder extends Seeder
                 'email' => 'paul@example.com',
                 'phone' => '+241044556677',
                 'password' => Hash::make('Client2025!'),
+                'user_type_id' => $clientUserType?->id,
                 'is_organizer' => false,
                 'status' => 'active',
                 'email_verified_at' => now(),

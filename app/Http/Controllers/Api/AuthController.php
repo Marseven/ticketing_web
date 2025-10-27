@@ -233,12 +233,12 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // Charger les rôles
-        $userData = $user->load('roles');
+        // Charger les rôles et le user type
+        $userData = $user->load(['roles', 'userType']);
 
-        // Déterminer le type d'utilisateur
-        $isAdmin = $userData->roles->contains('slug', 'admin');
-        $isOrganizer = $userData->roles->contains('slug', 'organizer') || $userData->is_organizer;
+        // Déterminer le type d'utilisateur via user_type
+        $isAdmin = $userData->userType && $userData->userType->name === 'admin';
+        $isOrganizer = $userData->is_organizer;
 
         // Ajouter les propriétés calculées
         $userData->is_admin = $isAdmin;
@@ -327,11 +327,11 @@ class AuthController extends Controller
      */
     public function me(Request $request): JsonResponse
     {
-        $user = $request->user()->load('roles');
-        
-        // Déterminer le type d'utilisateur
-        $isAdmin = $user->roles->contains('slug', 'admin');
-        $isOrganizer = $user->roles->contains('slug', 'organizer') || $user->is_organizer;
+        $user = $request->user()->load(['roles', 'userType']);
+
+        // Déterminer le type d'utilisateur via user_type
+        $isAdmin = $user->userType && $user->userType->name === 'admin';
+        $isOrganizer = $user->is_organizer;
         
         // Ajouter les propriétés calculées
         $user->is_admin = $isAdmin;
