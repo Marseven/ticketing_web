@@ -115,7 +115,48 @@
             <h2 class="text-xl md:text-3xl font-bold text-center text-blue-950 mb-6 md:mb-8">
               Tous les événements en cours
             </h2>
-            <div class="space-y-4 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
+            <!-- Mobile: Métadonnées sur image -->
+            <div class="space-y-3 md:hidden">
+              <router-link
+                v-for="event in upcomingEvents"
+                :key="event.id"
+                :to="`/events/${event.slug}`"
+                class="block bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow"
+              >
+                <div class="h-40 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 relative overflow-hidden">
+                  <img
+                    :src="event.cover_image || 'https://via.placeholder.com/400x240'"
+                    :alt="event.title"
+                    class="w-full h-full object-cover"
+                  />
+                  <div class="absolute inset-0 bg-blue-900/50"></div>
+
+                  <!-- Contenu sur l'image -->
+                  <div class="absolute inset-0 p-3 text-white flex flex-col justify-between">
+                    <div>
+                      <div class="bg-yellow-500/20 backdrop-blur-sm rounded-lg px-2 py-0.5 mb-1 text-yellow-500 font-bold uppercase text-xs inline-block">
+                        {{ event.category?.name || 'ÉVÉNEMENT' }}
+                      </div>
+                      <h3 class="font-bold text-base leading-tight line-clamp-2">
+                        {{ event.title }}
+                      </h3>
+                    </div>
+
+                    <div>
+                      <p class="text-xs leading-tight mb-1">
+                        {{ formatDate(event.event_date) }}
+                      </p>
+                      <p class="text-xs text-gray-200 leading-tight">
+                        {{ event.venue?.name || 'Lieu à définir' }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </router-link>
+            </div>
+
+            <!-- Desktop: Style classique -->
+            <div class="hidden md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
               <router-link
                 v-for="event in upcomingEvents"
                 :key="event.id"
@@ -130,13 +171,13 @@
                   />
                 </div>
                 <div class="p-4">
-                  <h3 class="font-bold text-blue-950 text-sm md:text-base line-clamp-2 mb-2">
+                  <h3 class="font-bold text-blue-950 text-base line-clamp-2 mb-2">
                     {{ event.title }}
                   </h3>
-                  <p class="text-xs text-gray-600 mb-1">
+                  <p class="text-sm text-gray-600 mb-1">
                     {{ formatDate(event.event_date) }}
                   </p>
-                  <p class="text-xs text-gray-500">
+                  <p class="text-sm text-gray-500">
                     {{ event.venue?.name || 'Lieu à définir' }}
                   </p>
                 </div>
@@ -149,12 +190,56 @@
             <h2 class="text-xl md:text-3xl font-bold text-center text-gray-600 mb-6 md:mb-8">
               Événements passés
             </h2>
-            <div class="space-y-4 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
+            <!-- Mobile: Métadonnées sur image -->
+            <div class="space-y-3 md:hidden opacity-75">
               <router-link
                 v-for="event in pastEvents"
                 :key="event.id"
                 :to="`/events/${event.slug}`"
-                class="block bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow opacity-75"
+                class="block bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow grayscale"
+              >
+                <div class="h-40 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 relative overflow-hidden">
+                  <img
+                    :src="event.cover_image || 'https://via.placeholder.com/400x240'"
+                    :alt="event.title"
+                    class="w-full h-full object-cover"
+                  />
+                  <div class="absolute inset-0 bg-blue-900/50"></div>
+                  <div class="absolute top-2 right-2 bg-gray-600 text-white px-2 py-1 rounded-lg text-xs font-semibold">
+                    Terminé
+                  </div>
+
+                  <!-- Contenu sur l'image -->
+                  <div class="absolute inset-0 p-3 text-white flex flex-col justify-between">
+                    <div>
+                      <div class="bg-yellow-500/20 backdrop-blur-sm rounded-lg px-2 py-0.5 mb-1 text-yellow-500 font-bold uppercase text-xs inline-block">
+                        {{ event.category?.name || 'ÉVÉNEMENT' }}
+                      </div>
+                      <h3 class="font-bold text-base leading-tight line-clamp-2">
+                        {{ event.title }}
+                      </h3>
+                    </div>
+
+                    <div>
+                      <p class="text-xs leading-tight mb-1">
+                        {{ formatDate(event.event_date) }}
+                      </p>
+                      <p class="text-xs text-gray-200 leading-tight">
+                        {{ event.venue?.name || 'Lieu à définir' }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </router-link>
+            </div>
+
+            <!-- Desktop: Style classique -->
+            <div class="hidden md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 opacity-75">
+              <router-link
+                v-for="event in pastEvents"
+                :key="event.id"
+                :to="`/events/${event.slug}`"
+                class="block bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow"
               >
                 <div class="relative pb-[60%]">
                   <img
@@ -167,13 +252,13 @@
                   </div>
                 </div>
                 <div class="p-4">
-                  <h3 class="font-bold text-gray-700 text-sm md:text-base line-clamp-2 mb-2">
+                  <h3 class="font-bold text-gray-700 text-base line-clamp-2 mb-2">
                     {{ event.title }}
                   </h3>
-                  <p class="text-xs text-gray-500 mb-1">
+                  <p class="text-sm text-gray-500 mb-1">
                     {{ formatDate(event.event_date) }}
                   </p>
-                  <p class="text-xs text-gray-400">
+                  <p class="text-sm text-gray-400">
                     {{ event.venue?.name || 'Lieu à définir' }}
                   </p>
                 </div>

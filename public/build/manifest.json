@@ -121,7 +121,7 @@
     "src": "node_modules/intl-tel-input/build/img/globe@2x.webp"
   },
   "resources/css/app.css": {
-    "file": "assets/css/app-bClPPwqX.css",
+    "file": "assets/css/app-BADM8FUE.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [
@@ -129,7 +129,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-qwPr8eNP.js",
+    "file": "assets/js/app-DLIWtuxb.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -192,8 +192,8 @@
       "resources/js/pages/scanner/ScannerApp.vue"
     ],
     "css": [
-      "assets/css/app-Dew764HO.css",
-      "assets/css/app-bClPPwqX.css"
+      "assets/css/app-BI3As4lQ.css",
+      "assets/css/app-BADM8FUE.css"
     ]
   },
   "resources/js/layouts/AdminLayout.vue": {
