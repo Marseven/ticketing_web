@@ -121,7 +121,7 @@
     "src": "node_modules/intl-tel-input/build/img/globe@2x.webp"
   },
   "resources/css/app.css": {
-    "file": "assets/css/app-DYh9Y7Cg.css",
+    "file": "assets/css/app-bj0-b0-O.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [
@@ -129,7 +129,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-B-H9EtSN.js",
+    "file": "assets/js/app-CIKJ1-8k.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -193,7 +193,7 @@
     ],
     "css": [
       "assets/css/app-CA3YZ649.css",
-      "assets/css/app-DYh9Y7Cg.css"
+      "assets/css/app-bj0-b0-O.css"
     ]
   },
   "resources/js/layouts/AdminLayout.vue": {
@@ -397,7 +397,7 @@
     ]
   },
   "resources/js/pages/auth/Register.vue": {
-    "file": "assets/js/Register-CsrnTMzN.js",
+    "file": "assets/js/Register-heoa6cSC.js",
     "name": "Register",
     "src": "resources/js/pages/auth/Register.vue",
     "isDynamicEntry": true,
@@ -408,7 +408,7 @@
       "_pinia-vendor-DSZd9EMP.js"
     ],
     "css": [
-      "assets/css/Register-CVx0hB3q.css"
+      "assets/css/Register-BPVvHy7c.css"
     ]
   },
   "resources/js/pages/auth/RegisterOrganizer.vue": {
