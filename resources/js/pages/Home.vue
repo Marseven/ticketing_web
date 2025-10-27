@@ -426,7 +426,11 @@ export default {
           if (data.success && data.data) {
             heroBanner.value = data.data
           }
+        } else if (response.status !== 404) {
+          // Logger uniquement si ce n'est pas une 404 (pas de hero banner)
+          console.error('Erreur lors du chargement du hero banner:', response.status)
         }
+        // Si 404, c'est normal, on utilise l'image par défaut en silence
       } catch (error) {
         console.error('Erreur lors du chargement du hero banner:', error)
         // En cas d'erreur, on garde heroBanner à null pour utiliser l'image par défaut
