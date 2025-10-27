@@ -13,7 +13,7 @@
       </div>
 
       <!-- Content -->
-      <div class="relative z-10 w-full px-4 py-12 md:py-20">
+      <div class="relative z-10 w-full px-4 py-0">
         <div class="max-w-4xl mx-auto text-center">
           <!-- Search Bar -->
           <div class="mb-8">
