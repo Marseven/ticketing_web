@@ -34,4 +34,28 @@ class HeroBanner extends Model
     {
         return $query->orderBy('display_order', 'asc');
     }
+
+    /**
+     * Accesseur pour l'URL du média - retourne l'URL complète
+     * Transforme les chemins relatifs en URLs complètes
+     */
+    public function getMediaUrlAttribute($value): ?string
+    {
+        if (!$value) {
+            return null;
+        }
+
+        // Si c'est déjà une URL complète (externe), on la retourne telle quelle
+        if (filter_var($value, FILTER_VALIDATE_URL)) {
+            return $value;
+        }
+
+        // Si c'est un chemin relatif (local), on construit l'URL complète
+        // Ex: /storage/hero_banners/xxx.jpg -> https://primea.ga/storage/hero_banners/xxx.jpg
+        if (str_starts_with($value, '/storage/') || str_starts_with($value, 'storage/')) {
+            return url($value);
+        }
+
+        return $value;
+    }
 }
