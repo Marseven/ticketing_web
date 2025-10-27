@@ -3,7 +3,7 @@
     <div class="max-w-7xl mx-auto px-4">
       <!-- Mobile Footer -->
       <div class="md:hidden text-center">
-        <img src="/images/logo.png" alt="Logo" class="h-8 mx-auto mb-4" />
+        <img src="/images/logo.png" alt="Logo" class="h-8 mx-auto mb-4" style="filter: brightness(0) saturate(100%) invert(48%) sepia(6%) saturate(717%) hue-rotate(182deg) brightness(92%) contrast(88%);" />
 
         <div class="flex justify-center space-x-4 mb-4">
           <!-- WhatsApp -->
@@ -44,7 +44,7 @@
           <!-- Company Info -->
           <div>
             <div class="flex items-center mb-4">
-              <img src="/images/logo.png" alt="Logo" class="h-12 w-auto" />
+              <img src="/images/logo.png" alt="Logo" class="h-12 w-auto" style="filter: brightness(0) saturate(100%) invert(48%) sepia(6%) saturate(717%) hue-rotate(182deg) brightness(92%) contrast(88%);" />
             </div>
             <p class="text-gray-600 mb-4">
               La plateforme de référence pour vos événements.
