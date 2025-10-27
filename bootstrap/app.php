@@ -21,6 +21,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \App\Http\Middleware\PermissionMiddleware::class,
         ]);
 
+        // Utiliser notre middleware CSRF personnalisé pour exempter certaines routes
+        $middleware->validateCsrfTokens(except: [
+            'api/register',
+            'api/login',
+        ]);
+
         $middleware->api(prepend: [
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
