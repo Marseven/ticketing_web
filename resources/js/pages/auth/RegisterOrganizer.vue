@@ -233,11 +233,19 @@ const handleRegister = async () => {
   loading.value = true
 
   try {
+    // Étape 1: Récupérer le cookie CSRF
+    await fetch('/sanctum/csrf-cookie', {
+      credentials: 'same-origin'
+    })
+
+    // Étape 2: Faire la requête d'inscription avec le token CSRF
     const response = await fetch('/api/register', {
       method: 'POST',
+      credentials: 'same-origin',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
       },
       body: JSON.stringify(formData.value)
     })
