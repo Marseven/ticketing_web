@@ -65,8 +65,8 @@
         </div>
 
         <!-- Stats cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div class="bg-white rounded-primea shadow-primea p-6">
+        <div class="flex md:grid gap-3 md:gap-6 mb-8 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 md:grid-cols-4">
+          <div class="bg-white rounded-primea shadow-primea p-6 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
             <div class="flex items-center">
               <div class="p-2 rounded-lg" style="background-color: rgba(39, 45, 99, 0.1);">
                 <TicketIcon class="w-6 h-6 text-primea-blue" />
@@ -78,7 +78,7 @@
             </div>
           </div>
 
-          <div class="bg-white rounded-primea shadow-primea p-6">
+          <div class="bg-white rounded-primea shadow-primea p-6 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
             <div class="flex items-center">
               <div class="p-2 rounded-lg" style="background-color: rgba(39, 45, 99, 0.15);">
                 <CurrencyDollarIcon class="w-6 h-6 text-primea-blue" />
@@ -90,7 +90,7 @@
             </div>
           </div>
 
-          <div class="bg-white rounded-primea shadow-primea p-6">
+          <div class="bg-white rounded-primea shadow-primea p-6 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
             <div class="flex items-center">
               <div class="p-2 rounded-lg" style="background-color: rgba(250, 181, 17, 0.15);">
                 <UsersIcon class="w-6 h-6 text-primea-yellow" />
@@ -102,7 +102,7 @@
             </div>
           </div>
 
-          <div class="bg-white rounded-primea shadow-primea p-6">
+          <div class="bg-white rounded-primea shadow-primea p-6 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
             <div class="flex items-center">
               <div class="p-2 rounded-lg" style="background-color: rgba(39, 45, 99, 0.2);">
                 <CalendarIcon class="w-6 h-6 text-primea-blue" />
