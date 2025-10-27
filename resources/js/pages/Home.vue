@@ -2,11 +2,22 @@
   <div class="home bg-white min-h-screen">
     <!-- Hero Section -->
     <section class="relative min-h-[500px] md:min-h-[600px] flex items-center">
-      <!-- Background Image -->
+      <!-- Background Media (Image or Video) -->
       <div class="absolute inset-0">
+        <!-- Video -->
+        <video
+          v-if="heroBanner && heroBanner.type === 'video'"
+          :src="heroBanner.media_url"
+          autoplay
+          loop
+          muted
+          class="w-full h-full object-cover"
+        ></video>
+        <!-- Image -->
         <img
-          src="https://images.unsplash.com/photo-1540575467063-178a50c2df87"
-          alt="Événements"
+          v-else
+          :src="heroBanner?.media_url || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87'"
+          :alt="heroBanner?.title || 'Événements'"
           class="w-full h-full object-cover"
         />
         <div class="absolute inset-0 bg-black bg-opacity-60"></div>
@@ -313,6 +324,7 @@ export default {
     const events = ref([])
     const categories = ref([])
     const loading = ref(true)
+    const heroBanner = ref(null)
 
     // Filtered events
     const filteredEvents = computed(() => {
@@ -403,6 +415,24 @@ export default {
       }
     }
 
+    const loadHeroBanner = async () => {
+      try {
+        const response = await fetch('/api/hero-banners/active', {
+          headers: { 'Accept': 'application/json' }
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success && data.data) {
+            heroBanner.value = data.data
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement du hero banner:', error)
+        // En cas d'erreur, on garde heroBanner à null pour utiliser l'image par défaut
+      }
+    }
+
     const searchEvents = () => {
       if (searchQuery.value.trim()) {
         router.push({
@@ -447,6 +477,7 @@ export default {
     onMounted(() => {
       loadEvents()
       loadCategories()
+      loadHeroBanner()
     })
 
     return {
@@ -455,6 +486,7 @@ export default {
       events,
       categories,
       loading,
+      heroBanner,
       filteredEvents,
       upcomingEvents,
       pastEvents,

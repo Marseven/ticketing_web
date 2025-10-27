@@ -337,6 +337,17 @@ Route::prefix('v1')->group(function () {
             Route::post('{banner}/toggle-active', [App\Http\Controllers\Api\Admin\BannerController::class, 'toggleActive']);
         });
 
+        // Gestion des hero banners (page d'accueil)
+        Route::prefix('hero-banners')->group(function () {
+            Route::get('/', [App\Http\Controllers\Api\Admin\HeroBannerController::class, 'index']);
+            Route::post('/', [App\Http\Controllers\Api\Admin\HeroBannerController::class, 'store']);
+            Route::get('{heroBanner}', [App\Http\Controllers\Api\Admin\HeroBannerController::class, 'show']);
+            Route::post('{heroBanner}', [App\Http\Controllers\Api\Admin\HeroBannerController::class, 'update']); // Pour FormData
+            Route::put('{heroBanner}', [App\Http\Controllers\Api\Admin\HeroBannerController::class, 'update']);
+            Route::delete('{heroBanner}', [App\Http\Controllers\Api\Admin\HeroBannerController::class, 'destroy']);
+            Route::post('{heroBanner}/toggle-active', [App\Http\Controllers\Api\Admin\HeroBannerController::class, 'toggleActive']);
+        });
+
         // Gestion des commandes (Orders)
         Route::prefix('orders')->group(function () {
             Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'orders']);
@@ -371,3 +382,6 @@ Route::get('venues', [App\Http\Controllers\Api\VenueController::class, 'index'])
 
 // Route publique pour les bannières
 Route::get('banners/active', [App\Http\Controllers\Api\BannerController::class, 'getActive']);
+
+// Route publique pour le hero banner actif
+Route::get('hero-banners/active', [App\Http\Controllers\Api\Admin\HeroBannerController::class, 'getActive']);
