@@ -210,6 +210,19 @@
             Bannières
           </router-link>
 
+          <!-- Hero Banner Page Accueil -->
+          <router-link to="/admin/hero-banners"
+                       class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-colors duration-200"
+                       :class="getMenuItemClass('/admin/hero-banners')"
+                       :style="getMenuItemStyle('/admin/hero-banners')"
+                       @mouseover="handleMenuHover($event, '/admin/hero-banners')"
+                       @mouseleave="handleMenuLeave($event, '/admin/hero-banners')">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            Hero Banner
+          </router-link>
+
           <!-- Rapports -->
           <router-link to="/admin/reports"
                        class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-colors duration-200"
@@ -473,6 +486,7 @@ export default {
         '/admin/categories': 'Gestion des Catégories',
         '/admin/venues': 'Gestion des Lieux',
         '/admin/banners': 'Gestion des Bannières Publicitaires',
+        '/admin/hero-banners': 'Gestion du Hero Banner',
         '/admin/reports': 'Rapports et Analyses',
         '/admin/analytics': 'Analytics Avancées',
         '/admin/profile': 'Mon Profil',
@@ -537,6 +551,9 @@ export default {
       }
       if (path.startsWith('/admin/banners')) {
         crumbs.push({ name: 'Bannières', to: '/admin/banners' })
+      }
+      if (path.startsWith('/admin/hero-banners')) {
+        crumbs.push({ name: 'Hero Banner', to: '/admin/hero-banners' })
       }
       if (path.startsWith('/admin/reports')) {
         crumbs.push({ name: 'Rapports', to: '/admin/reports' })
