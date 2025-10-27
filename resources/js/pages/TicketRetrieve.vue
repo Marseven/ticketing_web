@@ -35,15 +35,6 @@
 
             <!-- Main Search Options -->
             <div class="space-y-5">
-              <div>
-                <label class="block text-base md:text-lg font-semibold text-blue-900 mb-4">
-                  Choisissez une méthode de recherche
-                </label>
-                <p class="text-xs md:text-sm text-gray-600 mb-4">
-                  Utilisez l'une des options ci-dessous pour retrouver votre ticket
-                </p>
-              </div>
-
               <!-- Reference Field -->
               <div>
                 <label for="reference" class="block text-sm font-semibold text-blue-900 mb-2">
@@ -58,13 +49,15 @@
                 />
               </div>
 
-              <!-- Alternative Search Methods -->
-              <div class="relative">
-                <div class="absolute inset-x-0 top-3 flex items-center">
+               <div class="absolute inset-x-0 top-3 flex items-center">
                   <div class="flex-1 border-t border-gray-200"></div>
                   <span class="px-3 text-xs font-medium text-gray-500 bg-white">OU</span>
                   <div class="flex-1 border-t border-gray-200"></div>
                 </div>
+
+              <!-- Alternative Search Methods -->
+              <div class="relative">
+
                 <div class="mt-10">
                   <!-- Phone Number -->
                   <div>
