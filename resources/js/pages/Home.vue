@@ -104,54 +104,94 @@
     <!-- Events Section -->
     <section class="py-8 md:py-12 bg-white">
       <div class="px-4 max-w-7xl mx-auto">
-        <h2 class="text-xl md:text-3xl font-bold text-center text-blue-950 mb-6 md:mb-8">
-          Tous les événements en cours
-        </h2>
-
         <!-- Loading State -->
         <div v-if="loading" class="flex justify-center py-12">
           <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-950 border-t-yellow-500"></div>
         </div>
 
-        <!-- Events Grid -->
-        <div v-else-if="filteredEvents.length > 0" class="space-y-4 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
-          <router-link
-            v-for="event in filteredEvents"
-            :key="event.id"
-            :to="`/events/${event.slug}`"
-            class="block bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow"
-          >
-            <div class="relative pb-[60%]">
-              <img
-                :src="event.cover_image || 'https://via.placeholder.com/400x240'"
-                :alt="event.title"
-                class="absolute inset-0 w-full h-full object-cover"
-              />
+        <template v-else>
+          <!-- Événements en cours -->
+          <div v-if="upcomingEvents.length > 0" class="mb-12">
+            <h2 class="text-xl md:text-3xl font-bold text-center text-blue-950 mb-6 md:mb-8">
+              Tous les événements en cours
+            </h2>
+            <div class="space-y-4 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
+              <router-link
+                v-for="event in upcomingEvents"
+                :key="event.id"
+                :to="`/events/${event.slug}`"
+                class="block bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow"
+              >
+                <div class="relative pb-[60%]">
+                  <img
+                    :src="event.cover_image || 'https://via.placeholder.com/400x240'"
+                    :alt="event.title"
+                    class="absolute inset-0 w-full h-full object-cover"
+                  />
+                </div>
+                <div class="p-4">
+                  <h3 class="font-bold text-blue-950 text-sm md:text-base line-clamp-2 mb-2">
+                    {{ event.title }}
+                  </h3>
+                  <p class="text-xs text-gray-600 mb-1">
+                    {{ formatDate(event.event_date) }}
+                  </p>
+                  <p class="text-xs text-gray-500">
+                    {{ event.venue?.name || 'Lieu à définir' }}
+                  </p>
+                </div>
+              </router-link>
             </div>
-            <div class="p-4">
-              <h3 class="font-bold text-blue-950 text-sm md:text-base line-clamp-2 mb-2">
-                {{ event.title }}
-              </h3>
-              <p class="text-xs text-gray-600 mb-1">
-                {{ formatDate(event.event_date) }}
-              </p>
-              <p class="text-xs text-gray-500">
-                {{ event.venue?.name || 'Lieu à définir' }}
-              </p>
-            </div>
-          </router-link>
-        </div>
+          </div>
 
-        <!-- Empty State -->
-        <div v-else class="text-center py-12">
-          <p class="text-gray-500 mb-4">Aucun événement disponible pour le moment.</p>
-          <button
-            @click="filterByCategory('all')"
-            class="bg-blue-950 text-white px-6 py-3 rounded-lg hover:bg-yellow-500 hover:text-blue-950 transition-colors"
-          >
-            Voir tous les événements
-          </button>
-        </div>
+          <!-- Événements passés -->
+          <div v-if="pastEvents.length > 0" class="mb-8">
+            <h2 class="text-xl md:text-3xl font-bold text-center text-gray-600 mb-6 md:mb-8">
+              Événements passés
+            </h2>
+            <div class="space-y-4 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
+              <router-link
+                v-for="event in pastEvents"
+                :key="event.id"
+                :to="`/events/${event.slug}`"
+                class="block bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow opacity-75"
+              >
+                <div class="relative pb-[60%]">
+                  <img
+                    :src="event.cover_image || 'https://via.placeholder.com/400x240'"
+                    :alt="event.title"
+                    class="absolute inset-0 w-full h-full object-cover grayscale"
+                  />
+                  <div class="absolute top-2 right-2 bg-gray-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                    Terminé
+                  </div>
+                </div>
+                <div class="p-4">
+                  <h3 class="font-bold text-gray-700 text-sm md:text-base line-clamp-2 mb-2">
+                    {{ event.title }}
+                  </h3>
+                  <p class="text-xs text-gray-500 mb-1">
+                    {{ formatDate(event.event_date) }}
+                  </p>
+                  <p class="text-xs text-gray-400">
+                    {{ event.venue?.name || 'Lieu à définir' }}
+                  </p>
+                </div>
+              </router-link>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div v-if="upcomingEvents.length === 0 && pastEvents.length === 0" class="text-center py-12">
+            <p class="text-gray-500 mb-4">Aucun événement disponible pour le moment.</p>
+            <button
+              @click="filterByCategory('all')"
+              class="bg-blue-950 text-white px-6 py-3 rounded-lg hover:bg-yellow-500 hover:text-blue-950 transition-colors"
+            >
+              Voir tous les événements
+            </button>
+          </div>
+        </template>
       </div>
     </section>
 
@@ -197,6 +237,25 @@ export default {
       return events.value.filter(event => {
         const eventCategoryId = event.category?.id || event.category_id
         return eventCategoryId === parseInt(selectedCategory.value)
+      })
+    })
+
+    // Séparer les événements en cours des événements passés
+    const upcomingEvents = computed(() => {
+      const now = new Date()
+      return filteredEvents.value.filter(event => {
+        if (!event.event_date) return true // Si pas de date, considérer comme à venir
+        const eventDate = new Date(event.event_date)
+        return eventDate >= now
+      })
+    })
+
+    const pastEvents = computed(() => {
+      const now = new Date()
+      return filteredEvents.value.filter(event => {
+        if (!event.event_date) return false // Si pas de date, ne pas mettre dans passés
+        const eventDate = new Date(event.event_date)
+        return eventDate < now
       })
     })
 
@@ -312,6 +371,8 @@ export default {
       categories,
       loading,
       filteredEvents,
+      upcomingEvents,
+      pastEvents,
       searchEvents,
       filterByCategory,
       formatDate
