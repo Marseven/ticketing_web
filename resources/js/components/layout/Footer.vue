@@ -9,6 +9,7 @@
               src="/images/logo_white.png"
               alt="Logo"
               class="h-10 w-auto"
+              style="filter: brightness(0) saturate(100%) invert(48%) sepia(6%) saturate(717%) hue-rotate(182deg) brightness(92%) contrast(88%);"
             />
           </div>
           <p class="text-gray-300 mb-4">
