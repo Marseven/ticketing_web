@@ -24,9 +24,9 @@
     </div>
 
     <!-- Cartes de statistiques -->
-    <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-8">
+    <div class="flex md:grid gap-3 md:gap-6 mb-8 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 md:grid-cols-2 lg:grid-cols-4">
       <!-- Total Événements -->
-      <div class="bg-white rounded-primea shadow-primea p-3 md:p-6 border-l-4 border-primea-blue aspect-square flex flex-col justify-center">
+      <div class="bg-white rounded-primea shadow-primea p-3 md:p-6 border-l-4 border-primea-blue aspect-square flex flex-col justify-center flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
         <div class="flex flex-col items-center text-center md:flex-row md:items-center md:text-left">
           <div class="p-1.5 md:p-2 bg-primea-blue/10 rounded-lg mb-2 md:mb-0">
             <CalendarIcon class="w-4 h-4 md:w-6 md:h-6 text-primea-blue" />
@@ -39,7 +39,7 @@
       </div>
 
       <!-- Événements Actifs -->
-      <div class="bg-white rounded-primea shadow-primea p-3 md:p-6 border-l-4 border-primea-blue aspect-square flex flex-col justify-center">
+      <div class="bg-white rounded-primea shadow-primea p-3 md:p-6 border-l-4 border-primea-blue aspect-square flex flex-col justify-center flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
         <div class="flex flex-col items-center text-center md:flex-row md:items-center md:text-left">
           <div class="p-1.5 md:p-2 rounded-lg mb-2 md:mb-0" style="background-color: rgba(39, 45, 99, 0.15);">
             <PlayIcon class="w-4 h-4 md:w-6 md:h-6 text-primea-blue" />
@@ -52,7 +52,7 @@
       </div>
 
       <!-- Billets Vendus -->
-      <div class="bg-white rounded-primea shadow-primea p-3 md:p-6 border-l-4 border-primea-yellow aspect-square flex flex-col justify-center">
+      <div class="bg-white rounded-primea shadow-primea p-3 md:p-6 border-l-4 border-primea-yellow aspect-square flex flex-col justify-center flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
         <div class="flex flex-col items-center text-center md:flex-row md:items-center md:text-left">
           <div class="p-1.5 md:p-2 bg-primea-yellow/10 rounded-lg mb-2 md:mb-0">
             <TicketIcon class="w-4 h-4 md:w-6 md:h-6 text-primea-yellow" />
@@ -65,7 +65,7 @@
       </div>
 
       <!-- Revenus -->
-      <div class="bg-white rounded-primea shadow-primea p-3 md:p-6 border-l-4 border-primea-blue aspect-square flex flex-col justify-center">
+      <div class="bg-white rounded-primea shadow-primea p-3 md:p-6 border-l-4 border-primea-blue aspect-square flex flex-col justify-center flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
         <div class="flex flex-col items-center text-center md:flex-row md:items-center md:text-left">
           <div class="p-1.5 md:p-2 rounded-lg mb-2 md:mb-0" style="background-color: rgba(39, 45, 99, 0.2);">
             <CurrencyDollarIcon class="w-4 h-4 md:w-6 md:h-6 text-primea-blue" />

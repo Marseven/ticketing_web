@@ -73,19 +73,19 @@
 
         <!-- Statistiques rapides -->
         <div class="flex gap-4 overflow-x-auto pb-2">
-          <div class="text-center flex-shrink-0 min-w-[140px]">
+          <div class="text-center flex-shrink-0 w-[calc(50%-0.5rem)]">
             <p class="text-2xl font-bold text-blue-600">{{ stats.published }}</p>
             <p class="text-sm text-gray-600">Publiés</p>
           </div>
-          <div class="text-center flex-shrink-0 min-w-[140px]">
+          <div class="text-center flex-shrink-0 w-[calc(50%-0.5rem)]">
             <p class="text-2xl font-bold text-yellow-600">{{ stats.draft }}</p>
             <p class="text-sm text-gray-600">Brouillons</p>
           </div>
-          <div class="text-center flex-shrink-0 min-w-[140px]">
+          <div class="text-center flex-shrink-0 w-[calc(50%-0.5rem)]">
             <p class="text-2xl font-bold text-green-600">{{ stats.totalTicketsSold }}</p>
             <p class="text-sm text-gray-600">Tickets vendus</p>
           </div>
-          <div class="text-center flex-shrink-0 min-w-[180px]">
+          <div class="text-center flex-shrink-0 w-[calc(50%-0.5rem)]">
             <p class="text-2xl font-bold text-purple-600">{{ formatPrice(stats.totalRevenue) }} XAF</p>
             <p class="text-sm text-gray-600">Revenus</p>
           </div>
