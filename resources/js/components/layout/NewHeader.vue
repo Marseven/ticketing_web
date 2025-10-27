@@ -2,12 +2,12 @@
   <header class="bg-white shadow-sm sticky top-0 z-50">
     <div class="max-w-7xl mx-auto">
       <!-- Mobile Header -->
-      <div class="md:hidden px-4 py-4">
-        <div class="flex items-center justify-between">
+      <div class="md:hidden px-4 py-3">
+        <div class="flex items-start justify-between">
           <!-- Back Button -->
           <button
             @click="goBack"
-            class="p-2 -ml-2 text-gray-600 hover:text-blue-950 transition-colors"
+            class="p-1 -ml-2 text-gray-600 hover:text-blue-950 transition-colors mt-1"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -16,17 +16,17 @@
 
           <!-- Logo and Title Center -->
           <router-link :to="{ name: 'home' }" class="flex-1 flex items-center justify-center group">
-            <img src="/images/logo.png" alt="Logo" class="h-14 w-auto transition-transform duration-200 group-hover:scale-105" />
-            <div class="ml-3 text-left">
-              <h1 class="text-blue-950 text-2xl font-black leading-tight">La Billetterie</h1>
-              <p class="text-blue-950 text-xs font-medium">Simple, Rapide et Sécurisée</p>
+            <img src="/images/logo.png" alt="Logo" class="h-10 w-auto transition-transform duration-200 group-hover:scale-105" />
+            <div class="ml-2 text-left">
+              <h1 class="text-blue-950 text-lg font-black leading-tight">La Billetterie</h1>
+              <p class="text-blue-950 text-xs font-medium leading-tight">Simple, Rapide et Sécurisée</p>
             </div>
           </router-link>
 
           <!-- Burger Menu -->
           <button
             @click="toggleMenu"
-            class="p-2 -mr-2 text-blue-950 hover:text-yellow-500 transition-colors"
+            class="p-1 -mr-2 text-blue-950 hover:text-yellow-500 transition-colors mt-1"
           >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
