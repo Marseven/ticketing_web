@@ -15,6 +15,25 @@ $dirs = [
 
 $results = [];
 
+// Créer le lien symbolique storage dans public/
+$storageLink = __DIR__ . '/public/storage';
+$storageTarget = __DIR__ . '/storage/app/public';
+
+if (!file_exists($storageLink)) {
+    if (symlink($storageTarget, $storageLink)) {
+        $results[] = "✅ Lien symbolique créé: public/storage";
+    } else {
+        $results[] = "❌ Erreur création lien symbolique: public/storage";
+    }
+} else {
+    if (is_link($storageLink)) {
+        $results[] = "ℹ️ Lien symbolique existe déjà: public/storage";
+    } else {
+        $results[] = "⚠️ public/storage existe mais n'est pas un lien symbolique!";
+    }
+}
+
+// Créer les dossiers
 foreach ($dirs as $dir) {
     $fullPath = __DIR__ . '/' . $dir;
 
@@ -73,6 +92,10 @@ header('Content-Type: text/html; charset=utf-8');
             background: #f8d7da;
             color: #721c24;
         }
+        .result.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
         .warning {
             background: #fff3cd;
             color: #856404;
@@ -92,6 +115,7 @@ header('Content-Type: text/html; charset=utf-8');
                     $class = 'info';
                     if (strpos($result, '✅') !== false) $class = 'success';
                     if (strpos($result, '❌') !== false) $class = 'error';
+                    if (strpos($result, '⚠️') !== false) $class = 'warning';
                 ?>
                 <div class="result <?php echo $class; ?>">
                     <?php echo $result; ?>
