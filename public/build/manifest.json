@@ -129,7 +129,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-BnCGu-E_.js",
+    "file": "assets/js/app-DelZRmg7.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -412,7 +412,7 @@
     ]
   },
   "resources/js/pages/auth/RegisterOrganizer.vue": {
-    "file": "assets/js/RegisterOrganizer-CfgjfJD5.js",
+    "file": "assets/js/RegisterOrganizer-uWDR6bT5.js",
     "name": "RegisterOrganizer",
     "src": "resources/js/pages/auth/RegisterOrganizer.vue",
     "isDynamicEntry": true,

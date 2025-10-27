@@ -95,7 +95,7 @@ class AuthController extends Controller
                     'phone' => $user->phone,
                     'description' => null,
                     'is_active' => true,
-                    'is_verified' => false, // Nécessite vérification admin
+                    'is_verified' => true, // Pas de vérification admin requise
                 ]);
 
                 // Associer l'utilisateur à l'organisation comme owner
@@ -125,7 +125,7 @@ class AuthController extends Controller
             \DB::commit();
 
             $message = $user->is_organizer
-                ? 'Inscription réussie. Votre compte organisateur a été créé et est en attente de vérification. Un email de confirmation a été envoyé.'
+                ? 'Inscription réussie. Votre compte organisateur a été créé. Un email de confirmation a été envoyé.'
                 : 'Inscription réussie. Un email de vérification a été envoyé.';
 
             return response()->json([
