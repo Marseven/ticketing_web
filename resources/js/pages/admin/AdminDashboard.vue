@@ -15,8 +15,8 @@
 
     <div v-else>
       <!-- Statistiques Principales -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow" @click="$router.push('/admin/payments')">
+      <div class="flex md:grid gap-3 md:gap-6 mb-8 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 md:grid-cols-2 lg:grid-cols-4">
+        <div class="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto" @click="$router.push('/admin/payments')">
           <div class="flex items-center">
             <div class="p-2 rounded-lg" style="background-color: rgba(39, 45, 99, 0.1);">
               <svg class="w-6 h-6" style="color: #272d63;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,7 +30,7 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow" @click="$router.push('/admin/orders')">
+        <div class="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto" @click="$router.push('/admin/orders')">
           <div class="flex items-center">
             <div class="p-2 rounded-lg" style="background-color: rgba(250, 181, 17, 0.1);">
               <svg class="w-6 h-6" style="color: #fab511;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,7 +44,7 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow" @click="$router.push('/admin/events')">
+        <div class="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto" @click="$router.push('/admin/events')">
           <div class="flex items-center">
             <div class="p-2 rounded-lg bg-green-100">
               <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,7 +58,7 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow" @click="$router.push('/admin/users')">
+        <div class="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto" @click="$router.push('/admin/users')">
           <div class="flex items-center">
             <div class="p-2 rounded-lg bg-purple-100">
               <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,8 +74,8 @@
       </div>
 
       <!-- Statistiques des Paiements -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex md:grid gap-3 md:gap-6 mb-8 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 md:grid-cols-2 lg:grid-cols-4">
+        <div class="bg-white rounded-lg shadow p-6 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
           <div class="flex items-center">
             <div class="p-2 rounded-lg" style="background-color: rgba(39, 45, 99, 0.1);">
               <svg class="w-6 h-6" style="color: #272d63;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -89,7 +89,7 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-6 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
           <div class="flex items-center">
             <div class="p-2 rounded-lg" style="background-color: rgba(250, 181, 17, 0.1);">
               <svg class="w-6 h-6" style="color: #fab511;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,7 +103,7 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-6 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
           <div class="flex items-center">
             <div class="p-2 rounded-lg" style="background-color: rgba(39, 45, 99, 0.15);">
               <svg class="w-6 h-6" style="color: #272d63;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,7 +117,7 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-6 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
           <div class="flex items-center">
             <div class="p-2 bg-red-100 rounded-lg">
               <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

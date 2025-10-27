@@ -192,9 +192,9 @@
         <!-- Contenu du dashboard -->
         <div v-else>
         <!-- Statistiques principales -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div class="flex md:grid gap-3 md:gap-6 mb-8 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 md:grid-cols-2 lg:grid-cols-5">
           <!-- Événements -->
-          <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-primea-blue">
+          <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-primea-blue flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
             <div class="flex flex-col">
               <div class="flex items-center justify-between mb-2">
                 <CalendarIcon class="w-8 h-8 text-primea-blue" />
@@ -207,7 +207,7 @@
           </div>
 
           <!-- Montant Global -->
-          <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-primea-yellow">
+          <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-primea-yellow flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
             <div class="flex flex-col">
               <div class="flex items-center justify-between mb-2">
                 <BanknotesIcon class="w-8 h-8 text-primea-yellow" />
@@ -220,7 +220,7 @@
           </div>
 
           <!-- Tickets Vendus -->
-          <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-green-500">
+          <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-green-500 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
             <div class="flex flex-col">
               <div class="flex items-center justify-between mb-2">
                 <TicketIcon class="w-8 h-8 text-green-500" />
@@ -233,7 +233,7 @@
           </div>
 
           <!-- Tickets Scannés -->
-          <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-purple-500">
+          <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-purple-500 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
             <div class="flex flex-col">
               <div class="flex items-center justify-between mb-2">
                 <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -248,7 +248,7 @@
           </div>
 
           <!-- Revenus Total -->
-          <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-primea-blue">
+          <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-primea-blue flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
             <div class="flex flex-col">
               <div class="flex items-center justify-between mb-2">
                 <svg class="w-8 h-8 text-primea-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
