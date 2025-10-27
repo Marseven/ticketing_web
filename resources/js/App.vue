@@ -56,7 +56,7 @@ export default {
 
 <style>
 html, body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   height: auto;
   overflow-x: hidden;
   overflow-y: auto;
