@@ -6,7 +6,7 @@
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-3xl font-bold text-primea-blue font-primea mb-2">Mon Solde</h1>
-          <p class="text-gray-600 font-primea">Consultez votre solde et effectuez des demandes de versement</p>
+          <p class="text-gray-600 font-primea text-sm">Consultez votre solde et effectuez des demandes de versement</p>
         </div>
         <button @click="$router.push('/organizer/payouts/history')" 
                 class="bg-primea-blue text-white px-4 py-2 rounded-primea hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 font-primea">
