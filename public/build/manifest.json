@@ -56,12 +56,12 @@
       "_vue-vendor-DL4qlPdi.js"
     ]
   },
-  "_organizer-BRZUwwds.css": {
-    "file": "assets/css/organizer-BRZUwwds.css",
-    "src": "_organizer-BRZUwwds.css"
+  "_organizer-BfwjnTKM.css": {
+    "file": "assets/css/organizer-BfwjnTKM.css",
+    "src": "_organizer-BfwjnTKM.css"
   },
-  "_organizer-CQ-3upqS.js": {
-    "file": "assets/js/organizer-CQ-3upqS.js",
+  "_organizer-Cfp7BhAC.js": {
+    "file": "assets/js/organizer-Cfp7BhAC.js",
     "name": "organizer",
     "isDynamicEntry": true,
     "imports": [
@@ -70,7 +70,7 @@
       "_vendor-14XLBY50.js"
     ],
     "css": [
-      "assets/css/organizer-BRZUwwds.css"
+      "assets/css/organizer-BfwjnTKM.css"
     ]
   },
   "_pinia-vendor-DSZd9EMP.js": {
@@ -129,7 +129,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-B3KDJPcb.js",
+    "file": "assets/js/app-D5be-Knh.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -159,13 +159,13 @@
       "_account-UXvY6J1o.js",
       "_account-UXvY6J1o.js",
       "resources/js/layouts/OrganizerLayout.vue",
-      "_organizer-CQ-3upqS.js",
-      "_organizer-CQ-3upqS.js",
-      "_organizer-CQ-3upqS.js",
-      "_organizer-CQ-3upqS.js",
-      "_organizer-CQ-3upqS.js",
-      "_organizer-CQ-3upqS.js",
-      "_organizer-CQ-3upqS.js",
+      "_organizer-Cfp7BhAC.js",
+      "_organizer-Cfp7BhAC.js",
+      "_organizer-Cfp7BhAC.js",
+      "_organizer-Cfp7BhAC.js",
+      "_organizer-Cfp7BhAC.js",
+      "_organizer-Cfp7BhAC.js",
+      "_organizer-Cfp7BhAC.js",
       "resources/js/layouts/AdminLayout.vue",
       "_admin-DQZgKnZt.js",
       "_admin-DQZgKnZt.js",

@@ -25,8 +25,8 @@
 
     <div v-else>
       <!-- Summary Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex md:grid gap-3 md:gap-6 mb-8 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 md:grid-cols-3">
+        <div class="bg-white rounded-lg shadow p-6 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
           <div class="flex items-center">
             <div class="p-2 bg-green-100 rounded-lg">
               <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,7 +40,7 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-6 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
           <div class="flex items-center">
             <div class="p-2 bg-yellow-100 rounded-lg">
               <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -54,7 +54,7 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-6 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
           <div class="flex items-center">
             <div class="p-2 bg-blue-100 rounded-lg">
               <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
