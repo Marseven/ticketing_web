@@ -3,8 +3,8 @@
     <div class="max-w-7xl mx-auto">
 
       <!-- Filtres et statistiques -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-primea-lg shadow-sm p-6 border-l-4 border-primea-blue">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-8">
+        <div class="bg-white rounded-primea-lg shadow-sm p-3 md:p-6 border-l-4 border-primea-blue">
           <div class="flex items-center">
             <div class="flex-shrink-0">
               <TicketIcon class="w-8 h-8 text-primea-blue" />
@@ -16,7 +16,7 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-primea-lg shadow-sm p-6 border-l-4 border-green-500">
+        <div class="bg-white rounded-primea-lg shadow-sm p-3 md:p-6 border-l-4 border-green-500">
           <div class="flex items-center">
             <div class="flex-shrink-0">
               <CheckCircleIcon class="w-8 h-8 text-green-500" />
@@ -28,7 +28,7 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-primea-lg shadow-sm p-6 border-l-4 border-primea-yellow">
+        <div class="bg-white rounded-primea-lg shadow-sm p-3 md:p-6 border-l-4 border-primea-yellow">
           <div class="flex items-center">
             <div class="flex-shrink-0">
               <CalendarIcon size="xl" class="text-primea-yellow" />
@@ -40,7 +40,7 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-primea-lg shadow-sm p-6 border-l-4 border-gray-400">
+        <div class="bg-white rounded-primea-lg shadow-sm p-3 md:p-6 border-l-4 border-gray-400">
           <div class="flex items-center">
             <div class="flex-shrink-0">
               <ClockIcon class="w-8 h-8 text-gray-400" />

@@ -324,9 +324,6 @@
                   <router-link :to="{ name: 'my-tickets' }" @click="closeMenu" class="block text-white text-lg py-3 hover:text-yellow-500 transition-colors">
                     Mes tickets
                   </router-link>
-                  <router-link :to="{ name: 'my-orders' }" @click="closeMenu" class="block text-white text-lg py-3 hover:text-yellow-500 transition-colors">
-                    Mes achats
-                  </router-link>
                 </template>
 
                 <router-link :to="{ name: 'profile' }" @click="closeMenu" class="block text-white text-lg py-3 hover:text-yellow-500 transition-colors">
