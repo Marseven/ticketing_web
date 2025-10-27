@@ -24,11 +24,8 @@
           <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-blue-900 md:text-white mb-3 md:mb-4">
             Vous avez perdu votre ticket ?
           </h1>
-          <p class="text-lg md:text-xl text-gray-600 md:text-white/90 mb-4 md:mb-8">
+          <p class="text-lg md:text-xl text-gray-600 md:text-white/90">
             Ne vous inquiétez pas
-          </p>
-          <p class="text-sm md:text-base text-gray-600 md:text-white/80">
-            Utilisez votre référence du ticket pour retrouver votre ticket
           </p>
         </div>
 
@@ -68,7 +65,7 @@
                   <span class="px-3 text-xs font-medium text-gray-500 bg-white">OU</span>
                   <div class="flex-1 border-t border-gray-200"></div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-10">
+                <div class="mt-10">
                   <!-- Phone Number -->
                   <div>
                     <label for="phone" class="block text-sm font-semibold text-blue-900 mb-2">
@@ -78,20 +75,6 @@
                       v-model="searchForm.phone"
                       placeholder="Entrez votre numéro"
                       :required="false"
-                    />
-                  </div>
-
-                  <!-- Email -->
-                  <div>
-                    <label for="email" class="block text-sm font-semibold text-blue-900 mb-2">
-                      Adresse email <span class="text-xs font-normal text-gray-500">(utilisée pour l'achat)</span>
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      v-model="searchForm.email"
-                      placeholder="votre@email.com"
-                      class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-blue-900 transition-all duration-200 bg-white text-base"
                     />
                   </div>
                 </div>
@@ -121,7 +104,7 @@
             <!-- Search Button -->
             <button
               type="submit"
-              :disabled="loading || (!searchForm.reference && !searchForm.phone && !searchForm.email)"
+              :disabled="loading || (!searchForm.reference && !searchForm.phone)"
               class="w-full bg-blue-900 text-white py-4 px-6 rounded-xl text-base md:text-lg font-bold transition-all duration-200 shadow-lg hover:bg-yellow-500 hover:text-blue-900 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-900 disabled:hover:text-white transform hover:scale-105 disabled:transform-none"
             >
               <span v-if="loading" class="flex items-center justify-center">
@@ -216,8 +199,7 @@ export default {
 
     const searchForm = ref({
       reference: '',
-      phone: '',
-      email: ''
+      phone: ''
     })
 
     // Methods
@@ -228,15 +210,14 @@ export default {
         success.value = ''
 
         // Validation
-        if (!searchForm.value.reference && !searchForm.value.phone && !searchForm.value.email) {
+        if (!searchForm.value.reference && !searchForm.value.phone) {
           throw new Error('Veuillez remplir au moins un champ de recherche')
         }
 
         // Use API to search tickets
         const response = await ticketService.searchTickets({
           reference: searchForm.value.reference,
-          phone: searchForm.value.phone,
-          email: searchForm.value.email
+          phone: searchForm.value.phone
         })
 
         if (response.data.data?.tickets) {
@@ -342,8 +323,7 @@ export default {
     const clearForm = () => {
       searchForm.value = {
         reference: '',
-        phone: '',
-        email: ''
+        phone: ''
       }
       error.value = ''
       success.value = ''
