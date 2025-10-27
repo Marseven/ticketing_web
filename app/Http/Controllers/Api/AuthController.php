@@ -101,13 +101,8 @@ class AuthController extends Controller
                 // Associer l'utilisateur à l'organisation comme owner
                 $organizer->users()->attach($user->id, ['role' => 'owner']);
 
-                // Créer le balance pour l'organisateur
-                \App\Models\OrganizerBalance::create([
-                    'organizer_id' => $organizer->id,
-                    'balance' => 0,
-                    'pending_balance' => 0,
-                    'auto_payout_enabled' => false,
-                ]);
+                // Note: Le balance sera créé quand l'organisateur configurera ses moyens de paiement
+                // Un organisateur peut avoir plusieurs balances (un par gateway: airtelmoney, moovmoney, etc.)
 
                 \Log::info('Organisation créée automatiquement lors de l\'inscription', [
                     'user_id' => $user->id,
