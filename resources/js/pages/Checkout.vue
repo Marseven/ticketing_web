@@ -505,9 +505,17 @@
               <div class="absolute inset-0 bg-blue-900/50"></div>
               <div class="absolute bottom-0 left-0 right-0 p-4 text-white">
                 <h2 class="text-lg font-bold mb-1">{{ event.title }}</h2>
-                <div class="flex items-center gap-2 text-sm text-white/90">
-                  <ClockIcon class="w-4 h-4" />
-                  <span>{{ formatEventDate }}</span>
+                <div class="flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-2 text-sm text-white/90">
+                    <ClockIcon class="w-4 h-4" />
+                    <span>{{ formatEventDate }}</span>
+                  </div>
+                  <router-link
+                    :to="`/events/${event.slug}`"
+                    class="bg-yellow-500 text-blue-900 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-yellow-400 transition-colors shadow-md"
+                  >
+                    À propos
+                  </router-link>
                 </div>
               </div>
             </div>
