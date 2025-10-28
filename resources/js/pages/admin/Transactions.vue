@@ -429,6 +429,10 @@ export default {
 </script>
 
 <style scoped>
+* {
+  font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
 .admin-transactions {
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }

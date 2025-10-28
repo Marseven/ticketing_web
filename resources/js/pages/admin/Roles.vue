@@ -858,3 +858,9 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+* {
+  font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+</style>

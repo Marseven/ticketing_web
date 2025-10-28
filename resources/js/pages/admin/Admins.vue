@@ -652,3 +652,10 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+/* Police Inter prioritaire */
+.admins-page * {
+  font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+</style>

@@ -748,6 +748,11 @@ export default {
 </script>
 
 <style scoped>
+/* Police Inter prioritaire */
+* {
+  font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
 /* Smooth transitions */
 .router-link-active {
   @apply bg-blue-50 text-blue-700 border-r-2 border-blue-600;
