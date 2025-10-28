@@ -2006,9 +2006,10 @@ class AdminController extends Controller
     public function admins(Request $request): JsonResponse
     {
         try {
+            // Filtrer par user_type 'admin' au lieu de role slug
             $query = User::with(['roles', 'userType'])
-                ->whereHas('roles', function ($q) {
-                    $q->where('slug', Role::ADMIN);
+                ->whereHas('userType', function ($q) {
+                    $q->where('name', 'admin');
                 });
 
             if ($request->filled('search')) {
@@ -2049,10 +2050,11 @@ class AdminController extends Controller
     public function clients(Request $request): JsonResponse
     {
         try {
+            // Filtrer par user_type 'client' au lieu de role slug
             $query = User::with(['roles', 'userType'])
                 ->where('is_organizer', false)
-                ->whereHas('roles', function ($q) {
-                    $q->where('slug', Role::CLIENT);
+                ->whereHas('userType', function ($q) {
+                    $q->where('name', 'client');
                 });
 
             if ($request->filled('search')) {
