@@ -233,6 +233,8 @@ export default {
 .phone-input-wrapper {
   position: relative;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .phone-input-container {
@@ -240,6 +242,8 @@ export default {
   display: flex;
   align-items: center;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .country-selector {
@@ -254,6 +258,8 @@ export default {
   cursor: pointer;
   transition: all 0.2s;
   user-select: none;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .country-selector:hover {
@@ -293,6 +299,7 @@ export default {
 
 .phone-input {
   flex: 1;
+  min-width: 0;
   padding: 0.75rem 1rem;
   border: 2px solid #e5e7eb;
   border-left: none;
@@ -301,6 +308,7 @@ export default {
   font-size: 1rem;
   transition: all 0.2s;
   background: rgba(255, 255, 255, 0.9);
+  box-sizing: border-box;
 }
 
 .phone-input:focus {
@@ -323,6 +331,8 @@ export default {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .country-search {
