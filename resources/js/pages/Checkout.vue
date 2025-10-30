@@ -503,12 +503,29 @@
                 <PhotoIcon class="w-16 h-16 text-white/30" />
               </div>
               <div class="absolute inset-0 bg-blue-900/50"></div>
+
+              <!-- Compte à rebours en haut à droite -->
+              <div v-if="!isEventPassed" class="absolute top-3 right-3 bg-yellow-500/90 backdrop-blur-sm px-3 py-2 rounded-lg text-blue-900">
+                <div class="text-center">
+                  <div class="text-xs font-semibold mb-0.5">Commence dans</div>
+                  <div class="flex items-center gap-1 text-sm font-bold">
+                    <span v-if="countdown.days > 0">{{ countdown.days }}j</span>
+                    <span>{{ countdown.hours }}h</span>
+                    <span>{{ countdown.minutes }}m</span>
+                  </div>
+                </div>
+              </div>
+
               <div class="absolute bottom-0 left-0 right-0 p-4 text-white">
                 <h2 class="text-lg font-bold mb-1">{{ event.title }}</h2>
+                <div class="flex items-center gap-2 text-sm text-white/90 mb-2">
+                  <ClockIcon class="w-4 h-4" />
+                  <span>{{ formatEventDate }}</span>
+                </div>
                 <div class="flex items-center justify-between gap-2">
                   <div class="flex items-center gap-2 text-sm text-white/90">
-                    <ClockIcon class="w-4 h-4" />
-                    <span>{{ formatEventDate }}</span>
+                    <MapPinIcon class="w-4 h-4" />
+                    <span>{{ event.venue_name || 'Lieu à confirmer' }}</span>
                   </div>
                   <router-link
                     :to="`/events/${event.slug}`"
