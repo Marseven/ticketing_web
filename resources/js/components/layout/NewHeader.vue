@@ -247,8 +247,8 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center">
                 <img src="/images/logo.png" alt="Logo" class="h-12" />
-                <div class="ml-3 text-left">
-                  <h1 class="text-blue-950 font-black text-base leading-tight">La Billetterie</h1>
+                <div class="text-right">
+                  <h1 class="text-blue-950 font-black leading-tight" style="font-size: 1.54rem;">La Billetterie</h1>
                   <p class="text-blue-950 text-xs font-medium leading-tight">Simple, Rapide et Sécurisée</p>
                 </div>
               </div>

@@ -26,9 +26,9 @@
       <!-- Content Centré -->
       <div class="relative z-10 w-full flex-1 flex items-center justify-center px-4 py-8">
         <div class="w-full max-w-2xl mx-auto text-center">
-          <!-- Search Bar (réduit de 50% et centré) -->
+          <!-- Search Bar (75% de largeur et centré) -->
           <div class="mb-8 flex justify-center">
-            <div class="relative w-1/2">
+            <div class="relative w-3/4">
               <input
                 type="text"
                 v-model="searchQuery"
