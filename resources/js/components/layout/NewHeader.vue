@@ -35,7 +35,7 @@
 
           <!-- Texte -->
           <div class="text-left flex-1 ml-3">
-            <h1 class="text-blue-950 text-lg font-black leading-tight">La Billetterie</h1>
+            <h1 class="text-blue-950 text-xl font-black leading-tight">La Billetterie</h1>
             <p class="text-blue-950 text-xs font-medium leading-tight">Simple, Rapide et Sécurisée</p>
           </div>
         </div>
