@@ -130,10 +130,9 @@
             </h2>
             <!-- Mobile: Métadonnées sur image -->
             <div class="space-y-3 md:hidden">
-              <router-link
+              <div
                 v-for="event in upcomingEvents"
                 :key="event.id"
-                :to="`/events/${event.slug}`"
                 class="block bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow"
               >
                 <div class="h-40 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 relative overflow-hidden">
@@ -156,16 +155,30 @@
                     </div>
 
                     <div>
-                      <p class="text-xs leading-tight mb-1">
-                        {{ formatDate(event.event_date) }}
-                      </p>
-                      <p class="text-xs text-gray-200 leading-tight">
-                        {{ event.venue?.name || 'Lieu à définir' }}
-                      </p>
+                      <div class="flex items-end justify-between">
+                        <div>
+                          <p class="text-xs leading-tight mb-1">
+                            {{ formatDate(event.event_date) }}
+                          </p>
+                          <p class="text-xs text-gray-200 leading-tight">
+                            {{ event.venue?.name || 'Lieu à définir' }}
+                          </p>
+                        </div>
+                        <router-link
+                          :to="`/events/${event.slug}`"
+                          class="bg-yellow-500 text-blue-950 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-yellow-400 transition-colors flex items-center gap-1"
+                          @click.stop
+                        >
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+                          </svg>
+                          Réserver
+                        </router-link>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </router-link>
+              </div>
             </div>
 
             <!-- Desktop: Style classique -->
