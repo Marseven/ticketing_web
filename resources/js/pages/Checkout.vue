@@ -549,7 +549,7 @@
           </div>
 
           <!-- Order Form -->
-          <form v-if="!isEventPassed" @submit.prevent="processOrder" class="space-y-5">
+          <form v-if="!isEventPassed" @submit.prevent="processOrder" class="space-y-5 w-[76%] mx-auto">
 
             <!-- Ticket Type Selection -->
             <div>
