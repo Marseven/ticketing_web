@@ -30,11 +30,11 @@
         <div class="flex items-center justify-between">
           <!-- Logo -->
           <router-link :to="{ name: 'home' }" class="group">
-            <img src="/images/logo.png" alt="Logo" class="h-10 w-auto transition-transform duration-200 group-hover:scale-105" />
+            <img src="/images/logo.png" alt="Logo" class="h-14 w-auto transition-transform duration-200 group-hover:scale-105" />
           </router-link>
 
           <!-- Texte -->
-          <div class="text-right">
+          <div class="text-left flex-1 ml-3">
             <h1 class="text-blue-950 text-lg font-black leading-tight">La Billetterie</h1>
             <p class="text-blue-950 text-xs font-medium leading-tight">Simple, Rapide et Sécurisée</p>
           </div>
@@ -45,10 +45,10 @@
       <div class="hidden md:flex items-center justify-between px-6 py-4">
         <!-- Logo and Title -->
         <router-link :to="{ name: 'home' }" class="flex items-center group">
-          <img src="/images/logo.png" alt="Logo" class="h-16 w-auto transition-transform duration-200 group-hover:scale-105" />
+          <img src="/images/logo.png" alt="Logo" class="h-20 w-auto transition-transform duration-200 group-hover:scale-105" />
           <div class="ml-4 text-left">
             <h1 class="text-blue-950 text-3xl font-black leading-tight">La Billetterie</h1>
-            <p class="text-blue-950 text-sm font-medium">Simple, Rapide et Sécurisée</p>
+            <p class="text-blue-950 text-sm font-medium leading-tight">Simple, Rapide et Sécurisée</p>
           </div>
         </router-link>
 
@@ -246,10 +246,10 @@
           <div class="px-4 py-3 bg-white border-b">
             <div class="flex items-center justify-between">
               <div class="flex items-center">
-                <img src="/images/logo.png" alt="Logo" class="h-10" />
+                <img src="/images/logo.png" alt="Logo" class="h-12" />
                 <div class="ml-3 text-left">
                   <h1 class="text-blue-950 font-black text-base leading-tight">La Billetterie</h1>
-                  <p class="text-blue-950 text-xs font-medium">Simple, Rapide et Sécurisée</p>
+                  <p class="text-blue-950 text-xs font-medium leading-tight">Simple, Rapide et Sécurisée</p>
                 </div>
               </div>
               <button @click="closeMenu" class="text-blue-950 p-2">
