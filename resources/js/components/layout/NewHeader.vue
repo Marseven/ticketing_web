@@ -261,7 +261,7 @@
           </div>
 
           <!-- Menu Items -->
-          <nav class="p-6 pb-32 space-y-4">
+          <nav class="p-6 pb-32 space-y-4 opacity-70">
             <router-link to="/" @click="closeMenu" class="block text-white text-lg py-3 hover:text-yellow-500 transition-colors">
               Accueil
             </router-link>
