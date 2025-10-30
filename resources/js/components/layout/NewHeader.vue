@@ -34,8 +34,8 @@
           </router-link>
 
           <!-- Texte -->
-          <div class="text-left flex-1 ml-3">
-            <h1 class="text-blue-950 text-xl font-black leading-tight">La Billetterie</h1>
+          <div class="text-right">
+            <h1 class="text-blue-950 font-black leading-tight" style="font-size: 1.54rem;">La Billetterie</h1>
             <p class="text-blue-950 text-xs font-medium leading-tight">Simple, Rapide et Sécurisée</p>
           </div>
         </div>
