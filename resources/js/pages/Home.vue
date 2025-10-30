@@ -165,7 +165,7 @@
                           </p>
                         </div>
                         <router-link
-                          :to="`/events/${event.slug}`"
+                          :to="`/checkout/${event.slug}`"
                           class="bg-yellow-500 text-blue-950 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-yellow-400 transition-colors flex items-center gap-1"
                           @click.stop
                         >
