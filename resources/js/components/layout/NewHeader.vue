@@ -241,7 +241,7 @@
     <transition name="slide">
       <div v-if="mobileMenuOpen" class="fixed inset-0 z-50 md:hidden" @click="closeMenu">
         <div class="absolute inset-0 bg-black/50"></div>
-        <div @click.stop class="absolute inset-0 w-full bg-gray-700 shadow-xl overflow-y-auto">
+        <div @click.stop class="absolute inset-0 w-full bg-gray-700/90 shadow-xl overflow-y-auto">
           <!-- Menu Header -->
           <div class="px-4 py-3 bg-white border-b">
             <div class="flex items-center justify-between">
