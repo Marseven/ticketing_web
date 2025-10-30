@@ -26,9 +26,9 @@
       <!-- Content Centré -->
       <div class="relative z-10 w-full flex-1 flex items-center justify-center px-4 py-8">
         <div class="w-full max-w-2xl mx-auto text-center">
-          <!-- Search Bar (50% width) -->
-          <div class="mb-8">
-            <div class="relative">
+          <!-- Search Bar (réduit de 50% et centré) -->
+          <div class="mb-8 flex justify-center">
+            <div class="relative w-1/2">
               <input
                 type="text"
                 v-model="searchQuery"
@@ -47,8 +47,8 @@
             </div>
           </div>
 
-          <!-- Slogan -->
-          <h1 class="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight uppercase">
+          <!-- Slogan (taille réduite) -->
+          <h1 class="text-xl md:text-2xl lg:text-3xl font-bold text-white mb-6 leading-tight uppercase">
             SE PROCURER UN TICKET<br>
             N'A JAMAIS ÉTÉ AUSSI SIMPLE !
           </h1>
