@@ -295,11 +295,11 @@
             </router-link>
 
             <template v-if="!isAuthenticated">
-              <div class="pt-6 space-y-3">
-                <router-link :to="{ name: 'login' }" @click="closeMenu" class="block w-full text-center bg-blue-950 text-white py-3 px-6 rounded-lg font-bold hover:bg-yellow-500 hover:text-blue-950 transition-colors">
+              <div class="pt-6 space-y-3 flex flex-col items-center">
+                <router-link :to="{ name: 'login' }" @click="closeMenu" class="block w-3/5 text-center bg-blue-950 text-white py-3 px-6 rounded-lg font-bold hover:bg-yellow-500 hover:text-blue-950 transition-colors">
                   Connexion
                 </router-link>
-                <router-link :to="{ name: 'register' }" @click="closeMenu" class="block w-full text-center border-2 border-white text-white py-3 px-6 rounded-lg font-bold hover:bg-white hover:text-blue-950 transition-colors">
+                <router-link :to="{ name: 'register' }" @click="closeMenu" class="block w-3/5 text-center border-2 border-white text-white py-3 px-6 rounded-lg font-bold hover:bg-white hover:text-blue-950 transition-colors">
                   Inscription
                 </router-link>
               </div>
@@ -342,8 +342,8 @@
               </div>
             </template>
 
-            <div v-if="!isAuthenticated" class="pt-6">
-              <router-link to="/register-organizer" @click="closeMenu" class="block bg-blue-950 text-white text-center py-3 px-6 rounded-lg font-bold hover:bg-yellow-500 hover:text-blue-950 transition-colors">
+            <div v-if="!isAuthenticated" class="pt-6 flex justify-center">
+              <router-link to="/register-organizer" @click="closeMenu" class="block w-3/5 bg-yellow-500 text-blue-950 text-center py-3 px-6 rounded-lg font-bold hover:bg-yellow-400 transition-colors">
                 Créateur d'événements
               </router-link>
             </div>
