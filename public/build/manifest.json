@@ -121,7 +121,7 @@
     "src": "node_modules/intl-tel-input/build/img/globe@2x.webp"
   },
   "resources/css/app.css": {
-    "file": "assets/css/app-Dn0pOato.css",
+    "file": "assets/css/app-DNCzPi_k.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [
@@ -129,7 +129,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-D01NIDMe.js",
+    "file": "assets/js/app-CDoe8wR9.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -194,7 +194,7 @@
     ],
     "css": [
       "assets/css/app-CJrdpS43.css",
-      "assets/css/app-Dn0pOato.css"
+      "assets/css/app-DNCzPi_k.css"
     ]
   },
   "resources/js/layouts/AdminLayout.vue": {
@@ -413,7 +413,7 @@
     ]
   },
   "resources/js/pages/auth/RegisterOrganizer.vue": {
-    "file": "assets/js/RegisterOrganizer-Bi_D3_kn.js",
+    "file": "assets/js/RegisterOrganizer-CVhlmQ05.js",
     "name": "RegisterOrganizer",
     "src": "resources/js/pages/auth/RegisterOrganizer.vue",
     "isDynamicEntry": true,

@@ -12,7 +12,7 @@
       </div>
 
       <!-- Formulaire -->
-      <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      <div class="bg-white py-8 px-9 shadow sm:rounded-lg sm:px-10">
         <form @submit.prevent="handleRegister" class="space-y-6">
           <!-- Section Informations Utilisateur -->
           <div class="border-b border-gray-200 pb-6">
