@@ -123,6 +123,16 @@
         </div>
 
         <template v-else>
+          <!-- Espace publicitaire -->
+          <div class="mb-8 md:mb-12">
+            <BannerCarousel
+              position="home-top"
+              :auto-play="true"
+              :interval="4000"
+              :show-nav-buttons="true"
+            />
+          </div>
+
           <!-- Événements en cours -->
           <div v-if="upcomingEvents.length > 0" class="mb-12">
             <h2 class="text-xl md:text-3xl font-bold text-center text-blue-950 mb-6 md:mb-8">
