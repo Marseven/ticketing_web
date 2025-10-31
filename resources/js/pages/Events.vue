@@ -602,6 +602,7 @@ export default {
       searchQuery,
       filteredEvents,
       pastEvents,
+      isEventPast,
       formatEventDate,
       formatPrice,
       goToEvent,
