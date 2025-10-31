@@ -24,13 +24,26 @@
         </span>
       </div>
       
-      <!-- Prix sur l'image -->
-      <div class="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm rounded-lg px-3 py-2 text-white">
-        <div v-if="minPrice > 0">
-          <div class="text-xs text-gray-300">À partir de</div>
-          <div class="text-lg font-bold">{{ formatPrice(minPrice) }} FCFA</div>
+      <!-- Prix et bouton réserver -->
+      <div class="absolute bottom-4 left-4 right-4 flex items-end justify-between">
+        <div class="bg-black/70 backdrop-blur-sm rounded-lg px-3 py-2 text-white">
+          <div v-if="minPrice > 0">
+            <div class="text-xs text-gray-300">À partir de</div>
+            <div class="text-lg font-bold">{{ formatPrice(minPrice) }} FCFA</div>
+          </div>
+          <div v-else class="text-lg font-bold text-green-400">Gratuit</div>
         </div>
-        <div v-else class="text-lg font-bold text-green-400">Gratuit</div>
+
+        <button
+          v-if="canPurchase"
+          @click.stop="goToCheckout"
+          class="bg-yellow-500 text-blue-950 px-4 py-2 rounded-lg text-sm font-bold hover:bg-yellow-400 transition-colors flex items-center gap-1 shadow-lg"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+          </svg>
+          Réserver
+        </button>
       </div>
       
       <!-- Overlay avec action rapide -->
