@@ -213,8 +213,8 @@
 
                 <!-- Prix selon la maquette -->
                 <div class="absolute bottom-4 left-4 right-4">
-                  <div class="flex justify-between items-end">
-                    <div class="text-xs">
+                  <div class="flex justify-between items-end gap-2">
+                    <div class="text-xs flex-1">
                       <div class="flex space-x-2 mb-2">
                         <div v-if="event.min_price && event.min_price > 0" class="bg-green-500 text-white px-2 py-1 rounded-primea text-xs font-bold">
                           {{ formatPrice(event.min_price) }} XAF
@@ -225,10 +225,17 @@
                       </div>
                       <div class="text-xs text-gray-200">{{ event.venue?.name || event.venue_name || 'Lieu à confirmer' }}</div>
                     </div>
-                    <div class="text-right">
-                      <div class="text-xs text-gray-200">Organisé par</div>
-                      <div class="text-xs font-bold text-primea-yellow">{{ event.organizer?.name || 'Organisateur' }}</div>
-                    </div>
+
+                    <button
+                      v-if="!isEventPast(event)"
+                      @click.stop="$router.push(`/checkout/${event.slug}`)"
+                      class="bg-yellow-500 text-blue-950 px-3 py-2 rounded-lg text-xs font-bold hover:bg-yellow-400 transition-colors flex items-center gap-1 shadow-lg flex-shrink-0"
+                    >
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+                      </svg>
+                      Réserver
+                    </button>
                   </div>
                 </div>
               </div>
@@ -281,8 +288,8 @@
 
                 <!-- Prix selon la maquette -->
                 <div class="absolute bottom-4 left-4 right-4">
-                  <div class="flex justify-between items-end">
-                    <div class="text-xs">
+                  <div class="flex justify-between items-end gap-2">
+                    <div class="text-xs flex-1">
                       <div class="flex space-x-2 mb-2">
                         <div v-if="event.min_price && event.min_price > 0" class="bg-green-500 text-white px-2 py-1 rounded-primea text-xs font-bold">
                           {{ formatPrice(event.min_price) }} XAF
@@ -293,10 +300,17 @@
                       </div>
                       <div class="text-xs text-gray-200">{{ event.venue?.name || event.venue_name || 'Lieu à confirmer' }}</div>
                     </div>
-                    <div class="text-right">
-                      <div class="text-xs text-gray-200">Organisé par</div>
-                      <div class="text-xs font-bold text-primea-yellow">{{ event.organizer?.name || 'Organisateur' }}</div>
-                    </div>
+
+                    <button
+                      v-if="!isEventPast(event)"
+                      @click.stop="$router.push(`/checkout/${event.slug}`)"
+                      class="bg-yellow-500 text-blue-950 px-3 py-2 rounded-lg text-xs font-bold hover:bg-yellow-400 transition-colors flex items-center gap-1 shadow-lg flex-shrink-0"
+                    >
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+                      </svg>
+                      Réserver
+                    </button>
                   </div>
                 </div>
               </div>
