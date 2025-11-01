@@ -261,7 +261,7 @@
           </div>
 
           <!-- Menu Items -->
-          <nav class="flex-1 overflow-y-auto p-6">
+          <nav class="flex-1 min-h-0 overflow-y-auto p-6">
             <div class="w-4/5 mx-auto space-y-4">
             <router-link to="/" @click="closeMenu" class="block text-white text-lg py-3 hover:text-yellow-500 transition-colors">
               Accueil
