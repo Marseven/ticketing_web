@@ -84,3 +84,8 @@ body {
 .border-primea-yellow {
     border-color: #fab511;
 }
+
+/* Custom line-height override */
+.leading-tight {
+    line-height: 0.8;
+}

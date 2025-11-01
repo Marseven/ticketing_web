@@ -241,9 +241,9 @@
     <transition name="slide">
       <div v-if="mobileMenuOpen" class="fixed inset-0 z-50 md:hidden" @click="closeMenu">
         <div class="absolute inset-0 bg-black/50"></div>
-        <div @click.stop class="absolute right-0 top-0 bottom-0 w-full bg-gray-700/90 shadow-xl overflow-y-auto">
+        <div @click.stop class="absolute right-0 top-0 bottom-0 w-full bg-gray-700/90 shadow-xl flex flex-col">
           <!-- Menu Header -->
-          <div class="sticky top-0 z-10 px-4 py-3 bg-white border-b">
+          <div class="flex-shrink-0 px-4 py-3 bg-white border-b">
             <div class="flex items-center justify-between">
               <div class="flex items-center">
                 <img src="/images/logo.png" alt="Logo" class="h-12" />
@@ -261,7 +261,7 @@
           </div>
 
           <!-- Menu Items -->
-          <nav class="p-6 pb-48">
+          <nav class="flex-1 overflow-y-auto p-6">
             <div class="w-4/5 mx-auto space-y-4">
             <router-link to="/" @click="closeMenu" class="block text-white text-lg py-3 hover:text-yellow-500 transition-colors">
               Accueil
