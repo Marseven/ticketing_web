@@ -1,6 +1,6 @@
 <template>
   <div class="ticket-booking-card bg-white rounded-2xl shadow-lg p-6 sticky top-6">
-    <h3 class="text-xl font-semibold mb-4">Réserver vos tickets</h3>
+    <h3 class="text-xl font-semibold mb-4">Prendre vos tickets</h3>
     
     <div v-if="ticketTypes && ticketTypes.length > 0" class="space-y-4">
       <div v-for="ticket in ticketTypes" :key="ticket.id" class="border border-gray-200 rounded-lg p-4">
@@ -35,7 +35,7 @@
           :disabled="totalQuantity === 0"
           class="w-full bg-primea-blue text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Réserver ({{ totalQuantity }} ticket{{ totalQuantity > 1 ? 's' : '' }})
+          Prendre un ticket ({{ totalQuantity }} ticket{{ totalQuantity > 1 ? 's' : '' }})
         </button>
       </div>
     </div>

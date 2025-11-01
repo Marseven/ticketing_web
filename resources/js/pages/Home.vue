@@ -182,7 +182,7 @@
                           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
                           </svg>
-                          Réserver
+                          Prendre un ticket
                         </router-link>
                       </div>
                     </div>
@@ -365,10 +365,33 @@ export default {
     // Séparer les événements en cours des événements passés
     const upcomingEvents = computed(() => {
       const now = new Date()
-      return filteredEvents.value.filter(event => {
+      const upcoming = filteredEvents.value.filter(event => {
         if (!event.event_date) return true // Si pas de date, considérer comme à venir
         const eventDate = new Date(event.event_date)
         return eventDate >= now
+      })
+
+      // Trier par popularité (du plus au moins populaire)
+      // Calculer la popularité basée sur les tickets vendus
+      return upcoming.sort((a, b) => {
+        const getPopularity = (event) => {
+          // Utiliser sold_quantity ou tickets_sold ou calculer à partir des ticket_types
+          if (event.sold_quantity !== undefined) {
+            return event.sold_quantity
+          }
+          if (event.tickets_sold !== undefined) {
+            return event.tickets_sold
+          }
+          // Calculer à partir des types de tickets
+          if (event.ticket_types && Array.isArray(event.ticket_types)) {
+            return event.ticket_types.reduce((total, type) => {
+              return total + (type.sold_quantity || type.sold || 0)
+            }, 0)
+          }
+          return 0
+        }
+
+        return getPopularity(b) - getPopularity(a) // Ordre décroissant
       })
     })
 

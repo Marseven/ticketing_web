@@ -505,7 +505,7 @@
               <div class="absolute inset-0 bg-blue-900/50"></div>
 
               <!-- Compte à rebours en haut à droite -->
-              <div v-if="!isEventPassed" class="absolute top-3 right-3 bg-yellow-500/90 backdrop-blur-sm px-3 py-2 rounded-lg text-blue-900">
+              <div v-if="!isEventPassed" class="absolute top-3 right-3 bg-blue-900/70 backdrop-blur-sm px-3 py-2 rounded-lg text-white shadow-lg">
                 <div class="text-center">
                   <div class="text-xs font-semibold mb-0.5">Commence dans</div>
                   <div class="flex items-center gap-1 text-sm font-bold">

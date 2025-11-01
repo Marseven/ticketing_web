@@ -234,7 +234,7 @@
                       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
                       </svg>
-                      Réserver
+                      Prendre un ticket
                     </button>
                   </div>
                 </div>
@@ -309,7 +309,7 @@
                       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
                       </svg>
-                      Réserver
+                      Prendre un ticket
                     </button>
                   </div>
                 </div>
@@ -409,7 +409,27 @@ export default {
         })
       }
 
-      return filtered.filter(event => !isEventPast(event))
+      const upcomingOnly = filtered.filter(event => !isEventPast(event))
+
+      // Trier par popularité (du plus au moins populaire)
+      return upcomingOnly.sort((a, b) => {
+        const getPopularity = (event) => {
+          if (event.sold_quantity !== undefined) {
+            return event.sold_quantity
+          }
+          if (event.tickets_sold !== undefined) {
+            return event.tickets_sold
+          }
+          if (event.ticket_types && Array.isArray(event.ticket_types)) {
+            return event.ticket_types.reduce((total, type) => {
+              return total + (type.sold_quantity || type.sold || 0)
+            }, 0)
+          }
+          return 0
+        }
+
+        return getPopularity(b) - getPopularity(a)
+      })
     })
 
     // Événements passés filtrés
