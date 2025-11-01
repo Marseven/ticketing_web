@@ -352,7 +352,7 @@
           </nav>
 
           <!-- Menu Footer -->
-          <div class="absolute bottom-0 left-0 right-0 p-6 flex flex-col items-center gap-3 bg-gray-700/90 border-t border-white/10">
+          <div class="flex-shrink-0 p-6 flex flex-col items-center gap-3 bg-gray-700/90 border-t border-white/10">
             <img src="/images/logo.png" alt="Primea Logo" class="h-12" style="filter: brightness(0) invert(1) opacity(0.9);" />
             <div class="flex items-center gap-4 text-white/60">
               <a href="https://wa.me/237" target="_blank" class="hover:text-white transition-colors">
