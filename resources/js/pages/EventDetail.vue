@@ -45,12 +45,12 @@
       <section class="bg-white">
         <div class="max-w-7xl mx-auto px-4 py-6 md:py-8">
           <!-- Event Title -->
-          <h1 class="text-2xl md:text-4xl lg:text-5xl font-bold text-blue-900 mb-4 md:mb-6 leading-tight">
+          <h1 class="text-2xl md:text-4xl lg:text-5xl font-bold text-blue-900 mb-3 md:mb-4 leading-tight">
             {{ event.title }}
           </h1>
 
           <!-- Event Meta Info (Mobile: Stack, Desktop: Row) -->
-          <div class="space-y-3 md:space-y-0 md:flex md:flex-wrap md:gap-6 mb-6 md:mb-8">
+          <div class="space-y-2 md:space-y-0 md:flex md:flex-wrap md:gap-6 mb-4 md:mb-6">
             <!-- Date -->
             <div class="flex items-center gap-3 text-gray-700">
               <div class="bg-blue-100 p-2 rounded-lg flex-shrink-0">
@@ -73,18 +73,18 @@
           </div>
 
           <!-- Organizer Info (if available) -->
-          <div v-if="event.organizer" class="mb-6 pb-6 border-b border-gray-200">
+          <div v-if="event.organizer" class="mb-4 pb-4 border-b border-gray-200">
             <p class="text-sm text-gray-600">Organisé par</p>
             <p class="font-bold text-blue-900">{{ event.organizer.name || event.organizer.organization_name }}</p>
           </div>
 
           <!-- Desktop: Two Column Layout -->
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
             <!-- Main Content (Left Column on Desktop) -->
-            <div class="lg:col-span-2 space-y-6">
+            <div class="lg:col-span-2 space-y-4">
               <!-- Description - Mobile Only (before tickets) -->
               <div class="md:hidden bg-white p-4 rounded-2xl border border-gray-200">
-                <h2 class="text-lg font-bold text-blue-900 mb-4 flex items-center gap-2">
+                <h2 class="text-lg font-bold text-blue-900 mb-3 flex items-center gap-2">
                   <div class="bg-blue-100 p-2 rounded-lg">
                     <svg class="w-5 h-5 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -92,7 +92,7 @@
                   </div>
                   À propos de cet événement
                 </h2>
-                <div class="text-gray-700 leading-relaxed space-y-3 text-sm">
+                <div class="text-gray-700 leading-snug space-y-2 text-sm">
                   <p v-for="(paragraph, index) in descriptionParagraphs" :key="index">
                     {{ paragraph }}
                   </p>
@@ -104,14 +104,14 @@
 
               <!-- Ticket Types Section -->
               <div class="bg-gray-50 p-4 md:p-6 rounded-2xl">
-                <h3 class="text-lg md:text-xl font-bold text-blue-900 mb-4 flex items-center gap-2">
+                <h3 class="text-lg md:text-xl font-bold text-blue-900 mb-3 flex items-center gap-2">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
                   </svg>
                   Types de tickets
                 </h3>
 
-                <div v-if="event.ticket_types && event.ticket_types.length > 0" class="space-y-3">
+                <div v-if="event.ticket_types && event.ticket_types.length > 0" class="space-y-2">
                   <div
                     v-for="ticketType in event.ticket_types"
                     :key="ticketType.id"
@@ -167,7 +167,7 @@
 
               <!-- Description - Desktop Only (after tickets) -->
               <div class="hidden md:block bg-white p-4 md:p-6 rounded-2xl border border-gray-200">
-                <h2 class="text-lg md:text-xl font-bold text-blue-900 mb-4 flex items-center gap-2">
+                <h2 class="text-lg md:text-xl font-bold text-blue-900 mb-3 flex items-center gap-2">
                   <div class="bg-blue-100 p-2 rounded-lg">
                     <svg class="w-5 h-5 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -175,7 +175,7 @@
                   </div>
                   À propos de cet événement
                 </h2>
-                <div class="text-gray-700 leading-relaxed space-y-3 text-sm md:text-base">
+                <div class="text-gray-700 leading-snug space-y-2 text-sm md:text-base">
                   <p v-for="(paragraph, index) in descriptionParagraphs" :key="index">
                     {{ paragraph }}
                   </p>
@@ -193,7 +193,7 @@
 
               <!-- Similar Events (Desktop only, mobile shows at bottom) -->
               <div v-if="similarEvents.length > 0" class="hidden md:block bg-white p-6 rounded-2xl border border-gray-200">
-                <h2 class="text-xl font-bold text-blue-900 mb-6 flex items-center gap-2">
+                <h2 class="text-xl font-bold text-blue-900 mb-4 flex items-center gap-2">
                   <div class="bg-blue-100 p-2 rounded-lg">
                     <svg class="w-5 h-5 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
@@ -202,7 +202,7 @@
                   Événements similaires
                 </h2>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <EventCard
                     v-for="similarEvent in similarEvents.slice(0, 4)"
                     :key="similarEvent.id"
@@ -214,7 +214,7 @@
             </div>
 
             <!-- Sidebar (Right Column on Desktop) -->
-            <div class="lg:col-span-1 space-y-6">
+            <div class="lg:col-span-1 space-y-4">
               <!-- Share Card -->
               <ShareCard :event="event" />
 
@@ -226,15 +226,15 @@
           </div>
 
           <!-- Similar Events (Mobile only) -->
-          <div v-if="similarEvents.length > 0" class="md:hidden mt-8 bg-white p-4 rounded-2xl border border-gray-200">
-            <h2 class="text-lg font-bold text-blue-900 mb-4 flex items-center gap-2">
+          <div v-if="similarEvents.length > 0" class="md:hidden mt-6 bg-white p-4 rounded-2xl border border-gray-200">
+            <h2 class="text-lg font-bold text-blue-900 mb-3 flex items-center gap-2">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
               </svg>
               Événements similaires
             </h2>
 
-            <div class="space-y-3">
+            <div class="space-y-2">
               <EventCard
                 v-for="similarEvent in similarEvents.slice(0, 3)"
                 :key="similarEvent.id"
