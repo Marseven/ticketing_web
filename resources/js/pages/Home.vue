@@ -56,7 +56,7 @@
           <!-- CTA Button (réduit) -->
           <div>
             <router-link
-              to="/register-organizer"
+              to="/organizer-choice"
               class="inline-block bg-blue-950 text-white px-6 py-2 rounded-lg text-xs font-semibold hover:bg-opacity-90 transition-colors shadow-lg"
             >
               Créateur d'événements

@@ -12,6 +12,8 @@ const Checkout = () => import('./pages/Checkout.vue');
 const Payment = () => import('./pages/Payment.vue');
 const Register = () => import('./pages/auth/Register.vue');
 const RegisterOrganizer = () => import('./pages/auth/RegisterOrganizer.vue');
+const OrganizerChoice = () => import('./pages/auth/OrganizerChoice.vue');
+const LoginOrganizer = () => import('./pages/auth/LoginOrganizer.vue');
 const EmailVerification = () => import('./pages/auth/EmailVerification.vue');
 const EmailVerificationResult = () => import('./pages/EmailVerificationResult.vue');
 const ForgotPassword = () => import('./pages/auth/ForgotPassword.vue');
@@ -76,6 +78,8 @@ const routes = [
     { path: '/payment/:reference', component: Payment, name: 'payment' },
     { path: '/login', component: Login, name: 'login' },
     { path: '/register', component: Register, name: 'register' },
+    { path: '/organizer-choice', component: OrganizerChoice, name: 'organizer-choice' },
+    { path: '/login-organizer', component: LoginOrganizer, name: 'login-organizer' },
     { path: '/register-organizer', component: RegisterOrganizer, name: 'register-organizer' },
     { path: '/email/verify/:id?/:hash?', component: EmailVerification, name: 'email-verification' },
     { path: '/email-verification-result', component: EmailVerificationResult, name: 'email-verification-result' },

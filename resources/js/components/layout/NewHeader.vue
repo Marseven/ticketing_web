@@ -243,16 +243,16 @@
         <div class="absolute inset-0 bg-black/50"></div>
         <div @click.stop class="absolute right-0 top-0 bottom-0 w-full bg-gray-700/90 shadow-xl overflow-y-auto">
           <!-- Menu Header -->
-          <div class="px-4 py-3 bg-white border-b">
+          <div class="sticky top-0 z-10 px-4 py-3 bg-white border-b">
             <div class="flex items-center justify-between">
               <div class="flex items-center">
                 <img src="/images/logo.png" alt="Logo" class="h-12" />
-                <div class="text-right">
+                <div class="text-right ml-2">
                   <h1 class="text-blue-950 font-black leading-tight" style="font-size: 1.54rem;">La Billetterie</h1>
                   <p class="text-blue-950 text-xs font-medium leading-tight">Simple, Rapide et Sécurisée</p>
                 </div>
               </div>
-              <button @click="closeMenu" class="text-blue-950 p-2">
+              <button @click="closeMenu" class="text-blue-950 p-2 flex-shrink-0">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
@@ -344,7 +344,7 @@
             </template>
 
             <div v-if="!isAuthenticated" class="pt-6">
-              <router-link to="/register-organizer" @click="closeMenu" class="block w-full bg-yellow-500 text-blue-950 text-center py-3 px-6 rounded-lg font-bold hover:bg-yellow-400 transition-colors">
+              <router-link to="/organizer-choice" @click="closeMenu" class="block w-full bg-yellow-500 text-blue-950 text-center py-3 px-6 rounded-lg font-bold hover:bg-yellow-400 transition-colors">
                 Créateur d'événements
               </router-link>
             </div>

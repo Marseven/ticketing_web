@@ -176,8 +176,8 @@
           <!-- Lien vers connexion -->
           <div class="text-center mt-4">
             <p class="text-sm text-gray-600">
-              Vous avez déjà un compte ?
-              <router-link to="/login" class="font-medium text-blue-950 hover:text-yellow-500">
+              Vous avez déjà un compte organisateur ?
+              <router-link to="/login-organizer" class="font-medium text-blue-950 hover:text-yellow-500">
                 Se connecter
               </router-link>
             </p>
