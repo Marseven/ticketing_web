@@ -1,18 +1,18 @@
 {
-  "_EventCard-B_ReB_Yr.css": {
-    "file": "assets/css/EventCard-B_ReB_Yr.css",
-    "src": "_EventCard-B_ReB_Yr.css"
-  },
-  "_EventCard-rURoQmAg.js": {
-    "file": "assets/js/EventCard-rURoQmAg.js",
+  "_EventCard-WJyO4vAv.js": {
+    "file": "assets/js/EventCard-WJyO4vAv.js",
     "name": "EventCard",
     "imports": [
       "_vue-vendor-wiowK_YT.js",
       "_account-CYVf-4X6.js"
     ],
     "css": [
-      "assets/css/EventCard-B_ReB_Yr.css"
+      "assets/css/EventCard-kfrj8FyU.css"
     ]
+  },
+  "_EventCard-kfrj8FyU.css": {
+    "file": "assets/css/EventCard-kfrj8FyU.css",
+    "src": "_EventCard-kfrj8FyU.css"
   },
   "_account-BrsghN6a.css": {
     "file": "assets/css/account-BrsghN6a.css",
@@ -121,7 +121,7 @@
     "src": "node_modules/intl-tel-input/build/img/globe@2x.webp"
   },
   "resources/css/app.css": {
-    "file": "assets/css/app-COgIqZ7V.css",
+    "file": "assets/css/app-8dSd59z7.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [
@@ -129,7 +129,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-BWMrSvVv.js",
+    "file": "assets/js/app-C0JtG-Ko.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -196,7 +196,7 @@
     ],
     "css": [
       "assets/css/app-BVmsUNji.css",
-      "assets/css/app-COgIqZ7V.css"
+      "assets/css/app-8dSd59z7.css"
     ]
   },
   "resources/js/layouts/AdminLayout.vue": {
@@ -261,14 +261,14 @@
     ]
   },
   "resources/js/pages/EventDetail.vue": {
-    "file": "assets/js/EventDetail-xSfeK4m_.js",
+    "file": "assets/js/EventDetail-Ds9pvJCV.js",
     "name": "EventDetail",
     "src": "resources/js/pages/EventDetail.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vue-vendor-wiowK_YT.js",
       "_events-BiwlR7Rs.js",
-      "_EventCard-rURoQmAg.js",
+      "_EventCard-WJyO4vAv.js",
       "_account-CYVf-4X6.js",
       "_vendor-14XLBY50.js",
       "_pinia-vendor-xH9DYcoO.js"
@@ -278,14 +278,14 @@
     ]
   },
   "resources/js/pages/Events.vue": {
-    "file": "assets/js/Events-Dhgr7NQf.js",
+    "file": "assets/js/Events-Cskccxqo.js",
     "name": "Events",
     "src": "resources/js/pages/Events.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vue-vendor-wiowK_YT.js",
       "_events-BiwlR7Rs.js",
-      "_EventCard-rURoQmAg.js",
+      "_EventCard-WJyO4vAv.js",
       "_account-CYVf-4X6.js",
       "_vendor-14XLBY50.js",
       "_pinia-vendor-xH9DYcoO.js"

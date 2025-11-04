@@ -16,14 +16,14 @@
       >
         <CalendarIcon size="2xl" class="primea-text-gray-400" />
       </div>
-      
+
       <!-- Badge de catégorie -->
       <div v-if="event.category?.name || event.category_name" class="absolute top-4 left-4">
         <span class="bg-yellow-400 primea-text-blue px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide">
           {{ event.category?.name || event.category_name || 'Événement' }}
         </span>
       </div>
-      
+
       <!-- Prix et bouton réserver -->
       <div class="absolute bottom-4 left-4 right-4 flex items-end justify-between">
         <div class="bg-black/70 backdrop-blur-sm rounded-lg px-3 py-2 text-white">
@@ -45,7 +45,7 @@
           Prendre un ticket
         </button>
       </div>
-      
+
       <!-- Overlay avec action rapide -->
       <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center pointer-events-none">
         <button
@@ -113,22 +113,6 @@
           </div>
           <div v-else-if="availableTickets === 0 && !isEventPassed" class="text-red-600 text-sm font-medium">Complet</div>
         </div>
-
-        <!-- Bouton d'action -->
-        <button
-          @click.stop="handleReserveClick"
-          :class="[
-            'px-6 py-2 rounded-primea text-sm font-bold transition-all duration-200 font-primea shadow-primea border-2',
-            canPurchase
-              ? 'ticket-btn-animate bg-primea-blue text-white hover:bg-primea-yellow hover:text-primea-blue border-primea-blue hover:border-primea-yellow'
-              : isEventPassed
-                ? 'bg-gray-400 text-white cursor-not-allowed border-gray-400'
-                : 'bg-red-500 text-white cursor-not-allowed border-red-500'
-          ]"
-          :disabled="!canPurchase"
-        >
-          {{ buttonText }}
-        </button>
       </div>
     </div>
   </article>
@@ -199,18 +183,18 @@ export default {
     const eventDate = computed(() => {
       // Essayer plusieurs sources de dates
       let dateStr = null;
-      
+
       // 1. Vérifier dans schedules
       if (props.event.schedules && props.event.schedules.length > 0) {
         const schedule = props.event.schedules[0];
         dateStr = schedule.starts_at;
       }
-      
+
       // 2. Vérifier dans next_schedule (ajouté par l'API)
       if (!dateStr && props.event.next_schedule) {
         dateStr = props.event.next_schedule.starts_at;
       }
-      
+
       if (!dateStr) {
         return null;
       }
@@ -218,7 +202,7 @@ export default {
       try {
         // Gérer différents formats de date
         let date;
-        
+
         // Format ISO (2024-03-15T20:00:00.000000Z)
         if (dateStr.includes('T') || dateStr.includes('Z')) {
           date = new Date(dateStr);
@@ -257,7 +241,7 @@ export default {
       if (props.event.min_price !== undefined && props.event.min_price !== null && props.event.min_price > 0) {
         return props.event.min_price;
       }
-      
+
       // Sinon calculer à partir des types de tickets
       const ticketTypes = props.event.ticket_types || props.event.ticketTypes
       if (ticketTypes && ticketTypes.length > 0) {
@@ -267,12 +251,12 @@ export default {
             return isNaN(price) ? 0 : price;
           })
           .filter(price => price > 0);
-        
+
         if (prices.length > 0) {
           return Math.min(...prices);
         }
       }
-      
+
       return 0; // Gratuit si aucun prix trouvé
     })
 
@@ -284,7 +268,7 @@ export default {
     const availableTickets = computed(() => {
       // Si l'événement est passé, considérer qu'il n'y a plus de tickets disponibles
       if (isEventPassed.value) return 0
-      
+
       const ticketTypes = props.event.ticket_types || props.event.ticketTypes
       if (ticketTypes && ticketTypes.length > 0) {
         const totalAvailable = ticketTypes.reduce((total, ticketType) => {
@@ -302,16 +286,16 @@ export default {
           const sold = (ticketType.sold_quantity || ticketType.sold || 0);
           return total + Math.max(0, available - sold);
         }, 0);
-        
+
         // Si tous les ticket types ont available_quantity à null (quantité illimitée), retourner une valeur élevée
-        const hasLimitedQuantity = ticketTypes.some(t => 
+        const hasLimitedQuantity = ticketTypes.some(t =>
           t.available_quantity !== null && t.available_quantity !== undefined
         );
-        
+
         if (!hasLimitedQuantity) {
           return 1000; // Quantité illimitée - afficher "Réserver"
         }
-        
+
         return totalAvailable;
       }
       return 1000 // Valeur par défaut si pas d'info - permettre la réservation
@@ -362,7 +346,7 @@ export default {
     const goToCheckout = () => {
       console.log('goToCheckout called with event:', props.event)
       console.log('Event slug:', props.event.slug)
-      
+
       // Utiliser le slug s'il existe, sinon créer un slug basé sur l'ID ou le titre
       let slug = props.event.slug
       if (!slug) {
@@ -387,7 +371,7 @@ export default {
           return
         }
       }
-      
+
       console.log('Using slug:', slug)
       router.push(`/checkout/${slug}`)
     }
