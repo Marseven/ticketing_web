@@ -254,7 +254,7 @@
         <button
           v-if="canPurchaseTickets"
           @click="goToBooking"
-          class="flex-1 bg-blue-900 text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-yellow-500 hover:text-blue-900 transition-all duration-200 shadow-lg flex items-center justify-center gap-2"
+          class="ticket-btn-animate flex-1 bg-blue-900 text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-yellow-500 hover:text-blue-900 transition-all duration-200 shadow-lg flex items-center justify-center gap-2"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
@@ -280,7 +280,7 @@
           <button
             v-if="canPurchaseTickets"
             @click="goToBooking"
-            class="bg-blue-900 text-white px-10 py-4 rounded-xl text-lg font-bold hover:bg-yellow-500 hover:text-blue-900 transition-all duration-200 shadow-lg transform hover:scale-105 flex items-center justify-center gap-3"
+            class="ticket-btn-animate bg-blue-900 text-white px-10 py-4 rounded-xl text-lg font-bold hover:bg-yellow-500 hover:text-blue-900 transition-all duration-200 shadow-lg transform hover:scale-105 flex items-center justify-center gap-3"
           >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
@@ -559,5 +559,20 @@ export default {
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+}
+
+/* Animation pour le bouton "Prendre un ticket" */
+@keyframes pulse-scale-animation {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.ticket-btn-animate {
+  animation: pulse-scale-animation 2s ease-in-out infinite;
+  transform-origin: center;
 }
 </style>
