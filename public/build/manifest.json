@@ -1,18 +1,18 @@
 {
-  "_EventCard-B76L6PEc.js": {
-    "file": "assets/js/EventCard-B76L6PEc.js",
+  "_EventCard-B_ReB_Yr.css": {
+    "file": "assets/css/EventCard-B_ReB_Yr.css",
+    "src": "_EventCard-B_ReB_Yr.css"
+  },
+  "_EventCard-rURoQmAg.js": {
+    "file": "assets/js/EventCard-rURoQmAg.js",
     "name": "EventCard",
     "imports": [
       "_vue-vendor-wiowK_YT.js",
       "_account-CYVf-4X6.js"
     ],
     "css": [
-      "assets/css/EventCard-BtoX0bit.css"
+      "assets/css/EventCard-B_ReB_Yr.css"
     ]
-  },
-  "_EventCard-BtoX0bit.css": {
-    "file": "assets/css/EventCard-BtoX0bit.css",
-    "src": "_EventCard-BtoX0bit.css"
   },
   "_account-BrsghN6a.css": {
     "file": "assets/css/account-BrsghN6a.css",
@@ -129,7 +129,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-Dtky0ur3.js",
+    "file": "assets/js/app-CDDc9zSP.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -261,31 +261,31 @@
     ]
   },
   "resources/js/pages/EventDetail.vue": {
-    "file": "assets/js/EventDetail-Du1MpHaP.js",
+    "file": "assets/js/EventDetail-xSfeK4m_.js",
     "name": "EventDetail",
     "src": "resources/js/pages/EventDetail.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vue-vendor-wiowK_YT.js",
       "_events-BiwlR7Rs.js",
-      "_EventCard-B76L6PEc.js",
+      "_EventCard-rURoQmAg.js",
       "_account-CYVf-4X6.js",
       "_vendor-14XLBY50.js",
       "_pinia-vendor-xH9DYcoO.js"
     ],
     "css": [
-      "assets/css/EventDetail-CQEEhCKQ.css"
+      "assets/css/EventDetail-nEAT2tpR.css"
     ]
   },
   "resources/js/pages/Events.vue": {
-    "file": "assets/js/Events-C4snFd3e.js",
+    "file": "assets/js/Events-CxSPVdzb.js",
     "name": "Events",
     "src": "resources/js/pages/Events.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vue-vendor-wiowK_YT.js",
       "_events-BiwlR7Rs.js",
-      "_EventCard-B76L6PEc.js",
+      "_EventCard-rURoQmAg.js",
       "_account-CYVf-4X6.js",
       "_vendor-14XLBY50.js",
       "_pinia-vendor-xH9DYcoO.js"
