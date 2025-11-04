@@ -140,9 +140,10 @@
             </h2>
             <!-- Mobile: Métadonnées sur image -->
             <div class="space-y-3 md:hidden">
-              <div
+              <router-link
                 v-for="event in upcomingEvents"
                 :key="event.id"
+                :to="`/events/${event.slug}`"
                 class="block bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow"
               >
                 <div class="h-40 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 relative overflow-hidden">
@@ -188,7 +189,7 @@
                     </div>
                   </div>
                 </div>
-              </div>
+              </router-link>
             </div>
 
             <!-- Desktop: Style classique -->
