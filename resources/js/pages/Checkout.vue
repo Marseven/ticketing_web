@@ -725,7 +725,7 @@
 
             <!-- Retrieve Ticket Link -->
             <div class="text-center pt-4">
-              <router-link to="/retrieve-ticket" class="text-blue-900 hover:text-yellow-500 text-sm font-semibold">
+              <router-link to="/retrieve-ticket" class="text-blue-900 hover:text-yellow-500 text-sm font-semibold underline">
                 Récupérer mon ticket perdu
               </router-link>
             </div>
