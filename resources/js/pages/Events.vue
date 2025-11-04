@@ -229,7 +229,7 @@
                     <button
                       v-if="!isEventPast(event)"
                       @click.stop="$router.push(`/checkout/${event.slug}`)"
-                      class="bg-yellow-500 text-blue-950 px-3 py-2 rounded-lg text-xs font-bold hover:bg-yellow-400 transition-colors flex items-center gap-1 shadow-lg flex-shrink-0"
+                      class="ticket-btn-animate bg-yellow-500 text-blue-950 px-3 py-2 rounded-lg text-xs font-bold hover:bg-yellow-400 transition-colors flex items-center gap-1 shadow-lg flex-shrink-0"
                     >
                       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
@@ -304,7 +304,7 @@
                     <button
                       v-if="!isEventPast(event)"
                       @click.stop="$router.push(`/checkout/${event.slug}`)"
-                      class="bg-yellow-500 text-blue-950 px-3 py-2 rounded-lg text-xs font-bold hover:bg-yellow-400 transition-colors flex items-center gap-1 shadow-lg flex-shrink-0"
+                      class="ticket-btn-animate bg-yellow-500 text-blue-950 px-3 py-2 rounded-lg text-xs font-bold hover:bg-yellow-400 transition-colors flex items-center gap-1 shadow-lg flex-shrink-0"
                     >
                       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
@@ -706,5 +706,20 @@ export default {
 
 .rounded-primea-xl {
   border-radius: 20px;
+}
+
+/* Animation pour les boutons "Prendre un ticket" */
+@keyframes pulse-scale-animation {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.ticket-btn-animate {
+  animation: pulse-scale-animation 2s ease-in-out infinite;
+  transform-origin: center;
 }
 </style>

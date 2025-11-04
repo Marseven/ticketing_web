@@ -129,7 +129,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-CDDc9zSP.js",
+    "file": "assets/js/app-BWMrSvVv.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -278,7 +278,7 @@
     ]
   },
   "resources/js/pages/Events.vue": {
-    "file": "assets/js/Events-CxSPVdzb.js",
+    "file": "assets/js/Events-Dhgr7NQf.js",
     "name": "Events",
     "src": "resources/js/pages/Events.vue",
     "isDynamicEntry": true,
@@ -291,7 +291,7 @@
       "_pinia-vendor-xH9DYcoO.js"
     ],
     "css": [
-      "assets/css/Events-OYW8zGeU.css"
+      "assets/css/Events-Cj_HJtLA.css"
     ]
   },
   "resources/js/pages/Payment.vue": {
