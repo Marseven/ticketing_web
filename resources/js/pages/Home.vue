@@ -48,7 +48,7 @@
           </div>
 
           <!-- Slogan (taille réduite) -->
-          <h1 class="text-xl md:text-2xl lg:text-3xl font-bold text-white mb-6 leading-tight uppercase">
+          <h1 class="text-xl md:text-2xl lg:text-3xl font-bold text-white mb-6 uppercase">
             SE PROCURER UN TICKET<br>
             N'A JAMAIS ÉTÉ AUSSI SIMPLE !
           </h1>
