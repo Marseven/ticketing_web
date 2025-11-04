@@ -505,14 +505,14 @@
               <div class="absolute inset-0 bg-blue-900/50"></div>
 
               <!-- Compte à rebours en haut à droite -->
-              <div v-if="!isEventPassed" class="absolute top-3 right-3 bg-blue-900/70 backdrop-blur-sm px-3 py-2 rounded-lg text-white shadow-lg">
+              <div v-if="!isEventPassed" class="absolute top-3 right-3 px-3 py-2 text-white">
                 <div class="text-right">
                   <div style="font-size: 9px; font-weight: 900; margin-bottom: 2px;">Compte à rebours</div>
                   <div style="font-size: 14px; font-weight: 900; font-family: Inter; word-wrap: break-word; letter-spacing: 1px;">
                     {{ String(countdown.days).padStart(2, '0') }} : {{ String(countdown.hours).padStart(2, '0') }} : {{ String(countdown.minutes).padStart(2, '0') }} : {{ String(countdown.seconds).padStart(2, '0') }}
                   </div>
-                  <div style="font-size: 7px; font-weight: 400; font-family: Inter; word-wrap: break-word; margin-top: 2px;">
-                    JOUR(S)  HRS       MIN        SEC
+                  <div style="font-size: 7px; font-weight: 400; font-family: monospace; word-wrap: break-word; margin-top: 2px; letter-spacing: 0.5px;">
+                    JOUR(S)   HRS      MIN      SEC
                   </div>
                 </div>
               </div>
