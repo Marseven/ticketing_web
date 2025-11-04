@@ -177,7 +177,7 @@
                         </div>
                         <router-link
                           :to="`/checkout/${event.slug}`"
-                          class="bg-yellow-500 text-blue-950 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-yellow-400 transition-colors flex items-center gap-1"
+                          class="ticket-btn-animate bg-yellow-500 text-blue-950 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-yellow-400 transition-colors flex items-center gap-1 shadow-lg hover:shadow-xl"
                           @click.stop
                         >
                           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -582,5 +582,64 @@ export default {
 .scrollbar-thin {
   scrollbar-width: thin;
   scrollbar-color: #172554 #e5e7eb;
+}
+
+/* Animations pour le bouton "Prendre un ticket" */
+@keyframes bounce-gentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes ring-pulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  40% {
+    opacity: 0.6;
+    transform: scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+.ticket-pulse-btn {
+  animation: bounce-gentle 2.5s ease-in-out infinite;
+  position: relative;
+}
+
+.ticket-pulse-btn::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border: 2px solid rgba(250, 181, 17, 0.8);
+  border-radius: 0.5rem;
+  opacity: 0;
+  transform: scale(0.7);
+  will-change: transform, opacity;
+  animation: ring-pulse 2.4s ease-out infinite;
+  pointer-events: none;
+}
+
+/* Animation directe pour bouton "Prendre un ticket" */
+@keyframes pulse-scale-animation {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.ticket-btn-animate {
+  animation: pulse-scale-animation 2s ease-in-out infinite;
+  transform-origin: center;
+  display: inline-flex !important;
 }
 </style>

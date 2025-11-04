@@ -254,7 +254,7 @@
         <button
           v-if="canPurchaseTickets"
           @click="goToBooking"
-          class="flex-1 bg-blue-900 text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-yellow-500 hover:text-blue-900 transition-all duration-200 shadow-lg flex items-center justify-center gap-2"
+          class="ticket-pulse-btn flex-1 bg-blue-900 text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-yellow-500 hover:text-blue-900 transition-all duration-200 shadow-lg flex items-center justify-center gap-2"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
@@ -280,7 +280,7 @@
           <button
             v-if="canPurchaseTickets"
             @click="goToBooking"
-            class="bg-blue-900 text-white px-10 py-4 rounded-xl text-lg font-bold hover:bg-yellow-500 hover:text-blue-900 transition-all duration-200 shadow-lg transform hover:scale-105 flex items-center justify-center gap-3"
+            class="ticket-pulse-btn bg-blue-900 text-white px-10 py-4 rounded-xl text-lg font-bold hover:bg-yellow-500 hover:text-blue-900 transition-all duration-200 shadow-lg transform hover:scale-105 flex items-center justify-center gap-3"
           >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
@@ -559,5 +559,48 @@ export default {
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+}
+
+/* Animations pour le bouton "Prendre un ticket" */
+@keyframes bounce-gentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes ring-pulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  40% {
+    opacity: 0.6;
+    transform: scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+.ticket-pulse-btn {
+  animation: bounce-gentle 2.5s ease-in-out infinite;
+  position: relative;
+}
+
+.ticket-pulse-btn::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border: 2px solid rgba(250, 181, 17, 0.8);
+  border-radius: 0.75rem;
+  opacity: 0;
+  transform: scale(0.7);
+  will-change: transform, opacity;
+  animation: ring-pulse 2.4s ease-out infinite;
+  pointer-events: none;
 }
 </style>

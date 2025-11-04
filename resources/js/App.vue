@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div class="app-container">
     <!-- Header global: gère automatiquement mobile (avec burger) et desktop (menu normal) -->
     <NewHeader v-if="showHeader" />
     <main>
@@ -64,7 +64,8 @@ html, body {
   padding: 0;
 }
 
-#app {
+#app,
+.app-container {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
