@@ -47,10 +47,10 @@
       </div>
       
       <!-- Overlay avec action rapide -->
-      <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-        <button 
+      <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center pointer-events-none">
+        <button
           @click.stop="goToEvent"
-          class="bg-primea-yellow text-primea-blue px-6 py-3 rounded-primea-lg font-bold hover:bg-white hover:text-primea-blue transition-all duration-200 shadow-primea-lg transform translate-y-4 group-hover:translate-y-0 flex items-center"
+          class="bg-primea-yellow text-primea-blue px-6 py-3 rounded-primea-lg font-bold hover:bg-white hover:text-primea-blue transition-all duration-200 shadow-primea-lg transform translate-y-4 group-hover:translate-y-0 flex items-center pointer-events-auto"
         >
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
