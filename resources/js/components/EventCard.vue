@@ -120,7 +120,7 @@
           :class="[
             'px-6 py-2 rounded-primea text-sm font-bold transition-all duration-200 font-primea shadow-primea border-2',
             canPurchase
-              ? 'reserve-button bg-primea-blue text-white hover:bg-primea-yellow hover:text-primea-blue transform hover:scale-105 border-primea-blue hover:border-primea-yellow'
+              ? 'ticket-btn-animate bg-primea-blue text-white hover:bg-primea-yellow hover:text-primea-blue transform hover:scale-105 border-primea-blue hover:border-primea-yellow'
               : isEventPassed
                 ? 'bg-gray-400 text-white cursor-not-allowed border-gray-400'
                 : 'bg-red-500 text-white cursor-not-allowed border-red-500'
