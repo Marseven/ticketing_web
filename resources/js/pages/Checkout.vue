@@ -518,13 +518,13 @@
               </div>
 
               <div class="absolute bottom-0 left-0 right-0 p-4 text-white">
-                <h2 class="text-lg font-bold mb-1">{{ event.title }}</h2>
-                <div class="flex items-center gap-2 text-sm text-white/90 mb-2">
+                <h2 class="text-lg font-bold mb-0.5">{{ event.title }}</h2>
+                <div class="flex items-center gap-1 text-sm text-white/90 mb-1">
                   <ClockIcon class="w-4 h-4" />
                   <span>{{ formatEventDate }}</span>
                 </div>
-                <div class="flex items-center justify-between gap-2">
-                  <div class="flex items-center gap-2 text-sm text-white/90">
+                <div class="flex items-center justify-between gap-1">
+                  <div class="flex items-center gap-1 text-sm text-white/90">
                     <MapPinIcon class="w-4 h-4" />
                     <span>{{ event.venue_name || 'Lieu à confirmer' }}</span>
                   </div>
