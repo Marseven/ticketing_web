@@ -261,98 +261,99 @@
           </div>
 
           <!-- Menu Items -->
-          <nav class="flex-1 overflow-y-auto p-6">
-            <div class="w-4/5 mx-auto space-y-4">
-            <router-link to="/" @click="closeMenu" class="block text-white text-lg py-3 hover:text-yellow-500 transition-colors">
-              Accueil
-            </router-link>
-
-            <!-- Events with submenu -->
-            <div>
-              <button @click="toggleMobileEventsSubmenu" class="flex items-center justify-between w-full text-white text-lg py-3 hover:text-yellow-500 transition-colors">
-                <span>Événements</span>
-                <svg class="w-4 h-4 transition-transform" :class="{'rotate-180': mobileEventsSubmenuOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-              </button>
-              <div v-if="mobileEventsSubmenuOpen" class="ml-4 mt-2 space-y-2">
-                <router-link :to="{ name: 'events' }" @click="closeMenu" class="block text-white/80 text-base py-2 hover:text-yellow-500 transition-colors">
-                  Tous les événements
+          <nav class="flex-1 overflow-y-auto">
+            <div class="p-6">
+              <div class="w-4/5 mx-auto space-y-4">
+                <router-link to="/" @click="closeMenu" class="block text-white text-lg py-3 hover:text-yellow-500 transition-colors">
+                  Accueil
                 </router-link>
-                <router-link
-                  v-for="category in categories"
-                  :key="category.id"
-                  :to="{ name: 'events', query: { category: category.id } }"
-                  @click="closeMenu"
-                  class="block text-white/80 text-sm py-2 hover:text-yellow-500 transition-colors"
-                >
-                  {{ category.name }}
-                </router-link>
-              </div>
-            </div>
 
-            <router-link :to="{ name: 'ticket-retrieve' }" @click="closeMenu" class="block text-white text-lg py-3 hover:text-yellow-500 transition-colors">
-              Récupérer mon ticket
-            </router-link>
-
-            <template v-if="!isAuthenticated">
-              <div class="pt-6 space-y-3 flex flex-col">
-                <router-link :to="{ name: 'login' }" @click="closeMenu" class="block w-full text-center bg-blue-950 text-white py-3 px-6 rounded-lg font-bold hover:bg-yellow-500 hover:text-blue-950 transition-colors">
-                  Connexion
-                </router-link>
-                <router-link :to="{ name: 'register' }" @click="closeMenu" class="block w-full text-center border-2 border-white text-white py-3 px-6 rounded-lg font-bold hover:bg-white hover:text-blue-950 transition-colors">
-                  Inscription
-                </router-link>
-              </div>
-            </template>
-
-            <template v-else>
-              <div class="pt-6 border-t border-gray-700">
-                <div class="text-white text-sm mb-4">
-                  Connecté en tant que <span class="font-bold">{{ user?.name }}</span>
+                <!-- Events with submenu -->
+                <div>
+                  <button @click="toggleMobileEventsSubmenu" class="flex items-center justify-between w-full text-white text-lg py-3 hover:text-yellow-500 transition-colors">
+                    <span>Événements</span>
+                    <svg class="w-4 h-4 transition-transform" :class="{'rotate-180': mobileEventsSubmenuOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                  </button>
+                  <div v-if="mobileEventsSubmenuOpen" class="ml-4 mt-2 space-y-2">
+                    <router-link :to="{ name: 'events' }" @click="closeMenu" class="block text-white/80 text-base py-2 hover:text-yellow-500 transition-colors">
+                      Tous les événements
+                    </router-link>
+                    <router-link
+                      v-for="category in categories"
+                      :key="category.id"
+                      :to="{ name: 'events', query: { category: category.id } }"
+                      @click="closeMenu"
+                      class="block text-white/80 text-sm py-2 hover:text-yellow-500 transition-colors"
+                    >
+                      {{ category.name }}
+                    </router-link>
+                  </div>
                 </div>
 
-                <template v-if="isAdmin">
-                  <router-link :to="{ name: 'admin-dashboard' }" @click="closeMenu" class="block text-white text-lg py-3 hover:text-yellow-500 transition-colors">
-                    Administration
-                  </router-link>
-                </template>
+                <router-link :to="{ name: 'ticket-retrieve' }" @click="closeMenu" class="block text-white text-lg py-3 hover:text-yellow-500 transition-colors">
+                  Récupérer mon ticket
+                </router-link>
 
-                <template v-else-if="isOrganizer">
-                  <router-link :to="{ name: 'organizer-dashboard' }" @click="closeMenu" class="block text-white text-lg py-3 hover:text-yellow-500 transition-colors">
-                    Tableau de bord
-                  </router-link>
-                  <router-link :to="{ name: 'organizer-events' }" @click="closeMenu" class="block text-white text-lg py-3 hover:text-yellow-500 transition-colors">
-                    Mes événements
-                  </router-link>
+                <template v-if="!isAuthenticated">
+                  <div class="pt-6 space-y-3 flex flex-col">
+                    <router-link :to="{ name: 'login' }" @click="closeMenu" class="block w-full text-center bg-blue-950 text-white py-3 px-6 rounded-lg font-bold hover:bg-yellow-500 hover:text-blue-950 transition-colors">
+                      Connexion
+                    </router-link>
+                    <router-link :to="{ name: 'register' }" @click="closeMenu" class="block w-full text-center border-2 border-white text-white py-3 px-6 rounded-lg font-bold hover:bg-white hover:text-blue-950 transition-colors">
+                      Inscription
+                    </router-link>
+                  </div>
                 </template>
 
                 <template v-else>
-                  <router-link :to="{ name: 'my-tickets' }" @click="closeMenu" class="block text-white text-lg py-3 hover:text-yellow-500 transition-colors">
-                    Mes tickets
-                  </router-link>
+                  <div class="pt-6 border-t border-gray-700">
+                    <div class="text-white text-sm mb-4">
+                      Connecté en tant que <span class="font-bold">{{ user?.name }}</span>
+                    </div>
+
+                    <template v-if="isAdmin">
+                      <router-link :to="{ name: 'admin-dashboard' }" @click="closeMenu" class="block text-white text-lg py-3 hover:text-yellow-500 transition-colors">
+                        Administration
+                      </router-link>
+                    </template>
+
+                    <template v-else-if="isOrganizer">
+                      <router-link :to="{ name: 'organizer-dashboard' }" @click="closeMenu" class="block text-white text-lg py-3 hover:text-yellow-500 transition-colors">
+                        Tableau de bord
+                      </router-link>
+                      <router-link :to="{ name: 'organizer-events' }" @click="closeMenu" class="block text-white text-lg py-3 hover:text-yellow-500 transition-colors">
+                        Mes événements
+                      </router-link>
+                    </template>
+
+                    <template v-else>
+                      <router-link :to="{ name: 'my-tickets' }" @click="closeMenu" class="block text-white text-lg py-3 hover:text-yellow-500 transition-colors">
+                        Mes tickets
+                      </router-link>
+                    </template>
+
+                    <router-link :to="{ name: 'profile' }" @click="closeMenu" class="block text-white text-lg py-3 hover:text-yellow-500 transition-colors">
+                      Mon profil
+                    </router-link>
+
+                    <button @click="logout" class="block w-full text-left text-red-400 text-lg py-3 hover:text-red-300 transition-colors">
+                      Déconnexion
+                    </button>
+                  </div>
                 </template>
 
-                <router-link :to="{ name: 'profile' }" @click="closeMenu" class="block text-white text-lg py-3 hover:text-yellow-500 transition-colors">
-                  Mon profil
-                </router-link>
-
-                <button @click="logout" class="block w-full text-left text-red-400 text-lg py-3 hover:text-red-300 transition-colors">
-                  Déconnexion
-                </button>
+                <div v-if="!isAuthenticated" class="pt-6">
+                  <router-link to="/organizer-choice" @click="closeMenu" class="block w-full bg-yellow-500 text-blue-950 text-center py-3 px-6 rounded-lg font-bold hover:bg-yellow-400 transition-colors">
+                    Créateur d'événements
+                  </router-link>
+                </div>
               </div>
-            </template>
-
-            <div v-if="!isAuthenticated" class="pt-6">
-              <router-link to="/organizer-choice" @click="closeMenu" class="block w-full bg-yellow-500 text-blue-950 text-center py-3 px-6 rounded-lg font-bold hover:bg-yellow-400 transition-colors">
-                Créateur d'événements
-              </router-link>
             </div>
-            </div>
-          </nav>
 
-          <!-- Menu Footer -->
-          <div class="flex-shrink-0 p-6 flex flex-col items-center gap-3 bg-gray-700/90 border-t border-white/10">
+            <!-- Menu Footer (à l'intérieur du scroll) -->
+            <div class="p-6 flex flex-col items-center gap-3 bg-gray-700/90 border-t border-white/10">
             <img src="/images/logo.png" alt="Primea Logo" class="h-12" style="filter: brightness(0) invert(1) opacity(0.9);" />
             <div class="flex items-center gap-4 text-white/60">
               <a href="https://wa.me/237" target="_blank" class="hover:text-white transition-colors">
@@ -377,6 +378,7 @@
               </a>
             </div>
           </div>
+          </nav>
         </div>
       </div>
     </transition>
