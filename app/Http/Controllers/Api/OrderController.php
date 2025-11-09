@@ -517,9 +517,17 @@ class OrderController extends Controller
                     'starts_at' => $schedule->starts_at->format('d/m/Y H:i:s')
                 ] : null,
                 'tickets' => $order->tickets->map(function($ticket) {
+                    // Générer le QR code en base64
+                    $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
+                        ->size(200)
+                        ->margin(1)
+                        ->generate($ticket->code);
+                    $qrCodeBase64 = 'data:image/png;base64,' . base64_encode($qrCode);
+
                     return [
                         'id' => $ticket->id,
                         'code' => $ticket->code,
+                        'qrCode' => $qrCodeBase64,
                         'status' => $ticket->status,
                         'ticket_type' => $ticket->ticketType ? [
                             'id' => $ticket->ticketType->id,
@@ -718,9 +726,17 @@ class OrderController extends Controller
                 'starts_at' => $schedule->starts_at->format('d/m/Y H:i:s')
             ] : null,
             'tickets' => $order->tickets->map(function($ticket) {
+                // Générer le QR code en base64
+                $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
+                    ->size(200)
+                    ->margin(1)
+                    ->generate($ticket->code);
+                $qrCodeBase64 = 'data:image/png;base64,' . base64_encode($qrCode);
+
                 return [
                     'id' => $ticket->id,
                     'code' => $ticket->code,
+                    'qrCode' => $qrCodeBase64,
                     'status' => $ticket->status,
                     'ticket_type' => $ticket->ticketType ? [
                         'id' => $ticket->ticketType->id,
