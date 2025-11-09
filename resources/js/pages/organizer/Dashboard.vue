@@ -294,7 +294,17 @@ export default {
     }
 
     const formatEventDate = (dateString) => {
+      if (!dateString) {
+        return 'Date non définie'
+      }
+
       const date = new Date(dateString)
+
+      // Vérifier si la date est valide
+      if (isNaN(date.getTime())) {
+        return 'Date invalide'
+      }
+
       return date.toLocaleDateString('fr-FR', {
         weekday: 'long',
         day: 'numeric',

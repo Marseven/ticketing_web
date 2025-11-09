@@ -317,7 +317,18 @@ const formatAmount = (amount) => {
 };
 
 const formatDate = (date) => {
-  return new Date(date).toLocaleDateString('fr-FR');
+  if (!date) {
+    return 'Date non définie';
+  }
+
+  const dateObj = new Date(date);
+
+  // Vérifier si la date est valide
+  if (isNaN(dateObj.getTime())) {
+    return 'Date invalide';
+  }
+
+  return dateObj.toLocaleDateString('fr-FR');
 };
 
 const formatDateTime = (datetime) => {

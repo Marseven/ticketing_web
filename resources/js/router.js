@@ -163,6 +163,21 @@ const routes = [
 const router = createRouter({
     history: createWebHistory(),
     routes,
+    scrollBehavior(to, from, savedPosition) {
+        // Si l'utilisateur utilise les boutons retour/avant du navigateur
+        if (savedPosition) {
+            return savedPosition;
+        }
+        // Pour les ancres (#section)
+        if (to.hash) {
+            return {
+                el: to.hash,
+                behavior: 'smooth',
+            };
+        }
+        // Par défaut, scroller en haut de la page
+        return { top: 0, behavior: 'smooth' };
+    },
 });
 
 // Navigation guards
