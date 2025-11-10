@@ -1,18 +1,18 @@
 {
-  "_EventCard-DmCdp5Ly.js": {
-    "file": "assets/js/EventCard-DmCdp5Ly.js",
+  "_EventCard-B29j9B5N.css": {
+    "file": "assets/css/EventCard-B29j9B5N.css",
+    "src": "_EventCard-B29j9B5N.css"
+  },
+  "_EventCard-DsTzxP1g.js": {
+    "file": "assets/js/EventCard-DsTzxP1g.js",
     "name": "EventCard",
     "imports": [
       "_vue-vendor-Crt3CPuW.js",
       "_account-k_xqo_mH.js"
     ],
     "css": [
-      "assets/css/EventCard-bAC2vjE7.css"
+      "assets/css/EventCard-B29j9B5N.css"
     ]
-  },
-  "_EventCard-bAC2vjE7.css": {
-    "file": "assets/css/EventCard-bAC2vjE7.css",
-    "src": "_EventCard-bAC2vjE7.css"
   },
   "_account-BrsghN6a.css": {
     "file": "assets/css/account-BrsghN6a.css",
@@ -144,7 +144,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-BbdX2LrU.js",
+    "file": "assets/js/app-CWdmYbrf.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -276,14 +276,14 @@
     ]
   },
   "resources/js/pages/EventDetail.vue": {
-    "file": "assets/js/EventDetail-D4u7mx-J.js",
+    "file": "assets/js/EventDetail-8JCkt6Ye.js",
     "name": "EventDetail",
     "src": "resources/js/pages/EventDetail.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vue-vendor-Crt3CPuW.js",
       "_events-JVM0Qz6c.js",
-      "_EventCard-DmCdp5Ly.js",
+      "_EventCard-DsTzxP1g.js",
       "_account-k_xqo_mH.js",
       "_vendor-CzIG1j6G.js",
       "_pinia-vendor-DHhcPo2H.js"
@@ -293,14 +293,14 @@
     ]
   },
   "resources/js/pages/Events.vue": {
-    "file": "assets/js/Events-TJGPhinj.js",
+    "file": "assets/js/Events-DxmxOE6f.js",
     "name": "Events",
     "src": "resources/js/pages/Events.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vue-vendor-Crt3CPuW.js",
       "_events-JVM0Qz6c.js",
-      "_EventCard-DmCdp5Ly.js",
+      "_EventCard-DsTzxP1g.js",
       "_account-k_xqo_mH.js",
       "_vendor-CzIG1j6G.js",
       "_pinia-vendor-DHhcPo2H.js"
