@@ -65,8 +65,24 @@ class EventController extends Controller
 
         // Si c'est une requête API (JSON)
         if ($request->wantsJson() || $request->is('api/*')) {
+            // Pré-charger toutes les quantités vendues pour éviter les requêtes N+1
+            $eventIds = collect($events->items())->pluck('id')->toArray();
+            $ticketTypeIds = \DB::table('ticket_types')
+                ->whereIn('event_id', $eventIds)
+                ->where('status', 'active')
+                ->pluck('id')
+                ->toArray();
+
+            // Récupérer les quantités vendues en une seule requête
+            $soldQuantities = \DB::table('tickets')
+                ->select('ticket_type_id', \DB::raw('COUNT(*) as sold_count'))
+                ->whereIn('ticket_type_id', $ticketTypeIds)
+                ->whereIn('status', ['issued', 'used'])
+                ->groupBy('ticket_type_id')
+                ->pluck('sold_count', 'ticket_type_id');
+
             // Enrichir les données pour le frontend
-            $enrichedEvents = collect($events->items())->map(function($event) {
+            $enrichedEvents = collect($events->items())->map(function($event) use ($soldQuantities) {
                 // Créer un tableau vide au lieu d'utiliser toArray() qui peut avoir des problèmes avec les accessors
                 $eventArray = [
                     'id' => $event->id,
@@ -97,25 +113,22 @@ class EventController extends Controller
                         'address' => $event->venue->address,
                     ] : null,
                 ];
-                
+
                 // Récupérer les ticket types directement depuis la base
                 $ticketTypesQuery = \DB::table('ticket_types')
                     ->where('event_id', $event->id)
                     ->where('status', 'active')
                     ->orderBy('price')
                     ->get();
-                
+
                 if ($ticketTypesQuery->count() > 0) {
-                    $ticketTypes = $ticketTypesQuery->map(function($ticketType) {
-                        // Calculer sold_quantity directement
-                        $soldQuantity = \DB::table('tickets')
-                            ->where('ticket_type_id', $ticketType->id)
-                            ->whereIn('status', ['issued', 'used'])
-                            ->count();
-                            
-                        $remainingQuantity = $ticketType->available_quantity ? 
+                    $ticketTypes = $ticketTypesQuery->map(function($ticketType) use ($soldQuantities) {
+                        // Utiliser les quantités pré-chargées
+                        $soldQuantity = $soldQuantities[$ticketType->id] ?? 0;
+
+                        $remainingQuantity = $ticketType->available_quantity ?
                             max(0, $ticketType->available_quantity - $soldQuantity) : null;
-                        
+
                         return [
                             'id' => $ticketType->id,
                             'name' => $ticketType->name,
@@ -129,14 +142,14 @@ class EventController extends Controller
                             'status' => $ticketType->status,
                         ];
                     });
-                    
+
                     $eventArray['ticket_types'] = $ticketTypes->toArray();
-                    
+
                     // Calculer min et max prix correctement
                     $prices = $ticketTypes->pluck('price')->filter(function($price) {
                         return $price > 0;
                     });
-                    
+
                     $eventArray['min_price'] = $prices->count() > 0 ? $prices->min() : 0;
                     $eventArray['max_price'] = $prices->count() > 0 ? $prices->max() : 0;
                 } else {
@@ -280,18 +293,24 @@ class EventController extends Controller
                 ->where('status', 'active')
                 ->orderBy('price')
                 ->get();
-            
+
             if ($ticketTypesQuery->count() > 0) {
-                $ticketTypes = $ticketTypesQuery->map(function($ticketType) {
-                    // Calculer sold_quantity directement
-                    $soldQuantity = \DB::table('tickets')
-                        ->where('ticket_type_id', $ticketType->id)
-                        ->whereIn('status', ['issued', 'used'])
-                        ->count();
-                        
-                    $remainingQuantity = $ticketType->available_quantity ? 
+                // Pré-charger les quantités vendues en une seule requête
+                $ticketTypeIds = $ticketTypesQuery->pluck('id')->toArray();
+                $soldQuantities = \DB::table('tickets')
+                    ->select('ticket_type_id', \DB::raw('COUNT(*) as sold_count'))
+                    ->whereIn('ticket_type_id', $ticketTypeIds)
+                    ->whereIn('status', ['issued', 'used'])
+                    ->groupBy('ticket_type_id')
+                    ->pluck('sold_count', 'ticket_type_id');
+
+                $ticketTypes = $ticketTypesQuery->map(function($ticketType) use ($soldQuantities) {
+                    // Utiliser les quantités pré-chargées
+                    $soldQuantity = $soldQuantities[$ticketType->id] ?? 0;
+
+                    $remainingQuantity = $ticketType->available_quantity ?
                         max(0, $ticketType->available_quantity - $soldQuantity) : null;
-                    
+
                     return [
                         'id' => $ticketType->id,
                         'name' => $ticketType->name,
@@ -305,14 +324,14 @@ class EventController extends Controller
                         'status' => $ticketType->status,
                     ];
                 });
-                
+
                 $enrichedEvent['ticket_types'] = $ticketTypes->toArray();
-                
+
                 // Calculer min et max prix correctement
                 $prices = $ticketTypes->pluck('price')->filter(function($price) {
                     return $price > 0;
                 });
-                
+
                 $enrichedEvent['min_price'] = $prices->count() > 0 ? $prices->min() : 0;
                 $enrichedEvent['max_price'] = $prices->count() > 0 ? $prices->max() : 0;
             } else {
