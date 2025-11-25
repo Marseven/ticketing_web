@@ -298,10 +298,16 @@
               >
                 <div class="relative pb-[60%]">
                   <img
-                    :src="event.image || event.cover_image || event.image_url || 'https://via.placeholder.com/400x240'"
+                    v-if="event.image || event.cover_image || event.image_url"
+                    :src="event.image || event.cover_image || event.image_url"
                     :alt="event.title"
                     class="absolute inset-0 w-full h-full object-cover grayscale"
                   />
+                  <div v-else class="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-100 to-yellow-100 flex items-center justify-center grayscale">
+                    <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                  </div>
                   <div class="absolute top-2 right-2 bg-gray-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
                     Terminé
                   </div>
