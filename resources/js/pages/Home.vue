@@ -148,7 +148,7 @@
               >
                 <div class="h-40 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 relative overflow-hidden">
                   <img
-                    :src="event.cover_image || 'https://via.placeholder.com/400x240'"
+                    :src="event.image || event.cover_image || event.image_url || 'https://via.placeholder.com/400x240'"
                     :alt="event.title"
                     class="w-full h-full object-cover"
                   />
@@ -202,7 +202,7 @@
               >
                 <div class="relative pb-[60%]">
                   <img
-                    :src="event.cover_image || 'https://via.placeholder.com/400x240'"
+                    :src="event.image || event.cover_image || event.image_url || 'https://via.placeholder.com/400x240'"
                     :alt="event.title"
                     class="absolute inset-0 w-full h-full object-cover"
                   />
@@ -237,7 +237,7 @@
               >
                 <div class="h-40 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 relative overflow-hidden">
                   <img
-                    :src="event.cover_image || 'https://via.placeholder.com/400x240'"
+                    :src="event.image || event.cover_image || event.image_url || 'https://via.placeholder.com/400x240'"
                     :alt="event.title"
                     class="w-full h-full object-cover"
                   />
@@ -280,7 +280,7 @@
               >
                 <div class="relative pb-[60%]">
                   <img
-                    :src="event.cover_image || 'https://via.placeholder.com/400x240'"
+                    :src="event.image || event.cover_image || event.image_url || 'https://via.placeholder.com/400x240'"
                     :alt="event.title"
                     class="absolute inset-0 w-full h-full object-cover grayscale"
                   />
@@ -455,11 +455,9 @@ export default {
         }
       } catch (error) {
         console.error('Erreur:', error)
+        // En cas d'erreur, on garde seulement le filtre "Tous"
         categories.value = [
-          { id: 'all', name: 'Tous' },
-          { id: '1', name: 'Concerts/Shows' },
-          { id: '2', name: 'Cinéma/Théâtre/Conférence/Expo' },
-          { id: '3', name: 'Sports' }
+          { id: 'all', name: 'Tous' }
         ]
       }
     }

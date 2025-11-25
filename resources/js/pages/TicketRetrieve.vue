@@ -63,7 +63,21 @@
               <!-- Alternative Search Methods -->
               <div class="relative">
 
-                <div class="mt-10">
+                <div class="mt-10 space-y-5">
+                  <!-- Email -->
+                  <div>
+                    <label for="email" class="block text-sm font-semibold text-blue-900 mb-2">
+                      Email <span class="text-xs font-normal text-gray-500">(utilisé pour l'achat)</span>
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      v-model="searchForm.email"
+                      placeholder="Ex: votreemail@example.com"
+                      class="w-full px-4 md:px-6 py-3 md:py-4 text-base border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-blue-900 transition-all duration-200 bg-white"
+                    />
+                  </div>
+
                   <!-- Phone Number -->
                   <div>
                     <label for="phone" class="block text-sm font-semibold text-blue-900 mb-2">
@@ -102,7 +116,7 @@
             <!-- Search Button -->
             <button
               type="submit"
-              :disabled="loading || (!searchForm.reference && !searchForm.phone)"
+              :disabled="loading || (!searchForm.reference && !searchForm.phone && !searchForm.email)"
               class="w-full bg-blue-900 text-white py-4 px-6 rounded-xl text-base md:text-lg font-bold transition-all duration-200 shadow-lg hover:bg-yellow-500 hover:text-blue-900 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-900 disabled:hover:text-white transform hover:scale-105 disabled:transform-none"
             >
               <span v-if="loading" class="flex items-center justify-center">
@@ -197,6 +211,7 @@ export default {
 
     const searchForm = ref({
       reference: '',
+      email: '',
       phone: ''
     })
 
@@ -208,13 +223,14 @@ export default {
         success.value = ''
 
         // Validation
-        if (!searchForm.value.reference && !searchForm.value.phone) {
+        if (!searchForm.value.reference && !searchForm.value.phone && !searchForm.value.email) {
           throw new Error('Veuillez remplir au moins un champ de recherche')
         }
 
         // Use API to search tickets
         const response = await ticketService.searchTickets({
           reference: searchForm.value.reference,
+          email: searchForm.value.email,
           phone: searchForm.value.phone
         })
 
@@ -321,6 +337,7 @@ export default {
     const clearForm = () => {
       searchForm.value = {
         reference: '',
+        email: '',
         phone: ''
       }
       error.value = ''

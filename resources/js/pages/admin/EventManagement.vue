@@ -837,10 +837,25 @@ export default {
         }
       } catch (error) {
         console.error('Erreur sauvegarde événement:', error)
+
+        // Extraire le message d'erreur détaillé
+        let errorMessage = 'Une erreur est survenue lors de la sauvegarde'
+
+        if (error.response?.data?.message) {
+          errorMessage = error.response.data.message
+        } else if (error.response?.data?.errors) {
+          // Si c'est une erreur de validation Laravel
+          const errors = Object.values(error.response.data.errors).flat()
+          errorMessage = errors.join(', ')
+        } else if (error.message) {
+          errorMessage = error.message
+        }
+
         Swal.fire({
           icon: 'error',
-          title: 'Erreur technique',
-          text: 'Une erreur est survenue lors de la sauvegarde'
+          title: 'Erreur de sauvegarde',
+          text: errorMessage,
+          footer: 'Vérifiez que tous les champs obligatoires sont remplis correctement'
         })
       } finally {
         saving.value = false
@@ -928,10 +943,25 @@ export default {
         }
       } catch (error) {
         console.error('Erreur duplication événement:', error)
+
+        // Extraire le message d'erreur détaillé
+        let errorMessage = 'Une erreur est survenue lors de la duplication'
+
+        if (error.response?.data?.message) {
+          errorMessage = error.response.data.message
+        } else if (error.response?.data?.errors) {
+          // Si c'est une erreur de validation Laravel
+          const errors = Object.values(error.response.data.errors).flat()
+          errorMessage = errors.join(', ')
+        } else if (error.message) {
+          errorMessage = error.message
+        }
+
         Swal.fire({
           icon: 'error',
-          title: 'Erreur technique',
-          text: 'Une erreur est survenue lors de la duplication'
+          title: 'Erreur de duplication',
+          text: errorMessage,
+          footer: 'Impossible de récupérer les détails de l\'événement'
         })
       }
     }
