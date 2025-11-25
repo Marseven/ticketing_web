@@ -148,10 +148,16 @@
               >
                 <div class="h-40 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 relative overflow-hidden">
                   <img
-                    :src="event.image || event.cover_image || event.image_url || 'https://via.placeholder.com/400x240'"
+                    v-if="event.image || event.cover_image || event.image_url"
+                    :src="event.image || event.cover_image || event.image_url"
                     :alt="event.title"
                     class="w-full h-full object-cover"
                   />
+                  <div v-else class="w-full h-full bg-gradient-to-br from-blue-100 to-yellow-100 flex items-center justify-center">
+                    <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                  </div>
                   <div class="absolute inset-0 bg-blue-900/50"></div>
 
                   <!-- Contenu sur l'image -->
@@ -202,10 +208,16 @@
               >
                 <div class="relative pb-[60%]">
                   <img
-                    :src="event.image || event.cover_image || event.image_url || 'https://via.placeholder.com/400x240'"
+                    v-if="event.image || event.cover_image || event.image_url"
+                    :src="event.image || event.cover_image || event.image_url"
                     :alt="event.title"
                     class="absolute inset-0 w-full h-full object-cover"
                   />
+                  <div v-else class="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-100 to-yellow-100 flex items-center justify-center">
+                    <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                  </div>
                 </div>
                 <div class="p-4">
                   <h3 class="font-bold text-blue-950 text-base line-clamp-2 mb-2">
@@ -237,10 +249,16 @@
               >
                 <div class="h-40 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 relative overflow-hidden">
                   <img
-                    :src="event.image || event.cover_image || event.image_url || 'https://via.placeholder.com/400x240'"
+                    v-if="event.image || event.cover_image || event.image_url"
+                    :src="event.image || event.cover_image || event.image_url"
                     :alt="event.title"
                     class="w-full h-full object-cover"
                   />
+                  <div v-else class="w-full h-full bg-gradient-to-br from-blue-100 to-yellow-100 flex items-center justify-center">
+                    <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                  </div>
                   <div class="absolute inset-0 bg-blue-900/50"></div>
                   <div class="absolute top-2 right-2 bg-gray-600 text-white px-2 py-1 rounded-lg text-xs font-semibold">
                     Terminé
