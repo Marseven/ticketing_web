@@ -49,9 +49,9 @@
               </a>
             </li>
             <li>
-              <a href="#" class="text-gray-300 hover:text-yellow-500 transition-colors duration-200">
+              <router-link :to="{ name: 'organizer-choice' }" class="text-gray-300 hover:text-yellow-500 transition-colors duration-200">
                 Devenir organisateur
-              </a>
+              </router-link>
             </li>
             <li>
               <router-link :to="{ name: 'ticket-retrieve' }" class="text-gray-300 hover:text-yellow-500 transition-colors duration-200">
