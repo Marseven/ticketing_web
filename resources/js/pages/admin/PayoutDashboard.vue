@@ -321,15 +321,15 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">Organisateur</label>
               <select v-model="newPayout.organizer_id" @change="onOrganizerChange" required :disabled="!newPayout.gateway" class="w-full border rounded-lg px-3 py-2 disabled:bg-gray-100">
                 <option value="">{{ newPayout.gateway ? 'Sélectionner un organisateur' : 'Sélectionnez d\'abord le gateway' }}</option>
-                <option v-for="organizer in organizers" :key="organizer?.id || Math.random()" :value="organizer?.id" v-if="organizer && organizer.id">
-                  {{ organizer.name }} - Solde: {{ formatAmount(organizer.balances?.[newPayout.gateway]?.balance || 0) }} XAF
+                <option v-for="organizer in organizers" :key="organizer.id" :value="organizer.id">
+                  {{ organizer.name }} - Solde: {{ formatAmount(parseFloat(organizer.balances?.[newPayout.gateway]?.balance || 0)) }} XAF
                 </option>
               </select>
             </div>
 
             <div v-if="selectedOrganizer && maxAmount > 0" class="bg-blue-50 border border-blue-200 rounded-lg p-3">
               <p class="text-sm text-blue-800">
-                <strong>Solde disponible:</strong> {{ formatAmount(selectedOrganizer.balances[newPayout.gateway].balance) }} XAF
+                <strong>Solde disponible:</strong> {{ formatAmount(parseFloat(selectedOrganizer.balances[newPayout.gateway].balance)) }} XAF
               </p>
               <p class="text-sm text-blue-800 mt-1">
                 <strong>Montant maximum (99%):</strong> {{ formatAmount(maxAmount) }} XAF
