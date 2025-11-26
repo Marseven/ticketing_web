@@ -67,7 +67,8 @@
 
     <!-- Actions rapides -->
     <div class="flex flex-wrap gap-4 mb-8">
-      <button 
+      <button
+        type="button"
         @click="openCreatePayoutModal"
         class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
       >
@@ -77,7 +78,8 @@
         Nouveau Payout Manuel
       </button>
       
-      <button 
+      <button
+        type="button"
         @click="checkAllPending"
         :disabled="checkingAll"
         class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
@@ -87,8 +89,9 @@
         </svg>
         {{ checkingAll ? 'Vérification...' : 'Vérifier tous les payouts' }}
       </button>
-      
-      <button 
+
+      <button
+        type="button"
         @click="loadShapBalance"
         :disabled="loadingShapBalance"
         class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors disabled:opacity-50"
@@ -147,7 +150,7 @@
         </div>
         
         <div class="flex items-end">
-          <button @click="resetFilters" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+          <button type="button" @click="resetFilters" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
             Réinitialiser
           </button>
         </div>
@@ -208,12 +211,12 @@
               </td>
               <td class="px-6 py-4 text-sm text-gray-500">{{ formatDate(payout.created_at) }}</td>
               <td class="px-6 py-4 text-sm space-x-2">
-                <button @click="checkPayoutStatus(payout)" 
+                <button type="button" @click="checkPayoutStatus(payout)"
                         :disabled="payout.checking"
                         class="text-blue-600 hover:text-blue-900 disabled:opacity-50">
                   {{ payout.checking ? 'Vérif...' : 'Vérifier' }}
                 </button>
-                <button @click="viewPayoutDetails(payout)" class="text-green-600 hover:text-green-900">
+                <button type="button" @click="viewPayoutDetails(payout)" class="text-green-600 hover:text-green-900">
                   Détails
                 </button>
               </td>
@@ -224,8 +227,8 @@
     </div>
 
     <!-- Modal Création Payout Manuel -->
-    <div v-if="showCreateModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg p-6 w-full max-w-md">
+    <div v-if="showCreateModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="showCreateModal = false">
+      <div class="bg-white rounded-lg p-6 w-full max-w-md" @click.stop>
         <h3 class="text-lg font-bold mb-4">Nouveau Payout Manuel</h3>
         
         <form @submit.prevent="createPayout">
