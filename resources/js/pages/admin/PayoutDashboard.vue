@@ -407,6 +407,17 @@ export default {
       phone_number: '',
     })
 
+    // Helper pour récupérer le token CSRF depuis les cookies
+    const getCsrfToken = () => {
+      const name = 'XSRF-TOKEN'
+      const value = `; ${document.cookie}`
+      const parts = value.split(`; ${name}=`)
+      if (parts.length === 2) {
+        return decodeURIComponent(parts.pop().split(';').shift())
+      }
+      return null
+    }
+
     // Méthodes
     const loadPayouts = async () => {
       loading.value = true
@@ -500,12 +511,19 @@ export default {
     const checkAllPending = async () => {
       checkingAll.value = true
       try {
+        const csrfToken = getCsrfToken()
+        const headers = {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Accept': 'application/json'
+        }
+        if (csrfToken) {
+          headers['X-XSRF-TOKEN'] = csrfToken
+        }
+
         const response = await fetch('/api/v1/admin/payouts/check-all-pending', {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json'
-          }
+          headers: headers,
+          credentials: 'include'
         })
         
         const data = await response.json()
@@ -523,12 +541,19 @@ export default {
     const checkPayoutStatus = async (payout) => {
       payout.checking = true
       try {
+        const csrfToken = getCsrfToken()
+        const headers = {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Accept': 'application/json'
+        }
+        if (csrfToken) {
+          headers['X-XSRF-TOKEN'] = csrfToken
+        }
+
         const response = await fetch(`/api/v1/admin/payouts/${payout.id}/check-status`, {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json'
-          }
+          headers: headers,
+          credentials: 'include'
         })
         
         const data = await response.json()
@@ -618,13 +643,22 @@ export default {
 
       creatingPayout.value = true
       try {
+        const csrfToken = getCsrfToken()
+        const headers = {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+
+        // Ajouter le token CSRF si disponible
+        if (csrfToken) {
+          headers['X-XSRF-TOKEN'] = csrfToken
+        }
+
         const response = await fetch('/api/v1/admin/payouts', {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
+          headers: headers,
+          credentials: 'include', // Important pour inclure les cookies
           body: JSON.stringify(newPayout)
         })
 
