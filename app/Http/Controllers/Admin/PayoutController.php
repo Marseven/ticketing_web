@@ -247,19 +247,26 @@ class PayoutController extends Controller
                 ]);
             }
 
-            return response()->json([
-                'success' => false,
-                'message' => $result['message']
-            ], 400);
-
-        } catch (\Exception $e) {
-            Log::error('Erreur récupération solde SHAP admin', [
-                'error' => $e->getMessage()
+            Log::warning('Échec récupération solde SHAP', [
+                'result' => $result
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur technique lors de la récupération du solde SHAP'
+                'message' => $result['message'] ?? 'Erreur inconnue',
+                'debug' => config('app.debug') ? $result : null
+            ], 400);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur récupération solde SHAP admin', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de la récupération du solde SHAP',
+                'error' => config('app.debug') ? $e->getMessage() : null
             ], 500);
         }
     }

@@ -16,9 +16,16 @@ class ShapPayoutService
 
     public function __construct()
     {
-        $this->apiId = env('API_PAYOUT_ID');
-        $this->apiSecret = env('API_PAYOUT_SECRET');
-        $this->baseUrl = env('SHAP_BASE_URL', 'https://test.billing-easy.net/shap/api/v1/merchant/');
+        $this->apiId = trim(env('API_PAYOUT_ID', ''));
+        $this->apiSecret = trim(env('API_PAYOUT_SECRET', ''));
+        $this->baseUrl = trim(env('SHAP_BASE_URL', 'https://test.billing-easy.net/shap/api/v1/merchant/'));
+
+        // Log de vérification au démarrage
+        Log::debug('ShapPayoutService initialized', [
+            'has_api_id' => !empty($this->apiId),
+            'has_api_secret' => !empty($this->apiSecret),
+            'base_url' => $this->baseUrl
+        ]);
     }
 
     /**
@@ -191,6 +198,20 @@ class ShapPayoutService
     public function getBalance(): array
     {
         try {
+            // Vérifier que les credentials sont configurés
+            if (empty($this->apiId) || empty($this->apiSecret)) {
+                Log::error('SHAP credentials manquants', [
+                    'has_api_id' => !empty($this->apiId),
+                    'has_api_secret' => !empty($this->apiSecret)
+                ]);
+
+                return [
+                    'success' => false,
+                    'message' => 'Configuration SHAP manquante (API_PAYOUT_ID ou API_PAYOUT_SECRET)',
+                    'error_code' => 'CONFIG_MISSING'
+                ];
+            }
+
             $token = $this->getAccessToken();
 
             Log::info('SHAP API Call - Get Balance', [
@@ -226,7 +247,8 @@ class ShapPayoutService
             $errorData = $response->json();
             return [
                 'success' => false,
-                'message' => $errorData['error_description'] ?? 'Erreur lors de la récupération du solde'
+                'message' => $errorData['error_description'] ?? 'Erreur lors de la récupération du solde',
+                'error_code' => $errorData['error_code'] ?? 'UNKNOWN'
             ];
 
         } catch (\Exception $e) {
@@ -234,9 +256,16 @@ class ShapPayoutService
                 'error' => $e->getMessage()
             ]);
 
+            // Si c'est une erreur d'authentification, donner un message plus clair
+            $message = $e->getMessage();
+            if (str_contains($message, 'invalid') || str_contains($message, 'revoked')) {
+                $message = 'Identifiants SHAP invalides ou révoqués. Veuillez vérifier API_PAYOUT_ID et API_PAYOUT_SECRET';
+            }
+
             return [
                 'success' => false,
-                'message' => 'Erreur technique lors de la récupération du solde'
+                'message' => $message,
+                'error_code' => 'EXCEPTION'
             ];
         }
     }
