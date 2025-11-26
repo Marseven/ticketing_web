@@ -110,25 +110,25 @@
         <div v-for="(balance, index) in shapBalance" :key="`${balance.payment_system_name}-${index}`"
              class="bg-white rounded-lg shadow p-4 border-l-4"
              :class="{
-               'border-blue-500': balance.balance_type === 'PAYIN',
-               'border-green-500': balance.balance_type === 'PAYOUT'
+               'border-blue-500': balance.category === 'PAYIN',
+               'border-green-500': balance.category === 'PAYOUT'
              }">
           <div class="flex justify-between items-start mb-2">
             <h3 class="font-semibold text-gray-900">{{ balance.payment_system_displayed_name }}</h3>
             <span class="text-xs font-semibold px-2 py-1 rounded"
                   :class="{
-                    'bg-blue-100 text-blue-800': balance.balance_type === 'PAYIN',
-                    'bg-green-100 text-green-800': balance.balance_type === 'PAYOUT',
-                    'bg-gray-100 text-gray-800': !balance.balance_type
+                    'bg-blue-100 text-blue-800': balance.category === 'PAYIN',
+                    'bg-green-100 text-green-800': balance.category === 'PAYOUT',
+                    'bg-gray-100 text-gray-800': !balance.category
                   }">
-              {{ balance.balance_type || 'N/A' }}
+              {{ balance.category || 'N/A' }}
             </span>
           </div>
           <p class="text-2xl font-bold"
              :class="{
-               'text-blue-600': balance.balance_type === 'PAYIN',
-               'text-green-600': balance.balance_type === 'PAYOUT',
-               'text-gray-600': !balance.balance_type
+               'text-blue-600': balance.category === 'PAYIN',
+               'text-green-600': balance.category === 'PAYOUT',
+               'text-gray-600': !balance.category
              }">
             {{ formatAmount(balance.amount) }} XAF
           </p>

@@ -31,12 +31,12 @@
       "assets/css/account-BrsghN6a.css"
     ]
   },
-  "_admin-B_Ex7F1r.css": {
-    "file": "assets/css/admin-B_Ex7F1r.css",
-    "src": "_admin-B_Ex7F1r.css"
+  "_admin-BR-7SL0E.css": {
+    "file": "assets/css/admin-BR-7SL0E.css",
+    "src": "_admin-BR-7SL0E.css"
   },
-  "_admin-D2eHK0Il.js": {
-    "file": "assets/js/admin-D2eHK0Il.js",
+  "_admin-CEl_qNpn.js": {
+    "file": "assets/js/admin-CEl_qNpn.js",
     "name": "admin",
     "isDynamicEntry": true,
     "imports": [
@@ -45,7 +45,7 @@
       "_vendor-CzIG1j6G.js"
     ],
     "css": [
-      "assets/css/admin-B_Ex7F1r.css"
+      "assets/css/admin-BR-7SL0E.css"
     ]
   },
   "_events-JVM0Qz6c.js": {
@@ -144,7 +144,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-BSpIsRwg.js",
+    "file": "assets/js/app-CBHHZtyN.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -184,29 +184,29 @@
       "_organizer-Dy0E96P6.js",
       "_organizer-Dy0E96P6.js",
       "resources/js/layouts/AdminLayout.vue",
-      "_admin-D2eHK0Il.js",
-      "_admin-D2eHK0Il.js",
-      "_admin-D2eHK0Il.js",
-      "_admin-D2eHK0Il.js",
-      "_admin-D2eHK0Il.js",
-      "_admin-D2eHK0Il.js",
-      "_admin-D2eHK0Il.js",
-      "_admin-D2eHK0Il.js",
-      "_admin-D2eHK0Il.js",
-      "_admin-D2eHK0Il.js",
-      "_admin-D2eHK0Il.js",
-      "_admin-D2eHK0Il.js",
-      "_admin-D2eHK0Il.js",
-      "_admin-D2eHK0Il.js",
-      "_admin-D2eHK0Il.js",
-      "_admin-D2eHK0Il.js",
-      "_admin-D2eHK0Il.js",
-      "_admin-D2eHK0Il.js",
-      "_admin-D2eHK0Il.js",
-      "_admin-D2eHK0Il.js",
-      "_admin-D2eHK0Il.js",
-      "_admin-D2eHK0Il.js",
-      "_admin-D2eHK0Il.js",
+      "_admin-CEl_qNpn.js",
+      "_admin-CEl_qNpn.js",
+      "_admin-CEl_qNpn.js",
+      "_admin-CEl_qNpn.js",
+      "_admin-CEl_qNpn.js",
+      "_admin-CEl_qNpn.js",
+      "_admin-CEl_qNpn.js",
+      "_admin-CEl_qNpn.js",
+      "_admin-CEl_qNpn.js",
+      "_admin-CEl_qNpn.js",
+      "_admin-CEl_qNpn.js",
+      "_admin-CEl_qNpn.js",
+      "_admin-CEl_qNpn.js",
+      "_admin-CEl_qNpn.js",
+      "_admin-CEl_qNpn.js",
+      "_admin-CEl_qNpn.js",
+      "_admin-CEl_qNpn.js",
+      "_admin-CEl_qNpn.js",
+      "_admin-CEl_qNpn.js",
+      "_admin-CEl_qNpn.js",
+      "_admin-CEl_qNpn.js",
+      "_admin-CEl_qNpn.js",
+      "_admin-CEl_qNpn.js",
       "resources/js/pages/scanner/ScannerApp.vue"
     ],
     "css": [
