@@ -27,11 +27,12 @@
         }
 
         .ticket-header {
-            background: linear-gradient(135deg, #272d63 0%, #1a1e47 100%);
-            color: white;
+            background: #ffffff;
+            color: #272d63;
             padding: 30px;
             text-align: center;
             position: relative;
+            border-bottom: 3px solid #fab511;
         }
 
         .logo {
@@ -43,11 +44,12 @@
         .ticket-header h1 {
             font-size: 32px;
             margin-bottom: 10px;
+            color: #272d63;
         }
 
         .ticket-header p {
             font-size: 16px;
-            opacity: 0.9;
+            color: #666;
         }
 
         .ticket-body {
