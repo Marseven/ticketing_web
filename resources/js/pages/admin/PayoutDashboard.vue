@@ -106,12 +106,33 @@
     <!-- Solde SHAP -->
     <div v-if="shapBalance.length > 0" class="mb-8">
       <h2 class="text-xl font-bold mb-4">Solde SHAP par Opérateur</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div v-for="balance in shapBalance" :key="balance.payment_system_name" 
-             class="bg-white rounded-lg shadow p-4">
-          <h3 class="font-semibold text-gray-900">{{ balance.payment_system_displayed_name }}</h3>
-          <p class="text-2xl font-bold text-green-600">{{ formatAmount(balance.amount) }} XAF</p>
-          <p class="text-sm text-gray-500">Dernière MAJ: {{ balance.last_updated }}</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div v-for="(balance, index) in shapBalance" :key="`${balance.payment_system_name}-${index}`"
+             class="bg-white rounded-lg shadow p-4 border-l-4"
+             :class="{
+               'border-blue-500': balance.balance_type === 'PAYIN',
+               'border-green-500': balance.balance_type === 'PAYOUT'
+             }">
+          <div class="flex justify-between items-start mb-2">
+            <h3 class="font-semibold text-gray-900">{{ balance.payment_system_displayed_name }}</h3>
+            <span class="text-xs font-semibold px-2 py-1 rounded"
+                  :class="{
+                    'bg-blue-100 text-blue-800': balance.balance_type === 'PAYIN',
+                    'bg-green-100 text-green-800': balance.balance_type === 'PAYOUT',
+                    'bg-gray-100 text-gray-800': !balance.balance_type
+                  }">
+              {{ balance.balance_type || 'N/A' }}
+            </span>
+          </div>
+          <p class="text-2xl font-bold"
+             :class="{
+               'text-blue-600': balance.balance_type === 'PAYIN',
+               'text-green-600': balance.balance_type === 'PAYOUT',
+               'text-gray-600': !balance.balance_type
+             }">
+            {{ formatAmount(balance.amount) }} XAF
+          </p>
+          <p class="text-xs text-gray-500 mt-2">Dernière MAJ: {{ balance.last_updated }}</p>
         </div>
       </div>
     </div>
