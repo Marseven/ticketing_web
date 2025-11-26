@@ -2530,12 +2530,14 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             Log::error('Erreur affichage commande admin', [
                 'order_id' => $orderId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur technique'
+                'message' => 'Erreur lors de la récupération de la commande',
+                'error' => config('app.debug') ? $e->getMessage() : 'Erreur technique'
             ], 500);
         }
     }
@@ -2579,12 +2581,14 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             Log::error('Erreur mise à jour statut commande', [
                 'order_id' => $orderId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur technique'
+                'message' => 'Erreur lors de la mise à jour du statut',
+                'error' => config('app.debug') ? $e->getMessage() : 'Erreur technique'
             ], 500);
         }
     }
