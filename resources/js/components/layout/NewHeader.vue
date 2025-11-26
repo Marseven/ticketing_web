@@ -497,10 +497,15 @@ const loadCategories = async () => {
 }
 
 const logout = async () => {
-  await authStore.logout()
-  closeDropdown()
-  closeMenu()
-  window.location.href = '/'
+  try {
+    await authStore.logout()
+  } finally {
+    closeDropdown()
+    closeMenu()
+    // Force un reload complet pour s'assurer que l'interface est mise à jour
+    window.location.href = '/'
+    window.location.reload()
+  }
 }
 
 const handleClickOutside = (event) => {

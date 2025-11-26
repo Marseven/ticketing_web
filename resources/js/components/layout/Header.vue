@@ -386,11 +386,15 @@ const closeMobileMenu = () => {
 };
 
 const logout = async () => {
-  await authStore.logout();
-  closeDropdown();
-  closeMobileMenu();
-  // Forcer un refresh de page et rediriger à l'accueil
-  window.location.href = '/';
+  try {
+    await authStore.logout();
+  } finally {
+    closeDropdown();
+    closeMobileMenu();
+    // Force un reload complet pour s'assurer que l'interface est mise à jour
+    window.location.href = '/';
+    window.location.reload();
+  }
 };
 
 // Close dropdown on click outside
