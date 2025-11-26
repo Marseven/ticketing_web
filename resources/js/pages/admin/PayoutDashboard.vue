@@ -309,33 +309,44 @@
         <form @submit.prevent="createPayout">
           <div class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Organisateur</label>
-              <select v-model="newPayout.organizer_id" required class="w-full border rounded-lg px-3 py-2">
-                <option value="">Sélectionner un organisateur</option>
-                <option v-for="organizer in organizers" :key="organizer?.id || Math.random()" :value="organizer?.id" v-if="organizer && organizer.id">
-                  {{ organizer.name }}
-                </option>
-              </select>
-            </div>
-            
-            <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Gateway</label>
-              <select v-model="newPayout.gateway" required class="w-full border rounded-lg px-3 py-2">
-                <option value="">Sélectionner</option>
+              <select v-model="newPayout.gateway" @change="onGatewayChange" required class="w-full border rounded-lg px-3 py-2">
+                <option value="">Sélectionner le gateway</option>
                 <option value="airtelmoney">Airtel Money</option>
                 <option value="moovmoney">Moov Money</option>
               </select>
             </div>
-            
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Organisateur</label>
+              <select v-model="newPayout.organizer_id" @change="onOrganizerChange" required :disabled="!newPayout.gateway" class="w-full border rounded-lg px-3 py-2 disabled:bg-gray-100">
+                <option value="">{{ newPayout.gateway ? 'Sélectionner un organisateur' : 'Sélectionnez d\'abord le gateway' }}</option>
+                <option v-for="organizer in organizers" :key="organizer?.id || Math.random()" :value="organizer?.id" v-if="organizer && organizer.id">
+                  {{ organizer.name }} - Solde: {{ formatAmount(organizer.balances?.[newPayout.gateway]?.balance || 0) }} XAF
+                </option>
+              </select>
+            </div>
+
+            <div v-if="selectedOrganizer && maxAmount > 0" class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p class="text-sm text-blue-800">
+                <strong>Solde disponible:</strong> {{ formatAmount(selectedOrganizer.balances[newPayout.gateway].balance) }} XAF
+              </p>
+              <p class="text-sm text-blue-800 mt-1">
+                <strong>Montant maximum (99%):</strong> {{ formatAmount(maxAmount) }} XAF
+              </p>
+            </div>
+
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Montant (XAF)</label>
-              <input v-model.number="newPayout.amount" type="number" min="100" required 
-                     class="w-full border rounded-lg px-3 py-2">
+              <input v-model.number="newPayout.amount" type="number" min="100" :max="maxAmount" required
+                     :disabled="!selectedOrganizer"
+                     class="w-full border rounded-lg px-3 py-2 disabled:bg-gray-100">
+              <p v-if="maxAmount > 0" class="text-xs text-gray-500 mt-1">Maximum: {{ formatAmount(maxAmount) }} XAF</p>
             </div>
-            
+
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Numéro de téléphone</label>
-              <input v-model="newPayout.phone_number" type="tel" maxlength="9" pattern="[0-9]{9}" required 
+              <input v-model="newPayout.phone_number" type="tel" maxlength="9" pattern="[0-9]{9}" required
                      placeholder="074123456" class="w-full border rounded-lg px-3 py-2">
             </div>
           </div>
@@ -374,19 +385,21 @@ export default {
     const organizers = ref([])
     const shapBalance = ref([])
     const shapLogs = ref([])
+    const selectedOrganizer = ref(null)
+    const maxAmount = ref(0)
     const stats = reactive({
       total_payouts: 0,
       successful_payouts: 0,
       pending_payouts: 0,
       automatic_payouts: 0,
     })
-    
+
     const filters = reactive({
       status: '',
       gateway: '',
       is_automatic: '',
     })
-    
+
     const newPayout = reactive({
       organizer_id: '',
       gateway: '',
@@ -532,22 +545,59 @@ export default {
 
     const openCreatePayoutModal = () => {
       showCreateModal.value = true
-      loadOrganizers()
+      // Ne charger les organisateurs qu'après sélection du gateway
+    }
+
+    const onGatewayChange = () => {
+      // Réinitialiser les champs dépendants
+      newPayout.organizer_id = ''
+      newPayout.phone_number = ''
+      newPayout.amount = ''
+      selectedOrganizer.value = null
+      maxAmount.value = 0
+
+      // Charger les organisateurs pour ce gateway
+      if (newPayout.gateway) {
+        loadOrganizers()
+      } else {
+        organizers.value = []
+      }
+    }
+
+    const onOrganizerChange = () => {
+      const organizer = organizers.value.find(o => o.id === newPayout.organizer_id)
+      selectedOrganizer.value = organizer
+
+      if (organizer && organizer.balances && organizer.balances[newPayout.gateway]) {
+        const balanceInfo = organizer.balances[newPayout.gateway]
+        maxAmount.value = balanceInfo.max_payout
+        // Pré-remplir le numéro de téléphone si disponible
+        if (balanceInfo.phone_number) {
+          newPayout.phone_number = balanceInfo.phone_number
+        }
+      } else {
+        maxAmount.value = 0
+      }
+
+      // Réinitialiser le montant
+      newPayout.amount = ''
     }
 
     const loadOrganizers = async () => {
       try {
-        // Cette route devrait exister ou être créée
-        const response = await fetch('/api/v1/admin/organizers', {
+        // Charger les organisateurs avec leurs soldes
+        const gateway = newPayout.gateway || ''
+        const response = await fetch(`/api/v1/admin/payouts/organizers?gateway=${gateway}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Accept': 'application/json'
           }
         })
-        
+
         const data = await response.json()
         if (data.success) {
           organizers.value = data.data.organizers
+          console.log('Organisateurs chargés:', organizers.value)
         }
       } catch (error) {
         console.error('Erreur chargement organisateurs:', error)
@@ -555,6 +605,17 @@ export default {
     }
 
     const createPayout = async () => {
+      // Validation du montant
+      if (newPayout.amount > maxAmount.value) {
+        alert(`Le montant ne peut pas dépasser ${formatAmount(maxAmount.value)} XAF (99% du solde disponible)`)
+        return
+      }
+
+      if (newPayout.amount < 100) {
+        alert('Le montant minimum est de 100 XAF')
+        return
+      }
+
       creatingPayout.value = true
       try {
         const response = await fetch('/api/v1/admin/payouts', {
@@ -566,17 +627,21 @@ export default {
           },
           body: JSON.stringify(newPayout)
         })
-        
+
         const data = await response.json()
         if (data.success) {
           alert('Payout créé avec succès')
           showCreateModal.value = false
+          // Réinitialiser le formulaire
           Object.assign(newPayout, {
             organizer_id: '',
             gateway: '',
             amount: '',
             phone_number: '',
           })
+          selectedOrganizer.value = null
+          maxAmount.value = 0
+          organizers.value = []
           loadPayouts()
           loadStats()
         } else {
@@ -675,6 +740,8 @@ export default {
       organizers,
       shapBalance,
       shapLogs,
+      selectedOrganizer,
+      maxAmount,
       stats,
       filters,
       newPayout,
@@ -687,6 +754,8 @@ export default {
       checkAllPending,
       checkPayoutStatus,
       openCreatePayoutModal,
+      onGatewayChange,
+      onOrganizerChange,
       createPayout,
       resetFilters,
       viewPayoutDetails,

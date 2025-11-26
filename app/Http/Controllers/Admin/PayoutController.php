@@ -114,6 +114,28 @@ class PayoutController extends Controller
         try {
             $organizer = Organizer::findOrFail($request->organizer_id);
 
+            // Vérifier le solde disponible pour ce gateway
+            $balance = OrganizerBalance::where('organizer_id', $organizer->id)
+                ->where('gateway', $request->gateway)
+                ->first();
+
+            if (!$balance || $balance->balance <= 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Aucun solde disponible pour cet organisateur sur ce gateway'
+                ], 400);
+            }
+
+            // Calculer le montant maximum (99% du solde)
+            $maxAmount = floor($balance->balance * 0.99);
+
+            if ($request->amount > $maxAmount) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Le montant ne peut pas dépasser {$maxAmount} XAF (99% du solde disponible de {$balance->balance} XAF)"
+                ], 400);
+            }
+
             $result = $this->payoutService->createManualPayout(
                 $organizer,
                 $request->gateway,
@@ -342,19 +364,58 @@ class PayoutController extends Controller
     }
 
     /**
-     * Liste des organisateurs
+     * Liste des organisateurs avec solde disponible
      */
     public function organizers(Request $request): JsonResponse
     {
         try {
-            $organizers = Organizer::select('id', 'name', 'slug')
-                ->where('status', 'active')
-                ->orderBy('name')
+            // Récupérer le gateway si spécifié
+            $gateway = $request->get('gateway');
+
+            // Récupérer les organisateurs actifs avec leurs soldes
+            $organizersQuery = Organizer::select('organizers.id', 'organizers.name', 'organizers.slug')
+                ->join('organizer_balances', 'organizers.id', '=', 'organizer_balances.organizer_id')
+                ->where('organizers.status', 'active')
+                ->where('organizer_balances.balance', '>', 0);
+
+            // Filtrer par gateway si spécifié
+            if ($gateway) {
+                $organizersQuery->where('organizer_balances.gateway', $gateway);
+            }
+
+            $organizers = $organizersQuery
+                ->with(['balances' => function($query) use ($gateway) {
+                    $query->where('balance', '>', 0);
+                    if ($gateway) {
+                        $query->where('gateway', $gateway);
+                    }
+                }])
+                ->groupBy('organizers.id', 'organizers.name', 'organizers.slug')
+                ->orderBy('organizers.name')
                 ->get();
+
+            // Formater les données avec les soldes par gateway
+            $formattedOrganizers = $organizers->map(function ($organizer) {
+                $balancesByGateway = [];
+                foreach ($organizer->balances as $balance) {
+                    $balancesByGateway[$balance->gateway] = [
+                        'balance' => $balance->balance,
+                        'max_payout' => floor($balance->balance * 0.99), // 99% max
+                        'phone_number' => $balance->phone_number,
+                    ];
+                }
+
+                return [
+                    'id' => $organizer->id,
+                    'name' => $organizer->name,
+                    'slug' => $organizer->slug,
+                    'balances' => $balancesByGateway,
+                ];
+            });
 
             return response()->json([
                 'success' => true,
-                'data' => ['organizers' => $organizers]
+                'data' => ['organizers' => $formattedOrganizers]
             ]);
 
         } catch (\Exception $e) {
