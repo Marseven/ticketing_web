@@ -312,7 +312,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">Organisateur</label>
               <select v-model="newPayout.organizer_id" required class="w-full border rounded-lg px-3 py-2">
                 <option value="">Sélectionner un organisateur</option>
-                <option v-for="organizer in organizers" :key="organizer.id" :value="organizer.id">
+                <option v-for="organizer in organizers" :key="organizer?.id || Math.random()" :value="organizer?.id" v-if="organizer && organizer.id">
                   {{ organizer.name }}
                 </option>
               </select>

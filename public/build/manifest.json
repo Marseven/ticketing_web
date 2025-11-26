@@ -31,12 +31,8 @@
       "assets/css/account-BrsghN6a.css"
     ]
   },
-  "_admin-BR-7SL0E.css": {
-    "file": "assets/css/admin-BR-7SL0E.css",
-    "src": "_admin-BR-7SL0E.css"
-  },
-  "_admin-CEl_qNpn.js": {
-    "file": "assets/js/admin-CEl_qNpn.js",
+  "_admin-CDhnQP-5.js": {
+    "file": "assets/js/admin-CDhnQP-5.js",
     "name": "admin",
     "isDynamicEntry": true,
     "imports": [
@@ -45,8 +41,12 @@
       "_vendor-CzIG1j6G.js"
     ],
     "css": [
-      "assets/css/admin-BR-7SL0E.css"
+      "assets/css/admin-SUr-SFXS.css"
     ]
+  },
+  "_admin-SUr-SFXS.css": {
+    "file": "assets/css/admin-SUr-SFXS.css",
+    "src": "_admin-SUr-SFXS.css"
   },
   "_events-JVM0Qz6c.js": {
     "file": "assets/js/events-JVM0Qz6c.js",
@@ -144,7 +144,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-CBHHZtyN.js",
+    "file": "assets/js/app-7s413nNQ.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -184,29 +184,29 @@
       "_organizer-Dy0E96P6.js",
       "_organizer-Dy0E96P6.js",
       "resources/js/layouts/AdminLayout.vue",
-      "_admin-CEl_qNpn.js",
-      "_admin-CEl_qNpn.js",
-      "_admin-CEl_qNpn.js",
-      "_admin-CEl_qNpn.js",
-      "_admin-CEl_qNpn.js",
-      "_admin-CEl_qNpn.js",
-      "_admin-CEl_qNpn.js",
-      "_admin-CEl_qNpn.js",
-      "_admin-CEl_qNpn.js",
-      "_admin-CEl_qNpn.js",
-      "_admin-CEl_qNpn.js",
-      "_admin-CEl_qNpn.js",
-      "_admin-CEl_qNpn.js",
-      "_admin-CEl_qNpn.js",
-      "_admin-CEl_qNpn.js",
-      "_admin-CEl_qNpn.js",
-      "_admin-CEl_qNpn.js",
-      "_admin-CEl_qNpn.js",
-      "_admin-CEl_qNpn.js",
-      "_admin-CEl_qNpn.js",
-      "_admin-CEl_qNpn.js",
-      "_admin-CEl_qNpn.js",
-      "_admin-CEl_qNpn.js",
+      "_admin-CDhnQP-5.js",
+      "_admin-CDhnQP-5.js",
+      "_admin-CDhnQP-5.js",
+      "_admin-CDhnQP-5.js",
+      "_admin-CDhnQP-5.js",
+      "_admin-CDhnQP-5.js",
+      "_admin-CDhnQP-5.js",
+      "_admin-CDhnQP-5.js",
+      "_admin-CDhnQP-5.js",
+      "_admin-CDhnQP-5.js",
+      "_admin-CDhnQP-5.js",
+      "_admin-CDhnQP-5.js",
+      "_admin-CDhnQP-5.js",
+      "_admin-CDhnQP-5.js",
+      "_admin-CDhnQP-5.js",
+      "_admin-CDhnQP-5.js",
+      "_admin-CDhnQP-5.js",
+      "_admin-CDhnQP-5.js",
+      "_admin-CDhnQP-5.js",
+      "_admin-CDhnQP-5.js",
+      "_admin-CDhnQP-5.js",
+      "_admin-CDhnQP-5.js",
+      "_admin-CDhnQP-5.js",
       "resources/js/pages/scanner/ScannerApp.vue"
     ],
     "css": [
