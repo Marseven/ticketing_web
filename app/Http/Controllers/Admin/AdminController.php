@@ -2512,7 +2512,7 @@ class AdminController extends Controller
     public function showOrder($orderId): JsonResponse
     {
         try {
-            $order = Order::with(['event', 'buyer', 'organizer', 'tickets.ticketType', 'payment'])
+            $order = Order::with(['event', 'buyer', 'organizer', 'tickets.ticketType', 'payments'])
                 ->find($orderId);
 
             if (!$order) {
