@@ -226,6 +226,60 @@
       </div>
     </div>
 
+    <!-- Logs API SHAP -->
+    <div class="bg-white rounded-lg shadow mt-8">
+      <div class="p-6 border-b flex justify-between items-center">
+        <h2 class="text-xl font-bold">Logs API SHAP</h2>
+        <button
+          type="button"
+          @click="loadShapLogs"
+          :disabled="loadingLogs"
+          class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 text-sm"
+        >
+          {{ loadingLogs ? 'Chargement...' : 'Rafraîchir' }}
+        </button>
+      </div>
+
+      <div v-if="loadingLogs" class="p-8 text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        <p class="mt-4 text-gray-600">Chargement des logs...</p>
+      </div>
+
+      <div v-else-if="shapLogs.length === 0" class="p-8 text-center text-gray-500">
+        Aucun log SHAP trouvé
+      </div>
+
+      <div v-else class="p-6 space-y-4 max-h-96 overflow-y-auto">
+        <div
+          v-for="(log, index) in shapLogs"
+          :key="index"
+          class="border rounded-lg p-4 hover:bg-gray-50"
+          :class="{
+            'border-red-300 bg-red-50': log.type.includes('ERROR') || log.type.includes('Exception'),
+            'border-yellow-300 bg-yellow-50': log.type.includes('WARNING'),
+            'border-blue-300': log.type.includes('Call'),
+            'border-green-300': log.type.includes('Response')
+          }"
+        >
+          <div class="flex justify-between items-start mb-2">
+            <span
+              class="font-mono text-xs px-2 py-1 rounded"
+              :class="{
+                'bg-red-200 text-red-800': log.type.includes('ERROR') || log.type.includes('Exception'),
+                'bg-yellow-200 text-yellow-800': log.type.includes('WARNING'),
+                'bg-blue-200 text-blue-800': log.type.includes('Call'),
+                'bg-green-200 text-green-800': log.type.includes('Response')
+              }"
+            >
+              {{ log.type }}
+            </span>
+            <span class="text-xs text-gray-500">{{ log.timestamp }}</span>
+          </div>
+          <pre class="bg-gray-900 text-green-400 p-3 rounded text-xs overflow-x-auto">{{ JSON.stringify(log.data, null, 2) }}</pre>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal Création Payout Manuel -->
     <div v-if="showCreateModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="showCreateModal = false">
       <div class="bg-white rounded-lg p-6 w-full max-w-md" @click.stop>
@@ -291,12 +345,14 @@ export default {
     const loading = ref(false)
     const checkingAll = ref(false)
     const loadingShapBalance = ref(false)
+    const loadingLogs = ref(false)
     const showCreateModal = ref(false)
     const creatingPayout = ref(false)
-    
+
     const payouts = ref([])
     const organizers = ref([])
     const shapBalance = ref([])
+    const shapLogs = ref([])
     const stats = reactive({
       total_payouts: 0,
       successful_payouts: 0,
@@ -371,15 +427,39 @@ export default {
             'Accept': 'application/json'
           }
         })
-        
+
         const data = await response.json()
         if (data.success) {
           shapBalance.value = data.data.balances
+        } else {
+          console.error('Erreur SHAP:', data.message, data.debug)
+          alert(`Erreur SHAP: ${data.message}`)
         }
       } catch (error) {
         console.error('Erreur chargement solde SHAP:', error)
       } finally {
         loadingShapBalance.value = false
+      }
+    }
+
+    const loadShapLogs = async () => {
+      loadingLogs.value = true
+      try {
+        const response = await fetch('/api/v1/admin/payouts/shap-logs?limit=20', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Accept': 'application/json'
+          }
+        })
+
+        const data = await response.json()
+        if (data.success) {
+          shapLogs.value = data.data.logs
+        }
+      } catch (error) {
+        console.error('Erreur chargement logs SHAP:', error)
+      } finally {
+        loadingLogs.value = false
       }
     }
 
@@ -559,6 +639,7 @@ export default {
     onMounted(() => {
       loadPayouts()
       loadStats()
+      loadShapLogs()
     })
 
     return {
@@ -566,26 +647,29 @@ export default {
       loading,
       checkingAll,
       loadingShapBalance,
+      loadingLogs,
       showCreateModal,
       creatingPayout,
       payouts,
       organizers,
       shapBalance,
+      shapLogs,
       stats,
       filters,
       newPayout,
-      
+
       // Méthodes
       loadPayouts,
       loadStats,
       loadShapBalance,
+      loadShapLogs,
       checkAllPending,
       checkPayoutStatus,
       openCreatePayoutModal,
       createPayout,
       resetFilters,
       viewPayoutDetails,
-      
+
       // Utilitaires
       formatAmount,
       formatDate,

@@ -31,12 +31,8 @@
       "assets/css/account-BrsghN6a.css"
     ]
   },
-  "_admin-CbEB-qg-.css": {
-    "file": "assets/css/admin-CbEB-qg-.css",
-    "src": "_admin-CbEB-qg-.css"
-  },
-  "_admin-XaM1nhKm.js": {
-    "file": "assets/js/admin-XaM1nhKm.js",
+  "_admin-BWyFi1NW.js": {
+    "file": "assets/js/admin-BWyFi1NW.js",
     "name": "admin",
     "isDynamicEntry": true,
     "imports": [
@@ -45,8 +41,12 @@
       "_vendor-CzIG1j6G.js"
     ],
     "css": [
-      "assets/css/admin-CbEB-qg-.css"
+      "assets/css/admin-BjYS1-SH.css"
     ]
+  },
+  "_admin-BjYS1-SH.css": {
+    "file": "assets/css/admin-BjYS1-SH.css",
+    "src": "_admin-BjYS1-SH.css"
   },
   "_events-JVM0Qz6c.js": {
     "file": "assets/js/events-JVM0Qz6c.js",
@@ -136,7 +136,7 @@
     "src": "node_modules/leaflet/dist/images/marker-icon.png"
   },
   "resources/css/app.css": {
-    "file": "assets/css/app-BgViOvyy.css",
+    "file": "assets/css/app-D8Gehi1F.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [
@@ -144,7 +144,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-lF7awuJ8.js",
+    "file": "assets/js/app-W5ZWYqMp.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -184,34 +184,34 @@
       "_organizer-Dy0E96P6.js",
       "_organizer-Dy0E96P6.js",
       "resources/js/layouts/AdminLayout.vue",
-      "_admin-XaM1nhKm.js",
-      "_admin-XaM1nhKm.js",
-      "_admin-XaM1nhKm.js",
-      "_admin-XaM1nhKm.js",
-      "_admin-XaM1nhKm.js",
-      "_admin-XaM1nhKm.js",
-      "_admin-XaM1nhKm.js",
-      "_admin-XaM1nhKm.js",
-      "_admin-XaM1nhKm.js",
-      "_admin-XaM1nhKm.js",
-      "_admin-XaM1nhKm.js",
-      "_admin-XaM1nhKm.js",
-      "_admin-XaM1nhKm.js",
-      "_admin-XaM1nhKm.js",
-      "_admin-XaM1nhKm.js",
-      "_admin-XaM1nhKm.js",
-      "_admin-XaM1nhKm.js",
-      "_admin-XaM1nhKm.js",
-      "_admin-XaM1nhKm.js",
-      "_admin-XaM1nhKm.js",
-      "_admin-XaM1nhKm.js",
-      "_admin-XaM1nhKm.js",
-      "_admin-XaM1nhKm.js",
+      "_admin-BWyFi1NW.js",
+      "_admin-BWyFi1NW.js",
+      "_admin-BWyFi1NW.js",
+      "_admin-BWyFi1NW.js",
+      "_admin-BWyFi1NW.js",
+      "_admin-BWyFi1NW.js",
+      "_admin-BWyFi1NW.js",
+      "_admin-BWyFi1NW.js",
+      "_admin-BWyFi1NW.js",
+      "_admin-BWyFi1NW.js",
+      "_admin-BWyFi1NW.js",
+      "_admin-BWyFi1NW.js",
+      "_admin-BWyFi1NW.js",
+      "_admin-BWyFi1NW.js",
+      "_admin-BWyFi1NW.js",
+      "_admin-BWyFi1NW.js",
+      "_admin-BWyFi1NW.js",
+      "_admin-BWyFi1NW.js",
+      "_admin-BWyFi1NW.js",
+      "_admin-BWyFi1NW.js",
+      "_admin-BWyFi1NW.js",
+      "_admin-BWyFi1NW.js",
+      "_admin-BWyFi1NW.js",
       "resources/js/pages/scanner/ScannerApp.vue"
     ],
     "css": [
       "assets/css/app-CeNye4AY.css",
-      "assets/css/app-BgViOvyy.css"
+      "assets/css/app-D8Gehi1F.css"
     ]
   },
   "resources/js/layouts/AdminLayout.vue": {

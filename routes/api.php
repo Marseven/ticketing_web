@@ -273,6 +273,7 @@ Route::prefix('v1')->group(function () {
             Route::get('stats', [App\Http\Controllers\Admin\PayoutController::class, 'stats']);
             Route::get('balances', [App\Http\Controllers\Admin\PayoutController::class, 'balances']);
             Route::get('shap-balance', [App\Http\Controllers\Admin\PayoutController::class, 'shapBalance']);
+            Route::get('shap-logs', [App\Http\Controllers\Admin\PayoutController::class, 'shapLogs']);
             Route::post('check-all-pending', [App\Http\Controllers\Admin\PayoutController::class, 'checkAllPending']);
             Route::get('{payout}', [App\Http\Controllers\Admin\PayoutController::class, 'show']);
             Route::post('{payout}/check-status', [App\Http\Controllers\Admin\PayoutController::class, 'checkStatus']);

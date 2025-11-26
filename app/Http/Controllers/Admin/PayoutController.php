@@ -370,6 +370,70 @@ class PayoutController extends Controller
     }
 
     /**
+     * Récupérer les logs SHAP récents
+     */
+    public function shapLogs(Request $request): JsonResponse
+    {
+        try {
+            $limit = $request->get('limit', 50);
+            $logFile = storage_path('logs/laravel.log');
+
+            if (!file_exists($logFile)) {
+                return response()->json([
+                    'success' => true,
+                    'data' => ['logs' => []]
+                ]);
+            }
+
+            // Lire les dernières lignes du fichier de log
+            $logs = [];
+            $file = new \SplFileObject($logFile);
+            $file->seek(PHP_INT_MAX);
+            $totalLines = $file->key();
+
+            // Commencer à partir des dernières lignes
+            $startLine = max(0, $totalLines - ($limit * 10)); // On lit plus de lignes pour filtrer ensuite
+            $file->seek($startLine);
+
+            $buffer = '';
+            while (!$file->eof()) {
+                $buffer .= $file->fgets();
+            }
+
+            // Parser les logs SHAP
+            $pattern = '/\[(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})\].*?(SHAP.*?)\s(\{.*?\}(?:\s*\{.*?\})*)/s';
+            preg_match_all($pattern, $buffer, $matches, PREG_SET_ORDER);
+
+            foreach (array_slice($matches, -$limit) as $match) {
+                try {
+                    $logs[] = [
+                        'timestamp' => $match[1],
+                        'type' => trim($match[2]),
+                        'data' => json_decode($match[3], true) ?? $match[3]
+                    ];
+                } catch (\Exception $e) {
+                    // Ignorer les erreurs de parsing
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => ['logs' => array_reverse($logs)]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur récupération logs SHAP', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors de la récupération des logs'
+            ], 500);
+        }
+    }
+
+    /**
      * Balances des organisateurs avec stats
      */
     public function balances(Request $request): JsonResponse
