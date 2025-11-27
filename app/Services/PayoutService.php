@@ -372,11 +372,18 @@ class PayoutService
             // Envoyer la notification PayoutCreated uniquement si le payout n'a pas échoué immédiatement
             if ($payout && $payout->status !== 'failed') {
                 try {
-                    $organizer->user->notify(new PayoutCreated($payout));
-                    Log::info('Notification PayoutCreated envoyée', [
-                        'payout_id' => $payout->id,
-                        'organizer_id' => $organizer->id
-                    ]);
+                    if ($organizer->user) {
+                        $organizer->user->notify(new PayoutCreated($payout));
+                        Log::info('Notification PayoutCreated envoyée', [
+                            'payout_id' => $payout->id,
+                            'organizer_id' => $organizer->id
+                        ]);
+                    } else {
+                        Log::warning('Notification PayoutCreated non envoyée - organizer sans user', [
+                            'payout_id' => $payout->id,
+                            'organizer_id' => $organizer->id
+                        ]);
+                    }
                 } catch (\Exception $e) {
                     Log::error('Erreur envoi notification PayoutCreated', [
                         'payout_id' => $payout->id,
@@ -443,11 +450,20 @@ class PayoutService
 
                 // Envoyer la notification PayoutSuccessful
                 try {
-                    $payout->organizer->user->notify(new PayoutSuccessful($payout));
-                    Log::info('Notification PayoutSuccessful envoyée', [
-                        'payout_id' => $payout->id,
-                        'organizer_id' => $payout->organizer_id
-                    ]);
+                    if ($payout->organizer && $payout->organizer->user) {
+                        $payout->organizer->user->notify(new PayoutSuccessful($payout));
+                        Log::info('Notification PayoutSuccessful envoyée', [
+                            'payout_id' => $payout->id,
+                            'organizer_id' => $payout->organizer_id
+                        ]);
+                    } else {
+                        Log::warning('Notification PayoutSuccessful non envoyée - organizer ou user manquant', [
+                            'payout_id' => $payout->id,
+                            'organizer_id' => $payout->organizer_id,
+                            'has_organizer' => isset($payout->organizer),
+                            'has_user' => $payout->organizer && isset($payout->organizer->user)
+                        ]);
+                    }
                 } catch (\Exception $e) {
                     Log::error('Erreur envoi notification PayoutSuccessful', [
                         'payout_id' => $payout->id,
@@ -486,11 +502,20 @@ class PayoutService
 
                 // Envoyer la notification PayoutFailed
                 try {
-                    $payout->organizer->user->notify(new PayoutFailed($payout));
-                    Log::info('Notification PayoutFailed envoyée', [
-                        'payout_id' => $payout->id,
-                        'organizer_id' => $payout->organizer_id
-                    ]);
+                    if ($payout->organizer && $payout->organizer->user) {
+                        $payout->organizer->user->notify(new PayoutFailed($payout));
+                        Log::info('Notification PayoutFailed envoyée', [
+                            'payout_id' => $payout->id,
+                            'organizer_id' => $payout->organizer_id
+                        ]);
+                    } else {
+                        Log::warning('Notification PayoutFailed non envoyée - organizer ou user manquant', [
+                            'payout_id' => $payout->id,
+                            'organizer_id' => $payout->organizer_id,
+                            'has_organizer' => isset($payout->organizer),
+                            'has_user' => $payout->organizer && isset($payout->organizer->user)
+                        ]);
+                    }
                 } catch (\Exception $e) {
                     Log::error('Erreur envoi notification PayoutFailed', [
                         'payout_id' => $payout->id,
