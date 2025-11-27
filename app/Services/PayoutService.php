@@ -86,18 +86,8 @@ class PayoutService
      */
     private function updateOrganizerBalance(Organizer $organizer, Payment $payment): OrganizerBalance
     {
-        // Vérifier que le gateway n'est pas null
-        $gateway = $payment->gateway ?? 'unknown';
-
-        if ($gateway === 'unknown' || empty($gateway)) {
-            Log::warning('Gateway null ou vide lors de la mise à jour du solde', [
-                'payment_id' => $payment->id,
-                'order_id' => $payment->order_id,
-                'gateway_original' => $payment->gateway
-            ]);
-            // Utiliser un gateway par défaut basé sur le mode de paiement
-            $gateway = 'airtelmoney'; // Par défaut
-        }
+        // Déduire le gateway depuis payment_system ou sub_payment_system
+        $gateway = $this->deduceGateway($payment);
 
         $organizerBalance = OrganizerBalance::firstOrCreate([
             'organizer_id' => $organizer->id,
@@ -121,7 +111,9 @@ class PayoutService
 
         Log::info('Solde organisateur mis à jour', [
             'organizer_id' => $organizer->id,
-            'gateway' => $payment->gateway,
+            'gateway' => $gateway,
+            'payment_system' => $payment->payment_system,
+            'sub_payment_system' => $payment->sub_payment_system,
             'order_id' => $order->id,
             'total_paid_by_customer' => $payment->amount,
             'net_for_organizer' => $netAmount,
@@ -129,6 +121,59 @@ class PayoutService
         ]);
 
         return $organizerBalance;
+    }
+
+    /**
+     * Déduire le gateway depuis les champs payment_system et sub_payment_system
+     */
+    private function deduceGateway(Payment $payment): string
+    {
+        // Vérifier sub_payment_system en premier (plus spécifique)
+        $subPaymentSystem = strtolower($payment->sub_payment_system ?? '');
+        $paymentSystem = strtolower($payment->payment_system ?? '');
+
+        // Mapping des payment systems vers nos gateways
+        $mapping = [
+            'airtel money' => 'airtelmoney',
+            'airtelmoney' => 'airtelmoney',
+            'airtel' => 'airtelmoney',
+            'moov money' => 'moovmoney',
+            'moovmoney' => 'moovmoney',
+            'moov' => 'moovmoney',
+        ];
+
+        // Essayer sub_payment_system d'abord
+        foreach ($mapping as $key => $gateway) {
+            if (str_contains($subPaymentSystem, $key)) {
+                Log::info('Gateway déduit depuis sub_payment_system', [
+                    'payment_id' => $payment->id,
+                    'sub_payment_system' => $payment->sub_payment_system,
+                    'deduced_gateway' => $gateway
+                ]);
+                return $gateway;
+            }
+        }
+
+        // Puis essayer payment_system
+        foreach ($mapping as $key => $gateway) {
+            if (str_contains($paymentSystem, $key)) {
+                Log::info('Gateway déduit depuis payment_system', [
+                    'payment_id' => $payment->id,
+                    'payment_system' => $payment->payment_system,
+                    'deduced_gateway' => $gateway
+                ]);
+                return $gateway;
+            }
+        }
+
+        // Par défaut si rien n'est trouvé
+        Log::warning('Gateway non identifié - utilisation d\'airtelmoney par défaut', [
+            'payment_id' => $payment->id,
+            'payment_system' => $payment->payment_system,
+            'sub_payment_system' => $payment->sub_payment_system
+        ]);
+
+        return 'airtelmoney';
     }
 
     /**
