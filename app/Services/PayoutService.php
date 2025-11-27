@@ -193,12 +193,27 @@ class PayoutService
         string $phoneNumber
     ): array {
         try {
+            Log::info('🎯 Début création payout manuel', [
+                'organizer_id' => $organizer->id,
+                'organizer_name' => $organizer->name,
+                'gateway' => $gateway,
+                'amount' => $amount,
+                'phone_number' => $phoneNumber
+            ]);
+
             // Vérifier le solde de l'organisateur
             $organizerBalance = OrganizerBalance::where('organizer_id', $organizer->id)
                 ->where('gateway', $gateway)
                 ->first();
 
             if (!$organizerBalance || $organizerBalance->balance < $amount) {
+                Log::warning('Solde organisateur insuffisant', [
+                    'organizer_id' => $organizer->id,
+                    'gateway' => $gateway,
+                    'requested_amount' => $amount,
+                    'available_balance' => $organizerBalance?->balance ?? 0
+                ]);
+
                 return [
                     'success' => false,
                     'message' => 'Solde insuffisant pour ce payout'
@@ -208,6 +223,12 @@ class PayoutService
             $payout = $this->createPayout($organizer, $gateway, $amount, $phoneNumber, false);
 
             if ($payout) {
+                Log::info('✅ Payout manuel créé avec succès', [
+                    'payout_id' => $payout->id,
+                    'organizer_id' => $organizer->id,
+                    'status' => $payout->status
+                ]);
+
                 return [
                     'success' => true,
                     'payout' => $payout,
@@ -215,22 +236,31 @@ class PayoutService
                 ];
             }
 
-            return [
-                'success' => false,
-                'message' => 'Erreur lors de la création du payout'
-            ];
-
-        } catch (\Exception $e) {
-            Log::error('Erreur payout manuel', [
+            // Si createPayout retourne null, c'est qu'il y a eu une erreur (voir logs détaillés dans createPayout)
+            Log::error('❌ Échec création payout manuel - createPayout returned null', [
                 'organizer_id' => $organizer->id,
                 'gateway' => $gateway,
                 'amount' => $amount,
-                'error' => $e->getMessage()
+                'message' => 'La méthode createPayout() a retourné null - voir logs précédents pour détails'
             ]);
 
             return [
                 'success' => false,
-                'message' => 'Erreur technique lors de la création du payout'
+                'message' => 'Erreur lors de la création du payout - voir logs pour détails'
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('💥 Exception payout manuel', [
+                'organizer_id' => $organizer->id,
+                'gateway' => $gateway,
+                'amount' => $amount,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Erreur technique lors de la création du payout: ' . $e->getMessage()
             ];
         }
     }
