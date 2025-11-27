@@ -101,6 +101,24 @@ class AuthController extends Controller
                 // Associer l'utilisateur à l'organisation comme owner
                 $organizer->users()->attach($user->id, ['role' => 'owner']);
 
+                // Assigner le rôle 'organizer' au user
+                $organizerRole = \App\Models\Role::where('slug', \App\Models\Role::ORGANIZER)->first();
+                if ($organizerRole && !$user->hasRole($organizerRole->slug)) {
+                    $user->roles()->attach($organizerRole->id, [
+                        'assigned_at' => now(),
+                        'assigned_by' => null,
+                    ]);
+
+                    \Log::info('Rôle organisateur assigné lors de l\'inscription', [
+                        'user_id' => $user->id,
+                        'role_id' => $organizerRole->id
+                    ]);
+                } else if (!$organizerRole) {
+                    \Log::warning('Rôle organisateur non trouvé dans la table roles', [
+                        'user_id' => $user->id
+                    ]);
+                }
+
                 // Note: Le balance sera créé quand l'organisateur configurera ses moyens de paiement
                 // Un organisateur peut avoir plusieurs balances (un par gateway: airtelmoney, moovmoney, etc.)
 
