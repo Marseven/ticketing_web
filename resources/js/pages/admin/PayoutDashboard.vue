@@ -364,11 +364,103 @@
         </form>
       </div>
     </div>
+
+    <!-- Modal Détails Payout -->
+    <div v-if="showDetailsModal && selectedPayout" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="showDetailsModal = false">
+      <div class="bg-white rounded-lg p-6 w-full max-w-2xl" @click.stop>
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-2xl font-bold text-gray-900">Détails du Payout #{{ selectedPayout.id }}</h3>
+          <button type="button" @click="showDetailsModal = false" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Informations principales -->
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <p class="text-sm text-gray-600 mb-1">Référence</p>
+              <p class="text-lg font-semibold text-gray-900">{{ selectedPayout.reference }}</p>
+            </div>
+
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <p class="text-sm text-gray-600 mb-1">Montant</p>
+              <p class="text-lg font-semibold text-gray-900">{{ formatAmount(selectedPayout.amount) }} XAF</p>
+            </div>
+
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <p class="text-sm text-gray-600 mb-1">Organisateur</p>
+              <p class="text-lg font-semibold text-gray-900">{{ selectedPayout.organizer?.name || 'N/A' }}</p>
+            </div>
+
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <p class="text-sm text-gray-600 mb-1">Gateway</p>
+              <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full"
+                    :class="getGatewayBadgeClass(selectedPayout.gateway)">
+                {{ getGatewayName(selectedPayout.gateway) }}
+              </span>
+            </div>
+
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <p class="text-sm text-gray-600 mb-1">Statut</p>
+              <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full"
+                    :class="getStatusBadgeClass(selectedPayout.status)">
+                {{ getStatusName(selectedPayout.status) }}
+              </span>
+            </div>
+
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <p class="text-sm text-gray-600 mb-1">Type</p>
+              <span class="inline-flex px-3 py-1 text-sm rounded-full"
+                    :class="selectedPayout.is_automatic ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'">
+                {{ selectedPayout.is_automatic ? 'Automatique' : 'Manuel' }}
+              </span>
+            </div>
+
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <p class="text-sm text-gray-600 mb-1">Numéro de téléphone</p>
+              <p class="text-lg font-semibold text-gray-900">{{ selectedPayout.phone_number || 'N/A' }}</p>
+            </div>
+
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <p class="text-sm text-gray-600 mb-1">Date de création</p>
+              <p class="text-lg font-semibold text-gray-900">{{ formatDate(selectedPayout.created_at) }}</p>
+            </div>
+          </div>
+
+          <!-- Informations additionnelles -->
+          <div v-if="selectedPayout.transaction_id" class="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+            <p class="text-sm text-blue-800 mb-1">Transaction ID</p>
+            <p class="text-md font-mono text-blue-900">{{ selectedPayout.transaction_id }}</p>
+          </div>
+
+          <div v-if="selectedPayout.error_message" class="bg-red-50 border border-red-200 p-4 rounded-lg">
+            <p class="text-sm text-red-800 mb-1">Message d'erreur</p>
+            <p class="text-md text-red-900">{{ selectedPayout.error_message }}</p>
+          </div>
+
+          <div v-if="selectedPayout.notes" class="bg-gray-50 border border-gray-200 p-4 rounded-lg">
+            <p class="text-sm text-gray-600 mb-1">Notes</p>
+            <p class="text-md text-gray-900">{{ selectedPayout.notes }}</p>
+          </div>
+        </div>
+
+        <div class="mt-6 flex justify-end">
+          <button type="button" @click="showDetailsModal = false"
+                  class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+            Fermer
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import { ref, reactive, onMounted } from 'vue'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'PayoutDashboard',
@@ -379,6 +471,7 @@ export default {
     const loadingShapBalance = ref(false)
     const loadingLogs = ref(false)
     const showCreateModal = ref(false)
+    const showDetailsModal = ref(false)
     const creatingPayout = ref(false)
 
     const payouts = ref([])
@@ -386,6 +479,7 @@ export default {
     const shapBalance = ref([])
     const shapLogs = ref([])
     const selectedOrganizer = ref(null)
+    const selectedPayout = ref(null)
     const maxAmount = ref(0)
     const stats = reactive({
       total_payouts: 0,
@@ -478,10 +572,19 @@ export default {
           shapBalance.value = data.data.balances
         } else {
           console.error('Erreur SHAP:', data.message, data.debug)
-          alert(`Erreur SHAP: ${data.message}`)
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur SHAP',
+            text: data.message || 'Erreur lors de la récupération du solde SHAP'
+          })
         }
       } catch (error) {
         console.error('Erreur chargement solde SHAP:', error)
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: 'Erreur technique lors du chargement du solde SHAP'
+        })
       } finally {
         loadingShapBalance.value = false
       }
@@ -528,11 +631,22 @@ export default {
         
         const data = await response.json()
         if (data.success) {
-          alert(`Vérification terminée: ${data.data.results.length} payouts vérifiés`)
+          Swal.fire({
+            icon: 'success',
+            title: 'Vérification terminée',
+            text: `${data.data.results.length} payouts vérifiés`,
+            timer: 3000,
+            showConfirmButton: false
+          })
           loadPayouts() // Recharger la liste
         }
       } catch (error) {
         console.error('Erreur vérification batch:', error)
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: 'Erreur lors de la vérification des payouts'
+        })
       } finally {
         checkingAll.value = false
       }
@@ -558,11 +672,21 @@ export default {
         
         const data = await response.json()
         if (data.success) {
-          alert(`Statut: ${data.data.current_status}`)
+          Swal.fire({
+            icon: 'info',
+            title: 'Statut du payout',
+            text: `Statut actuel: ${data.data.current_status}`,
+            confirmButtonText: 'OK'
+          })
           loadPayouts() // Recharger la liste
         }
       } catch (error) {
         console.error('Erreur vérification payout:', error)
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: 'Erreur lors de la vérification du payout'
+        })
       } finally {
         payout.checking = false
       }
@@ -632,12 +756,20 @@ export default {
     const createPayout = async () => {
       // Validation du montant
       if (newPayout.amount > maxAmount.value) {
-        alert(`Le montant ne peut pas dépasser ${formatAmount(maxAmount.value)} XAF (99% du solde disponible)`)
+        Swal.fire({
+          icon: 'warning',
+          title: 'Montant invalide',
+          text: `Le montant ne peut pas dépasser ${formatAmount(maxAmount.value)} XAF (99% du solde disponible)`
+        })
         return
       }
 
       if (newPayout.amount < 100) {
-        alert('Le montant minimum est de 100 XAF')
+        Swal.fire({
+          icon: 'warning',
+          title: 'Montant invalide',
+          text: 'Le montant minimum est de 100 XAF'
+        })
         return
       }
 
@@ -664,7 +796,13 @@ export default {
 
         const data = await response.json()
         if (data.success) {
-          alert('Payout créé avec succès')
+          Swal.fire({
+            icon: 'success',
+            title: 'Payout créé',
+            text: 'Le payout manuel a été créé avec succès',
+            timer: 3000,
+            showConfirmButton: false
+          })
           showCreateModal.value = false
           // Réinitialiser le formulaire
           Object.assign(newPayout, {
@@ -679,11 +817,19 @@ export default {
           loadPayouts()
           loadStats()
         } else {
-          alert(data.message || 'Erreur lors de la création')
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: data.message || 'Erreur lors de la création du payout'
+          })
         }
       } catch (error) {
         console.error('Erreur création payout:', error)
-        alert('Erreur technique')
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur technique',
+          text: 'Une erreur technique est survenue'
+        })
       } finally {
         creatingPayout.value = false
       }
@@ -699,7 +845,8 @@ export default {
     }
 
     const viewPayoutDetails = (payout) => {
-      alert(`Détails du payout #${payout.id}\nRéférence: ${payout.reference}\nMontant: ${formatAmount(payout.amount)} XAF`)
+      selectedPayout.value = payout
+      showDetailsModal.value = true
     }
 
     // Utilitaires
@@ -769,12 +916,14 @@ export default {
       loadingShapBalance,
       loadingLogs,
       showCreateModal,
+      showDetailsModal,
       creatingPayout,
       payouts,
       organizers,
       shapBalance,
       shapLogs,
       selectedOrganizer,
+      selectedPayout,
       maxAmount,
       stats,
       filters,
