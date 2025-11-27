@@ -153,26 +153,85 @@ class ShapPayoutService
                 'response_json' => $responseData,
                 'response_headers' => $response->headers(),
                 'content_type' => $response->header('Content-Type'),
+                'has_successful_field' => isset($responseData['successful']),
+                'has_response_field' => isset($responseData['response']),
+                'has_error_code' => isset($responseData['error_code']),
             ]);
 
-            if ($response->successful() && isset($responseData['successful'])) {
-                // Vérifier si c'est un statut ambigus qui nécessite un check
-                $ambiguousStatuses = ['transaction_initiated', 'processing', 'pending'];
-                $isAmbiguous = in_array($responseData['successful'], $ambiguousStatuses);
-                
+            // Si la requête HTTP est réussie (2xx)
+            if ($response->successful()) {
+                // Cas 1: Réponse avec le champ 'successful' (format attendu)
+                if (isset($responseData['successful'])) {
+                    $ambiguousStatuses = ['transaction_initiated', 'processing', 'pending'];
+                    $isAmbiguous = in_array($responseData['successful'], $ambiguousStatuses);
+
+                    return [
+                        'success' => true,
+                        'data' => $responseData['response'] ?? $responseData,
+                        'message' => $responseData['success_message'] ?? 'Payout créé avec succès',
+                        'is_synchronous' => !$isAmbiguous,
+                        'requires_status_check' => $isAmbiguous,
+                        'shap_status' => $responseData['successful']
+                    ];
+                }
+
+                // Cas 2: Réponse avec le champ 'response' mais sans 'successful'
+                // (certaines versions de l'API SHAP retournent directement la réponse)
+                if (isset($responseData['response']) && !isset($responseData['error_code'])) {
+                    Log::warning('SHAP Response sans champ "successful" - assume success', [
+                        'response_data' => $responseData
+                    ]);
+
+                    return [
+                        'success' => true,
+                        'data' => $responseData['response'],
+                        'message' => $responseData['success_message'] ?? 'Payout créé avec succès',
+                        'is_synchronous' => true,
+                        'requires_status_check' => false,
+                        'shap_status' => 'success'
+                    ];
+                }
+
+                // Cas 3: HTTP 200 mais avec un error_code (erreur métier)
+                if (isset($responseData['error_code'])) {
+                    Log::error('SHAP HTTP 200 mais avec error_code', [
+                        'error_code' => $responseData['error_code'],
+                        'error_description' => $responseData['error_description'] ?? 'Unknown error'
+                    ]);
+
+                    return [
+                        'success' => false,
+                        'error_code' => $responseData['error_code'],
+                        'message' => $responseData['error_description'] ?? 'Erreur lors de la création du payout',
+                        'requires_status_check' => false
+                    ];
+                }
+
+                // Cas 4: HTTP 200 mais structure inattendue - on log et assume succès
+                Log::warning('SHAP Response structure inattendue - assume success', [
+                    'response_data' => $responseData
+                ]);
+
                 return [
                     'success' => true,
-                    'data' => $responseData['response'],
-                    'message' => $responseData['success_message'] ?? 'Payout créé avec succès',
-                    'is_synchronous' => !$isAmbiguous,
-                    'requires_status_check' => $isAmbiguous,
-                    'shap_status' => $responseData['successful']
+                    'data' => $responseData,
+                    'message' => 'Payout créé avec succès',
+                    'is_synchronous' => true,
+                    'requires_status_check' => false,
+                    'shap_status' => 'success'
                 ];
             }
 
+            // HTTP error (4xx, 5xx)
+            Log::error('SHAP HTTP Error Response', [
+                'status' => $status,
+                'error_code' => $responseData['error_code'] ?? 'HTTP_ERROR',
+                'error_description' => $responseData['error_description'] ?? 'HTTP Error'
+            ]);
+
             return [
                 'success' => false,
-                'error_code' => $responseData['error_code'] ?? 'UNKNOWN',
+                'error_code' => $responseData['error_code'] ?? 'HTTP_ERROR',
                 'message' => $responseData['error_description'] ?? 'Erreur lors de la création du payout',
                 'requires_status_check' => false
             ];
