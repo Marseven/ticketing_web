@@ -421,7 +421,7 @@
 
             <div class="bg-gray-50 p-4 rounded-lg">
               <p class="text-sm text-gray-600 mb-1">Numéro de téléphone</p>
-              <p class="text-lg font-semibold text-gray-900">{{ selectedPayout.phone_number || 'N/A' }}</p>
+              <p class="text-lg font-semibold text-gray-900">{{ selectedPayout.payee_msisdn || 'N/A' }}</p>
             </div>
 
             <div class="bg-gray-50 p-4 rounded-lg">

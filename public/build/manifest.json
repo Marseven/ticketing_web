@@ -31,12 +31,8 @@
       "assets/css/account-BrsghN6a.css"
     ]
   },
-  "_admin-CODLcGpz.css": {
-    "file": "assets/css/admin-CODLcGpz.css",
-    "src": "_admin-CODLcGpz.css"
-  },
-  "_admin-khfK0Fy6.js": {
-    "file": "assets/js/admin-khfK0Fy6.js",
+  "_admin-BIBcLKQh.js": {
+    "file": "assets/js/admin-BIBcLKQh.js",
     "name": "admin",
     "isDynamicEntry": true,
     "imports": [
@@ -45,8 +41,12 @@
       "_vendor-D_sY0cVe.js"
     ],
     "css": [
-      "assets/css/admin-CODLcGpz.css"
+      "assets/css/admin-CsFMAxtY.css"
     ]
+  },
+  "_admin-CsFMAxtY.css": {
+    "file": "assets/css/admin-CsFMAxtY.css",
+    "src": "_admin-CsFMAxtY.css"
   },
   "_events-Ba2urub_.js": {
     "file": "assets/js/events-Ba2urub_.js",
@@ -144,7 +144,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-Cz9ELJUw.js",
+    "file": "assets/js/app-DpwizEyE.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -184,29 +184,29 @@
       "_organizer-BktQGVgL.js",
       "_organizer-BktQGVgL.js",
       "resources/js/layouts/AdminLayout.vue",
-      "_admin-khfK0Fy6.js",
-      "_admin-khfK0Fy6.js",
-      "_admin-khfK0Fy6.js",
-      "_admin-khfK0Fy6.js",
-      "_admin-khfK0Fy6.js",
-      "_admin-khfK0Fy6.js",
-      "_admin-khfK0Fy6.js",
-      "_admin-khfK0Fy6.js",
-      "_admin-khfK0Fy6.js",
-      "_admin-khfK0Fy6.js",
-      "_admin-khfK0Fy6.js",
-      "_admin-khfK0Fy6.js",
-      "_admin-khfK0Fy6.js",
-      "_admin-khfK0Fy6.js",
-      "_admin-khfK0Fy6.js",
-      "_admin-khfK0Fy6.js",
-      "_admin-khfK0Fy6.js",
-      "_admin-khfK0Fy6.js",
-      "_admin-khfK0Fy6.js",
-      "_admin-khfK0Fy6.js",
-      "_admin-khfK0Fy6.js",
-      "_admin-khfK0Fy6.js",
-      "_admin-khfK0Fy6.js",
+      "_admin-BIBcLKQh.js",
+      "_admin-BIBcLKQh.js",
+      "_admin-BIBcLKQh.js",
+      "_admin-BIBcLKQh.js",
+      "_admin-BIBcLKQh.js",
+      "_admin-BIBcLKQh.js",
+      "_admin-BIBcLKQh.js",
+      "_admin-BIBcLKQh.js",
+      "_admin-BIBcLKQh.js",
+      "_admin-BIBcLKQh.js",
+      "_admin-BIBcLKQh.js",
+      "_admin-BIBcLKQh.js",
+      "_admin-BIBcLKQh.js",
+      "_admin-BIBcLKQh.js",
+      "_admin-BIBcLKQh.js",
+      "_admin-BIBcLKQh.js",
+      "_admin-BIBcLKQh.js",
+      "_admin-BIBcLKQh.js",
+      "_admin-BIBcLKQh.js",
+      "_admin-BIBcLKQh.js",
+      "_admin-BIBcLKQh.js",
+      "_admin-BIBcLKQh.js",
+      "_admin-BIBcLKQh.js",
       "resources/js/pages/scanner/ScannerApp.vue"
     ],
     "css": [
