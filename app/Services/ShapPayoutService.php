@@ -416,13 +416,13 @@ class ShapPayoutService
     }
 
     /**
-     * Vérifier le solde PAYIN disponible pour un opérateur avant un payout
+     * Vérifier le solde PAYOUT disponible pour un opérateur avant un payout
      */
     public function checkBalance(string $paymentSystemName, float $amount): array
     {
         try {
             $balanceResult = $this->getBalance();
-            
+
             if (!$balanceResult['success']) {
                 return [
                     'success' => false,
@@ -430,52 +430,56 @@ class ShapPayoutService
                 ];
             }
 
-            // Chercher le solde PAYIN pour l'opérateur spécifique
-            $operatorBalance = null;
+            // Chercher le solde PAYOUT pour l'opérateur spécifique
+            $payoutBalance = null;
             foreach ($balanceResult['data'] as $balance) {
-                if ($balance['payment_system_name'] === $paymentSystemName) {
-                    $operatorBalance = $balance;
+                // On cherche le solde PAYOUT (category === 'PAYOUT') pour le payment_system correspondant
+                if ($balance['payment_system_name'] === $paymentSystemName &&
+                    isset($balance['category']) &&
+                    $balance['category'] === 'PAYOUT') {
+                    $payoutBalance = $balance;
                     break;
                 }
             }
 
-            if (!$operatorBalance) {
+            if (!$payoutBalance) {
                 return [
                     'success' => false,
-                    'message' => "Aucun solde PAYIN trouvé pour l'opérateur {$paymentSystemName}"
+                    'message' => "Aucun solde PAYOUT trouvé pour l'opérateur {$paymentSystemName}"
                 ];
             }
 
-            // Le solde retourné par l'API balance correspond au solde PAYIN (encaissements)
-            $availablePayinAmount = $operatorBalance['amount'];
-            
-            Log::info('Vérification solde PAYIN SHAP', [
+            // Le solde PAYOUT est utilisé pour les décaissements (payouts)
+            $availablePayoutAmount = $payoutBalance['amount'];
+
+            Log::info('Vérification solde PAYOUT SHAP', [
                 'payment_system' => $paymentSystemName,
-                'available_payin_amount' => $availablePayinAmount,
+                'available_payout_amount' => $availablePayoutAmount,
                 'requested_payout_amount' => $amount,
-                'sufficient' => $availablePayinAmount >= $amount
+                'sufficient' => $availablePayoutAmount >= $amount,
+                'category' => $payoutBalance['category']
             ]);
 
-            if ($availablePayinAmount < $amount) {
+            if ($availablePayoutAmount < $amount) {
                 return [
                     'success' => false,
-                    'error_code' => 'SP0016',
-                    'message' => "Solde PAYIN insuffisant. Disponible: {$availablePayinAmount} XAF, Payout demandé: {$amount} XAF",
-                    'available_payin_balance' => $availablePayinAmount,
+                    'error_code' => 'INSUFFICIENT_PAYOUT_BALANCE',
+                    'message' => "Solde PAYOUT insuffisant. Disponible: {$availablePayoutAmount} XAF, Payout demandé: {$amount} XAF",
+                    'available_payout_balance' => $availablePayoutAmount,
                     'requested_payout_amount' => $amount,
-                    'balance_type' => 'PAYIN'
+                    'balance_type' => 'PAYOUT'
                 ];
             }
 
             return [
                 'success' => true,
-                'available_payin_balance' => $availablePayinAmount,
+                'available_payout_balance' => $availablePayoutAmount,
                 'requested_payout_amount' => $amount,
-                'balance_type' => 'PAYIN'
+                'balance_type' => 'PAYOUT'
             ];
 
         } catch (\Exception $e) {
-            Log::error('Exception vérification solde PAYIN SHAP', [
+            Log::error('Exception vérification solde PAYOUT SHAP', [
                 'error' => $e->getMessage(),
                 'payment_system' => $paymentSystemName,
                 'amount' => $amount
@@ -483,7 +487,7 @@ class ShapPayoutService
 
             return [
                 'success' => false,
-                'message' => 'Erreur technique lors de la vérification du solde PAYIN'
+                'message' => 'Erreur technique lors de la vérification du solde PAYOUT'
             ];
         }
     }
