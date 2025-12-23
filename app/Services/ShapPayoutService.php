@@ -490,11 +490,38 @@ class ShapPayoutService
                 ];
             }
 
+            // Gérer les deux formats possibles de réponse SHAP
+            // Format 1: {"data": {"balances": [...]}}
+            // Format 2: {"data": [...]}
+            $balances = [];
+            if (isset($balanceResult['data']['balances'])) {
+                $balances = $balanceResult['data']['balances'];
+            } elseif (is_array($balanceResult['data'])) {
+                $balances = $balanceResult['data'];
+            }
+
+            Log::info('🔍 Recherche solde PAYIN SHAP', [
+                'payment_system_recherche' => $paymentSystemName,
+                'amount_demande' => $amount,
+                'balances_count' => count($balances),
+                'balances_disponibles' => $balances
+            ]);
+
             // Chercher le solde PAYIN pour l'opérateur spécifique
             $payinBalance = null;
-            foreach ($balanceResult['data']['balances'] ?? [] as $balance) {
+            foreach ($balances as $balance) {
+                Log::info('🔎 Analyse balance', [
+                    'payment_system_name' => $balance['payment_system_name'] ?? 'N/A',
+                    'category' => $balance['category'] ?? 'N/A',
+                    'amount' => $balance['amount'] ?? 'N/A',
+                    'recherche' => $paymentSystemName,
+                    'match_payment_system' => ($balance['payment_system_name'] ?? '') === $paymentSystemName,
+                    'match_category' => ($balance['category'] ?? '') === 'PAYIN'
+                ]);
+
                 // On cherche le solde PAYIN (category === 'PAYIN') pour le payment_system correspondant
-                if ($balance['payment_system_name'] === $paymentSystemName &&
+                if (isset($balance['payment_system_name']) &&
+                    $balance['payment_system_name'] === $paymentSystemName &&
                     isset($balance['category']) &&
                     $balance['category'] === 'PAYIN') {
                     $payinBalance = $balance;
@@ -503,6 +530,12 @@ class ShapPayoutService
             }
 
             if (!$payinBalance) {
+                Log::error('❌ Aucun solde PAYIN trouvé', [
+                    'payment_system_recherche' => $paymentSystemName,
+                    'balances_examinees' => count($balances),
+                    'tous_les_payment_systems' => array_column($balances, 'payment_system_name')
+                ]);
+
                 return [
                     'success' => false,
                     'message' => "Aucun solde PAYIN trouvé pour l'opérateur {$paymentSystemName}"
@@ -512,7 +545,7 @@ class ShapPayoutService
             // Le solde PAYIN est utilisé pour financer les payouts
             $availablePayinAmount = $payinBalance['amount'];
 
-            Log::info('Vérification solde PAYIN SHAP', [
+            Log::info('✅ Solde PAYIN trouvé', [
                 'payment_system' => $paymentSystemName,
                 'available_payin_amount' => $availablePayinAmount,
                 'requested_payout_amount' => $amount,
@@ -542,7 +575,8 @@ class ShapPayoutService
             Log::error('Exception vérification solde PAYIN SHAP', [
                 'error' => $e->getMessage(),
                 'payment_system' => $paymentSystemName,
-                'amount' => $amount
+                'amount' => $amount,
+                'trace' => $e->getTraceAsString()
             ]);
 
             return [
