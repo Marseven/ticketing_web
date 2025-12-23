@@ -596,11 +596,47 @@ class TicketController extends Controller
                 $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
             }
 
+            // Charger l'image de l'événement en base64
+            $eventImageBase64 = '';
+            if ($ticket->event->image_file) {
+                $eventImagePath = public_path('storage/images/events/' . $ticket->event->image_file);
+                if (file_exists($eventImagePath)) {
+                    $imageData = file_get_contents($eventImagePath);
+                    $extension = pathinfo($eventImagePath, PATHINFO_EXTENSION);
+                    $mimeType = $extension === 'png' ? 'image/png' : 'image/jpeg';
+                    $eventImageBase64 = "data:$mimeType;base64," . base64_encode($imageData);
+
+                    Log::info('✅ Image événement chargée', [
+                        'path' => $eventImagePath,
+                        'size' => strlen($imageData)
+                    ]);
+                }
+            } elseif ($ticket->event->image_url && filter_var($ticket->event->image_url, FILTER_VALIDATE_URL)) {
+                // Si c'est une URL externe, tenter de la télécharger
+                try {
+                    $imageData = @file_get_contents($ticket->event->image_url);
+                    if ($imageData) {
+                        $eventImageBase64 = 'data:image/jpeg;base64,' . base64_encode($imageData);
+
+                        Log::info('✅ Image événement téléchargée depuis URL', [
+                            'url' => $ticket->event->image_url,
+                            'size' => strlen($imageData)
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    Log::warning('⚠️ Impossible de charger l\'image depuis l\'URL', [
+                        'url' => $ticket->event->image_url,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+
             // Préparer les données pour le PDF
             $data = [
                 'ticket' => $ticket,
                 'qrCodeBase64' => $qrCodeBase64,
                 'logoBase64' => $logoBase64,
+                'eventImageBase64' => $eventImageBase64,
                 'event' => $ticket->event,
                 'ticketType' => $ticket->ticketType,
                 'buyer' => $ticket->buyer,

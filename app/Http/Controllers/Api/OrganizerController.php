@@ -193,12 +193,12 @@ class OrganizerController extends Controller
     }
 
     /**
-     * Get organizer balances
+     * Get organizer balances (PAYIN uniquement)
      */
     public function balances(Request $request): JsonResponse
     {
         $user = $request->user();
-        
+
         if (!$user->is_organizer) {
             return response()->json([
                 'message' => 'Accès refusé. Seuls les organisateurs peuvent accéder aux balances.',
@@ -207,23 +207,40 @@ class OrganizerController extends Controller
 
         $organizerIds = $user->organizers->pluck('id');
 
-        $balances = \App\Models\OrganizerBalance::whereIn('organizer_id', $organizerIds)
+        // Récupérer uniquement le solde PAYIN
+        $payinBalance = \App\Models\OrganizerBalance::whereIn('organizer_id', $organizerIds)
+            ->where('gateway', 'payin')
             ->with(['organizer:id,name'])
-            ->get();
+            ->first();
+
+        // Si le solde PAYIN n'existe pas, on le crée
+        if (!$payinBalance && $organizerIds->isNotEmpty()) {
+            $organizerId = $organizerIds->first();
+            $payinBalance = \App\Models\OrganizerBalance::create([
+                'organizer_id' => $organizerId,
+                'gateway' => 'payin',
+                'balance' => 0,
+                'pending_balance' => 0
+            ]);
+            $payinBalance->load('organizer:id,name');
+        }
 
         return response()->json([
             'success' => true,
-            'data' => ['balances' => $balances]
+            'data' => [
+                'balance' => $payinBalance,
+                'available_balance' => $payinBalance ? $payinBalance->balance : 0
+            ]
         ]);
     }
 
     /**
-     * Request a payout
+     * Request a payout (utilise uniquement le solde PAYIN)
      */
     public function requestPayout(Request $request): JsonResponse
     {
         $user = $request->user();
-        
+
         if (!$user->is_organizer) {
             return response()->json([
                 'message' => 'Accès refusé. Seuls les organisateurs peuvent demander des payouts.',
@@ -246,15 +263,24 @@ class OrganizerController extends Controller
 
         $organizerIds = $user->organizers->pluck('id');
 
-        // Vérifier le solde disponible
-        $balance = \App\Models\OrganizerBalance::whereIn('organizer_id', $organizerIds)
-            ->where('gateway', $request->gateway)
+        // Vérifier le solde PAYIN disponible (unique source pour tous les payouts)
+        $payinBalance = \App\Models\OrganizerBalance::whereIn('organizer_id', $organizerIds)
+            ->where('gateway', 'payin')
             ->first();
 
-        if (!$balance || $balance->balance < $request->amount) {
+        if (!$payinBalance) {
             return response()->json([
                 'success' => false,
-                'message' => 'Solde insuffisant pour ce payout'
+                'message' => 'Aucun solde PAYIN trouvé. Veuillez contacter le support.'
+            ], 400);
+        }
+
+        if ($payinBalance->balance < $request->amount) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Solde PAYIN insuffisant pour ce payout',
+                'available_balance' => $payinBalance->balance,
+                'requested_amount' => $request->amount
             ], 400);
         }
 
@@ -262,7 +288,14 @@ class OrganizerController extends Controller
             $payoutService = app(\App\Services\PayoutService::class);
 
             // Récupérer l'objet Organizer complet
-            $organizer = \App\Models\Organizer::findOrFail($balance->organizer_id);
+            $organizer = \App\Models\Organizer::findOrFail($payinBalance->organizer_id);
+
+            \Illuminate\Support\Facades\Log::info('💸 Demande de payout avec solde PAYIN', [
+                'organizer_id' => $organizer->id,
+                'gateway_envoi' => $request->gateway,
+                'amount' => $request->amount,
+                'payin_balance_before' => $payinBalance->balance
+            ]);
 
             $result = $payoutService->createManualPayout(
                 $organizer,
@@ -275,7 +308,10 @@ class OrganizerController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'Demande de payout créée avec succès',
-                    'data' => ['payout' => $result['payout']]
+                    'data' => [
+                        'payout' => $result['payout'],
+                        'remaining_balance' => $payinBalance->fresh()->balance
+                    ]
                 ]);
             }
 
@@ -287,7 +323,8 @@ class OrganizerController extends Controller
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Erreur demande payout organisateur', [
                 'user_id' => $user->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
@@ -1264,20 +1301,21 @@ class OrganizerController extends Controller
                     'path' => $path,
                     'event_id' => $event->id
                 ]);
-            } elseif ($request->has('image_url')) {
-                // Si une URL est fournie
+            } elseif ($request->filled('image_url')) {
+                // Si une URL valide est fournie (pas null ni chaîne vide)
                 $updateData['image_url'] = $request->image_url;
                 // Optionnellement, supprimer l'ancien fichier si on passe à une URL
                 if ($event->image_file) {
                     \Illuminate\Support\Facades\Storage::disk('public')->delete('images/events/' . $event->image_file);
                     $updateData['image_file'] = null;
                 }
-                
+
                 \Illuminate\Support\Facades\Log::info('Image URL updated', [
                     'image_url' => $request->image_url,
                     'event_id' => $event->id
                 ]);
             }
+            // Si ni image_file ni image_url valide ne sont fournis, on conserve les valeurs existantes
             
             \Illuminate\Support\Facades\Log::info('UpdateData before event update', [
                 'updateData' => $updateData,
@@ -1305,14 +1343,51 @@ class OrganizerController extends Controller
 
             // Mettre à jour les types de billets
             if ($request->has('ticket_types')) {
+                \Illuminate\Support\Facades\Log::info('Updating ticket types', [
+                    'event_id' => $event->id,
+                    'ticket_types_count' => count($request->ticket_types),
+                    'ticket_types_data' => $request->ticket_types
+                ]);
+
                 $submittedIds = collect($request->ticket_types)->pluck('id')->filter()->toArray();
-                
+
                 // Supprimer les types de billets qui ne sont plus dans la liste
-                $event->ticketTypes()->whereNotIn('id', $submittedIds)->delete();
-                
+                $deletedCount = $event->ticketTypes()->whereNotIn('id', $submittedIds)->count();
+                if ($deletedCount > 0) {
+                    $event->ticketTypes()->whereNotIn('id', $submittedIds)->delete();
+                    \Illuminate\Support\Facades\Log::info('Deleted ticket types', [
+                        'event_id' => $event->id,
+                        'deleted_count' => $deletedCount
+                    ]);
+                }
+
                 // Créer ou mettre à jour les types de billets
-                foreach ($request->ticket_types as $ticketTypeData) {
+                foreach ($request->ticket_types as $index => $ticketTypeData) {
+                    // Déterminer le statut : préserver le statut existant si is_active n'est pas fourni
+                    $status = 'active'; // Valeur par défaut pour les nouveaux types
+
                     if (isset($ticketTypeData['id']) && $ticketTypeData['id']) {
+                        // Pour les types existants, préserver le statut actuel si is_active n'est pas fourni
+                        $existingType = \App\Models\TicketType::find($ticketTypeData['id']);
+                        if ($existingType) {
+                            // Si is_active est fourni, l'utiliser ; sinon, conserver le statut existant
+                            if (array_key_exists('is_active', $ticketTypeData)) {
+                                $status = $ticketTypeData['is_active'] ? 'active' : 'inactive';
+                            } else {
+                                $status = $existingType->status; // Conserver le statut existant
+                            }
+                        }
+
+                        \Illuminate\Support\Facades\Log::info('Updating existing ticket type', [
+                            'event_id' => $event->id,
+                            'ticket_type_id' => $ticketTypeData['id'],
+                            'index' => $index,
+                            'is_active_provided' => array_key_exists('is_active', $ticketTypeData),
+                            'is_active_value' => $ticketTypeData['is_active'] ?? 'NOT_PROVIDED',
+                            'final_status' => $status,
+                            'previous_status' => $existingType ? $existingType->status : 'N/A'
+                        ]);
+
                         // Mettre à jour le type existant
                         \App\Models\TicketType::where('id', $ticketTypeData['id'])
                             ->where('event_id', $event->id)
@@ -1321,9 +1396,22 @@ class OrganizerController extends Controller
                                 'description' => $ticketTypeData['description'],
                                 'price' => $ticketTypeData['price'],
                                 'available_quantity' => $ticketTypeData['capacity'],
-                                'status' => ($ticketTypeData['is_active'] ?? true) ? 'active' : 'inactive'
+                                'status' => $status
                             ]);
                     } else {
+                        // Pour les nouveaux types, utiliser is_active s'il est fourni, sinon 'active' par défaut
+                        if (array_key_exists('is_active', $ticketTypeData)) {
+                            $status = $ticketTypeData['is_active'] ? 'active' : 'inactive';
+                        }
+
+                        \Illuminate\Support\Facades\Log::info('Creating new ticket type', [
+                            'event_id' => $event->id,
+                            'index' => $index,
+                            'is_active_provided' => array_key_exists('is_active', $ticketTypeData),
+                            'is_active_value' => $ticketTypeData['is_active'] ?? 'NOT_PROVIDED',
+                            'final_status' => $status
+                        ]);
+
                         // Créer un nouveau type
                         \App\Models\TicketType::create([
                             'event_id' => $event->id,
@@ -1331,10 +1419,14 @@ class OrganizerController extends Controller
                             'description' => $ticketTypeData['description'],
                             'price' => $ticketTypeData['price'],
                             'available_quantity' => $ticketTypeData['capacity'],
-                            'status' => ($ticketTypeData['is_active'] ?? true) ? 'active' : 'inactive'
+                            'status' => $status
                         ]);
                     }
                 }
+
+                \Illuminate\Support\Facades\Log::info('Ticket types update completed', [
+                    'event_id' => $event->id
+                ]);
             }
 
             DB::commit();
@@ -1348,17 +1440,57 @@ class OrganizerController extends Controller
                 'data' => $event
             ]);
 
+        } catch (\Illuminate\Database\QueryException $e) {
+            DB::rollback();
+            \Illuminate\Support\Facades\Log::error('Erreur base de données lors de la mise à jour événement', [
+                'event_id' => $event->id,
+                'error_message' => $e->getMessage(),
+                'error_code' => $e->getCode(),
+                'sql' => $e->getSql() ?? 'N/A',
+                'bindings' => $e->getBindings() ?? [],
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            // Messages d'erreur plus informatifs pour les erreurs SQL courantes
+            $message = 'Erreur lors de la mise à jour de l\'événement';
+            if (str_contains($e->getMessage(), 'foreign key constraint')) {
+                $message = 'Impossible de supprimer certains éléments car ils sont liés à des tickets vendus';
+            } elseif (str_contains($e->getMessage(), 'Duplicate entry')) {
+                $message = 'Un élément avec ces informations existe déjà';
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => $message,
+                'error_details' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollback();
+            \Illuminate\Support\Facades\Log::warning('Erreur de validation lors de la mise à jour événement', [
+                'event_id' => $event->id,
+                'errors' => $e->errors()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
             DB::rollback();
-            \Illuminate\Support\Facades\Log::error('Erreur mise à jour événement', [
+            \Illuminate\Support\Facades\Log::error('Erreur inattendue lors de la mise à jour événement', [
                 'event_id' => $event->id,
-                'error' => $e->getMessage(),
+                'error_type' => get_class($e),
+                'error_message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la mise à jour'
+                'message' => 'Erreur technique lors de la mise à jour : ' . $e->getMessage(),
+                'error_type' => config('app.debug') ? get_class($e) : null
             ], 500);
         }
     }
@@ -1424,9 +1556,12 @@ class OrganizerController extends Controller
                 return [
                     'id' => $order->id,
                     'customer_name' => $order->buyer ? $order->buyer->name : $order->guest_name,
+                    'customer_phone' => $order->buyer ? $order->buyer->phone : $order->guest_phone,
                     'ticket_quantity' => $order->tickets->count(),
                     'total_amount' => $order->total_amount,
-                    'created_at' => $order->created_at->toIso8601String()
+                    'created_at' => $order->created_at->toIso8601String(),
+                    'purchase_time' => $order->created_at->format('H:i'),
+                    'purchase_date' => $order->created_at->format('d/m/Y')
                 ];
             });
 

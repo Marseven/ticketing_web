@@ -243,7 +243,7 @@ class OrderController extends Controller
                 'is_guest_order' => false,
             ]);
 
-            // Créer les billets
+            // Créer les billets avec statut 'pending' en attendant la confirmation du paiement
             for ($i = 0; $i < $validated['quantity']; $i++) {
                 \App\Models\Ticket::create([
                     'order_id' => $order->id,
@@ -252,8 +252,8 @@ class OrderController extends Controller
                     'schedule_id' => $event->schedules->where('status', 'active')->first()?->id,
                     'buyer_id' => $user->id,
                     'code' => $this->generateTicketCode(),
-                    'status' => 'issued',
-                    'issued_at' => now(),
+                    'status' => 'pending', // Statut pending en attendant le paiement
+                    'issued_at' => null, // Sera défini lors de la confirmation du paiement
                 ]);
             }
 

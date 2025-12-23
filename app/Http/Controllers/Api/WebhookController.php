@@ -570,12 +570,34 @@ class WebhookController extends Controller
                     ]);
                 }
             }
-        } elseif (in_array($internalStatus, ['failed', 'cancelled'])) {
+        } elseif (in_array($internalStatus, ['failed', 'cancelled', 'expired'])) {
             // Libérer les places réservées si le paiement échoue
             $order = Order::find($payment->order_id);
             if ($order) {
+                // Protection contre webhooks multiples: vérifier si déjà annulé
+                if ($order->status === 'cancelled') {
+                    Log::warning('🔄 Commande déjà annulée (webhook multiple détecté)', [
+                        'order_id' => $order->id,
+                        'payment_id' => $payment->id
+                    ]);
+                    return; // Ne rien faire
+                }
+
                 $order->update(['status' => 'cancelled']);
-                // TODO: Libérer les quantités réservées dans les TicketTypes
+
+                // Annuler tous les tickets de cette commande pour libérer le stock
+                foreach ($order->tickets as $ticket) {
+                    $ticket->update([
+                        'status' => 'cancelled',
+                        'issued_at' => null
+                    ]);
+                }
+
+                Log::info('✅ Commande annulée et tickets libérés', [
+                    'order_id' => $order->id,
+                    'tickets_count' => $order->tickets->count(),
+                    'reason' => $internalStatus
+                ]);
             }
         }
 
