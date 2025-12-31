@@ -83,7 +83,7 @@
               v-for="event in pastEvents"
               :key="event.id"
               :event="event"
-              class="transform hover:scale-105 transition-all duration-300 grayscale hover:grayscale-0"
+              class="transform hover:scale-105 transition-all duration-300"
             />
           </div>
         </div>
@@ -257,7 +257,7 @@
               v-for="event in pastEvents"
             :key="event.id"
             @click="goToEvent(event)"
-            class="bg-white rounded-primea-lg shadow-primea overflow-hidden cursor-pointer hover:shadow-primea-lg transition-all duration-300 transform hover:scale-105 grayscale hover:grayscale-0"
+            class="bg-white rounded-primea-lg shadow-primea overflow-hidden cursor-pointer hover:shadow-primea-lg transition-all duration-300 transform hover:scale-105"
           >
             <!-- Image de l'événement avec overlay comme dans la maquette -->
             <div class="h-48 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 relative overflow-hidden">

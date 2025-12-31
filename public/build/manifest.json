@@ -136,7 +136,7 @@
     "src": "node_modules/leaflet/dist/images/marker-icon.png"
   },
   "resources/css/app.css": {
-    "file": "assets/css/app-B_WwXweA.css",
+    "file": "assets/css/app-CxzXKPRO.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [
@@ -144,7 +144,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-CLtPryP8.js",
+    "file": "assets/js/app-CVg0Yp-i.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -211,7 +211,7 @@
     ],
     "css": [
       "assets/css/app-CeNye4AY.css",
-      "assets/css/app-B_WwXweA.css"
+      "assets/css/app-CxzXKPRO.css"
     ]
   },
   "resources/js/layouts/AdminLayout.vue": {
@@ -293,7 +293,7 @@
     ]
   },
   "resources/js/pages/Events.vue": {
-    "file": "assets/js/Events-CRDm_m5L.js",
+    "file": "assets/js/Events-CDqSDXHy.js",
     "name": "Events",
     "src": "resources/js/pages/Events.vue",
     "isDynamicEntry": true,
@@ -306,7 +306,7 @@
       "_pinia-vendor-6F1O2Wmp.js"
     ],
     "css": [
-      "assets/css/Events-Cj_HJtLA.css"
+      "assets/css/Events-C38SedYm.css"
     ]
   },
   "resources/js/pages/Payment.vue": {
