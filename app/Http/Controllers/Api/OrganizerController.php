@@ -1062,6 +1062,7 @@ class OrganizerController extends Controller
             'image_url' => 'nullable|string',
             'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
             'is_active' => 'boolean|in:0,1,true,false',
+            'published_at' => 'nullable|date',
             'schedules' => 'required|array|min:1',
             'schedules.*.starts_at' => 'required|date',
             'schedules.*.ends_at' => 'required|date|after_or_equal:schedules.*.starts_at',
@@ -1140,6 +1141,21 @@ class OrganizerController extends Controller
                 ]);
             }
             
+            // Déterminer le status et published_at
+            $status = $request->is_active ? 'published' : 'draft';
+            $publishedAt = null;
+
+            // Si l'événement est publié
+            if ($status === 'published') {
+                // Si published_at est fourni, l'utiliser (publication programmée)
+                if ($request->filled('published_at')) {
+                    $publishedAt = $request->published_at;
+                } else {
+                    // Sinon, publier immédiatement
+                    $publishedAt = now();
+                }
+            }
+
             // Créer l'événement
             $event = Event::create([
                 'title' => $request->title,
@@ -1153,7 +1169,8 @@ class OrganizerController extends Controller
                 'image_url' => $imageUrl,
                 'image_file' => $imageFile,
                 'is_active' => $request->is_active ?? false,
-                'status' => $request->is_active ? 'published' : 'draft'
+                'status' => $status,
+                'published_at' => $publishedAt
             ]);
 
             // Créer les horaires
@@ -1263,6 +1280,7 @@ class OrganizerController extends Controller
             'image_file' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
             'is_active' => 'sometimes|boolean',
             'status' => 'sometimes|in:draft,published,cancelled',
+            'published_at' => 'sometimes|nullable|date',
             'schedules' => 'sometimes|array',
             'schedules.*.starts_at' => 'required_with:schedules|date',
             'schedules.*.ends_at' => 'required_with:schedules|date|after_or_equal:schedules.*.starts_at',
@@ -1302,6 +1320,25 @@ class OrganizerController extends Controller
             $updateData = $request->only([
                 'title', 'description', 'category_id', 'venue_id', 'is_active', 'status'
             ]);
+
+            // Gérer published_at
+            if ($request->has('published_at')) {
+                $updateData['published_at'] = $request->published_at;
+            }
+
+            // Si le status passe à 'published' et que published_at n'est pas défini
+            if (isset($updateData['status']) && $updateData['status'] === 'published') {
+                // Si published_at n'est pas fourni et que l'événement n'a pas déjà une date de publication
+                if (!$request->has('published_at') && !$event->published_at) {
+                    $updateData['published_at'] = now();
+                }
+            }
+
+            // Si le status passe à 'draft', on peut vider published_at si souhaité
+            // (optionnel - laissé commenté pour préserver la date de publication précédente)
+            // if (isset($updateData['status']) && $updateData['status'] === 'draft' && !$request->has('published_at')) {
+            //     $updateData['published_at'] = null;
+            // }
             
             if ($request->hasFile('image_file')) {
                 // Supprimer l'ancienne image si elle existe
