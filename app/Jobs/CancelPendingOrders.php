@@ -30,7 +30,8 @@ class CancelPendingOrders implements ShouldQueue
         // Récupérer les commandes en attente depuis plus d'1 heure
         $oneHourAgo = Carbon::now()->subHour();
 
-        $pendingOrders = Order::where('status', 'pending')
+        $pendingOrders = Order::with('tickets')
+            ->where('status', 'pending')
             ->where('created_at', '<', $oneHourAgo)
             ->get();
 
@@ -55,10 +56,22 @@ class CancelPendingOrders implements ShouldQueue
                 $order->status = 'cancelled';
                 $order->save();
 
-                // Libérer les billets réservés (si applicable)
-                // Si vous avez un système de réservation de billets, libérez-les ici
-                // Exemple:
-                // $order->tickets()->delete();
+                // Annuler les tickets associés pour libérer le stock
+                $ticketsCancelled = 0;
+                foreach ($order->tickets as $ticket) {
+                    if ($ticket->status === 'pending') {
+                        $ticket->update([
+                            'status' => 'cancelled',
+                            'issued_at' => null
+                        ]);
+                        $ticketsCancelled++;
+                    }
+                }
+
+                Log::info('🎫 Tickets annulés pour commande expirée', [
+                    'reference' => $order->reference,
+                    'tickets_cancelled' => $ticketsCancelled
+                ]);
 
                 $cancelledCount++;
 

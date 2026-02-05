@@ -92,7 +92,7 @@ class OrganizerBalance extends Model
     {
         return match($this->gateway) {
             'airtelmoney' => 'Airtel Money',
-            'moovmoney' => 'Moov Money',
+            'moovmoney4' => 'Moov Money',
             'ORABANK_NG' => 'Visa/Mastercard',
             default => ucfirst($this->gateway),
         };

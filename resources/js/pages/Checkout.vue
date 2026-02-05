@@ -877,8 +877,22 @@ export default {
     })
 
     const isEventPassed = computed(() => {
-      if (!eventDate.value) return false
-      return new Date() > eventDate.value
+      if (!event.value?.schedules || event.value.schedules.length === 0) return false
+
+      const schedule = event.value.schedules[0]
+      const startsAt = new Date(schedule.starts_at)
+      const endsAt = new Date(schedule.ends_at)
+
+      // Vérifier si c'est un événement sur plusieurs jours
+      const startsDay = startsAt.toISOString().split('T')[0]
+      const endsDay = endsAt.toISOString().split('T')[0]
+      const isMultiDayEvent = startsDay !== endsDay
+
+      // Pour les événements multi-jours, vérifier ends_at
+      // Pour les événements ponctuels, vérifier starts_at
+      const salesCutoff = isMultiDayEvent ? endsAt : startsAt
+
+      return new Date() > salesCutoff
     })
 
     const timeUntilEvent = computed(() => {

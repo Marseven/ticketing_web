@@ -69,9 +69,9 @@
         </div>
       </div>
 
-      <!-- Balance Cards -->
+      <!-- Balance Cards par opérateur -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        <div v-for="balance in balances" :key="balance.gateway" 
+        <div v-for="balance in balances" :key="balance.gateway"
              class="bg-white rounded-lg shadow p-6">
           <div class="flex items-center justify-between mb-4">
             <div class="flex items-center">
@@ -99,7 +99,7 @@
                 {{ balance.auto_payout_enabled ? 'Activé' : 'Désactivé' }}
               </span>
             </div>
-            
+
             <div v-if="balance.auto_payout_enabled" class="text-sm text-gray-600 font-primea">
               <p>Seuil: {{ formatAmount(balance.auto_payout_threshold) }} XAF</p>
               <p v-if="balance.payout_phone_number">Téléphone: {{ balance.payout_phone_number }}</p>
@@ -112,7 +112,7 @@
 
           <!-- Actions -->
           <div class="space-y-3">
-            <button @click="requestPayout(balance)" 
+            <button @click="requestPayout(balance)"
                     :disabled="balance.balance < 1000"
                     class="w-full bg-primea-blue text-white py-2 px-4 rounded-primea hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 font-primea disabled:opacity-50 disabled:cursor-not-allowed">
               <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,18 +124,18 @@
 
           <!-- Recent Transactions for this Gateway -->
           <div class="mt-6 pt-6 border-t">
-            <h4 class="text-sm font-medium text-gray-700 mb-3">Dernières transactions</h4>
+            <h4 class="text-sm font-medium text-gray-700 mb-3">Derniers versements</h4>
             <div v-if="getRecentPayouts(balance.gateway).length === 0" class="text-sm text-gray-500">
-              Aucune transaction récente
+              Aucun versement récent
             </div>
             <div v-else class="space-y-2">
-              <div v-for="payout in getRecentPayouts(balance.gateway)" :key="payout.id" 
+              <div v-for="payout in getRecentPayouts(balance.gateway)" :key="payout.id"
                    class="flex justify-between items-center text-sm">
                 <div>
                   <span class="font-medium">{{ formatAmount(payout.amount) }} XAF</span>
                   <span class="text-gray-500 ml-2">{{ formatDate(payout.created_at) }}</span>
                 </div>
-                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full" 
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
                       :class="getPayoutStatusClass(payout.status)">
                   {{ getPayoutStatusName(payout.status) }}
                 </span>
@@ -211,39 +211,39 @@
     <div v-if="showPayoutModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded-primea p-6 w-full max-w-md">
         <h3 class="text-lg font-bold text-primea-blue font-primea mb-4">Demande de Versement</h3>
-        
+
         <form @submit.prevent="submitPayoutRequest">
           <div class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Gateway</label>
-              <input :value="getGatewayName(payoutForm.gateway)" disabled 
+              <label class="block text-sm font-medium text-gray-700 mb-2">Opérateur</label>
+              <input :value="getGatewayName(payoutForm.gateway)" disabled
                      class="w-full border rounded-lg px-3 py-2 bg-gray-100">
             </div>
-            
+
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Solde Disponible</label>
-              <input :value="formatAmount(payoutForm.available_balance) + ' XAF'" disabled 
+              <input :value="formatAmount(payoutForm.available_balance) + ' XAF'" disabled
                      class="w-full border rounded-lg px-3 py-2 bg-gray-100">
             </div>
-            
+
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Montant à retirer (XAF)</label>
-              <input v-model.number="payoutForm.amount" type="number" 
-                     :min="1000" :max="payoutForm.available_balance" required 
+              <input v-model.number="payoutForm.amount" type="number"
+                     :min="1000" :max="payoutForm.available_balance" required
                      class="w-full border rounded-lg px-3 py-2">
               <p class="text-xs text-gray-500 mt-1">Montant minimum: 1,000 XAF</p>
             </div>
-            
+
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Numéro de téléphone</label>
-              <input v-model="payoutForm.phone_number" type="tel" maxlength="9" pattern="[0-9]{9}" required 
+              <input v-model="payoutForm.phone_number" type="tel" maxlength="9" pattern="[0-9]{9}" required
                      placeholder="074123456" class="w-full border rounded-lg px-3 py-2">
-              <p class="text-xs text-gray-500 mt-1">Numéro sans indicatif pays</p>
+              <p class="text-xs text-gray-500 mt-1">Numéro {{ payoutForm.gateway === 'airtelmoney' ? 'Airtel' : 'Moov' }} sans indicatif pays (ex: 074123456)</p>
             </div>
           </div>
-          
+
           <div class="flex justify-end space-x-3 mt-6">
-            <button type="button" @click="showPayoutModal = false" 
+            <button type="button" @click="showPayoutModal = false"
                     class="px-4 py-2 text-gray-600 hover:text-gray-800">
               Annuler
             </button>
@@ -289,6 +289,7 @@ const totalBalance = computed(() => {
   return balances.value.reduce((total, balance) => total + (parseFloat(balance.balance) || 0), 0)
 })
 
+
 // Méthodes
 const loadBalances = async () => {
   loading.value = true
@@ -311,7 +312,7 @@ const loadBalances = async () => {
             payout_phone_number: null
           },
           {
-            gateway: 'moovmoney',
+            gateway: 'moovmoney4',
             balance: 0,
             auto_payout_enabled: false,
             auto_payout_threshold: 10000,
@@ -337,7 +338,7 @@ const loadBalances = async () => {
         payout_phone_number: null
       },
       {
-        gateway: 'moovmoney',
+        gateway: 'moovmoney4',
         balance: 0,
         auto_payout_enabled: false,
         auto_payout_threshold: 10000,
@@ -467,7 +468,7 @@ const formatDateTime = (datetime) => {
 const getGatewayName = (gateway) => {
   const names = {
     airtelmoney: 'Airtel Money',
-    moovmoney: 'Moov Money'
+    moovmoney4: 'Moov Money'
   }
   return names[gateway] || gateway
 }
@@ -475,7 +476,7 @@ const getGatewayName = (gateway) => {
 const getGatewayBadgeClass = (gateway) => {
   const classes = {
     airtelmoney: 'bg-red-100 text-red-800',
-    moovmoney: 'bg-orange-100 text-orange-800'
+    moovmoney4: 'bg-orange-100 text-orange-800'
   }
   return classes[gateway] || 'bg-gray-100 text-gray-800'
 }

@@ -86,7 +86,7 @@ class PayoutService
      */
     private function updateOrganizerBalance(Organizer $organizer, Payment $payment): OrganizerBalance
     {
-        // Déduire le gateway depuis payment_system ou sub_payment_system
+        // Déduire le gateway depuis le paiement (airtelmoney ou moovmoney4)
         $gateway = $this->deduceGateway($payment);
 
         $organizerBalance = OrganizerBalance::firstOrCreate([
@@ -137,9 +137,9 @@ class PayoutService
             'airtel money' => 'airtelmoney',
             'airtelmoney' => 'airtelmoney',
             'airtel' => 'airtelmoney',
-            'moov money' => 'moovmoney',
-            'moovmoney' => 'moovmoney',
-            'moov' => 'moovmoney',
+            'moov money' => 'moovmoney4',
+            'moovmoney' => 'moovmoney4',
+            'moov' => 'moovmoney4',
         ];
 
         // Essayer sub_payment_system d'abord
@@ -246,7 +246,7 @@ class PayoutService
                 'phone_number' => $phoneNumber
             ]);
 
-            // Vérifier le solde de l'organisateur
+            // Vérifier le solde de l'organisateur pour ce gateway
             $organizerBalance = OrganizerBalance::where('organizer_id', $organizer->id)
                 ->where('gateway', $gateway)
                 ->first();

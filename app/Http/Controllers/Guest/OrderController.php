@@ -152,14 +152,29 @@ class OrderController extends Controller
                 }
             }
 
-            // Vérifier si l'événement est passé
+            // Vérifier si les ventes sont encore possibles
             if ($event->schedules->isNotEmpty()) {
                 $nextSchedule = $event->schedules->where('status', 'active')->first();
-                if ($nextSchedule && $nextSchedule->starts_at < now()) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Impossible de réserver des billets pour un événement passé'
-                    ], 400);
+                if ($nextSchedule) {
+                    // Déterminer si c'est un événement sur plusieurs jours (période continue)
+                    // ou un événement ponctuel (même jour)
+                    $startsAt = $nextSchedule->starts_at;
+                    $endsAt = $nextSchedule->ends_at;
+                    $isMultiDayEvent = $startsAt->format('Y-m-d') !== $endsAt->format('Y-m-d');
+
+                    // Pour les événements sur plusieurs jours, ventes jusqu'à ends_at
+                    // Pour les événements ponctuels, ventes jusqu'à starts_at
+                    $salesCutoff = $isMultiDayEvent ? $endsAt : $startsAt;
+
+                    if ($salesCutoff < now()) {
+                        $message = $isMultiDayEvent
+                            ? 'Impossible de réserver des billets pour un événement terminé'
+                            : 'Impossible de réserver des billets pour un événement déjà commencé';
+                        return response()->json([
+                            'success' => false,
+                            'message' => $message
+                        ], 400);
+                    }
                 }
             }
 

@@ -598,24 +598,56 @@ class TicketController extends Controller
 
             // Charger l'image de l'événement en base64
             $eventImageBase64 = '';
-            if ($ticket->event->image_file) {
-                $eventImagePath = public_path('storage/images/events/' . $ticket->event->image_file);
-                if (file_exists($eventImagePath)) {
-                    $imageData = file_get_contents($eventImagePath);
-                    $extension = pathinfo($eventImagePath, PATHINFO_EXTENSION);
-                    $mimeType = $extension === 'png' ? 'image/png' : 'image/jpeg';
-                    $eventImageBase64 = "data:$mimeType;base64," . base64_encode($imageData);
+            $imageLoaded = false;
 
-                    Log::info('✅ Image événement chargée', [
-                        'path' => $eventImagePath,
-                        'size' => strlen($imageData)
+            if ($ticket->event->image_file) {
+                $filename = $ticket->event->image_file;
+                $basePath = public_path('storage/images/events/');
+
+                // Chercher l'image avec les différents préfixes (medium, large, original)
+                $prefixes = ['medium_', 'large_', 'thumbnail_', ''];
+
+                foreach ($prefixes as $prefix) {
+                    $eventImagePath = $basePath . $prefix . $filename;
+
+                    if (file_exists($eventImagePath)) {
+                        $imageData = file_get_contents($eventImagePath);
+
+                        // Vérifier que l'image n'est pas corrompue (taille minimale)
+                        if (strlen($imageData) > 1000) {
+                            $extension = pathinfo($eventImagePath, PATHINFO_EXTENSION);
+                            $mimeType = $extension === 'png' ? 'image/png' : 'image/jpeg';
+                            $eventImageBase64 = "data:$mimeType;base64," . base64_encode($imageData);
+                            $imageLoaded = true;
+
+                            Log::info('✅ Image événement chargée', [
+                                'path' => $eventImagePath,
+                                'prefix' => $prefix ?: 'original',
+                                'size' => strlen($imageData)
+                            ]);
+                            break;
+                        } else {
+                            Log::warning('⚠️ Image trop petite (probablement corrompue)', [
+                                'path' => $eventImagePath,
+                                'size' => strlen($imageData)
+                            ]);
+                        }
+                    }
+                }
+
+                if (!$imageLoaded) {
+                    Log::warning('⚠️ Aucune image valide trouvée pour l\'événement', [
+                        'filename' => $filename,
+                        'searched_prefixes' => $prefixes
                     ]);
                 }
-            } elseif ($ticket->event->image_url && filter_var($ticket->event->image_url, FILTER_VALIDATE_URL)) {
-                // Si c'est une URL externe, tenter de la télécharger
+            }
+
+            // Fallback: Si pas d'image locale, essayer l'URL externe
+            if (!$imageLoaded && $ticket->event->image_url && filter_var($ticket->event->image_url, FILTER_VALIDATE_URL)) {
                 try {
                     $imageData = @file_get_contents($ticket->event->image_url);
-                    if ($imageData) {
+                    if ($imageData && strlen($imageData) > 1000) {
                         $eventImageBase64 = 'data:image/jpeg;base64,' . base64_encode($imageData);
 
                         Log::info('✅ Image événement téléchargée depuis URL', [

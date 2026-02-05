@@ -183,8 +183,8 @@
                       <div class="flex items-center justify-between mb-2">
                         <h3 class="font-semibold text-gray-900 font-primea">{{ ticket.name }}</h3>
                         <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                              :class="ticket.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
-                          {{ ticket.is_active ? 'Actif' : 'Inactif' }}
+                              :class="ticket.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
+                          {{ ticket.status === 'active' ? 'Actif' : 'Inactif' }}
                         </span>
                       </div>
                       <p class="text-gray-600 text-sm font-primea">{{ ticket.description || 'Aucune description' }}</p>
@@ -221,21 +221,25 @@
             <div class="bg-white rounded-primea shadow-primea p-6">
               <h2 class="text-xl font-semibold text-primea-blue font-primea mb-6">Achats récents</h2>
               <div v-if="recentOrders.length > 0" class="overflow-x-auto">
-                <table class="w-full">
+                <table class="w-full min-w-[700px]">
                   <thead class="bg-gray-50">
                     <tr>
-                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase font-primea">Client</th>
-                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase font-primea">Billets</th>
-                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase font-primea">Montant</th>
-                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase font-primea">Date</th>
+                      <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase font-primea">Client</th>
+                      <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase font-primea">Téléphone</th>
+                      <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase font-primea">Billets</th>
+                      <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase font-primea">Montant</th>
+                      <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase font-primea">Date</th>
+                      <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase font-primea">Heure</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-gray-200">
                     <tr v-for="order in recentOrders" :key="order.id">
-                      <td class="px-4 py-3 text-sm text-gray-900 font-primea">{{ order.customer_name }}</td>
-                      <td class="px-4 py-3 text-sm text-gray-900 font-primea">{{ order.ticket_quantity }}</td>
-                      <td class="px-4 py-3 text-sm font-medium text-gray-900 font-primea">{{ formatAmount(order.total_amount) }} XAF</td>
-                      <td class="px-4 py-3 text-sm text-gray-500 font-primea">{{ formatDate(order.created_at) }}</td>
+                      <td class="px-3 py-3 text-sm text-gray-900 font-primea">{{ order.customer_name }}</td>
+                      <td class="px-3 py-3 text-sm text-gray-600 font-primea">{{ order.customer_phone || '-' }}</td>
+                      <td class="px-3 py-3 text-sm text-gray-900 font-primea text-center">{{ order.ticket_quantity }}</td>
+                      <td class="px-3 py-3 text-sm font-medium text-gray-900 font-primea text-right">{{ formatAmount(order.total_amount) }} XAF</td>
+                      <td class="px-3 py-3 text-sm text-gray-500 font-primea">{{ order.purchase_date || formatDate(order.created_at) }}</td>
+                      <td class="px-3 py-3 text-sm text-gray-500 font-primea">{{ order.purchase_time || formatTime(order.created_at) }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -539,6 +543,13 @@ const formatAmount = (amount) => {
 
 const formatDate = (date) => {
   return new Date(date).toLocaleDateString('fr-FR');
+};
+
+const formatTime = (datetime) => {
+  return new Date(datetime).toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 };
 
 const formatDateTime = (datetime) => {

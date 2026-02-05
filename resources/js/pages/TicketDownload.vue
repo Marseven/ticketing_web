@@ -72,9 +72,22 @@
             <div class="mb-8">
               <button
                 @click="downloadTicket"
-                class="w-full bg-yellow-500 text-blue-900 py-4 px-6 rounded-xl font-bold transition-all duration-200 shadow-lg hover:bg-yellow-600 transform hover:scale-105"
+                :disabled="downloading"
+                :class="[
+                  'w-full py-4 px-6 rounded-xl font-bold transition-all duration-200 shadow-lg',
+                  downloading
+                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                    : 'bg-yellow-500 text-blue-900 hover:bg-yellow-600 transform hover:scale-105'
+                ]"
               >
-                Télécharger
+                <span v-if="downloading" class="flex items-center justify-center gap-2">
+                  <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Téléchargement...
+                </span>
+                <span v-else>Télécharger le PDF</span>
               </button>
             </div>
 
@@ -130,12 +143,27 @@
                 <div class="space-y-3">
                   <button
                     @click="downloadTicket"
-                    class="w-full bg-yellow-500 text-blue-900 py-3 px-6 rounded-xl font-bold transition-all duration-200 shadow-lg hover:bg-yellow-600 transform hover:scale-105 flex items-center justify-center gap-2"
+                    :disabled="downloading"
+                    :class="[
+                      'w-full py-3 px-6 rounded-xl font-bold transition-all duration-200 shadow-lg flex items-center justify-center gap-2',
+                      downloading
+                        ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                        : 'bg-yellow-500 text-blue-900 hover:bg-yellow-600 transform hover:scale-105'
+                    ]"
                   >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    Télécharger le ticket PDF
+                    <template v-if="downloading">
+                      <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Téléchargement...
+                    </template>
+                    <template v-else>
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                      </svg>
+                      Télécharger le ticket PDF
+                    </template>
                   </button>
                   <button
                     @click="goBack"
@@ -158,6 +186,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import TicketComponent from '../components/TicketComponent.vue'
 import { ticketService } from '../services/api.js'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'TicketDownload',
@@ -172,6 +201,7 @@ export default {
     const ticket = ref(null)
     const loading = ref(true)
     const error = ref('')
+    const downloading = ref(false)
 
     // Load ticket data from API
     const loadTicket = async () => {
@@ -279,14 +309,71 @@ export default {
     }
 
     const downloadTicket = async () => {
-      try {
-        const ticketCode = route.params.id
+      if (downloading.value) return
 
-        // Open PDF download link in new tab
-        window.open(`/api/v1/tickets/${ticketCode}/pdf`, '_blank')
+      downloading.value = true
+      const ticketCode = route.params.id
+      const fileName = `ticket-${ticketCode}.pdf`
+
+      try {
+        // Afficher le loading
+        Swal.fire({
+          title: 'Téléchargement en cours...',
+          html: 'Préparation de votre ticket PDF',
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          showConfirmButton: false,
+          didOpen: () => {
+            Swal.showLoading()
+          }
+        })
+
+        // Télécharger le PDF via fetch
+        const response = await fetch(`/api/v1/tickets/${ticketCode}/pdf`)
+
+        if (!response.ok) {
+          throw new Error('Erreur lors de la génération du PDF')
+        }
+
+        // Convertir en blob
+        const blob = await response.blob()
+
+        // Créer un lien de téléchargement
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = fileName
+        document.body.appendChild(link)
+        link.click()
+
+        // Nettoyer
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+
+        // Notification de succès
+        Swal.fire({
+          icon: 'success',
+          title: 'Téléchargement réussi !',
+          html: `
+            <p class="text-gray-600 mb-2">Votre ticket a été téléchargé :</p>
+            <p class="font-semibold text-blue-900">${fileName}</p>
+            <p class="text-sm text-gray-500 mt-2">Vérifiez votre dossier Téléchargements</p>
+          `,
+          confirmButtonColor: '#272d63',
+          confirmButtonText: 'Parfait !'
+        })
+
       } catch (err) {
         console.error('Download error:', err)
-        alert('Erreur lors du téléchargement du ticket')
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur de téléchargement',
+          text: 'Impossible de télécharger le ticket. Veuillez réessayer.',
+          confirmButtonColor: '#272d63',
+          confirmButtonText: 'Réessayer'
+        })
+      } finally {
+        downloading.value = false
       }
     }
 
@@ -303,6 +390,7 @@ export default {
       ticket,
       loading,
       error,
+      downloading,
       formatEventDate,
       formatPrice,
       downloadTicket,

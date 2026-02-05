@@ -14,337 +14,383 @@
         body {
             font-family: 'Helvetica', 'Arial', sans-serif;
             background: #f5f5f5;
-            padding: 15px;
+            padding: 10px;
         }
 
         .ticket {
             background: white;
-            max-width: 650px;
+            max-width: 700px;
             margin: 0 auto;
-            border-radius: 12px;
+            border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
-        /* Image de l'événement */
-        .event-image-container {
-            position: relative;
+        /* ===== SECTION IMAGE EVENEMENT ===== */
+        .event-image-section {
             width: 100%;
-            height: 250px;
+            height: 280px;
             overflow: hidden;
             background: linear-gradient(135deg, #272d63 0%, #4a5098 100%);
+            position: relative;
         }
 
-        .event-image {
+        .event-image-section img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            opacity: 0.95;
         }
 
-        .event-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 70%, transparent 100%);
-            padding: 25px;
-            color: white;
-        }
-
-        .event-overlay h1 {
-            font-size: 28px;
-            margin-bottom: 8px;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
-
-        .event-overlay p {
-            font-size: 16px;
-            opacity: 0.95;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        }
-
-        /* Header avec logo si pas d'image */
-        .ticket-header {
+        /* Header alternatif sans image */
+        .event-header-no-image {
+            width: 100%;
+            height: 200px;
             background: linear-gradient(135deg, #272d63 0%, #4a5098 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             color: white;
-            padding: 35px 25px;
             text-align: center;
-            position: relative;
+            padding: 20px;
         }
 
-        .logo {
-            width: 90px;
+        .event-header-no-image .logo {
+            width: 80px;
             height: auto;
             margin-bottom: 15px;
         }
 
-        .ticket-header h1 {
+        .event-header-no-image h1 {
             font-size: 28px;
-            margin-bottom: 10px;
-            color: white;
             font-weight: bold;
+            margin-bottom: 10px;
         }
 
-        .ticket-header p {
-            font-size: 15px;
-            color: rgba(255,255,255,0.9);
-        }
-
-        .ticket-body {
-            padding: 25px;
-        }
-
-        .event-info {
-            border-bottom: 2px dashed #e0e0e0;
-            padding-bottom: 20px;
-            margin-bottom: 25px;
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 18px;
-            align-items: center;
-        }
-
-        .info-label {
-            font-weight: 600;
-            color: #272d63;
+        .event-header-no-image p {
             font-size: 14px;
+            opacity: 0.9;
         }
 
-        .info-value {
-            color: #333;
+        /* ===== SECTION INFORMATIONS ===== */
+        .ticket-info-section {
+            padding: 25px 30px;
+            position: relative;
+        }
+
+        /* Code du ticket en haut à droite */
+        .ticket-number {
+            position: absolute;
+            top: 20px;
+            right: 30px;
             font-size: 14px;
-            text-align: right;
+            font-weight: bold;
+            color: #dc2626;
+            font-family: 'Courier New', monospace;
         }
 
-        .qr-section {
+        /* Layout 2 colonnes */
+        .info-content {
+            display: table;
+            width: 100%;
+        }
+
+        .info-left {
+            display: table-cell;
+            width: 55%;
+            vertical-align: top;
+            padding-right: 20px;
+        }
+
+        .info-right {
+            display: table-cell;
+            width: 45%;
+            vertical-align: top;
             text-align: center;
-            padding: 25px 0;
-            background: #f9f9f9;
-            border-radius: 8px;
-            margin: 20px 0;
         }
 
-        .qr-section p.scan-instruction {
-            color: #666;
-            margin-bottom: 15px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .qr-section img {
-            width: 220px;
-            height: 220px;
-            margin: 15px auto;
-            border: 3px solid #fab511;
-            border-radius: 8px;
-            padding: 8px;
-            background: white;
-        }
-
-        .ticket-code {
+        /* Titre événement */
+        .event-title {
             font-size: 22px;
             font-weight: bold;
             color: #272d63;
-            margin: 12px 0 8px 0;
-            letter-spacing: 1px;
+            text-transform: uppercase;
+            line-height: 1.2;
+            margin-bottom: 15px;
+            padding-right: 80px; /* Espace pour le numéro de ticket */
         }
 
-        .qr-section p.unique-note {
-            color: #999;
-            font-size: 11px;
-            margin-top: 8px;
-        }
-
-        .buyer-info {
-            background: #f0f4ff;
-            padding: 18px;
-            border-radius: 8px;
+        /* Détails événement */
+        .event-details {
             margin-bottom: 20px;
-            border-left: 4px solid #272d63;
         }
 
-        .buyer-info .info-row {
-            margin-bottom: 12px;
+        .event-details p {
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 6px;
+            line-height: 1.4;
         }
 
-        .buyer-info .info-row:last-child {
-            margin-bottom: 0;
+        .event-details .label {
+            color: #6b7280;
         }
 
-        .warning {
-            background: #fff9e6;
-            border: 2px solid #fab511;
-            padding: 18px;
-            border-radius: 8px;
+        .event-details .value {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        /* Prix */
+        .ticket-price {
+            font-size: 36px;
+            font-weight: bold;
+            color: #dc2626;
+            margin: 20px 0;
+            letter-spacing: -1px;
+        }
+
+        /* Section avertissement */
+        .warning-section {
             margin-top: 20px;
-            font-size: 11px;
-            color: #856404;
-            line-height: 1.6;
+            padding-top: 15px;
+            border-top: 1px solid #e5e7eb;
         }
 
-        .warning strong {
-            display: block;
+        .warning-title {
+            font-size: 11px;
+            font-weight: bold;
+            color: #dc2626;
             margin-bottom: 8px;
-            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .warning-text {
+            font-size: 10px;
+            color: #6b7280;
+            line-height: 1.8;
+            letter-spacing: 0.3px;
+        }
+
+        /* Logo Primea */
+        .primea-logo {
+            margin-top: 20px;
+        }
+
+        .primea-logo img {
+            height: 35px;
+            width: auto;
+        }
+
+        .primea-logo-text {
+            font-size: 24px;
+            font-weight: bold;
             color: #272d63;
         }
 
-        .footer {
-            text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            color: #666;
-            font-size: 11px;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        .footer p {
-            margin: 3px 0;
-        }
-
-        .price {
-            font-size: 26px;
-            font-weight: bold;
+        .primea-logo-text span {
             color: #fab511;
         }
 
-        .badge {
-            display: inline-block;
-            background: #fab511;
-            color: #272d63;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 13px;
+        .primea-tagline {
+            font-size: 8px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        /* ===== SECTION QR CODE ===== */
+        .qr-code-container {
+            padding: 10px;
+        }
+
+        .qr-code-container img {
+            width: 200px;
+            height: 200px;
+            border: none;
+        }
+
+        .qr-unique-text {
+            margin-top: 12px;
+            font-size: 12px;
+        }
+
+        .qr-unique-text .red {
+            color: #dc2626;
             font-weight: 600;
         }
 
-        .date-time-block {
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
+        .qr-unique-text .gray {
+            color: #6b7280;
+            font-size: 11px;
         }
 
-        .date-time-block .info-row {
-            margin-bottom: 12px;
+        /* ===== INFORMATIONS TITULAIRE ===== */
+        .buyer-section {
+            background: #f8fafc;
+            padding: 15px 30px;
+            border-top: 2px dashed #e5e7eb;
         }
 
-        .date-time-block .info-row:last-child {
-            margin-bottom: 0;
+        .buyer-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #272d63;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .buyer-info-row {
+            display: table;
+            width: 100%;
+        }
+
+        .buyer-info-item {
+            display: table-cell;
+            width: 50%;
+            font-size: 12px;
+        }
+
+        .buyer-info-item .label {
+            color: #6b7280;
+        }
+
+        .buyer-info-item .value {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        /* ===== FOOTER ===== */
+        .ticket-footer {
+            background: #272d63;
+            color: white;
+            padding: 12px 30px;
+            font-size: 10px;
+            text-align: center;
+        }
+
+        .ticket-footer p {
+            margin: 2px 0;
+            opacity: 0.9;
+        }
+
+        .ticket-code-footer {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            letter-spacing: 1px;
         }
     </style>
 </head>
 <body>
     <div class="ticket">
-        <!-- Image de l'événement si disponible -->
+        <!-- Section Image Événement -->
         @if($eventImageBase64)
-            <div class="event-image-container">
-                <img src="{{ $eventImageBase64 }}" alt="{{ $event->title }}" class="event-image">
-                <div class="event-overlay">
-                    <h1>{{ $event->title }}</h1>
-                    <p>📍 {{ $venue?->name ?? 'À définir' }}</p>
-                </div>
+            <div class="event-image-section">
+                <img src="{{ $eventImageBase64 }}" alt="{{ $event->title }}">
             </div>
         @else
-            <!-- Header avec logo si pas d'image -->
-            <div class="ticket-header">
+            <div class="event-header-no-image">
                 @if($logoBase64)
                     <img src="{{ $logoBase64 }}" alt="Primea" class="logo">
                 @endif
                 <h1>{{ $event->title }}</h1>
-                <p>📍 {{ $venue?->name ?? 'À définir' }}</p>
+                <p>{{ $venue?->name ?? 'Lieu à définir' }}</p>
             </div>
         @endif
 
-        <div class="ticket-body">
-            <!-- Informations de date et heure -->
-            <div class="date-time-block">
-                <div class="info-row">
-                    <span class="info-label">📅 Date</span>
-                    <span class="info-value">
+        <!-- Section Informations Principales -->
+        <div class="ticket-info-section">
+            <!-- Code du ticket -->
+            <div class="ticket-number">{{ $ticket->code }}</div>
+
+            <div class="info-content">
+                <!-- Colonne Gauche : Détails -->
+                <div class="info-left">
+                    <h2 class="event-title">{{ $event->title }}</h2>
+
+                    <div class="event-details">
                         @if($schedule)
-                            <strong>{{ \Carbon\Carbon::parse($schedule->starts_at)->translatedFormat('l d F Y') }}</strong>
-                        @else
-                            <strong>À définir</strong>
+                            <p>
+                                <span class="value">{{ strtoupper(\Carbon\Carbon::parse($schedule->starts_at)->translatedFormat('l d F Y')) }}</span>
+                            </p>
+                            @if($schedule->door_time)
+                                <p>
+                                    <span class="label">Ouverture des portes : </span>
+                                    <span class="value">{{ \Carbon\Carbon::parse($schedule->door_time)->format('H\hi') }}</span>
+                                </p>
+                            @endif
                         @endif
-                    </span>
+                        <p>
+                            <span class="label">Lieu : </span>
+                            <span class="value">{{ $venue?->name ?? 'À définir' }}</span>
+                        </p>
+                        <p>
+                            <span class="label">Catégorie : </span>
+                            <span class="value">{{ $ticketType->name }}</span>
+                        </p>
+                    </div>
+
+                    <div class="ticket-price">
+                        {{ number_format($ticketType->price, 0, ',', '.') }} FCFA
+                    </div>
+
+                    <div class="warning-section">
+                        <p class="warning-title">** ATTENTION **</p>
+                        <p class="warning-text">
+                            Ce ticket est strictement personnel et à usage<br>
+                            unique. Tâchez de ne le remettre à personne.
+                        </p>
+                    </div>
+
+                    <div class="primea-logo">
+                        @if($logoBase64)
+                            <img src="{{ $logoBase64 }}" alt="Primea">
+                        @else
+                            <div class="primea-logo-text">Prim<span>e</span>a</div>
+                        @endif
+                        <p class="primea-tagline">Simple, Rapide et Sécurisée</p>
+                    </div>
                 </div>
 
-                @if($schedule)
-                <div class="info-row">
-                    <span class="info-label">🕐 Heure de début</span>
-                    <span class="info-value"><strong>{{ \Carbon\Carbon::parse($schedule->starts_at)->format('H:i') }}</strong></span>
+                <!-- Colonne Droite : QR Code -->
+                <div class="info-right">
+                    <div class="qr-code-container">
+                        <img src="{{ $qrCodeBase64 }}" alt="QR Code">
+                    </div>
+                    <div class="qr-unique-text">
+                        <p class="red">Ce QR Code est unique</p>
+                        <p class="gray">et ne peut être scanné qu'une seule fois</p>
+                    </div>
                 </div>
-                @endif
-
-                @if($schedule && $schedule->door_time)
-                <div class="info-row">
-                    <span class="info-label">🚪 Ouverture des portes</span>
-                    <span class="info-value"><strong>{{ \Carbon\Carbon::parse($schedule->door_time)->format('H:i') }}</strong></span>
-                </div>
-                @endif
-            </div>
-
-            <!-- Informations du billet -->
-            <div class="event-info">
-                <div class="info-row">
-                    <span class="info-label">🎫 Catégorie</span>
-                    <span class="badge">{{ $ticketType->name }}</span>
-                </div>
-
-                <div class="info-row">
-                    <span class="info-label">💰 Prix</span>
-                    <span class="price">{{ number_format($ticketType->price, 0, ',', ' ') }} XAF</span>
-                </div>
-            </div>
-
-            <!-- Informations du titulaire -->
-            <div class="buyer-info">
-                <div class="info-row">
-                    <span class="info-label">👤 Titulaire</span>
-                    <span class="info-value"><strong>{{ $buyer ? $buyer->name : ($ticket->order->guest_name ?? 'Guest') }}</strong></span>
-                </div>
-                @if($buyer && $buyer->phone)
-                <div class="info-row">
-                    <span class="info-label">📱 Téléphone</span>
-                    <span class="info-value">{{ $buyer->phone }}</span>
-                </div>
-                @elseif($ticket->order->guest_phone)
-                <div class="info-row">
-                    <span class="info-label">📱 Téléphone</span>
-                    <span class="info-value">{{ $ticket->order->guest_phone }}</span>
-                </div>
-                @endif
-            </div>
-
-            <!-- Section QR Code -->
-            <div class="qr-section">
-                <p class="scan-instruction"><strong>Présentez ce QR code à l'entrée</strong></p>
-                <img src="{{ $qrCodeBase64 }}" alt="QR Code">
-                <div class="ticket-code">{{ $ticket->code }}</div>
-                <p class="unique-note">Ce QR code est unique et ne peut être scanné qu'une seule fois</p>
-            </div>
-
-            <!-- Avertissement -->
-            <div class="warning">
-                <strong>⚠️ CONDITIONS D'UTILISATION</strong>
-                • Ce ticket est strictement personnel et à usage unique<br>
-                • Il ne peut être ni vendu ni transféré à autrui<br>
-                • Toute tentative de duplication ou falsification entraînera un refus d'entrée<br>
-                • Présentez-vous avec une pièce d'identité valide
             </div>
         </div>
 
-        <div class="footer">
-            <p><strong>Propulsé par Primea</strong></p>
-            <p>{{ config('app.url') }}</p>
-            <p style="margin-top: 5px; color: #999;">Téléchargé le {{ \Carbon\Carbon::now()->translatedFormat('d F Y à H:i') }}</p>
+        <!-- Section Titulaire -->
+        <div class="buyer-section">
+            <p class="buyer-section-title">Informations du titulaire</p>
+            <div class="buyer-info-row">
+                <div class="buyer-info-item">
+                    <span class="label">Nom : </span>
+                    <span class="value">{{ $buyer ? $buyer->name : ($ticket->order->guest_name ?? 'Non renseigné') }}</span>
+                </div>
+                <div class="buyer-info-item">
+                    <span class="label">Téléphone : </span>
+                    <span class="value">
+                        @if($buyer && $buyer->phone)
+                            {{ $buyer->phone }}
+                        @elseif($ticket->order->guest_phone)
+                            {{ $ticket->order->guest_phone }}
+                        @else
+                            Non renseigné
+                        @endif
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="ticket-footer">
+            <p class="ticket-code-footer">{{ $ticket->code }}</p>
+            <p>Téléchargé le {{ \Carbon\Carbon::now()->translatedFormat('d F Y à H:i') }} | {{ config('app.url') }}</p>
         </div>
     </div>
 </body>

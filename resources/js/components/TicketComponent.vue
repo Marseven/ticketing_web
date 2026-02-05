@@ -1,123 +1,182 @@
 <template>
-  <div 
+  <div
     :class="[
-      'ticket-component bg-white rounded-primea-xl overflow-hidden font-primea',
-      size === 'small' ? 'max-w-sm' : 'max-w-2xl',
+      'ticket-component bg-white overflow-hidden font-primea',
+      size === 'small' ? 'max-w-sm rounded-xl' : 'max-w-2xl rounded-2xl',
       'shadow-primea-lg'
     ]"
   >
-    <!-- Section du haut avec image sans texte -->
+    <!-- Section Image Événement -->
     <div class="relative">
-      <!-- Image d'arrière-plan simple -->
-      <div 
+      <div
         :class="[
           'relative overflow-hidden bg-primea-gradient',
-          size === 'small' ? 'h-40' : 'h-56'
+          size === 'small' ? 'h-44' : 'h-64'
         ]"
       >
-        <img 
-          v-if="ticket?.event?.image" 
-          :src="ticket.event.image" 
+        <img
+          v-if="ticket?.event?.image"
+          :src="ticket.event.image"
           :alt="ticket.event?.title"
           class="w-full h-full object-cover"
         />
-        <div class="absolute inset-0 bg-black/30"></div>
+        <div v-else class="w-full h-full flex items-center justify-center">
+          <span class="text-white/50 text-lg">Image de l'événement</span>
+        </div>
       </div>
     </div>
 
-    <!-- Section du bas avec détails -->
-    <div 
+    <!-- Section Informations (2 colonnes) -->
+    <div
       :class="[
-        'p-4 bg-gray-50 border-t-4 border-dashed border-gray-300',
-        size === 'small' ? 'text-sm' : 'text-base'
+        'relative bg-white',
+        size === 'small' ? 'p-4' : 'p-6'
       ]"
     >
-      <div class="flex justify-between items-start">
-        <!-- Informations détaillées -->
-        <div class="flex-1">
-          <!-- Titre de l'événement agrandi -->
-          <div class="mb-4">
-            <h3 
-              :class="[
-                'font-bold text-primea-blue mb-2',
-                size === 'small' ? 'text-lg' : 'text-3xl'
-              ]"
-            >
-              {{ ticket?.event?.title || "L'OISEAU RARE" }}
-            </h3>
+      <!-- Code du ticket en haut à droite -->
+      <div
+        :class="[
+          'absolute top-4 right-4 font-bold text-red-600 font-mono',
+          size === 'small' ? 'text-[10px]' : 'text-sm'
+        ]"
+      >
+        {{ ticket?.reference || 'TKT-XXXXXXXX' }}
+      </div>
+
+      <div class="flex gap-4">
+        <!-- Colonne Gauche : Détails -->
+        <div class="flex-1 pr-2">
+          <!-- Titre de l'événement -->
+          <h3
+            :class="[
+              'font-bold text-primea-blue uppercase leading-tight mb-3',
+              size === 'small' ? 'text-base pr-12' : 'text-xl pr-16'
+            ]"
+          >
+            {{ ticket?.event?.title || "L'OISEAU RARE" }}
+            <template v-if="ticket?.event?.venue_name">
+              <br />À {{ ticket.event.venue_name.toUpperCase() }}
+            </template>
+          </h3>
+
+          <!-- Date -->
+          <div :class="['text-gray-800 mb-1', size === 'small' ? 'text-xs' : 'text-sm']">
+            <span class="font-semibold">{{ formatEventDate }}</span>
           </div>
-          
-          <!-- Date et lieu -->
-          <div class="mb-4 space-y-1">
-            <div class="font-semibold text-gray-800">{{ formatEventDate }}</div>
-            <div class="text-gray-600 text-sm">À {{ ticket?.event?.venue_name?.toUpperCase() || 'ENTRE NOUS BAR' }}</div>
+
+          <!-- Lieu -->
+          <div :class="['text-gray-600 mb-1', size === 'small' ? 'text-xs' : 'text-sm']">
+            <span>Lieu : </span>
+            <span class="font-medium">{{ ticket?.event?.venue_name || 'Entre Nous Bar' }}</span>
           </div>
-          
-          <div class="mb-4">
-            <span class="text-sm text-gray-600">Catégorie : </span>
-            <span class="font-semibold text-gray-800">{{ ticket?.ticketType || 'standard' }}</span>
+
+          <!-- Catégorie -->
+          <div :class="['text-gray-600 mb-3', size === 'small' ? 'text-xs' : 'text-sm']">
+            <span>Catégorie : </span>
+            <span class="font-medium">{{ ticket?.ticketType || 'standard' }}</span>
           </div>
-          
-          <div class="mb-4">
-            <div 
-              :class="[
-                'font-bold text-primea-blue',
-                size === 'small' ? 'text-lg' : 'text-2xl'
-              ]"
-            >
-              {{ formatPrice(ticket?.price) }} XAF
-            </div>
+
+          <!-- Prix -->
+          <div
+            :class="[
+              'font-bold text-red-600 mb-4',
+              size === 'small' ? 'text-xl' : 'text-3xl'
+            ]"
+          >
+            {{ formatPrice(ticket?.price) }} FCFA
           </div>
-          
+
           <!-- Avertissement -->
-          <div class="text-xs text-red-600 leading-tight mb-4 text-justify">
-            <strong>*ATTENTION:*</strong>
-            CE TICKET EST STRICTEMENT PERSONNEL ET À USAGE UNIQUE. IL NE PEUT ÊTRE NI VENDU NI DONNÉ À AUTRUI SOUS PEINE D'ÊTRE REFUSÉ À L'ENTRÉE.
+          <div
+            :class="[
+              'border-t border-gray-200 pt-3 mb-3',
+              size === 'small' ? 'text-[10px]' : 'text-xs'
+            ]"
+          >
+            <p class="text-red-600 font-bold mb-2 tracking-wide">** ATTENTION **</p>
+            <p class="text-gray-500 leading-loose tracking-normal">
+              Ce ticket est strictement personnel et à usage<br />
+              unique. Tâchez de ne le remettre à personne.
+            </p>
           </div>
-          
+
           <!-- Logo Primea -->
-          <div class="flex justify-start">
-            <img src="/images/logo.png" alt="Primea" class="h-6" />
+          <div class="mt-3">
+            <img
+              src="/images/logo.png"
+              alt="Primea"
+              :class="size === 'small' ? 'h-5' : 'h-7'"
+            />
+            <p :class="['text-gray-400 mt-0.5', size === 'small' ? 'text-[8px]' : 'text-[10px]']">
+              Simple, Rapide et Sécurisée
+            </p>
           </div>
         </div>
 
-        <!-- Référence et QR Code -->
-        <div 
+        <!-- Colonne Droite : QR Code -->
+        <div
           :class="[
-            'ml-4 text-center',
-            size === 'small' ? 'w-20' : 'w-32'
+            'flex flex-col items-center justify-start',
+            size === 'small' ? 'w-28' : 'w-44'
           ]"
         >
-          <!-- Référence du ticket au-dessus du QR code -->
-          <div class="mb-3">
-            <div 
-              :class="[
-                'font-bold text-primea-blue',
-                size === 'small' ? 'text-sm' : 'text-lg'
-              ]"
-            >
-              {{ ticket?.reference || '0001' }}
-            </div>
-          </div>
-          
+          <!-- Espace pour le numéro (déjà positionné en absolu) -->
+          <div :class="size === 'small' ? 'h-6' : 'h-8'"></div>
+
           <!-- QR Code -->
-          <div class="bg-white p-2 border-2 border-gray-300 rounded-primea">
-            <img 
-              :src="ticket?.qrCode || generateQRCode()" 
+          <div class="bg-white">
+            <img
+              :src="ticket?.qrCode || generateQRCode()"
               alt="QR Code"
               :class="[
-                'object-contain mx-auto',
-                size === 'small' ? 'w-16 h-16' : 'w-24 h-24'
+                'object-contain',
+                size === 'small' ? 'w-24 h-24' : 'w-40 h-40'
               ]"
             />
           </div>
-          <p class="text-xs text-gray-500 mt-2 leading-tight">
-            Ce QR Code est unique<br>
-            et ne peut être scanné<br>
-            qu'une seule fois
-          </p>
+
+          <!-- Texte QR unique -->
+          <div :class="['text-center mt-3', size === 'small' ? 'text-[10px]' : 'text-xs']">
+            <p class="text-red-600 font-semibold">Ce QR Code est unique</p>
+            <p class="text-gray-500">et ne peut être scanné qu'une seule fois</p>
+          </div>
         </div>
       </div>
+    </div>
+
+    <!-- Section Titulaire (optionnel) -->
+    <div
+      v-if="ticket?.buyer_name || ticket?.buyer_email"
+      :class="[
+        'bg-gray-50 border-t-2 border-dashed border-gray-200',
+        size === 'small' ? 'px-4 py-3' : 'px-6 py-4'
+      ]"
+    >
+      <p :class="['font-semibold text-primea-blue uppercase mb-2', size === 'small' ? 'text-[10px]' : 'text-xs']">
+        Informations du titulaire
+      </p>
+      <div class="flex justify-between">
+        <div :class="size === 'small' ? 'text-xs' : 'text-sm'">
+          <span class="text-gray-500">Nom : </span>
+          <span class="font-medium text-gray-800">{{ ticket?.buyer_name || 'Non renseigné' }}</span>
+        </div>
+        <div :class="size === 'small' ? 'text-xs' : 'text-sm'">
+          <span class="text-gray-500">Email : </span>
+          <span class="font-medium text-gray-800">{{ ticket?.buyer_email || 'Non renseigné' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div
+      :class="[
+        'bg-primea-blue text-white text-center',
+        size === 'small' ? 'py-2 px-3' : 'py-3 px-4'
+      ]"
+    >
+      <p :class="['font-mono', size === 'small' ? 'text-[10px]' : 'text-xs']">
+        {{ ticket?.reference || 'TKT-XXXXXXXX' }}
+      </p>
     </div>
   </div>
 </template>
@@ -134,7 +193,7 @@ export default {
     },
     size: {
       type: String,
-      default: 'large', // 'small' ou 'large'
+      default: 'large',
       validator: (value) => ['small', 'large'].includes(value)
     }
   },
@@ -142,7 +201,7 @@ export default {
     // Computed properties
     const formatEventDate = computed(() => {
       if (!props.ticket?.event?.date) return 'DIMANCHE 27 JUILLET 2025'
-      
+
       const date = new Date(props.ticket.event.date)
       return date.toLocaleDateString('fr-FR', {
         weekday: 'long',
@@ -152,20 +211,6 @@ export default {
       }).toUpperCase()
     })
 
-    const eventDay = computed(() => {
-      if (!props.ticket?.event?.date) return '27'
-      
-      const date = new Date(props.ticket.event.date)
-      return date.getDate()
-    })
-
-    const eventMonth = computed(() => {
-      if (!props.ticket?.event?.date) return 'JUILLET'
-      
-      const date = new Date(props.ticket.event.date)
-      return date.toLocaleDateString('fr-FR', { month: 'long' }).toUpperCase()
-    })
-
     const eventTime = computed(() => {
       if (!props.ticket?.event?.time) return 'DÈS 13H'
       return `DÈS ${props.ticket.event.time}`
@@ -173,36 +218,21 @@ export default {
 
     // Méthodes
     const formatPrice = (price) => {
-      if (!price) return '10.000'
+      if (!price && price !== 0) return '0'
       return new Intl.NumberFormat('fr-FR').format(price)
     }
 
     const generateQRCode = () => {
-      // Si le ticket a déjà un QR code, l'utiliser
       if (props.ticket?.qrCode) {
         return props.ticket.qrCode
       }
-      
-      // Sinon, générer un QR code simple basé sur la référence du ticket
+
       const ticketRef = props.ticket?.reference || 'PRIMEA-TICKET'
-      return `data:image/svg+xml;base64,${btoa(`
-        <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="qr" patternUnits="userSpaceOnUse" width="10" height="10">
-              <rect width="5" height="5" fill="#000"/>
-              <rect x="5" y="5" width="5" height="5" fill="#000"/>
-            </pattern>
-          </defs>
-          <rect width="100" height="100" fill="url(#qr)"/>
-          <text x="50" y="50" text-anchor="middle" fill="#333" font-size="8">${ticketRef.slice(-4)}</text>
-        </svg>
-      `)}`
+      return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(ticketRef)}`
     }
 
     return {
       formatEventDate,
-      eventDay,
-      eventMonth,
       eventTime,
       formatPrice,
       generateQRCode
@@ -245,18 +275,6 @@ export default {
   background: linear-gradient(135deg, var(--primea-blue) 0%, #1a1e47 100%);
 }
 
-.rounded-primea {
-  border-radius: 12px;
-}
-
-.rounded-primea-lg {
-  border-radius: 16px;
-}
-
-.rounded-primea-xl {
-  border-radius: 20px;
-}
-
 .shadow-primea-lg {
   box-shadow: 0 8px 30px rgba(39, 45, 99, 0.15);
 }
@@ -269,10 +287,5 @@ export default {
 .ticket-component:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 40px rgba(39, 45, 99, 0.2);
-}
-
-/* Style de découpe de ticket */
-.border-dashed {
-  border-style: dashed;
 }
 </style>

@@ -269,7 +269,7 @@ class OrganizerController extends Controller
         }
 
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
-            'gateway' => 'required|string|in:airtelmoney,moovmoney',
+            'gateway' => 'required|string|in:airtelmoney,moovmoney4',
             'amount' => 'required|numeric|min:1000',
             'phone_number' => 'required|string|size:9|regex:/^[0-9]+$/',
         ]);
@@ -284,23 +284,23 @@ class OrganizerController extends Controller
 
         $organizerIds = $user->organizers->pluck('id');
 
-        // Vérifier le solde PAYIN disponible (unique source pour tous les payouts)
-        $payinBalance = \App\Models\OrganizerBalance::whereIn('organizer_id', $organizerIds)
-            ->where('gateway', 'payin')
+        // Vérifier le solde disponible pour le gateway demandé
+        $organizerBalance = \App\Models\OrganizerBalance::whereIn('organizer_id', $organizerIds)
+            ->where('gateway', $request->gateway)
             ->first();
 
-        if (!$payinBalance) {
+        if (!$organizerBalance) {
             return response()->json([
                 'success' => false,
-                'message' => 'Aucun solde PAYIN trouvé. Veuillez contacter le support.'
+                'message' => 'Aucun solde trouvé pour cet opérateur. Veuillez contacter le support.'
             ], 400);
         }
 
-        if ($payinBalance->balance < $request->amount) {
+        if ($organizerBalance->balance < $request->amount) {
             return response()->json([
                 'success' => false,
-                'message' => 'Solde PAYIN insuffisant pour ce payout',
-                'available_balance' => $payinBalance->balance,
+                'message' => 'Solde insuffisant pour ce payout',
+                'available_balance' => $organizerBalance->balance,
                 'requested_amount' => $request->amount
             ], 400);
         }
@@ -309,13 +309,13 @@ class OrganizerController extends Controller
             $payoutService = app(\App\Services\PayoutService::class);
 
             // Récupérer l'objet Organizer complet
-            $organizer = \App\Models\Organizer::findOrFail($payinBalance->organizer_id);
+            $organizer = \App\Models\Organizer::findOrFail($organizerBalance->organizer_id);
 
-            \Illuminate\Support\Facades\Log::info('💸 Demande de payout avec solde PAYIN', [
+            \Illuminate\Support\Facades\Log::info('💸 Demande de payout', [
                 'organizer_id' => $organizer->id,
                 'gateway_envoi' => $request->gateway,
                 'amount' => $request->amount,
-                'payin_balance_before' => $payinBalance->balance
+                'balance_before' => $organizerBalance->balance
             ]);
 
             $result = $payoutService->createManualPayout(
@@ -331,7 +331,7 @@ class OrganizerController extends Controller
                     'message' => 'Demande de payout créée avec succès',
                     'data' => [
                         'payout' => $result['payout'],
-                        'remaining_balance' => $payinBalance->fresh()->balance
+                        'remaining_balance' => $organizerBalance->fresh()->balance
                     ]
                 ]);
             }
@@ -1156,11 +1156,10 @@ class OrganizerController extends Controller
                 }
             }
 
-            // Créer l'événement
+            // Créer l'événement (le slug est généré automatiquement par le modèle)
             $event = Event::create([
                 'title' => $request->title,
                 'description' => $request->description,
-                'slug' => \Illuminate\Support\Str::slug($request->title . '-' . time()),
                 'event_date' => $request->event_date,
                 'organizer_id' => $organizer->id,
                 'category_id' => $request->category_id,

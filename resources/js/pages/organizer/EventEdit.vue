@@ -346,14 +346,14 @@
                 <div class="space-y-4">
                   <div>
                     <label class="flex items-center space-x-2">
-                      <input 
+                      <input
                         v-model="form.is_active"
-                        type="checkbox" 
+                        type="checkbox"
                         class="rounded border-gray-300 text-primea-blue focus:ring-primea-blue"
                       />
                       <span class="text-sm font-medium text-gray-700 font-primea">Événement actif</span>
                     </label>
-                    <p class="text-xs text-gray-500 mt-1 font-primea">Publier l'événement et activer les ventes</p>
+                    <p class="text-xs text-gray-500 mt-1 font-primea">Activer les ventes de billets pour cet événement</p>
                   </div>
                 </div>
               </div>
@@ -377,8 +377,8 @@
                     Annuler les modifications
                   </router-link>
 
-                  <button 
-                    v-if="event && !event.is_active"
+                  <button
+                    v-if="event && event.status !== 'published'"
                     type="button"
                     @click="publishEvent"
                     class="w-full bg-green-600 text-white px-4 py-2 rounded-primea hover:bg-green-700 transition-all duration-200 font-primea"
@@ -531,7 +531,7 @@ const loadEvent = async () => {
       new_venue_city: '',
       new_venue_address: '',
       image_url: event.value.image_url || '',
-      image_preview: event.value.image_url || '',
+      image_preview: event.value.image || event.value.image_url || '',
       is_active: event.value.is_active ?? false,
       schedules: (event.value.schedules && event.value.schedules.length > 0) 
         ? event.value.schedules.map(s => ({
@@ -642,9 +642,21 @@ const updateEvent = async () => {
     router.push({ name: 'organizer-event-detail', params: { slug: event.value.slug } });
   } catch (err) {
     console.error('Erreur lors de la mise à jour:', err);
+
+    // Construire un message d'erreur détaillé
+    let errorMessage = err.response?.data?.message || 'Erreur lors de la mise à jour de l\'événement';
+
+    // Ajouter les erreurs de validation si présentes
+    if (err.response?.data?.errors) {
+      const validationErrors = Object.values(err.response.data.errors).flat();
+      if (validationErrors.length > 0) {
+        errorMessage = validationErrors.join('\n');
+      }
+    }
+
     await Swal.fire({
       title: 'Erreur',
-      text: err.response?.data?.message || 'Erreur lors de la mise à jour de l\'événement',
+      text: errorMessage,
       icon: 'error',
       confirmButtonColor: '#272d63'
     });
