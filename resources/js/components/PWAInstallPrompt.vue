@@ -9,7 +9,7 @@
           <!-- App Icon -->
           <div class="flex-shrink-0">
             <img
-              src="/images/logo.png"
+              src="/images/ico.png"
               alt="Primea"
               class="w-14 h-14 rounded-xl shadow-md"
             />
@@ -60,6 +60,23 @@
             puis "Sur l'écran d'accueil"
           </p>
         </div>
+
+        <!-- Manual Installation Instructions (Chrome/Edge/etc.) -->
+        <div v-if="showManualInstructions && !isIOS" class="mt-3 pt-3 border-t border-gray-100">
+          <p class="text-xs text-gray-600 text-center font-medium mb-2">
+            Pour installer l'application :
+          </p>
+          <ul class="text-xs text-gray-500 space-y-1">
+            <li class="flex items-center justify-center gap-1">
+              <span>1. Cliquez sur</span>
+              <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+              </svg>
+              <span>dans la barre d'adresse</span>
+            </li>
+            <li class="text-center">2. Sélectionnez "Installer l'application"</li>
+          </ul>
+        </div>
       </div>
     </div>
   </Transition>
@@ -103,22 +120,32 @@ const shouldShowPrompt = () => {
   return true
 }
 
+const showManualInstructions = ref(false)
+
 const installPWA = async () => {
   if (deferredPrompt.value) {
     // Show the native install prompt
-    deferredPrompt.value.prompt()
+    try {
+      deferredPrompt.value.prompt()
+      const { outcome } = await deferredPrompt.value.userChoice
 
-    const { outcome } = await deferredPrompt.value.userChoice
+      if (outcome === 'accepted') {
+        localStorage.setItem('pwa-installed', 'true')
+      }
 
-    if (outcome === 'accepted') {
-      localStorage.setItem('pwa-installed', 'true')
+      deferredPrompt.value = null
+      showPrompt.value = false
+    } catch (error) {
+      console.error('PWA install error:', error)
+      showManualInstructions.value = true
     }
-
-    deferredPrompt.value = null
-    showPrompt.value = false
   } else if (isIOS.value) {
     // For iOS, we just show instructions (already displayed)
     // User needs to manually add to home screen
+    showManualInstructions.value = true
+  } else {
+    // No deferred prompt available - show manual instructions
+    showManualInstructions.value = true
   }
 }
 
@@ -126,6 +153,11 @@ const dismissPrompt = () => {
   showPrompt.value = false
   localStorage.setItem('pwa-prompt-dismissed', Date.now().toString())
 }
+
+// Detect if browser supports PWA installation
+const isMobile = computed(() => {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+})
 
 onMounted(() => {
   // Listen for the beforeinstallprompt event
@@ -146,6 +178,18 @@ onMounted(() => {
     setTimeout(() => {
       showPrompt.value = true
     }, 5000)
+  }
+
+  // For mobile browsers that don't fire beforeinstallprompt (or if event doesn't fire)
+  // Show the prompt with manual instructions after a longer delay
+  if (isMobile.value && !isIOS.value && shouldShowPrompt()) {
+    setTimeout(() => {
+      // Only show if we haven't already shown due to beforeinstallprompt
+      if (!showPrompt.value && !deferredPrompt.value) {
+        showPrompt.value = true
+        showManualInstructions.value = true
+      }
+    }, 6000)
   }
 
   // Listen for successful installation
