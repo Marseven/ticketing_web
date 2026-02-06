@@ -3,73 +3,73 @@
     <div class="max-w-7xl mx-auto">
 
       <!-- Statistiques -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-primea-lg shadow-sm p-6 border-l-4 border-primea-blue">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
+        <div class="bg-white rounded-primea-lg shadow-sm p-4 md:p-6 border-l-4 border-primea-blue">
           <div class="flex items-center">
-            <div class="flex-shrink-0">
+            <div class="flex-shrink-0 hidden sm:block">
               <ClipboardDocumentListIcon class="w-8 h-8 text-primea-blue" />
             </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-500">Total achats</p>
-              <p class="text-2xl font-bold text-gray-900">{{ stats.totalOrders }}</p>
+            <div class="sm:ml-4">
+              <p class="text-xs md:text-sm font-medium text-gray-500">Total achats</p>
+              <p class="text-xl md:text-2xl font-bold text-gray-900">{{ stats.totalOrders }}</p>
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-primea-lg shadow-sm p-6 border-l-4 border-green-500">
+        <div class="bg-white rounded-primea-lg shadow-sm p-4 md:p-6 border-l-4 border-green-500">
           <div class="flex items-center">
-            <div class="flex-shrink-0">
+            <div class="flex-shrink-0 hidden sm:block">
               <CheckCircleIcon class="w-8 h-8 text-green-500" />
             </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-500">Confirmées</p>
-              <p class="text-2xl font-bold text-gray-900">{{ stats.confirmedOrders }}</p>
+            <div class="sm:ml-4">
+              <p class="text-xs md:text-sm font-medium text-gray-500">Confirmées</p>
+              <p class="text-xl md:text-2xl font-bold text-gray-900">{{ stats.confirmedOrders }}</p>
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-primea-lg shadow-sm p-6 border-l-4 border-primea-yellow">
+        <div class="bg-white rounded-primea-lg shadow-sm p-4 md:p-6 border-l-4 border-primea-yellow">
           <div class="flex items-center">
-            <div class="flex-shrink-0">
+            <div class="flex-shrink-0 hidden sm:block">
               <CurrencyDollarIcon class="w-8 h-8 text-primea-yellow" />
             </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-500">Total dépensé</p>
-              <p class="text-2xl font-bold text-gray-900">{{ formatPrice(stats.totalSpent) }} FCFA</p>
+            <div class="sm:ml-4">
+              <p class="text-xs md:text-sm font-medium text-gray-500">Total dépensé</p>
+              <p class="text-lg md:text-2xl font-bold text-gray-900">{{ formatPrice(stats.totalSpent) }}</p>
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-primea-lg shadow-sm p-6 border-l-4 border-orange-500">
+        <div class="bg-white rounded-primea-lg shadow-sm p-4 md:p-6 border-l-4 border-orange-500">
           <div class="flex items-center">
-            <div class="flex-shrink-0">
+            <div class="flex-shrink-0 hidden sm:block">
               <ClockIcon class="w-8 h-8 text-orange-500" />
             </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-500">En attente</p>
-              <p class="text-2xl font-bold text-gray-900">{{ stats.pendingOrders }}</p>
+            <div class="sm:ml-4">
+              <p class="text-xs md:text-sm font-medium text-gray-500">En attente</p>
+              <p class="text-xl md:text-2xl font-bold text-gray-900">{{ stats.pendingOrders }}</p>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Filtres -->
-      <div class="bg-white rounded-primea-lg shadow-sm p-6 mb-8">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div class="flex flex-col md:flex-row gap-4">
-            <div class="relative">
-              <MagnifyingGlassIcon class="w-5 h-5 text-gray-400 absolute left-3 top-3" />
-              <input 
-                v-model="searchQuery"
-                type="text" 
-                placeholder="Rechercher par référence ou événement..."
-                class="pl-10 pr-4 py-2 w-full md:w-80 border border-gray-300 rounded-primea focus:ring-primea-blue focus:border-primea-blue"
-              />
-            </div>
-            
-            <select 
+      <div class="bg-white rounded-primea-lg shadow-sm p-4 md:p-6 mb-6 md:mb-8">
+        <div class="flex flex-col gap-3 md:gap-4">
+          <div class="relative">
+            <MagnifyingGlassIcon class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Rechercher..."
+              class="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-primea focus:ring-primea-blue focus:border-primea-blue text-sm"
+            />
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-3">
+            <select
               v-model="statusFilter"
-              class="px-4 py-2 border border-gray-300 rounded-primea focus:ring-primea-blue focus:border-primea-blue"
+              class="flex-1 px-4 py-2 border border-gray-300 rounded-primea focus:ring-primea-blue focus:border-primea-blue text-sm"
             >
               <option value="">Tous les statuts</option>
               <option value="confirmed">Confirmées</option>
@@ -78,9 +78,9 @@
               <option value="refunded">Remboursées</option>
             </select>
 
-            <select 
+            <select
               v-model="periodFilter"
-              class="px-4 py-2 border border-gray-300 rounded-primea focus:ring-primea-blue focus:border-primea-blue"
+              class="flex-1 px-4 py-2 border border-gray-300 rounded-primea focus:ring-primea-blue focus:border-primea-blue text-sm"
             >
               <option value="">Toute période</option>
               <option value="7days">7 derniers jours</option>
@@ -90,8 +90,8 @@
             </select>
           </div>
 
-          <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-500">{{ filteredOrders.length }} achats</span>
+          <div class="flex items-center justify-end">
+            <span class="text-xs md:text-sm text-gray-500">{{ filteredOrders.length }} achats</span>
           </div>
         </div>
       </div>

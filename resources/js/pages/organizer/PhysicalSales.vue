@@ -1,21 +1,21 @@
 <template>
-  <div class="physical-sales p-6 bg-gray-50 min-h-screen">
+  <div class="physical-sales p-4 md:p-6 bg-gray-50 min-h-screen">
     <!-- Header -->
-    <div class="mb-8">
-      <div class="flex items-center justify-between">
+    <div class="mb-6 md:mb-8">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div class="flex items-center mb-2">
-            <button @click="$router.go(-1)" class="text-gray-600 hover:text-gray-800 mr-4">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="flex items-center mb-1 md:mb-2">
+            <button @click="$router.go(-1)" class="text-gray-600 hover:text-gray-800 mr-3">
+              <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
               </svg>
             </button>
-            <h1 class="text-3xl font-bold text-gray-900">Ventes Physiques</h1>
+            <h1 class="text-xl md:text-3xl font-bold text-gray-900">Ventes Physiques</h1>
           </div>
-          <p class="text-gray-600">Ajoutez les ventes effectuées en dehors de la plateforme pour maintenir la cohérence des chiffres</p>
+          <p class="text-gray-600 text-xs md:text-base hidden sm:block">Ajoutez les ventes effectuées en dehors de la plateforme</p>
         </div>
-        <button @click="openAddSaleModal" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-          <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button @click="openAddSaleModal" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm w-full sm:w-auto">
+          <svg class="w-4 h-4 md:w-5 md:h-5 inline mr-1 md:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
           </svg>
           Ajouter Vente
@@ -24,28 +24,36 @@
     </div>
 
     <!-- Event Selection -->
-    <div class="bg-white rounded-lg shadow p-6 mb-8">
-      <h2 class="text-xl font-bold mb-4">Sélectionner un Événement</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="bg-white rounded-lg shadow p-4 md:p-6 mb-6 md:mb-8">
+      <h2 class="text-lg md:text-xl font-bold mb-3 md:mb-4">Sélectionner un Événement</h2>
+      <div class="space-y-4 md:space-y-0 md:grid md:grid-cols-3 md:gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Événement</label>
-          <select v-model="selectedEventId" @change="loadEventDetails" class="w-full border rounded-lg px-3 py-2">
+          <select v-model="selectedEventId" @change="loadEventDetails" class="w-full border rounded-lg px-3 py-2 text-sm">
             <option value="">Choisir un événement</option>
             <option v-for="event in events" :key="event.id" :value="event.id">
               {{ event.title }}
             </option>
           </select>
         </div>
-        
-        <div v-if="selectedEvent">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
-          <span class="inline-flex px-3 py-2 text-sm font-semibold rounded-full" 
-                :class="getStatusBadgeClass(selectedEvent.status)">
-            {{ getStatusName(selectedEvent.status) }}
-          </span>
+
+        <div v-if="selectedEvent" class="flex items-center gap-4 md:block">
+          <div class="md:mb-0">
+            <label class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">Statut</label>
+            <span class="inline-flex px-3 py-1 md:py-2 text-xs md:text-sm font-semibold rounded-full"
+                  :class="getStatusBadgeClass(selectedEvent.status)">
+              {{ getStatusName(selectedEvent.status) }}
+            </span>
+          </div>
+          <div class="flex-1 md:hidden">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Prochaine séance</label>
+            <p class="text-xs text-gray-900">
+              {{ nextSchedule ? formatDateTime(nextSchedule.starts_at) : 'Aucune' }}
+            </p>
+          </div>
         </div>
-        
-        <div v-if="selectedEvent">
+
+        <div v-if="selectedEvent" class="hidden md:block">
           <label class="block text-sm font-medium text-gray-700 mb-2">Prochaine séance</label>
           <p class="text-sm text-gray-900">
             {{ nextSchedule ? formatDateTime(nextSchedule.starts_at) : 'Aucune séance programmée' }}

@@ -2,18 +2,19 @@
   <div class="balance-management min-h-screen" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
     <!-- Header -->
-    <div class="mb-8">
-      <div class="flex items-center justify-between">
+    <div class="mb-6 md:mb-8">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-3xl font-bold text-primea-blue font-primea mb-2">Mon Solde</h1>
-          <p class="text-gray-600 font-primea text-sm">Consultez votre solde et effectuez des demandes de versement</p>
+          <h1 class="text-xl md:text-3xl font-bold text-primea-blue font-primea mb-1 md:mb-2">Mon Solde</h1>
+          <p class="text-gray-600 font-primea text-xs md:text-sm hidden sm:block">Consultez votre solde et effectuez des demandes de versement</p>
         </div>
-        <button @click="$router.push('/organizer/payouts/history')" 
-                class="bg-primea-blue text-white px-4 py-2 rounded-primea hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 font-primea">
-          <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button @click="$router.push('/organizer/payouts/history')"
+                class="bg-primea-blue text-white px-4 py-2 rounded-primea hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 font-primea text-sm w-full sm:w-auto text-center">
+          <svg class="w-4 h-4 md:w-5 md:h-5 inline mr-1 md:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
           </svg>
-          Historique Versements
+          <span class="sm:hidden">Historique</span>
+          <span class="hidden sm:inline">Historique Versements</span>
         </button>
       </div>
     </div>
@@ -25,45 +26,45 @@
 
     <div v-else>
       <!-- Summary Cards -->
-      <div class="flex md:grid gap-3 md:gap-6 mb-8 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 md:grid-cols-3">
-        <div class="bg-white rounded-lg shadow p-6 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 mb-6 md:mb-8">
+        <div class="bg-white rounded-lg shadow p-4 md:p-6 col-span-2 md:col-span-1">
           <div class="flex items-center">
-            <div class="p-2 bg-green-100 rounded-lg">
+            <div class="p-2 bg-green-100 rounded-lg hidden sm:block">
               <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
               </svg>
             </div>
-            <div class="ml-4">
-              <p class="text-sm text-gray-600">Solde Total</p>
-              <p class="text-2xl font-bold text-green-600">{{ formatAmount(totalBalance) }} XAF</p>
+            <div class="sm:ml-4">
+              <p class="text-xs md:text-sm text-gray-600">Solde Total</p>
+              <p class="text-lg md:text-2xl font-bold text-green-600">{{ formatAmount(totalBalance) }} <span class="text-xs md:text-base">XAF</span></p>
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
+        <div class="bg-white rounded-lg shadow p-4 md:p-6">
           <div class="flex items-center">
-            <div class="p-2 bg-yellow-100 rounded-lg">
+            <div class="p-2 bg-yellow-100 rounded-lg hidden sm:block">
               <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
             </div>
-            <div class="ml-4">
-              <p class="text-sm text-gray-600">Payouts en Cours</p>
-              <p class="text-2xl font-bold text-yellow-600">{{ stats.pending_payouts || 0 }}</p>
+            <div class="sm:ml-4">
+              <p class="text-xs md:text-sm text-gray-600">En Cours</p>
+              <p class="text-lg md:text-2xl font-bold text-yellow-600">{{ stats.pending_payouts || 0 }}</p>
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
+        <div class="bg-white rounded-lg shadow p-4 md:p-6">
           <div class="flex items-center">
-            <div class="p-2 bg-blue-100 rounded-lg">
+            <div class="p-2 bg-blue-100 rounded-lg hidden sm:block">
               <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
               </svg>
             </div>
-            <div class="ml-4">
-              <p class="text-sm text-gray-600">Total Payouts</p>
-              <p class="text-2xl font-bold text-blue-600">{{ formatAmount(stats.total_payouts || 0) }} XAF</p>
+            <div class="sm:ml-4">
+              <p class="text-xs md:text-sm text-gray-600">Total Payouts</p>
+              <p class="text-lg md:text-2xl font-bold text-blue-600">{{ formatAmount(stats.total_payouts || 0) }}</p>
             </div>
           </div>
         </div>

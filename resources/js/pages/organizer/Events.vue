@@ -2,19 +2,20 @@
   <div class="organizer-events min-h-screen" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)">
       <!-- En-tête de la page -->
       <div class="bg-white shadow-sm border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div class="flex items-center justify-between">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 md:py-4">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h1 class="text-xl font-bold text-primea-blue font-primea">Mes Événements</h1>
-              <p class="text-gray-600 text-sm font-primea">Gérez tous vos événements en un seul endroit</p>
+              <h1 class="text-lg md:text-xl font-bold text-primea-blue font-primea">Mes Événements</h1>
+              <p class="text-gray-600 text-xs md:text-sm font-primea hidden sm:block">Gérez tous vos événements en un seul endroit</p>
             </div>
 
             <router-link
               :to="{ name: 'organizer-event-create' }"
-              class="bg-primea-blue text-white px-3 py-1.5 rounded-primea hover:bg-primea-yellow hover:text-primea-blue text-sm font-semibold font-primea transition-all duration-200 shadow-primea"
+              class="bg-primea-blue text-white px-3 py-2 rounded-primea hover:bg-primea-yellow hover:text-primea-blue text-sm font-semibold font-primea transition-all duration-200 shadow-primea text-center w-full sm:w-auto"
             >
               <PlusIcon class="w-4 h-4 inline mr-1" />
-              Nouvel événement
+              <span class="sm:hidden">Créer</span>
+              <span class="hidden sm:inline">Nouvel événement</span>
             </router-link>
           </div>
         </div>
@@ -22,22 +23,23 @@
 
       <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <!-- Filtres et statistiques -->
-      <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <div class="flex flex-col md:flex-row gap-4 justify-between items-center mb-6">
-          <div class="flex items-center space-x-4">
-            <div class="relative">
+      <div class="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6 md:mb-8">
+        <div class="flex flex-col gap-4 mb-4 md:mb-6">
+          <!-- Recherche et filtre -->
+          <div class="flex flex-col sm:flex-row gap-3 w-full">
+            <div class="relative flex-1">
               <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
               </svg>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 v-model="searchQuery"
-                placeholder="Rechercher un événement..."
-                class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Rechercher..."
+                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
               />
             </div>
-            
-            <select v-model="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+
+            <select v-model="statusFilter" class="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
               <option value="">Tous les statuts</option>
               <option value="draft">Brouillons</option>
               <option value="published">Publiés</option>
@@ -46,24 +48,25 @@
             </select>
           </div>
 
-          <div class="flex items-center space-x-4">
-            <div class="text-sm text-gray-600">
+          <!-- Compteur et toggle vue -->
+          <div class="flex items-center justify-between">
+            <div class="text-xs sm:text-sm text-gray-600">
               {{ filteredEvents.length }} événement{{ filteredEvents.length > 1 ? 's' : '' }}
             </div>
             <div class="flex bg-gray-100 rounded-lg p-1">
-              <button 
+              <button
                 @click="viewMode = 'grid'"
-                :class="['px-3 py-2 rounded-lg transition-colors', viewMode === 'grid' ? 'bg-white shadow-sm' : '']"
+                :class="['px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg transition-colors', viewMode === 'grid' ? 'bg-white shadow-sm' : '']"
               >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                 </svg>
               </button>
-              <button 
+              <button
                 @click="viewMode = 'list'"
-                :class="['px-3 py-2 rounded-lg transition-colors', viewMode === 'list' ? 'bg-white shadow-sm' : '']"
+                :class="['px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg transition-colors hidden sm:block', viewMode === 'list' ? 'bg-white shadow-sm' : '']"
               >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
                 </svg>
               </button>
@@ -72,22 +75,22 @@
         </div>
 
         <!-- Statistiques rapides -->
-        <div class="flex gap-4 overflow-x-auto pb-2">
-          <div class="text-center flex-shrink-0 w-[calc(50%-0.5rem)]">
-            <p class="text-2xl font-bold text-blue-600">{{ stats.published }}</p>
-            <p class="text-sm text-gray-600">Publiés</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          <div class="text-center p-3 bg-blue-50 rounded-lg">
+            <p class="text-xl md:text-2xl font-bold text-blue-600">{{ stats.published }}</p>
+            <p class="text-xs md:text-sm text-gray-600">Publiés</p>
           </div>
-          <div class="text-center flex-shrink-0 w-[calc(50%-0.5rem)]">
-            <p class="text-2xl font-bold text-yellow-600">{{ stats.draft }}</p>
-            <p class="text-sm text-gray-600">Brouillons</p>
+          <div class="text-center p-3 bg-yellow-50 rounded-lg">
+            <p class="text-xl md:text-2xl font-bold text-yellow-600">{{ stats.draft }}</p>
+            <p class="text-xs md:text-sm text-gray-600">Brouillons</p>
           </div>
-          <div class="text-center flex-shrink-0 w-[calc(50%-0.5rem)]">
-            <p class="text-2xl font-bold text-green-600">{{ stats.totalTicketsSold }}</p>
-            <p class="text-sm text-gray-600">Tickets vendus</p>
+          <div class="text-center p-3 bg-green-50 rounded-lg">
+            <p class="text-xl md:text-2xl font-bold text-green-600">{{ stats.totalTicketsSold }}</p>
+            <p class="text-xs md:text-sm text-gray-600">Tickets vendus</p>
           </div>
-          <div class="text-center flex-shrink-0 w-[calc(50%-0.5rem)]">
-            <p class="text-2xl font-bold text-purple-600">{{ formatPrice(stats.totalRevenue) }} XAF</p>
-            <p class="text-sm text-gray-600">Revenus</p>
+          <div class="text-center p-3 bg-purple-50 rounded-lg">
+            <p class="text-lg md:text-2xl font-bold text-purple-600">{{ formatPrice(stats.totalRevenue) }}</p>
+            <p class="text-xs md:text-sm text-gray-600">Revenus (XAF)</p>
           </div>
         </div>
       </div>
@@ -175,8 +178,8 @@
           </div>
         </div>
 
-        <!-- Vue liste -->
-        <div v-else class="bg-white rounded-lg shadow-md overflow-hidden">
+        <!-- Vue liste (Desktop) -->
+        <div v-else class="hidden md:block bg-white rounded-lg shadow-md overflow-hidden">
           <table class="w-full">
             <thead class="bg-gray-50">
               <tr>
@@ -192,16 +195,16 @@
               <tr v-for="event in filteredEvents" :key="event.id" class="hover:bg-gray-50">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
-                    <img 
+                    <img
                       v-if="hasEventImage(event)"
-                      :src="getEventImageUrl(event, '60')" 
+                      :src="getEventImageUrl(event)"
                       :alt="event.title"
                       class="w-12 h-12 object-cover rounded-lg mr-4"
                       @error="handleImageError"
                       @load="handleImageLoad"
                     />
-                    <div 
-                      v-else 
+                    <div
+                      v-else
                       class="w-12 h-12 bg-gradient-to-br from-blue-100 to-yellow-100 flex items-center justify-center rounded-lg mr-4"
                     >
                       <CalendarIcon class="w-6 h-6 text-gray-400" />
@@ -216,7 +219,7 @@
                   {{ formatEventDate(event.date, 'short') }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span 
+                  <span
                     class="px-2 py-1 rounded-full text-xs font-medium font-primea"
                     :class="getStatusClass(event)"
                   >
@@ -230,19 +233,19 @@
                   {{ formatPrice(event.revenue || 0) }} XAF
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                  <router-link 
+                  <router-link
                     :to="{ name: 'organizer-event-detail', params: { slug: event.slug } }"
                     class="text-blue-600 hover:text-blue-900"
                   >
                     Voir
                   </router-link>
-                  <button 
+                  <button
                     @click="editEvent(event)"
                     class="text-yellow-600 hover:text-yellow-900"
                   >
                     Modifier
                   </button>
-                  <button 
+                  <button
                     @click="deleteEvent(event)"
                     class="text-red-600 hover:text-red-900"
                   >
@@ -252,6 +255,68 @@
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- Vue liste (Mobile - cartes compactes) -->
+        <div v-if="viewMode === 'list'" class="md:hidden space-y-3">
+          <div
+            v-for="event in filteredEvents"
+            :key="event.id"
+            class="bg-white rounded-lg shadow-sm p-4 border border-gray-100"
+          >
+            <div class="flex items-start gap-3">
+              <img
+                v-if="hasEventImage(event)"
+                :src="getEventImageUrl(event)"
+                :alt="event.title"
+                class="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+                @error="handleImageError"
+                @load="handleImageLoad"
+              />
+              <div
+                v-else
+                class="w-16 h-16 bg-gradient-to-br from-blue-100 to-yellow-100 flex items-center justify-center rounded-lg flex-shrink-0"
+              >
+                <CalendarIcon class="w-8 h-8 text-gray-400" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-2">
+                  <h3 class="text-sm font-semibold text-gray-900 truncate">{{ event.title }}</h3>
+                  <span
+                    class="px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0"
+                    :class="getStatusClass(event)"
+                  >
+                    {{ getStatusText(event) }}
+                  </span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">{{ formatEventDate(event.date, 'short') }}</p>
+                <div class="flex items-center justify-between mt-2">
+                  <span class="text-xs text-gray-600">{{ event.tickets_sold || 0 }}/{{ event.total_tickets || 0 }} tickets</span>
+                  <span class="text-xs font-semibold text-green-600">{{ formatPrice(event.revenue || 0) }} XAF</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+              <router-link
+                :to="{ name: 'organizer-event-detail', params: { slug: event.slug } }"
+                class="flex-1 text-center text-xs font-medium text-blue-600 py-2 bg-blue-50 rounded-lg"
+              >
+                Voir
+              </router-link>
+              <button
+                @click="editEvent(event)"
+                class="flex-1 text-center text-xs font-medium text-yellow-700 py-2 bg-yellow-50 rounded-lg"
+              >
+                Modifier
+              </button>
+              <button
+                @click="deleteEvent(event)"
+                class="text-xs font-medium text-red-600 py-2 px-3 bg-red-50 rounded-lg"
+              >
+                Suppr.
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
