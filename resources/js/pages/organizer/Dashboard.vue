@@ -1,92 +1,96 @@
 <template>
   <div class="organizer-dashboard min-h-screen bg-gray-100">
     <!-- En-tête organisateur -->
-    <header class="bg-blue-600 text-white py-4 px-4 shadow-lg">
+    <header class="bg-blue-600 text-white py-3 md:py-4 px-4 shadow-lg">
       <div class="max-w-6xl mx-auto flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-          <img src="/images/logo_white.png" alt="Primea" class="h-8" />
+        <div class="flex items-center space-x-3 md:space-x-4">
+          <img src="/images/logo_white.png" alt="Primea" class="h-6 md:h-8" />
           <div>
-            <h1 class="text-xl font-bold">Espace Organisateur</h1>
-            <p class="text-blue-200 text-sm">Tableau de bord</p>
+            <h1 class="text-base md:text-xl font-bold">Espace Organisateur</h1>
+            <p class="text-blue-200 text-xs md:text-sm hidden sm:block">Tableau de bord</p>
           </div>
         </div>
-        
-        <div class="flex items-center space-x-4">
-          <div class="text-right">
-            <p class="text-sm text-blue-200">Connecté en tant que</p>
-            <p class="font-semibold">{{ organizer.name || 'Organisateur' }}</p>
+
+        <div class="flex items-center space-x-2 md:space-x-4">
+          <div class="text-right hidden sm:block">
+            <p class="text-xs md:text-sm text-blue-200">Connecté en tant que</p>
+            <p class="font-semibold text-sm md:text-base">{{ organizer.name || 'Organisateur' }}</p>
           </div>
-          <button @click="logout" class="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded-lg transition-colors">
-            Déconnexion
+          <button @click="logout" class="bg-blue-700 hover:bg-blue-800 px-3 md:px-4 py-2 rounded-lg transition-colors text-sm md:text-base">
+            <span class="hidden sm:inline">Déconnexion</span>
+            <svg class="w-5 h-5 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
           </button>
         </div>
       </div>
     </header>
 
-    <div class="max-w-6xl mx-auto py-8 px-4">
+    <div class="max-w-6xl mx-auto py-4 md:py-8 px-4">
       <!-- Statistiques rapides -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
+        <div class="bg-white rounded-lg shadow-md p-4 md:p-6">
           <div class="flex items-center">
-            <div class="bg-blue-100 p-3 rounded-full mr-4">
-              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="bg-blue-100 p-2 md:p-3 rounded-full mr-3 md:mr-4 flex-shrink-0">
+              <svg class="w-5 h-5 md:w-6 md:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 8a4 4 0 11-8 0 4 4 0 018 0z"/>
               </svg>
             </div>
-            <div>
-              <p class="text-gray-600 text-sm">Événements</p>
-              <p class="text-2xl font-bold text-gray-800">{{ stats.totalEvents }}</p>
+            <div class="min-w-0">
+              <p class="text-gray-600 text-xs md:text-sm truncate">Événements</p>
+              <p class="text-lg md:text-2xl font-bold text-gray-800">{{ stats.totalEvents }}</p>
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="bg-white rounded-lg shadow-md p-4 md:p-6">
           <div class="flex items-center">
-            <div class="bg-green-100 p-3 rounded-full mr-4">
-              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="bg-green-100 p-2 md:p-3 rounded-full mr-3 md:mr-4 flex-shrink-0">
+              <svg class="w-5 h-5 md:w-6 md:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
               </svg>
             </div>
-            <div>
-              <p class="text-gray-600 text-sm">Tickets vendus</p>
-              <p class="text-2xl font-bold text-gray-800">{{ stats.totalTicketsSold }}</p>
+            <div class="min-w-0">
+              <p class="text-gray-600 text-xs md:text-sm truncate">Tickets vendus</p>
+              <p class="text-lg md:text-2xl font-bold text-gray-800">{{ stats.totalTicketsSold }}</p>
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="bg-white rounded-lg shadow-md p-4 md:p-6">
           <div class="flex items-center">
-            <div class="bg-yellow-100 p-3 rounded-full mr-4">
-              <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="bg-yellow-100 p-2 md:p-3 rounded-full mr-3 md:mr-4 flex-shrink-0">
+              <svg class="w-5 h-5 md:w-6 md:h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
               </svg>
             </div>
-            <div>
-              <p class="text-gray-600 text-sm">Revenus totaux</p>
-              <p class="text-2xl font-bold text-gray-800">{{ formatPrice(stats.totalRevenue) }} FCFA</p>
+            <div class="min-w-0">
+              <p class="text-gray-600 text-xs md:text-sm truncate">Revenus</p>
+              <p class="text-base md:text-2xl font-bold text-gray-800">{{ formatPrice(stats.totalRevenue) }}</p>
+              <p class="text-xs text-gray-500 hidden md:block">FCFA</p>
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="bg-white rounded-lg shadow-md p-4 md:p-6">
           <div class="flex items-center">
-            <div class="bg-purple-100 p-3 rounded-full mr-4">
-              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="bg-purple-100 p-2 md:p-3 rounded-full mr-3 md:mr-4 flex-shrink-0">
+              <svg class="w-5 h-5 md:w-6 md:h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
               </svg>
             </div>
-            <div>
-              <p class="text-gray-600 text-sm">Taux de vente</p>
-              <p class="text-2xl font-bold text-gray-800">{{ stats.salesRate }}%</p>
+            <div class="min-w-0">
+              <p class="text-gray-600 text-xs md:text-sm truncate">Taux de vente</p>
+              <p class="text-lg md:text-2xl font-bold text-gray-800">{{ stats.salesRate }}%</p>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Actions rapides -->
-      <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 class="text-xl font-bold text-gray-800 mb-6">Actions rapides</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6 md:mb-8">
+        <h2 class="text-lg md:text-xl font-bold text-gray-800 mb-4 md:mb-6">Actions rapides</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
           <router-link 
             to="/organizer/events/create" 
             class="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
@@ -134,41 +138,41 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <!-- Événements récents -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-bold text-gray-800">Mes événements récents</h2>
-            <router-link to="/organizer/events" class="text-blue-600 hover:text-blue-500 text-sm font-medium">
+        <div class="bg-white rounded-lg shadow-md p-4 md:p-6">
+          <div class="flex items-center justify-between mb-4 md:mb-6">
+            <h2 class="text-lg md:text-xl font-bold text-gray-800">Mes événements récents</h2>
+            <router-link to="/organizer/events" class="text-blue-600 hover:text-blue-500 text-xs md:text-sm font-medium">
               Voir tout
             </router-link>
           </div>
-          
-          <div class="space-y-4">
-            <div 
-              v-for="event in recentEvents" 
+
+          <div class="space-y-3 md:space-y-4">
+            <div
+              v-for="event in recentEvents"
               :key="event.id"
-              class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+              class="flex items-center p-2 md:p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
             >
-              <img 
-                :src="event.image || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100'" 
+              <img
+                :src="event.image || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100'"
                 :alt="event.title"
-                class="w-16 h-16 object-cover rounded-lg mr-4"
+                class="w-12 h-12 md:w-16 md:h-16 object-cover rounded-lg mr-3 md:mr-4 flex-shrink-0"
               />
-              <div class="flex-1">
-                <h3 class="font-semibold text-gray-800">{{ event.title }}</h3>
-                <p class="text-sm text-gray-600">{{ formatEventDate(event.date) }}</p>
-                <div class="flex items-center space-x-4 mt-1">
-                  <span class="text-xs px-2 py-1 rounded-full"
+              <div class="flex-1 min-w-0">
+                <h3 class="font-semibold text-gray-800 text-sm md:text-base truncate">{{ event.title }}</h3>
+                <p class="text-xs md:text-sm text-gray-600 truncate">{{ formatEventDate(event.date) }}</p>
+                <div class="flex items-center flex-wrap gap-2 mt-1">
+                  <span class="text-xs px-2 py-0.5 rounded-full"
                         :class="getStatusClass(event.status)">
                     {{ getStatusText(event.status) }}
                   </span>
-                  <span class="text-sm text-gray-500">{{ event.ticketsSold || 0 }} tickets vendus</span>
+                  <span class="text-xs md:text-sm text-gray-500">{{ event.ticketsSold || 0 }} vendus</span>
                 </div>
               </div>
-              <router-link 
+              <router-link
                 :to="`/organizer/events/${event.id}`"
-                class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                class="bg-blue-600 text-white px-2 md:px-3 py-1 rounded text-xs md:text-sm hover:bg-blue-700 flex-shrink-0 ml-2"
               >
                 Voir
               </router-link>
@@ -177,8 +181,8 @@
         </div>
 
         <!-- Notifications -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h2 class="text-xl font-bold text-gray-800 mb-6">Notifications</h2>
+        <div class="bg-white rounded-lg shadow-md p-4 md:p-6">
+          <h2 class="text-lg md:text-xl font-bold text-gray-800 mb-4 md:mb-6">Notifications</h2>
           
           <div class="space-y-4">
             <div 

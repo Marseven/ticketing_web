@@ -7,6 +7,8 @@
     </main>
     <!-- Footer global: gère automatiquement mobile et desktop -->
     <NewFooter v-if="showFooter" />
+    <!-- PWA Install Prompt -->
+    <PWAInstallPrompt />
   </div>
 </template>
 
@@ -15,12 +17,14 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import NewHeader from './components/layout/NewHeader.vue'
 import NewFooter from './components/layout/NewFooter.vue'
+import PWAInstallPrompt from './components/PWAInstallPrompt.vue'
 
 export default {
   name: 'App',
   components: {
     NewHeader,
-    NewFooter
+    NewFooter,
+    PWAInstallPrompt
   },
   setup() {
     const route = useRoute()

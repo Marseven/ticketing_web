@@ -106,86 +106,92 @@
       <!-- Liste des tickets -->
       <div v-else class="space-y-6">
         <!-- Billet actif avec événement à venir -->
-        <div v-for="ticket in filteredTickets" :key="ticket.id" 
+        <div v-for="ticket in filteredTickets" :key="ticket.id"
              class="bg-white rounded-primea-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
-          <div class="p-6">
-            <div class="flex flex-col lg:flex-row lg:items-center gap-6">
+          <div class="p-4 md:p-6">
+            <div class="flex flex-col md:flex-row md:items-start gap-4 md:gap-6">
               <!-- Image de l'événement -->
-              <div class="w-full lg:w-48 h-32 rounded-primea overflow-hidden flex-shrink-0">
-                <img 
-                  :src="ticket.event.image || '/images/default-event.jpg'" 
+              <div class="w-full md:w-32 lg:w-48 h-28 md:h-24 lg:h-32 rounded-primea overflow-hidden flex-shrink-0">
+                <img
+                  :src="ticket.event.image || '/images/default-event.jpg'"
                   :alt="ticket.event.title"
                   class="w-full h-full object-cover"
                 />
               </div>
 
               <!-- Informations du ticket -->
-              <div class="flex-1 space-y-3">
-                <div class="flex items-start justify-between">
-                  <div>
-                    <h3 class="text-xl font-bold text-primea-blue font-primea mb-1">{{ ticket.event.title }}</h3>
-                    <div class="flex items-center text-gray-600 text-sm mb-2">
-                      <CalendarIcon size="sm" class="mr-1" />
-                      {{ formatDate(ticket.event.date) }}
-                      <span class="mx-2">•</span>
-                      <ClockIcon class="w-4 h-4 mr-1" />
-                      {{ formatTime(ticket.event.date) }}
+              <div class="flex-1 space-y-3 min-w-0">
+                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                  <div class="min-w-0">
+                    <h3 class="text-lg md:text-xl font-bold text-primea-blue font-primea mb-1 truncate">{{ ticket.event.title }}</h3>
+                    <div class="flex flex-wrap items-center text-gray-600 text-xs md:text-sm gap-1 mb-2">
+                      <span class="flex items-center">
+                        <CalendarIcon size="sm" class="mr-1" />
+                        {{ formatDate(ticket.event.date) }}
+                      </span>
+                      <span class="mx-1 hidden sm:inline">•</span>
+                      <span class="flex items-center">
+                        <ClockIcon class="w-4 h-4 mr-1" />
+                        {{ formatTime(ticket.event.date) }}
+                      </span>
                     </div>
-                    <div class="flex items-center text-gray-600 text-sm">
-                      <MapPinIcon class="w-4 h-4 mr-1" />
-                      {{ ticket.event.venue }}
+                    <div class="flex items-center text-gray-600 text-xs md:text-sm">
+                      <MapPinIcon class="w-4 h-4 mr-1 flex-shrink-0" />
+                      <span class="truncate">{{ ticket.event.venue }}</span>
                     </div>
                   </div>
 
                   <!-- Statut du ticket -->
-                  <div class="flex flex-col items-end gap-2">
-                    <span :class="getStatusClass(ticket.status)" 
-                          class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium">
-                      <component :is="getStatusIcon(ticket.status)" class="w-4 h-4 mr-1" />
+                  <div class="flex sm:flex-col items-center sm:items-end gap-2">
+                    <span :class="getStatusClass(ticket.status)"
+                          class="inline-flex items-center px-2 md:px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap">
+                      <component :is="getStatusIcon(ticket.status)" class="w-3 h-3 md:w-4 md:h-4 mr-1" />
                       {{ getStatusText(ticket.status) }}
                     </span>
-                    <span class="text-lg font-bold text-primea-blue">{{ formatPrice(ticket.price) }} FCFA</span>
+                    <span class="text-base md:text-lg font-bold text-primea-blue whitespace-nowrap">{{ formatPrice(ticket.price) }} FCFA</span>
                   </div>
                 </div>
 
                 <!-- Informations détaillées du ticket -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4 pt-3 md:pt-4 border-t border-gray-200">
                   <div>
                     <p class="text-xs text-gray-500 uppercase tracking-wide">Référence</p>
-                    <p class="font-mono text-sm font-medium">{{ ticket.reference }}</p>
+                    <p class="font-mono text-xs md:text-sm font-medium truncate">{{ ticket.reference }}</p>
                   </div>
                   <div>
                     <p class="text-xs text-gray-500 uppercase tracking-wide">Type</p>
-                    <p class="text-sm font-medium">{{ ticket.type }}</p>
+                    <p class="text-xs md:text-sm font-medium truncate">{{ ticket.type }}</p>
                   </div>
                   <div>
                     <p class="text-xs text-gray-500 uppercase tracking-wide">Acheté le</p>
-                    <p class="text-sm font-medium">{{ formatDate(ticket.purchaseDate) }}</p>
+                    <p class="text-xs md:text-sm font-medium">{{ formatDate(ticket.purchaseDate) }}</p>
                   </div>
                   <div>
                     <p class="text-xs text-gray-500 uppercase tracking-wide">QR Code</p>
-                    <p class="text-sm font-medium text-green-600">✓ Généré</p>
+                    <p class="text-xs md:text-sm font-medium text-green-600">Généré</p>
                   </div>
                 </div>
               </div>
 
               <!-- Actions -->
-              <div class="flex lg:flex-col gap-3 lg:w-40">
+              <div class="flex md:flex-col gap-2 md:gap-3 md:w-32 lg:w-40">
                 <button
                   @click="viewTicket(ticket)"
-                  class="btn-view flex-1 lg:w-full px-4 py-2 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2"
+                  class="btn-view flex-1 md:w-full px-3 md:px-4 py-2 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-sm"
                 >
                   <EyeIcon class="w-4 h-4" />
-                  Voir le ticket
+                  <span class="hidden sm:inline">Voir le ticket</span>
+                  <span class="sm:hidden">Voir</span>
                 </button>
 
                 <button
                   v-if="ticket.status === 'active'"
                   @click="downloadTicket(ticket)"
-                  class="btn-download flex-1 lg:w-full px-4 py-2 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2"
+                  class="btn-download flex-1 md:w-full px-3 md:px-4 py-2 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-sm"
                 >
                   <ArrowDownTrayIcon class="w-4 h-4" />
-                  Télécharger
+                  <span class="hidden sm:inline">Télécharger</span>
+                  <span class="sm:hidden">PDF</span>
                 </button>
               </div>
             </div>

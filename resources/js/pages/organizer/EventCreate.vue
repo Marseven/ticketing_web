@@ -2,49 +2,49 @@
   <div class="event-create min-h-screen" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <!-- Header -->
-      <div class="mb-8">
+      <div class="mb-6 md:mb-8">
         <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-4">
-            <button 
+          <div class="flex items-center space-x-3 md:space-x-4">
+            <button
               @click="$router.go(-1)"
-              class="text-primea-blue hover:text-primea-yellow transition-colors"
+              class="text-primea-blue hover:text-primea-yellow transition-colors flex-shrink-0"
             >
-              <ArrowLeftIcon class="w-6 h-6" />
+              <ArrowLeftIcon class="w-5 h-5 md:w-6 md:h-6" />
             </button>
             <div>
-              <h1 class="text-3xl font-bold text-primea-blue font-primea">Créer un événement</h1>
-              <p class="text-gray-600 font-primea mt-1">Configurez tous les détails de votre événement</p>
+              <h1 class="text-xl md:text-3xl font-bold text-primea-blue font-primea">Créer un événement</h1>
+              <p class="text-gray-600 font-primea mt-1 text-sm md:text-base hidden sm:block">Configurez tous les détails de votre événement</p>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Form -->
-      <form @submit.prevent="createEvent" class="space-y-8">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <form @submit.prevent="createEvent" class="space-y-6 md:space-y-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           <!-- Main form content -->
-          <div class="lg:col-span-2 space-y-6">
+          <div class="lg:col-span-2 space-y-4 md:space-y-6">
             <!-- Basic Information -->
-            <div class="bg-white rounded-primea shadow-primea p-6">
-              <h2 class="text-xl font-semibold text-primea-blue font-primea mb-6">Informations de base</h2>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="md:col-span-2">
+            <div class="bg-white rounded-primea shadow-primea p-4 md:p-6">
+              <h2 class="text-lg md:text-xl font-semibold text-primea-blue font-primea mb-4 md:mb-6">Informations de base</h2>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+                <div class="sm:col-span-2">
                   <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Titre de l'événement</label>
-                  <input 
+                  <input
                     v-model="form.title"
-                    type="text" 
+                    type="text"
                     required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea text-base"
                     placeholder="Nom de votre événement"
                   />
                 </div>
 
-                <div class="md:col-span-2">
+                <div class="sm:col-span-2">
                   <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Description</label>
-                  <textarea 
+                  <textarea
                     v-model="form.description"
                     rows="4"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea resize-none"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea resize-none text-base"
                     placeholder="Décrivez votre événement..."
                   ></textarea>
                 </div>
@@ -112,7 +112,7 @@
                 </div>
 
 
-                <div class="md:col-span-2">
+                <div class="sm:col-span-2">
                   <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Image de l'événement</label>
                   <div class="border-2 border-dashed border-gray-300 rounded-primea p-4 text-center">
                     <div v-if="form.image_preview" class="mb-4">
@@ -155,22 +155,22 @@
             </div>
 
             <!-- Programmation -->
-            <div class="bg-white rounded-primea shadow-primea p-6">
-              <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-semibold text-primea-blue font-primea">Programmation</h2>
-                <button 
+            <div class="bg-white rounded-primea shadow-primea p-4 md:p-6">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 md:mb-6">
+                <h2 class="text-lg md:text-xl font-semibold text-primea-blue font-primea">Programmation</h2>
+                <button
                   type="button"
                   @click="addSchedule"
-                  class="bg-primea-blue text-white px-4 py-2 rounded-primea hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 font-primea"
+                  class="bg-primea-blue text-white px-3 md:px-4 py-2 rounded-primea hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 font-primea text-sm md:text-base w-full sm:w-auto"
                 >
-                  <PlusIcon class="w-4 h-4 inline mr-2" />
+                  <PlusIcon class="w-4 h-4 inline mr-1 md:mr-2" />
                   Ajouter une séance
                 </button>
               </div>
 
               <div class="space-y-4">
-                <div v-for="(schedule, index) in form.schedules" :key="index" 
-                     class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border border-gray-200 rounded-primea">
+                <div v-for="(schedule, index) in form.schedules" :key="index"
+                     class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 p-3 md:p-4 border border-gray-200 rounded-primea">
                   <div>
                     <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Date et heure de début *</label>
                     <input 
@@ -209,82 +209,83 @@
             </div>
 
             <!-- Ticket Types -->
-            <div class="bg-white rounded-primea shadow-primea p-6">
-              <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-semibold text-primea-blue font-primea">Types de billets</h2>
-                <button 
+            <div class="bg-white rounded-primea shadow-primea p-4 md:p-6">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 md:mb-6">
+                <h2 class="text-lg md:text-xl font-semibold text-primea-blue font-primea">Types de billets</h2>
+                <button
                   type="button"
                   @click="addTicketType"
-                  class="bg-primea-blue text-white px-4 py-2 rounded-primea hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 font-primea"
+                  class="bg-primea-blue text-white px-3 md:px-4 py-2 rounded-primea hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 font-primea text-sm md:text-base w-full sm:w-auto"
                 >
-                  <PlusIcon class="w-4 h-4 inline mr-2" />
+                  <PlusIcon class="w-4 h-4 inline mr-1 md:mr-2" />
                   Ajouter un type
                 </button>
               </div>
 
-              <div v-if="form.ticket_types.length === 0" class="text-center py-8 text-gray-500">
-                <TicketIcon class="w-12 h-12 mx-auto text-gray-300 mb-2" />
-                <p class="font-primea">Aucun type de billet configuré</p>
-                <p class="text-sm font-primea mt-1">Cliquez sur "Ajouter un type" pour commencer</p>
+              <div v-if="form.ticket_types.length === 0" class="text-center py-6 md:py-8 text-gray-500">
+                <TicketIcon class="w-10 md:w-12 h-10 md:h-12 mx-auto text-gray-300 mb-2" />
+                <p class="font-primea text-sm md:text-base">Aucun type de billet configuré</p>
+                <p class="text-xs md:text-sm font-primea mt-1">Cliquez sur "Ajouter un type" pour commencer</p>
               </div>
 
               <div v-else class="space-y-4">
-                <div v-for="(ticket, index) in form.ticket_types" :key="index" 
-                     class="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border border-gray-200 rounded-primea">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Nom *</label>
-                    <input 
+                <div v-for="(ticket, index) in form.ticket_types" :key="index"
+                     class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 p-3 md:p-4 border border-gray-200 rounded-primea">
+                  <div class="col-span-2 sm:col-span-1">
+                    <label class="block text-xs md:text-sm font-medium text-gray-700 font-primea mb-1">Nom *</label>
+                    <input
                       v-model="ticket.name"
-                      type="text" 
+                      type="text"
                       required
-                      class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea text-base"
                       placeholder="Ex: Billet Standard"
                     />
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Prix (XAF) *</label>
-                    <input 
+                    <label class="block text-xs md:text-sm font-medium text-gray-700 font-primea mb-1">Prix (XAF) *</label>
+                    <input
                       v-model.number="ticket.price"
-                      type="number" 
+                      type="number"
                       min="0"
                       step="0.01"
                       required
-                      class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea text-base"
                       placeholder="25000"
                     />
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Capacité *</label>
-                    <input 
+                    <label class="block text-xs md:text-sm font-medium text-gray-700 font-primea mb-1">Capacité *</label>
+                    <input
                       v-model.number="ticket.capacity"
-                      type="number" 
+                      type="number"
                       min="1"
                       required
-                      class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea text-base"
                       placeholder="100"
                     />
                   </div>
 
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 font-primea mb-1">Description</label>
-                    <input 
+                  <div class="col-span-2 sm:col-span-1">
+                    <label class="block text-xs md:text-sm font-medium text-gray-700 font-primea mb-1">Description</label>
+                    <input
                       v-model="ticket.description"
                       type="text"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea text-base"
                       placeholder="Description du billet"
                     />
                   </div>
-                  
-                  <div class="flex items-end">
-                    <button 
+
+                  <div class="col-span-2 lg:col-span-1 flex items-end justify-end">
+                    <button
                       v-if="form.ticket_types.length > 1"
                       type="button"
                       @click="removeTicketType(index)"
-                      class="bg-red-600 text-white px-3 py-2 rounded-primea hover:bg-red-700 font-primea"
+                      class="bg-red-600 text-white px-3 py-2 rounded-primea hover:bg-red-700 font-primea text-sm w-full lg:w-auto"
                     >
-                      <TrashIcon class="w-4 h-4" />
+                      <TrashIcon class="w-4 h-4 inline mr-1 lg:mr-0" />
+                      <span class="lg:hidden">Supprimer</span>
                     </button>
                   </div>
                 </div>
@@ -293,10 +294,10 @@
           </div>
 
           <!-- Sidebar -->
-          <div class="space-y-6">
+          <div class="space-y-4 md:space-y-6">
             <!-- Settings -->
-            <div class="bg-white rounded-primea shadow-primea p-6">
-              <h3 class="text-lg font-semibold text-primea-blue font-primea mb-4">Paramètres</h3>
+            <div class="bg-white rounded-primea shadow-primea p-4 md:p-6">
+              <h3 class="text-base md:text-lg font-semibold text-primea-blue font-primea mb-3 md:mb-4">Paramètres</h3>
               <div class="space-y-4">
                 <div>
                   <label class="flex items-center space-x-2">
@@ -338,20 +339,20 @@
             </div>
 
             <!-- Actions -->
-            <div class="bg-white rounded-primea shadow-primea p-6">
-              <h3 class="text-lg font-semibold text-primea-blue font-primea mb-4">Actions</h3>
+            <div class="bg-white rounded-primea shadow-primea p-4 md:p-6">
+              <h3 class="text-base md:text-lg font-semibold text-primea-blue font-primea mb-3 md:mb-4">Actions</h3>
               <div class="space-y-3">
-                <button 
+                <button
                   type="submit"
                   :disabled="creating"
-                  class="w-full bg-primea-blue text-white px-4 py-2 rounded-primea hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 font-primea disabled:opacity-50"
+                  class="w-full bg-primea-blue text-white px-4 py-3 rounded-primea hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 font-primea disabled:opacity-50 text-sm md:text-base font-semibold"
                 >
                   {{ creating ? 'Création en cours...' : 'Créer l\'événement' }}
                 </button>
 
-                <router-link 
+                <router-link
                   to="/organizer/dashboard"
-                  class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 rounded-primea hover:bg-gray-50 transition-all duration-200 font-primea"
+                  class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 rounded-primea hover:bg-gray-50 transition-all duration-200 font-primea text-sm md:text-base"
                 >
                   Annuler
                 </router-link>
@@ -359,14 +360,14 @@
             </div>
 
             <!-- Preview -->
-            <div v-if="form.image_url || form.image_preview" class="bg-white rounded-primea shadow-primea p-6">
-              <h3 class="text-lg font-semibold text-primea-blue font-primea mb-4">Aperçu de l'image</h3>
-              <img :src="form.image_preview || form.image_url" :alt="form.title" class="w-full h-48 object-cover rounded-primea">
+            <div v-if="form.image_url || form.image_preview" class="bg-white rounded-primea shadow-primea p-4 md:p-6">
+              <h3 class="text-base md:text-lg font-semibold text-primea-blue font-primea mb-3 md:mb-4">Aperçu de l'image</h3>
+              <img :src="form.image_preview || form.image_url" :alt="form.title" class="w-full h-40 md:h-48 object-cover rounded-primea">
             </div>
 
             <!-- Summary -->
-            <div class="bg-white rounded-primea shadow-primea p-6">
-              <h3 class="text-lg font-semibold text-primea-blue font-primea mb-4">Résumé</h3>
+            <div class="bg-white rounded-primea shadow-primea p-4 md:p-6">
+              <h3 class="text-base md:text-lg font-semibold text-primea-blue font-primea mb-3 md:mb-4">Résumé</h3>
               <div class="space-y-2 text-sm">
                 <div class="flex justify-between">
                   <span class="text-gray-600 font-primea">Types de billets:</span>
