@@ -63,7 +63,7 @@ export default {
     position: {
       type: String,
       default: 'home',
-      validator: (value) => ['home', 'events', 'checkout', 'all'].includes(value)
+      validator: (value) => ['home', 'home-top', 'home-bottom', 'events', 'checkout', 'all'].includes(value)
     },
     autoPlay: {
       type: Boolean,

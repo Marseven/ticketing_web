@@ -343,13 +343,25 @@
       </div>
     </section>
 
-    <!-- Bannières Publicitaires -->
+    <!-- Banniere Publicitaire - Zone principale -->
     <section class="py-8 md:py-12 bg-gray-50">
       <div class="px-4 max-w-6xl mx-auto">
         <BannerCarousel
           position="home"
           :auto-play="true"
           :interval="5000"
+          :show-nav-buttons="true"
+        />
+      </div>
+    </section>
+
+    <!-- Banniere Publicitaire - Avant le footer -->
+    <section class="py-6 md:py-8 bg-white">
+      <div class="px-4 max-w-6xl mx-auto">
+        <BannerCarousel
+          position="home-bottom"
+          :auto-play="true"
+          :interval="6000"
           :show-nav-buttons="true"
         />
       </div>

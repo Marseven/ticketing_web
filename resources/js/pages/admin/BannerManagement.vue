@@ -34,8 +34,10 @@
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
                   style="--tw-ring-color: #272d63;">
             <option value="">Toutes les positions</option>
-            <option value="home">Page d'accueil</option>
-            <option value="events">Page des événements</option>
+            <option value="home">Accueil - Zone principale</option>
+            <option value="home-top">Accueil - Avant le contenu</option>
+            <option value="home-bottom">Accueil - Avant le footer</option>
+            <option value="events">Page des evenements</option>
             <option value="checkout">Page de paiement</option>
             <option value="all">Toutes les pages</option>
           </select>
@@ -221,8 +223,10 @@
                 <select v-model="bannerForm.position" required
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
                         style="--tw-ring-color: #272d63;">
-                  <option value="home">Page d'accueil</option>
-                  <option value="events">Page des événements</option>
+                  <option value="home">Accueil - Zone principale</option>
+                  <option value="home-top">Accueil - Avant le contenu</option>
+                  <option value="home-bottom">Accueil - Avant le footer</option>
+                  <option value="events">Page des evenements</option>
                   <option value="checkout">Page de paiement</option>
                   <option value="all">Toutes les pages</option>
                 </select>
@@ -554,8 +558,10 @@ export default {
 
     const getPositionLabel = (position) => {
       const labels = {
-        home: 'Accueil',
-        events: 'Événements',
+        home: 'Accueil - Zone principale',
+        'home-top': 'Accueil - Avant contenu',
+        'home-bottom': 'Accueil - Avant footer',
+        events: 'Evenements',
         checkout: 'Paiement',
         all: 'Toutes les pages'
       }
