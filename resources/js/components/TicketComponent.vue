@@ -93,8 +93,8 @@
               size === 'small' ? 'text-[10px]' : 'text-xs'
             ]"
           >
-            <p class="text-red-600 font-bold mb-2 tracking-wide">** ATTENTION **</p>
-            <p class="text-gray-500 leading-loose tracking-normal">
+            <p class="text-red-600 font-bold mb-0.5 tracking-wide">** ATTENTION **</p>
+            <p class="text-red-600 leading-tight tracking-normal">
               Ce ticket est strictement personnel et à usage<br />
               unique. Tâchez de ne le remettre à personne.
             </p>

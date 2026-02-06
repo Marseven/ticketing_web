@@ -161,14 +161,14 @@
             font-size: 11px;
             font-weight: bold;
             color: #dc2626;
-            margin-bottom: 8px;
+            margin-bottom: 2px;
             letter-spacing: 0.5px;
         }
 
         .warning-text {
             font-size: 10px;
-            color: #6b7280;
-            line-height: 1.8;
+            color: #dc2626;
+            line-height: 1.3;
             letter-spacing: 0.3px;
         }
 
