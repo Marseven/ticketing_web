@@ -18,7 +18,9 @@
           v-else
           :src="heroBanner?.media_url || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87'"
           :alt="heroBanner?.title || 'Événements'"
-          class="w-full h-full object-cover"
+          class="w-full h-full object-cover hero-image"
+          loading="eager"
+          fetchpriority="high"
         />
         <div class="absolute inset-0 bg-black bg-opacity-60"></div>
       </div>
@@ -576,6 +578,15 @@ export default {
 <style scoped>
 .home {
   font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Hero image optimization - prevent pixelation */
+.hero-image {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 .line-clamp-2 {
