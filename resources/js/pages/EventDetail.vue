@@ -302,6 +302,16 @@
       </div>
     </div>
 
+    <!-- Banniere Publicitaire -->
+    <div class="py-6 px-4 max-w-6xl mx-auto">
+      <BannerCarousel
+        position="events"
+        :auto-play="true"
+        :interval="5000"
+        :show-nav-buttons="true"
+      />
+    </div>
+
     <!-- Add bottom padding for mobile fixed button -->
     <div class="h-24 md:hidden"></div>
   </div>
@@ -312,6 +322,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useEventsStore } from '../stores/events'
 import EventCard from '../components/EventCard.vue'
+import BannerCarousel from '../components/BannerCarousel.vue'
 import FavoriteButton from '../components/FavoriteButton.vue'
 import ScheduleSection from '../components/ScheduleSection.vue'
 import VenueSection from '../components/VenueSection.vue'
@@ -321,6 +332,7 @@ export default {
   name: 'EventDetail',
   components: {
     EventCard,
+    BannerCarousel,
     FavoriteButton,
     ScheduleSection,
     VenueSection,

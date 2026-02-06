@@ -144,7 +144,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-BMvqaI4z.js",
+    "file": "assets/js/app-KHvpO4NN.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -245,7 +245,7 @@
     ]
   },
   "resources/js/pages/Checkout.vue": {
-    "file": "assets/js/Checkout-Cz2iuvqR.js",
+    "file": "assets/js/Checkout-SmVgYITB.js",
     "name": "Checkout",
     "src": "resources/js/pages/Checkout.vue",
     "isDynamicEntry": true,
@@ -253,11 +253,13 @@
       "_vue-vendor-DRZPKcCW.js",
       "_events-Ba2urub_.js",
       "_account-DuoKYRJi.js",
+      "resources/js/app.js",
       "_vendor-D_sY0cVe.js",
       "_pinia-vendor-6F1O2Wmp.js"
     ],
     "css": [
-      "assets/css/Checkout-CEnKYBPs.css"
+      "assets/css/Checkout-DeNqp9o3.css",
+      "assets/css/app-XkftyQxS.css"
     ]
   },
   "resources/js/pages/EmailVerificationResult.vue": {
@@ -276,7 +278,7 @@
     ]
   },
   "resources/js/pages/EventDetail.vue": {
-    "file": "assets/js/EventDetail-BAqSGfp9.js",
+    "file": "assets/js/EventDetail-yhYxvVKq.js",
     "name": "EventDetail",
     "src": "resources/js/pages/EventDetail.vue",
     "isDynamicEntry": true,
@@ -284,16 +286,18 @@
       "_vue-vendor-DRZPKcCW.js",
       "_events-Ba2urub_.js",
       "_EventCard-DaoKDWXb.js",
+      "resources/js/app.js",
       "_account-DuoKYRJi.js",
       "_vendor-D_sY0cVe.js",
       "_pinia-vendor-6F1O2Wmp.js"
     ],
     "css": [
-      "assets/css/EventDetail-D0qXU3D9.css"
+      "assets/css/EventDetail-EoSqb1tw.css",
+      "assets/css/app-XkftyQxS.css"
     ]
   },
   "resources/js/pages/Events.vue": {
-    "file": "assets/js/Events-CBszI7_w.js",
+    "file": "assets/js/Events-82f1ohJy.js",
     "name": "Events",
     "src": "resources/js/pages/Events.vue",
     "isDynamicEntry": true,
@@ -301,12 +305,14 @@
       "_vue-vendor-DRZPKcCW.js",
       "_events-Ba2urub_.js",
       "_EventCard-DaoKDWXb.js",
+      "resources/js/app.js",
       "_account-DuoKYRJi.js",
       "_vendor-D_sY0cVe.js",
       "_pinia-vendor-6F1O2Wmp.js"
     ],
     "css": [
-      "assets/css/Events-C38SedYm.css"
+      "assets/css/Events-BewoAbvm.css",
+      "assets/css/app-XkftyQxS.css"
     ]
   },
   "resources/js/pages/Payment.vue": {

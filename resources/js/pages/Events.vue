@@ -335,6 +335,16 @@
         </div>
       </div>
     </div>
+
+    <!-- Banniere Publicitaire -->
+    <div class="py-6 px-4 max-w-6xl mx-auto">
+      <BannerCarousel
+        position="events"
+        :auto-play="true"
+        :interval="5000"
+        :show-nav-buttons="true"
+      />
+    </div>
   </div>
 </template>
 
@@ -343,12 +353,14 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useEventsStore } from '../stores/events'
 import EventCard from '../components/EventCard.vue'
+import BannerCarousel from '../components/BannerCarousel.vue'
 import { ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
 
 export default {
   name: 'Events',
   components: {
     EventCard,
+    BannerCarousel,
     ExclamationTriangleIcon
   },
   setup() {

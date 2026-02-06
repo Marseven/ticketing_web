@@ -731,6 +731,16 @@
         </div>
       </div>
     </div>
+
+    <!-- Banniere Publicitaire -->
+    <div class="py-6 px-4 max-w-6xl mx-auto">
+      <BannerCarousel
+        position="checkout"
+        :auto-play="true"
+        :interval="5000"
+        :show-nav-buttons="true"
+      />
+    </div>
   </div>
 </template>
 
@@ -741,6 +751,7 @@ import { useEventsStore } from '../stores/events'
 import { useAuthStore } from '../stores/auth'
 import { guestService, orderService } from '../services/api'
 import PhoneInput from '../components/PhoneInput.vue'
+import BannerCarousel from '../components/BannerCarousel.vue'
 import {
   ExclamationCircleIcon,
   PhotoIcon,
@@ -752,6 +763,7 @@ export default {
   name: 'Checkout',
   components: {
     PhoneInput,
+    BannerCarousel,
     ExclamationCircleIcon,
     PhotoIcon,
     MapPinIcon,
