@@ -524,6 +524,7 @@
 
 <script>
 import { ref, computed, onMounted } from 'vue'
+import Swal from 'sweetalert2'
 import { useAuthStore } from '../../stores/auth'
 import CalendarIcon from '../../components/icons/CalendarIcon.vue'
 import PhoneInput from '../../components/PhoneInput.vue'
@@ -874,13 +875,13 @@ export default {
 
       // Vérifier le type de fichier
       if (!file.type.startsWith('image/')) {
-        alert('Veuillez sélectionner un fichier image')
+        Swal.fire({ icon: 'warning', title: 'Attention', text: 'Veuillez sélectionner un fichier image', confirmButtonColor: '#272d63' })
         return
       }
 
       // Vérifier la taille (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        alert('La taille du fichier ne doit pas dépasser 5MB')
+        Swal.fire({ icon: 'warning', title: 'Attention', text: 'La taille du fichier ne doit pas dépasser 5MB', confirmButtonColor: '#272d63' })
         return
       }
 

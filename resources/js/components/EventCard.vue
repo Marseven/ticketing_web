@@ -129,6 +129,7 @@
 <script>
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import Swal from 'sweetalert2'
 import CalendarIcon from './icons/CalendarIcon.vue'
 import { ClockIcon, MapPinIcon } from '@heroicons/vue/24/outline'
 
@@ -386,7 +387,7 @@ export default {
             .slice(0, 50)
         } else {
           console.error('Event slug, ID and title are all missing!', props.event)
-          alert('Erreur: Impossible de réserver - informations manquantes')
+          Swal.fire({ icon: 'error', title: 'Erreur', text: 'Impossible de réserver - informations manquantes', confirmButtonColor: '#272d63' })
           return
         }
       }

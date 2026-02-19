@@ -265,6 +265,7 @@
 
 <script>
 import { ref, reactive, onMounted } from 'vue'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'Reports',
@@ -430,7 +431,7 @@ export default {
             'X-Requested-With': 'XMLHttpRequest'
           }
         })
-        
+
         if (response.ok) {
           const blob = await response.blob()
           const url = window.URL.createObjectURL(blob)
@@ -442,16 +443,26 @@ export default {
           window.URL.revokeObjectURL(url)
           document.body.removeChild(a)
         } else {
-          alert('Téléchargement simulé du rapport: ' + report.type)
+          Swal.fire({ icon: 'info', title: 'Information', text: 'Téléchargement simulé du rapport: ' + report.type, confirmButtonColor: '#272d63' })
         }
       } catch (error) {
-        alert('Téléchargement simulé du rapport: ' + report.type)
+        Swal.fire({ icon: 'info', title: 'Information', text: 'Téléchargement simulé du rapport: ' + report.type, confirmButtonColor: '#272d63' })
       }
     }
     
     const deleteReport = async (report) => {
-      if (!confirm(`Êtes-vous sûr de vouloir supprimer ce rapport ?`)) return
-      
+      const result = await Swal.fire({
+        icon: 'warning',
+        title: 'Confirmation',
+        text: 'Êtes-vous sûr de vouloir supprimer ce rapport ?',
+        showCancelButton: true,
+        confirmButtonText: 'Oui',
+        cancelButtonText: 'Annuler',
+        confirmButtonColor: '#272d63',
+        cancelButtonColor: '#d33'
+      })
+      if (!result.isConfirmed) return
+
       try {
         const response = await fetch(`/api/v1/admin/reports/${report.id}`, {
           method: 'DELETE',
@@ -462,7 +473,7 @@ export default {
             'X-Requested-With': 'XMLHttpRequest'
           }
         })
-        
+
         if (response.ok) {
           reports.value = reports.value.filter(r => r.id !== report.id)
         } else {
@@ -474,8 +485,18 @@ export default {
     }
     
     const clearHistory = async () => {
-      if (!confirm('Êtes-vous sûr de vouloir vider tout l\'historique des rapports ?')) return
-      
+      const result = await Swal.fire({
+        icon: 'warning',
+        title: 'Confirmation',
+        text: 'Êtes-vous sûr de vouloir vider tout l\'historique des rapports ?',
+        showCancelButton: true,
+        confirmButtonText: 'Oui',
+        cancelButtonText: 'Annuler',
+        confirmButtonColor: '#272d63',
+        cancelButtonColor: '#d33'
+      })
+      if (!result.isConfirmed) return
+
       try {
         const response = await fetch('/api/v1/admin/reports/clear', {
           method: 'DELETE',
@@ -486,7 +507,7 @@ export default {
             'X-Requested-With': 'XMLHttpRequest'
           }
         })
-        
+
         if (response.ok) {
           reports.value = []
         } else {

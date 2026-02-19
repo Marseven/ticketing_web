@@ -254,6 +254,7 @@
 
 <script>
 import { ref, reactive, computed, onMounted } from 'vue'
+import Swal from 'sweetalert2'
 import ImageUpload from '../../components/ImageUpload.vue'
 
 export default {
@@ -596,8 +597,9 @@ export default {
     }
     
     const deleteVenue = async (venue) => {
-      if (!confirm(`Êtes-vous sûr de vouloir supprimer le lieu "${venue.name}" ?`)) return
-      
+      const result = await Swal.fire({ icon: 'warning', title: 'Confirmation', text: `Êtes-vous sûr de vouloir supprimer le lieu "${venue.name}" ?`, showCancelButton: true, confirmButtonColor: '#272d63', cancelButtonColor: '#d33', confirmButtonText: 'Oui', cancelButtonText: 'Annuler' })
+      if (!result.isConfirmed) return
+
       try {
         const response = await fetch(`/api/v1/admin/venues/${venue.id}`, {
           method: 'DELETE',

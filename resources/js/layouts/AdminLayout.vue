@@ -435,6 +435,7 @@
 
 <script>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
+import Swal from 'sweetalert2'
 import { useRoute, useRouter } from 'vue-router'
 
 export default {
@@ -646,8 +647,9 @@ export default {
       return `Il y a ${days}j`
     }
 
-    const logout = () => {
-      if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+    const logout = async () => {
+      const result = await Swal.fire({ icon: 'question', title: 'Déconnexion', text: 'Êtes-vous sûr de vouloir vous déconnecter ?', showCancelButton: true, confirmButtonColor: '#272d63', cancelButtonColor: '#d33', confirmButtonText: 'Oui, me déconnecter', cancelButtonText: 'Annuler' })
+      if (result.isConfirmed) {
         localStorage.removeItem('token')
         localStorage.removeItem('userRole')
         localStorage.removeItem('userName')

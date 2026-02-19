@@ -358,6 +358,7 @@
 
 <script>
 import { ref, reactive, onMounted } from 'vue'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'PaymentHistory',
@@ -498,14 +499,14 @@ export default {
         
         const data = await response.json()
         if (data.success) {
-          alert(`Statut mis à jour: ${getStatusName(data.data.status)}`)
+          Swal.fire({ icon: 'success', title: 'Succès', text: `Statut mis à jour: ${getStatusName(data.data.status)}`, confirmButtonColor: '#272d63' })
           loadPayments()
         } else {
-          alert(data.message || 'Erreur lors de la vérification')
+          Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Erreur lors de la vérification', confirmButtonColor: '#272d63' })
         }
       } catch (error) {
         console.error('Erreur vérification statut:', error)
-        alert('Erreur technique')
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur technique', confirmButtonColor: '#272d63' })
       }
     }
 
@@ -538,7 +539,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur export:', error)
-        alert('Erreur lors de l\'export des données')
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors de l\'export des données', confirmButtonColor: '#272d63' })
       }
     }
 

@@ -212,6 +212,7 @@
 
 <script>
 import { ref, reactive, onMounted } from 'vue'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'OrganizerBalanceConfig',
@@ -349,15 +350,15 @@ export default {
         
         const data = await response.json()
         if (data.success) {
-          alert('Configuration mise à jour avec succès')
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Configuration mise à jour avec succès', confirmButtonColor: '#272d63' })
           showConfigModal.value = false
           loadBalances()
         } else {
-          alert(data.message || 'Erreur lors de la mise à jour')
+          Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Erreur lors de la mise à jour', confirmButtonColor: '#272d63' })
         }
       } catch (error) {
         console.error('Erreur sauvegarde config:', error)
-        alert('Erreur technique')
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur technique', confirmButtonColor: '#272d63' })
       } finally {
         savingConfig.value = false
       }

@@ -303,6 +303,7 @@
 
 <script>
 import { ref, reactive, computed, watch, onMounted } from 'vue'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'PhysicalSales',
@@ -447,7 +448,7 @@ export default {
 
     const openAddSaleModal = () => {
       if (!selectedEvent.value) {
-        alert('Veuillez d\'abord sélectionner un événement')
+        Swal.fire({ icon: 'warning', title: 'Attention', text: 'Veuillez d\'abord sélectionner un événement', confirmButtonColor: '#272d63' })
         return
       }
       
@@ -510,25 +511,32 @@ export default {
         
         const data = await response.json()
         if (data.success) {
-          alert(editingSale.value ? 'Vente mise à jour avec succès' : 'Vente ajoutée avec succès')
+          await Swal.fire({ icon: 'success', title: 'Succès', text: editingSale.value ? 'Vente mise à jour avec succès' : 'Vente ajoutée avec succès', confirmButtonColor: '#272d63' })
           showSaleModal.value = false
           loadPhysicalSales()
           loadEventDetails() // Recharger pour mettre à jour les stats
         } else {
-          alert(data.message || 'Erreur lors de l\'enregistrement')
+          await Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Erreur lors de l\'enregistrement', confirmButtonColor: '#272d63' })
         }
       } catch (error) {
         console.error('Erreur sauvegarde vente:', error)
-        alert('Erreur technique')
+        await Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur technique', confirmButtonColor: '#272d63' })
       } finally {
         saving.value = false
       }
     }
 
     const deleteSale = async (sale) => {
-      if (!confirm('Êtes-vous sûr de vouloir supprimer cette vente physique ?')) {
-        return
-      }
+      const result = await Swal.fire({
+        icon: 'warning',
+        title: 'Attention',
+        text: 'Êtes-vous sûr de vouloir supprimer cette vente physique ?',
+        showCancelButton: true,
+        confirmButtonColor: '#272d63',
+        cancelButtonText: 'Annuler',
+        confirmButtonText: 'Confirmer'
+      })
+      if (!result.isConfirmed) return
 
       try {
         const response = await fetch(`/api/v1/organizer/events/${selectedEventId.value}/physical-sales/${sale.id}`, {
@@ -538,18 +546,18 @@ export default {
             'Accept': 'application/json'
           }
         })
-        
+
         const data = await response.json()
         if (data.success) {
-          alert('Vente supprimée avec succès')
+          await Swal.fire({ icon: 'success', title: 'Succès', text: 'Vente supprimée avec succès', confirmButtonColor: '#272d63' })
           loadPhysicalSales()
           loadEventDetails()
         } else {
-          alert(data.message || 'Erreur lors de la suppression')
+          await Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Erreur lors de la suppression', confirmButtonColor: '#272d63' })
         }
       } catch (error) {
         console.error('Erreur suppression vente:', error)
-        alert('Erreur technique')
+        await Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur technique', confirmButtonColor: '#272d63' })
       }
     }
 
@@ -578,7 +586,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur export:', error)
-        alert('Erreur lors de l\'export des données')
+        await Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors de l\'export des données', confirmButtonColor: '#272d63' })
       }
     }
 

@@ -273,6 +273,7 @@
 
 <script>
 import { ref, reactive, onMounted } from 'vue'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'Profile',
@@ -397,20 +398,20 @@ export default {
             profile.value = { ...profile.value, ...profileForm }
             localStorage.setItem('userName', profileForm.name)
             localStorage.setItem('userEmail', profileForm.email)
-            alert('Profil mis à jour avec succès')
+            Swal.fire({ icon: 'success', title: 'Succès', text: 'Profil mis à jour avec succès', confirmButtonColor: '#272d63' })
           }
         } else {
           profile.value = { ...profile.value, ...profileForm }
           localStorage.setItem('userName', profileForm.name)
           localStorage.setItem('userEmail', profileForm.email)
-          alert('Profil mis à jour avec succès (simulé)')
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Profil mis à jour avec succès (simulé)', confirmButtonColor: '#272d63' })
         }
       } catch (error) {
         console.log('API non disponible, mise à jour locale')
         profile.value = { ...profile.value, ...profileForm }
         localStorage.setItem('userName', profileForm.name)
         localStorage.setItem('userEmail', profileForm.email)
-        alert('Profil mis à jour avec succès (simulé)')
+        Swal.fire({ icon: 'success', title: 'Succès', text: 'Profil mis à jour avec succès (simulé)', confirmButtonColor: '#272d63' })
       } finally {
         updatingProfile.value = false
       }
@@ -449,7 +450,7 @@ export default {
               new_password: '',
               new_password_confirmation: ''
             })
-            alert('Mot de passe changé avec succès')
+            Swal.fire({ icon: 'success', title: 'Succès', text: 'Mot de passe changé avec succès', confirmButtonColor: '#272d63' })
           }
         } else {
           Object.assign(passwordForm, {
@@ -457,7 +458,7 @@ export default {
             new_password: '',
             new_password_confirmation: ''
           })
-          alert('Mot de passe changé avec succès (simulé)')
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Mot de passe changé avec succès (simulé)', confirmButtonColor: '#272d63' })
         }
       } catch (error) {
         console.log('API non disponible, changement simulé')
@@ -466,7 +467,7 @@ export default {
           new_password: '',
           new_password_confirmation: ''
         })
-        alert('Mot de passe changé avec succès (simulé)')
+        Swal.fire({ icon: 'success', title: 'Succès', text: 'Mot de passe changé avec succès (simulé)', confirmButtonColor: '#272d63' })
       } finally {
         changingPassword.value = false
       }
@@ -486,13 +487,13 @@ export default {
         })
         
         if (response.ok) {
-          alert('Préférences sauvegardées avec succès')
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Préférences sauvegardées avec succès', confirmButtonColor: '#272d63' })
         } else {
-          alert('Préférences sauvegardées avec succès (simulé)')
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Préférences sauvegardées avec succès (simulé)', confirmButtonColor: '#272d63' })
         }
       } catch (error) {
         console.log('API non disponible, sauvegarde simulée')
-        alert('Préférences sauvegardées avec succès (simulé)')
+        Swal.fire({ icon: 'success', title: 'Succès', text: 'Préférences sauvegardées avec succès (simulé)', confirmButtonColor: '#272d63' })
       } finally {
         updatingPreferences.value = false
       }
@@ -503,7 +504,17 @@ export default {
     }
     
     const revokeSession = async (session) => {
-      if (!confirm('Êtes-vous sûr de vouloir révoquer cette session ?')) return
+      const result = await Swal.fire({
+        icon: 'warning',
+        title: 'Confirmation',
+        text: 'Êtes-vous sûr de vouloir révoquer cette session ?',
+        showCancelButton: true,
+        confirmButtonColor: '#272d63',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Oui',
+        cancelButtonText: 'Annuler'
+      })
+      if (!result.isConfirmed) return
       
       try {
         const response = await fetch(`/api/v1/admin/profile/sessions/${session.id}`, {
@@ -525,8 +536,18 @@ export default {
     }
     
     const logoutAllSessions = async () => {
-      if (!confirm('Cela déconnectera toutes les autres sessions. Continuer ?')) return
-      
+      const result = await Swal.fire({
+        icon: 'warning',
+        title: 'Confirmation',
+        text: 'Cela déconnectera toutes les autres sessions. Continuer ?',
+        showCancelButton: true,
+        confirmButtonColor: '#272d63',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Oui',
+        cancelButtonText: 'Annuler'
+      })
+      if (!result.isConfirmed) return
+
       try {
         const response = await fetch('/api/v1/admin/profile/sessions/logout-all', {
           method: 'POST',
@@ -535,22 +556,22 @@ export default {
             'Accept': 'application/json'
           }
         })
-        
+
         if (response.ok) {
           activeSessions.value = activeSessions.value.filter(s => s.current)
-          alert('Toutes les autres sessions ont été déconnectées')
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Toutes les autres sessions ont été déconnectées', confirmButtonColor: '#272d63' })
         } else {
           activeSessions.value = activeSessions.value.filter(s => s.current)
-          alert('Toutes les autres sessions ont été déconnectées (simulé)')
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Toutes les autres sessions ont été déconnectées (simulé)', confirmButtonColor: '#272d63' })
         }
       } catch (error) {
         activeSessions.value = activeSessions.value.filter(s => s.current)
-        alert('Toutes les autres sessions ont été déconnectées (simulé)')
+        Swal.fire({ icon: 'success', title: 'Succès', text: 'Toutes les autres sessions ont été déconnectées (simulé)', confirmButtonColor: '#272d63' })
       }
     }
     
     const downloadAccountData = () => {
-      alert('Téléchargement des données du compte (fonctionnalité à venir)')
+      Swal.fire({ icon: 'info', title: 'Information', text: 'Téléchargement des données du compte (fonctionnalité à venir)', confirmButtonColor: '#272d63' })
     }
     
     // Utils

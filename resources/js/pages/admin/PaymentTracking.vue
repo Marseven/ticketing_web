@@ -458,6 +458,7 @@
 
 <script>
 import { ref, reactive, onMounted, computed } from 'vue'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'PaymentTracking',
@@ -630,7 +631,7 @@ export default {
 
         if (!response.ok) {
           console.error('Erreur API payment details:', response.status)
-          alert('Impossible de charger les détails du paiement')
+          Swal.fire({ icon: 'error', title: 'Erreur', text: 'Impossible de charger les détails du paiement', confirmButtonColor: '#272d63' })
           return
         }
 
@@ -639,11 +640,11 @@ export default {
           selectedPayment.value = data.data.payment
           showDetailsModal.value = true
         } else {
-          alert('Erreur lors du chargement des détails')
+          Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors du chargement des détails', confirmButtonColor: '#272d63' })
         }
       } catch (error) {
         console.error('Erreur chargement détails paiement:', error)
-        alert('Erreur technique lors du chargement des détails')
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur technique lors du chargement des détails', confirmButtonColor: '#272d63' })
       }
     }
 
@@ -659,30 +660,38 @@ export default {
 
         if (!response.ok) {
           console.error('Erreur API check payment status:', response.status)
-          alert('Erreur lors de la vérification du statut')
+          Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors de la vérification du statut', confirmButtonColor: '#272d63' })
           return
         }
 
         const data = await response.json()
         if (data.success && data.data) {
-          alert(`Statut mis à jour: ${getStatusName(data.data.status)}`)
+          Swal.fire({ icon: 'success', title: 'Succès', text: `Statut mis à jour: ${getStatusName(data.data.status)}`, confirmButtonColor: '#272d63' })
           loadPayments()
           if (showDetailsModal.value) {
             selectedPayment.value.status = data.data.status
           }
         } else {
-          alert(data.message || 'Erreur lors de la vérification')
+          Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Erreur lors de la vérification', confirmButtonColor: '#272d63' })
         }
       } catch (error) {
         console.error('Erreur vérification statut:', error)
-        alert('Erreur technique')
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur technique', confirmButtonColor: '#272d63' })
       }
     }
 
     const checkPendingPayments = async () => {
-      if (!confirm('Vérifier tous les paiements en attente ? Cette opération peut prendre du temps.')) {
-        return
-      }
+      const result = await Swal.fire({
+        icon: 'warning',
+        title: 'Confirmation',
+        text: 'Vérifier tous les paiements en attente ? Cette opération peut prendre du temps.',
+        showCancelButton: true,
+        confirmButtonColor: '#272d63',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Oui',
+        cancelButtonText: 'Annuler'
+      })
+      if (!result.isConfirmed) return
 
       checkingPayments.value = true
       try {
@@ -696,32 +705,51 @@ export default {
 
         if (!response.ok) {
           console.error('Erreur API check pending:', response.status)
-          alert('Erreur lors de la vérification des paiements en attente')
+          Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors de la vérification des paiements en attente', confirmButtonColor: '#272d63' })
           return
         }
 
         const data = await response.json()
         if (data.success && data.data) {
-          alert(`Vérification terminée. ${data.data.updated_count} paiement(s) mis à jour.`)
+          Swal.fire({ icon: 'success', title: 'Succès', text: `Vérification terminée. ${data.data.updated_count} paiement(s) mis à jour.`, confirmButtonColor: '#272d63' })
           loadPayments()
         } else {
-          alert(data.message || 'Erreur lors de la vérification')
+          Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Erreur lors de la vérification', confirmButtonColor: '#272d63' })
         }
       } catch (error) {
         console.error('Erreur vérification paiements en attente:', error)
-        alert('Erreur technique')
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur technique', confirmButtonColor: '#272d63' })
       } finally {
         checkingPayments.value = false
       }
     }
 
     const processRefund = async (payment) => {
-      const reason = prompt('Raison du remboursement:')
+      const { value: reason } = await Swal.fire({
+        icon: 'info',
+        title: 'Information',
+        text: 'Raison du remboursement:',
+        input: 'text',
+        inputPlaceholder: 'Saisissez la raison...',
+        showCancelButton: true,
+        confirmButtonColor: '#272d63',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Continuer',
+        cancelButtonText: 'Annuler'
+      })
       if (!reason) return
 
-      if (!confirm(`Êtes-vous sûr de vouloir rembourser ce paiement de ${formatAmount(payment.amount)} XAF ?`)) {
-        return
-      }
+      const confirmResult = await Swal.fire({
+        icon: 'warning',
+        title: 'Confirmation',
+        text: `Êtes-vous sûr de vouloir rembourser ce paiement de ${formatAmount(payment.amount)} XAF ?`,
+        showCancelButton: true,
+        confirmButtonColor: '#272d63',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Oui',
+        cancelButtonText: 'Annuler'
+      })
+      if (!confirmResult.isConfirmed) return
 
       try {
         const response = await fetch(`/api/v1/admin/payments/${payment.id}/refund`, {
@@ -736,20 +764,20 @@ export default {
 
         if (!response.ok) {
           console.error('Erreur API refund:', response.status)
-          alert('Erreur lors du remboursement')
+          Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors du remboursement', confirmButtonColor: '#272d63' })
           return
         }
 
         const data = await response.json()
         if (data.success) {
-          alert('Remboursement initié avec succès')
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Remboursement initié avec succès', confirmButtonColor: '#272d63' })
           loadPayments()
         } else {
-          alert(data.message || 'Erreur lors du remboursement')
+          Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Erreur lors du remboursement', confirmButtonColor: '#272d63' })
         }
       } catch (error) {
         console.error('Erreur remboursement:', error)
-        alert('Erreur technique')
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur technique', confirmButtonColor: '#272d63' })
       }
     }
 
@@ -782,7 +810,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur export:', error)
-        alert('Erreur lors de l\'export des données')
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors de l\'export des données', confirmButtonColor: '#272d63' })
       }
     }
 

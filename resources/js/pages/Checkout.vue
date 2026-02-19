@@ -746,6 +746,7 @@
 
 <script>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import Swal from 'sweetalert2'
 import { useRoute, useRouter } from 'vue-router'
 import { useEventsStore } from '../stores/events'
 import { useAuthStore } from '../stores/auth'
@@ -1179,9 +1180,7 @@ export default {
       // window.location.href = paymentUrl
       
       // Pour la démonstration, on simule juste
-      alert('Redirection vers le paiement Visa sécurisé...\n' + 
-            `Montant: ${formatPrice(totalAmount.value)} FCFA\n` + 
-            `Événement: ${event.value?.title}`)
+      Swal.fire({ icon: 'info', title: 'Information', text: `Redirection vers le paiement Visa sécurisé... Montant: ${formatPrice(totalAmount.value)} FCFA - Événement: ${event.value?.title}`, confirmButtonColor: '#272d63' })
     }
 
 

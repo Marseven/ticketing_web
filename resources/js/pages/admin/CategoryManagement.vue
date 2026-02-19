@@ -207,6 +207,7 @@
 
 <script>
 import { ref, reactive, computed, onMounted } from 'vue'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'CategoryManagement',
@@ -466,8 +467,9 @@ export default {
     }
     
     const deleteCategory = async (category) => {
-      if (!confirm(`Êtes-vous sûr de vouloir supprimer la catégorie "${category.name}" ?`)) return
-      
+      const result = await Swal.fire({ icon: 'warning', title: 'Confirmation', text: `Êtes-vous sûr de vouloir supprimer la catégorie "${category.name}" ?`, showCancelButton: true, confirmButtonColor: '#272d63', cancelButtonColor: '#d33', confirmButtonText: 'Oui', cancelButtonText: 'Annuler' })
+      if (!result.isConfirmed) return
+
       try {
         const response = await fetch(`/api/v1/admin/categories/${category.id}`, {
           method: 'DELETE',

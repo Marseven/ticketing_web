@@ -296,6 +296,7 @@
 
 <script>
 import { ref, reactive, onMounted, computed } from 'vue'
+import Swal from 'sweetalert2'
 import { useRoute } from 'vue-router'
 
 export default {
@@ -426,7 +427,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur export:', error)
-        alert('Erreur lors de l\'export des données')
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors de l\'export des données', confirmButtonColor: '#272d63' })
       }
     }
 

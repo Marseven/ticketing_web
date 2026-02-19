@@ -415,6 +415,7 @@
 
 <script>
 import { ref, reactive, onMounted } from 'vue'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'OrderManagement',
@@ -598,7 +599,7 @@ export default {
 
         if (!response.ok) {
           console.error('Erreur API order details:', response.status)
-          alert('Impossible de charger les détails de la commande')
+          Swal.fire({ icon: 'error', title: 'Erreur', text: 'Impossible de charger les détails de la commande', confirmButtonColor: '#272d63' })
           return
         }
 
@@ -607,18 +608,26 @@ export default {
           selectedOrder.value = data.data.order
           showDetailsModal.value = true
         } else {
-          alert('Erreur lors du chargement des détails')
+          Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors du chargement des détails', confirmButtonColor: '#272d63' })
         }
       } catch (error) {
         console.error('Erreur chargement détails commande:', error)
-        alert('Erreur technique lors du chargement des détails')
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur technique lors du chargement des détails', confirmButtonColor: '#272d63' })
       }
     }
 
     const updateOrderStatus = async (order, newStatus) => {
-      if (!confirm(`Êtes-vous sûr de vouloir ${newStatus === 'confirmed' ? 'confirmer' : 'annuler'} cette commande ?`)) {
-        return
-      }
+      const result = await Swal.fire({
+        icon: 'warning',
+        title: 'Confirmation',
+        text: `Êtes-vous sûr de vouloir ${newStatus === 'confirmed' ? 'confirmer' : 'annuler'} cette commande ?`,
+        showCancelButton: true,
+        confirmButtonColor: '#272d63',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Oui',
+        cancelButtonText: 'Annuler'
+      })
+      if (!result.isConfirmed) { return }
 
       try {
         const response = await fetch(`/api/v1/admin/orders/${order.id}/status`, {
@@ -633,23 +642,23 @@ export default {
 
         if (!response.ok) {
           console.error('Erreur API update status:', response.status)
-          alert('Erreur lors de la mise à jour du statut')
+          Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors de la mise à jour du statut', confirmButtonColor: '#272d63' })
           return
         }
 
         const data = await response.json()
         if (data.success) {
-          alert(`Commande ${newStatus === 'confirmed' ? 'confirmée' : 'annulée'} avec succès`)
+          Swal.fire({ icon: 'success', title: 'Succès', text: `Commande ${newStatus === 'confirmed' ? 'confirmée' : 'annulée'} avec succès`, confirmButtonColor: '#272d63' })
           loadOrders()
           if (showDetailsModal.value) {
             selectedOrder.value.status = newStatus
           }
         } else {
-          alert(data.message || 'Erreur lors de la mise à jour')
+          Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Erreur lors de la mise à jour', confirmButtonColor: '#272d63' })
         }
       } catch (error) {
         console.error('Erreur mise à jour statut commande:', error)
-        alert('Erreur technique')
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur technique', confirmButtonColor: '#272d63' })
       }
     }
 
@@ -682,7 +691,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur export:', error)
-        alert('Erreur lors de l\'export des données')
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors de l\'export des données', confirmButtonColor: '#272d63' })
       }
     }
 

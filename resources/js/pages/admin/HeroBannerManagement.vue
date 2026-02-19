@@ -282,6 +282,7 @@
 
 <script>
 import { ref, reactive, computed, onMounted } from 'vue'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'HeroBannerManagement',
@@ -374,7 +375,7 @@ export default {
       const file = event.target.files[0]
       if (file) {
         if (file.size > 10240 * 1024) {
-          alert('Le fichier ne doit pas dépasser 10MB')
+          Swal.fire({ icon: 'warning', title: 'Attention', text: 'Le fichier ne doit pas dépasser 10MB', confirmButtonColor: '#272d63' })
           return
         }
 
@@ -397,11 +398,11 @@ export default {
 
     const createHeroBanner = async () => {
       if (uploadMode.value === 'file' && !mediaFile.value) {
-        alert('Veuillez sélectionner un fichier')
+        Swal.fire({ icon: 'warning', title: 'Attention', text: 'Veuillez sélectionner un fichier', confirmButtonColor: '#272d63' })
         return
       }
       if (uploadMode.value === 'url' && !heroBannerForm.media_url) {
-        alert('Veuillez fournir une URL')
+        Swal.fire({ icon: 'warning', title: 'Attention', text: 'Veuillez fournir une URL', confirmButtonColor: '#272d63' })
         return
       }
 
@@ -511,7 +512,17 @@ export default {
     }
 
     const deleteHeroBanner = async (heroBanner) => {
-      if (!confirm(`Êtes-vous sûr de vouloir supprimer ce hero banner ?`)) return
+      const result = await Swal.fire({
+        icon: 'warning',
+        title: 'Confirmation',
+        text: 'Êtes-vous sûr de vouloir supprimer ce hero banner ?',
+        showCancelButton: true,
+        confirmButtonText: 'Oui',
+        cancelButtonText: 'Annuler',
+        confirmButtonColor: '#272d63',
+        cancelButtonColor: '#d33'
+      })
+      if (!result.isConfirmed) return
 
       try {
         const response = await fetch(`/api/v1/admin/hero-banners/${heroBanner.id}`, {

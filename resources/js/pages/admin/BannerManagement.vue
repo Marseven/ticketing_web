@@ -308,6 +308,7 @@
 
 <script>
 import { ref, reactive, computed, onMounted } from 'vue'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'BannerManagement',
@@ -403,7 +404,7 @@ export default {
       const file = event.target.files[0]
       if (file) {
         if (file.size > 2048 * 1024) {
-          alert('L\'image ne doit pas dépasser 2MB')
+          Swal.fire({ icon: 'warning', title: 'Attention', text: 'L\'image ne doit pas dépasser 2MB', confirmButtonColor: '#272d63' })
           return
         }
 
@@ -426,7 +427,7 @@ export default {
 
     const createBanner = async () => {
       if (!imageFile.value) {
-        alert('Veuillez sélectionner une image')
+        Swal.fire({ icon: 'warning', title: 'Attention', text: 'Veuillez sélectionner une image', confirmButtonColor: '#272d63' })
         return
       }
 
@@ -538,7 +539,17 @@ export default {
     }
 
     const deleteBanner = async (banner) => {
-      if (!confirm(`Êtes-vous sûr de vouloir supprimer la bannière "${banner.title}" ?`)) return
+      const result = await Swal.fire({
+        icon: 'warning',
+        title: 'Confirmation',
+        text: `Êtes-vous sûr de vouloir supprimer la bannière "${banner.title}" ?`,
+        showCancelButton: true,
+        confirmButtonColor: '#272d63',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Oui, supprimer',
+        cancelButtonText: 'Annuler'
+      })
+      if (!result.isConfirmed) return
 
       try {
         const response = await fetch(`/api/v1/admin/banners/${banner.id}`, {

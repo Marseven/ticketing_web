@@ -290,6 +290,7 @@
 
 <script>
 import { ref, reactive, onMounted } from 'vue'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'Settings',
@@ -407,13 +408,13 @@ export default {
         })
         
         if (response.ok) {
-          alert('Paramètres généraux sauvegardés avec succès')
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres généraux sauvegardés avec succès', confirmButtonColor: '#272d63' })
         } else {
-          alert('Paramètres généraux sauvegardés avec succès (simulé)')
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres généraux sauvegardés avec succès (simulé)', confirmButtonColor: '#272d63' })
         }
       } catch (error) {
         console.log('API non disponible, sauvegarde simulée')
-        alert('Paramètres généraux sauvegardés avec succès (simulé)')
+        Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres généraux sauvegardés avec succès (simulé)', confirmButtonColor: '#272d63' })
       } finally {
         savingGeneral.value = false
       }
@@ -433,13 +434,13 @@ export default {
         })
         
         if (response.ok) {
-          alert('Paramètres de paiement sauvegardés avec succès')
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de paiement sauvegardés avec succès', confirmButtonColor: '#272d63' })
         } else {
-          alert('Paramètres de paiement sauvegardés avec succès (simulé)')
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de paiement sauvegardés avec succès (simulé)', confirmButtonColor: '#272d63' })
         }
       } catch (error) {
         console.log('API non disponible, sauvegarde simulée')
-        alert('Paramètres de paiement sauvegardés avec succès (simulé)')
+        Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de paiement sauvegardés avec succès (simulé)', confirmButtonColor: '#272d63' })
       } finally {
         savingPayment.value = false
       }
@@ -459,13 +460,13 @@ export default {
         })
         
         if (response.ok) {
-          alert('Paramètres de notification sauvegardés avec succès')
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de notification sauvegardés avec succès', confirmButtonColor: '#272d63' })
         } else {
-          alert('Paramètres de notification sauvegardés avec succès (simulé)')
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de notification sauvegardés avec succès (simulé)', confirmButtonColor: '#272d63' })
         }
       } catch (error) {
         console.log('API non disponible, sauvegarde simulée')
-        alert('Paramètres de notification sauvegardés avec succès (simulé)')
+        Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de notification sauvegardés avec succès (simulé)', confirmButtonColor: '#272d63' })
       } finally {
         savingNotifications.value = false
       }
@@ -488,13 +489,13 @@ export default {
         })
         
         if (response.ok) {
-          alert('Paramètres de sécurité sauvegardés avec succès')
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de sécurité sauvegardés avec succès', confirmButtonColor: '#272d63' })
         } else {
-          alert('Paramètres de sécurité sauvegardés avec succès (simulé)')
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de sécurité sauvegardés avec succès (simulé)', confirmButtonColor: '#272d63' })
         }
       } catch (error) {
         console.log('API non disponible, sauvegarde simulée')
-        alert('Paramètres de sécurité sauvegardés avec succès (simulé)')
+        Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de sécurité sauvegardés avec succès (simulé)', confirmButtonColor: '#272d63' })
       } finally {
         savingSecurity.value = false
       }
@@ -524,36 +525,56 @@ export default {
     const importSettings = (event) => {
       const file = event.target.files[0]
       if (!file) return
-      
+
       const reader = new FileReader()
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         try {
           const settings = JSON.parse(e.target.result)
-          
-          if (confirm('Êtes-vous sûr de vouloir importer cette configuration ? Cela remplacera tous les paramètres actuels.')) {
-            if (settings.general) Object.assign(generalForm, settings.general)
-            if (settings.payment) Object.assign(paymentForm, settings.payment)
-            if (settings.notification) Object.assign(notificationForm, settings.notification)
-            if (settings.maintenance) Object.assign(maintenanceForm, settings.maintenance)
-            if (settings.commission) Object.assign(commissionForm, settings.commission)
-            
-            alert('Configuration importée avec succès')
-          }
+
+          const result = await Swal.fire({
+            icon: 'warning',
+            title: 'Confirmation',
+            text: 'Êtes-vous sûr de vouloir importer cette configuration ? Cela remplacera tous les paramètres actuels.',
+            showCancelButton: true,
+            confirmButtonColor: '#272d63',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Oui',
+            cancelButtonText: 'Annuler'
+          })
+          if (!result.isConfirmed) return
+
+          if (settings.general) Object.assign(generalForm, settings.general)
+          if (settings.payment) Object.assign(paymentForm, settings.payment)
+          if (settings.notification) Object.assign(notificationForm, settings.notification)
+          if (settings.maintenance) Object.assign(maintenanceForm, settings.maintenance)
+          if (settings.commission) Object.assign(commissionForm, settings.commission)
+
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Configuration importée avec succès', confirmButtonColor: '#272d63' })
         } catch (error) {
-          alert('Erreur lors de l\'importation du fichier : format invalide')
+          Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors de l\'importation du fichier : format invalide', confirmButtonColor: '#272d63' })
         }
       }
       reader.readAsText(file)
-      
+
       // Reset input
       event.target.value = ''
     }
     
-    const resetAllSettings = () => {
-      if (!confirm('Êtes-vous sûr de vouloir réinitialiser tous les paramètres ? Cette action est irréversible.')) return
-      
+    const resetAllSettings = async () => {
+      const result = await Swal.fire({
+        icon: 'warning',
+        title: 'Confirmation',
+        text: 'Êtes-vous sûr de vouloir réinitialiser tous les paramètres ? Cette action est irréversible.',
+        showCancelButton: true,
+        confirmButtonColor: '#272d63',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Oui',
+        cancelButtonText: 'Annuler'
+      })
+      if (!result.isConfirmed) return
+
       loadMockData()
-      alert('Tous les paramètres ont été réinitialisés aux valeurs par défaut')
+      Swal.fire({ icon: 'success', title: 'Succès', text: 'Tous les paramètres ont été réinitialisés aux valeurs par défaut', confirmButtonColor: '#272d63' })
     }
 
     // Lifecycle

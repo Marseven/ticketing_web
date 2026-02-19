@@ -335,6 +335,7 @@
 
 <script>
 import { ref, reactive, onMounted, computed } from 'vue'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'AdminDashboard',
@@ -410,7 +411,7 @@ export default {
         if (data.success) {
           const balances = data.data.balances
           const total = balances.reduce((sum, b) => sum + b.amount, 0)
-          alert(`Solde SHAP total: ${formatAmount(total)} XAF`)
+          Swal.fire({ icon: 'info', title: 'Information', text: `Solde SHAP total: ${formatAmount(total)} XAF`, confirmButtonColor: '#272d63' })
         }
       } catch (error) {
         console.error('Erreur vérification solde SHAP:', error)
