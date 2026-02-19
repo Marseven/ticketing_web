@@ -437,6 +437,7 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import Swal from 'sweetalert2'
 import { useRoute, useRouter } from 'vue-router'
+import authUtils from '../utils/auth'
 
 export default {
   name: 'AdminLayout',
@@ -650,11 +651,7 @@ export default {
     const logout = async () => {
       const result = await Swal.fire({ icon: 'question', title: 'Déconnexion', text: 'Êtes-vous sûr de vouloir vous déconnecter ?', showCancelButton: true, confirmButtonColor: '#272d63', cancelButtonColor: '#d33', confirmButtonText: 'Oui, me déconnecter', cancelButtonText: 'Annuler' })
       if (result.isConfirmed) {
-        localStorage.removeItem('token')
-        localStorage.removeItem('userRole')
-        localStorage.removeItem('userName')
-        localStorage.removeItem('userEmail')
-        // Forcer un refresh de page et rediriger à l'accueil
+        authUtils.clearAuth()
         window.location.href = '/'
       }
     }
