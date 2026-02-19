@@ -56,12 +56,8 @@
       "_vue-vendor-DRZPKcCW.js"
     ]
   },
-  "_organizer-CXdMENze.css": {
-    "file": "assets/css/organizer-CXdMENze.css",
-    "src": "_organizer-CXdMENze.css"
-  },
-  "_organizer-DTjFYvhl.js": {
-    "file": "assets/js/organizer-DTjFYvhl.js",
+  "_organizer-B99ECtvX.js": {
+    "file": "assets/js/organizer-B99ECtvX.js",
     "name": "organizer",
     "isDynamicEntry": true,
     "imports": [
@@ -70,8 +66,12 @@
       "_vendor-D_sY0cVe.js"
     ],
     "css": [
-      "assets/css/organizer-CXdMENze.css"
+      "assets/css/organizer-DnFKyeYm.css"
     ]
+  },
+  "_organizer-DnFKyeYm.css": {
+    "file": "assets/css/organizer-DnFKyeYm.css",
+    "src": "_organizer-DnFKyeYm.css"
   },
   "_pinia-vendor-6F1O2Wmp.js": {
     "file": "assets/js/pinia-vendor-6F1O2Wmp.js",
@@ -144,7 +144,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-KHvpO4NN.js",
+    "file": "assets/js/app-qgtz9sHx.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -176,13 +176,13 @@
       "_account-DuoKYRJi.js",
       "_account-DuoKYRJi.js",
       "resources/js/layouts/OrganizerLayout.vue",
-      "_organizer-DTjFYvhl.js",
-      "_organizer-DTjFYvhl.js",
-      "_organizer-DTjFYvhl.js",
-      "_organizer-DTjFYvhl.js",
-      "_organizer-DTjFYvhl.js",
-      "_organizer-DTjFYvhl.js",
-      "_organizer-DTjFYvhl.js",
+      "_organizer-B99ECtvX.js",
+      "_organizer-B99ECtvX.js",
+      "_organizer-B99ECtvX.js",
+      "_organizer-B99ECtvX.js",
+      "_organizer-B99ECtvX.js",
+      "_organizer-B99ECtvX.js",
+      "_organizer-B99ECtvX.js",
       "resources/js/layouts/AdminLayout.vue",
       "_admin-cZ_Ik1ug.js",
       "_admin-cZ_Ik1ug.js",
@@ -245,7 +245,7 @@
     ]
   },
   "resources/js/pages/Checkout.vue": {
-    "file": "assets/js/Checkout-SmVgYITB.js",
+    "file": "assets/js/Checkout-C8ZEoOVN.js",
     "name": "Checkout",
     "src": "resources/js/pages/Checkout.vue",
     "isDynamicEntry": true,
@@ -278,7 +278,7 @@
     ]
   },
   "resources/js/pages/EventDetail.vue": {
-    "file": "assets/js/EventDetail-yhYxvVKq.js",
+    "file": "assets/js/EventDetail-B8LZrFHT.js",
     "name": "EventDetail",
     "src": "resources/js/pages/EventDetail.vue",
     "isDynamicEntry": true,
@@ -297,7 +297,7 @@
     ]
   },
   "resources/js/pages/Events.vue": {
-    "file": "assets/js/Events-82f1ohJy.js",
+    "file": "assets/js/Events-ifxYg7dw.js",
     "name": "Events",
     "src": "resources/js/pages/Events.vue",
     "isDynamicEntry": true,

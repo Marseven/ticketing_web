@@ -1061,7 +1061,7 @@ class OrganizerController extends Controller
             'max_attendees' => 'nullable|integer|min:1',
             'image_url' => 'nullable|string',
             'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
-            'is_active' => 'boolean|in:0,1,true,false',
+            'is_active' => 'sometimes|boolean',
             'published_at' => 'nullable|date',
             'schedules' => 'required|array|min:1',
             'schedules.*.starts_at' => 'required|date',

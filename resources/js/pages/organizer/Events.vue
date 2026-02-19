@@ -545,15 +545,40 @@ export default {
 
     const duplicateEvent = async (event) => {
       try {
+        // Preparer les schedules a partir de l'evenement source
+        const schedules = (event.schedules || []).map(s => ({
+          starts_at: s.starts_at,
+          ends_at: s.ends_at,
+          door_time: s.door_time || null
+        }))
+
+        // Preparer les ticket_types a partir de l'evenement source
+        const ticketTypes = (event.ticket_types || []).map(tt => ({
+          name: tt.name,
+          description: tt.description || '',
+          price: tt.price || 0,
+          capacity: tt.capacity || 100,
+          is_active: true
+        }))
+
+        // Fallback si pas de schedules/ticket_types dans les donnees
         const newEvent = {
           title: `${event.title} (Copie)`,
           description: event.description,
-          event_date: event.date,
           venue_id: event.venue_id,
           category_id: event.category_id,
-          is_active: false
+          is_active: 0,
+          schedules: schedules.length > 0 ? schedules : [{
+            starts_at: event.date || new Date().toISOString(),
+            ends_at: event.date || new Date().toISOString(),
+          }],
+          ticket_types: ticketTypes.length > 0 ? ticketTypes : [{
+            name: 'Standard',
+            price: 0,
+            capacity: 100,
+          }]
         }
-        
+
         await organizerService.createEvent(newEvent)
         await loadEvents()
         
