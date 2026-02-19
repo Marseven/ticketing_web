@@ -45,8 +45,8 @@ export default {
 
     const showBottomNav = computed(() => {
       if (isSpecialRoute.value) return false
-      // Masquer sur les pages de checkout/payment pour ne pas distraire
-      const noNavRoutes = ['checkout', 'payment', 'ticket-success', 'payment-success']
+      // Masquer sur les pages avec leur propre barre fixe en bas
+      const noNavRoutes = ['event-detail', 'checkout', 'payment', 'ticket-success', 'payment-success']
       return !noNavRoutes.includes(route.name)
     })
 
