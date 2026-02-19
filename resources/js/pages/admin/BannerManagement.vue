@@ -107,9 +107,24 @@
             <h3 class="text-lg font-bold mb-2" style="color: #272d63;">{{ banner.title }}</h3>
             <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ banner.description || 'Aucune description' }}</p>
 
-            <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
+            <div class="flex items-center justify-between text-xs text-gray-500 mb-2">
               <span>Ordre: {{ banner.order }}</span>
-              <span>{{ formatDate(banner.created_at) }}</span>
+              <span>Créé le {{ formatDate(banner.created_at) }}</span>
+            </div>
+
+            <div class="text-xs text-gray-500 mb-3 space-y-1">
+              <div class="flex items-center gap-1">
+                <svg class="w-3.5 h-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <span>Début: {{ banner.start_date ? formatDateTime(banner.start_date) : 'Immédiat' }}</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <svg class="w-3.5 h-3.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <span>Fin: {{ banner.end_date ? formatDateTime(banner.end_date) : 'Illimitée' }}</span>
+              </div>
             </div>
 
             <div v-if="banner.link_url" class="text-xs text-gray-500 mb-3 truncate">
@@ -577,6 +592,17 @@ export default {
       })
     }
 
+    const formatDateTime = (date) => {
+      if (!date) return ''
+      return new Date(date).toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    }
+
     // Lifecycle
     onMounted(() => {
       loadBanners()
@@ -603,7 +629,8 @@ export default {
       deleteBanner,
       closeModals,
       getPositionLabel,
-      formatDate
+      formatDate,
+      formatDateTime
     }
   }
 }
