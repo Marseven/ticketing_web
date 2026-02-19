@@ -28,7 +28,7 @@
                 @click="installPWA"
                 class="flex-1 bg-primea-blue text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 shadow-sm"
               >
-                Installer
+                {{ isIOS ? (showIOSSteps ? 'Compris !' : 'Comment installer ?') : 'Installer' }}
               </button>
               <button
                 @click="dismissPrompt"
@@ -50,16 +50,45 @@
           </button>
         </div>
 
-        <!-- iOS Instructions -->
-        <div v-if="isIOS && !isStandalone" class="mt-3 pt-3 border-t border-gray-100">
-          <p class="text-xs text-gray-500 text-center">
-            Appuyez sur
-            <svg class="w-4 h-4 inline-block mx-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-            </svg>
-            puis "Sur l'écran d'accueil"
-          </p>
-        </div>
+        <!-- iOS Step-by-Step Instructions -->
+        <Transition name="expand">
+          <div v-if="isIOS && showIOSSteps" class="mt-3 pt-3 border-t border-gray-100">
+            <p class="text-xs text-gray-700 font-semibold mb-3 text-center">
+              Suivez ces étapes :
+            </p>
+            <div class="space-y-3">
+              <!-- Step 1 -->
+              <div class="flex items-center gap-3 bg-gray-50 rounded-xl px-3 py-2.5">
+                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-primea-blue text-white flex items-center justify-center text-xs font-bold">1</div>
+                <p class="text-sm text-gray-700">
+                  Appuyez sur le bouton
+                  <svg class="w-5 h-5 inline-block mx-0.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  <span class="font-semibold">Partager</span>
+                </p>
+              </div>
+              <!-- Step 2 -->
+              <div class="flex items-center gap-3 bg-gray-50 rounded-xl px-3 py-2.5">
+                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-primea-blue text-white flex items-center justify-center text-xs font-bold">2</div>
+                <p class="text-sm text-gray-700">
+                  Faites défiler et appuyez sur
+                  <span class="font-semibold">"Sur l'écran d'accueil"</span>
+                  <svg class="w-5 h-5 inline-block ml-0.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                </p>
+              </div>
+              <!-- Step 3 -->
+              <div class="flex items-center gap-3 bg-gray-50 rounded-xl px-3 py-2.5">
+                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-primea-blue text-white flex items-center justify-center text-xs font-bold">3</div>
+                <p class="text-sm text-gray-700">
+                  Appuyez sur <span class="font-semibold">"Ajouter"</span> en haut à droite
+                </p>
+              </div>
+            </div>
+          </div>
+        </Transition>
 
         <!-- Manual Installation Instructions (Chrome/Edge/etc.) -->
         <div v-if="showManualInstructions && !isIOS" class="mt-3 pt-3 border-t border-gray-100">
@@ -87,6 +116,7 @@ import { ref, onMounted, computed } from 'vue'
 
 const showPrompt = ref(false)
 const deferredPrompt = ref(null)
+const showIOSSteps = ref(false)
 
 // Detect iOS
 const isIOS = computed(() => {
@@ -124,7 +154,7 @@ const showManualInstructions = ref(false)
 
 const installPWA = async () => {
   if (deferredPrompt.value) {
-    // Show the native install prompt
+    // Show the native install prompt (Android/Chrome)
     try {
       deferredPrompt.value.prompt()
       const { outcome } = await deferredPrompt.value.userChoice
@@ -140,9 +170,13 @@ const installPWA = async () => {
       showManualInstructions.value = true
     }
   } else if (isIOS.value) {
-    // For iOS, we just show instructions (already displayed)
-    // User needs to manually add to home screen
-    showManualInstructions.value = true
+    // iOS: toggle step-by-step instructions
+    if (showIOSSteps.value) {
+      // Second click = "Compris !" -> dismiss
+      dismissPrompt()
+    } else {
+      showIOSSteps.value = true
+    }
   } else {
     // No deferred prompt available - show manual instructions
     showManualInstructions.value = true
@@ -151,6 +185,7 @@ const installPWA = async () => {
 
 const dismissPrompt = () => {
   showPrompt.value = false
+  showIOSSteps.value = false
   localStorage.setItem('pwa-prompt-dismissed', Date.now().toString())
 }
 
@@ -232,5 +267,26 @@ onMounted(() => {
 .slide-up-leave-to {
   transform: translateY(100%);
   opacity: 0;
+}
+
+/* Expand animation for iOS steps */
+.expand-enter-active,
+.expand-leave-active {
+  transition: all 0.3s ease-out;
+  overflow: hidden;
+}
+
+.expand-enter-from,
+.expand-leave-to {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.expand-enter-to,
+.expand-leave-from {
+  max-height: 300px;
+  opacity: 1;
 }
 </style>
