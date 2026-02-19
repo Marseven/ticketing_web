@@ -140,7 +140,7 @@
         <div class="flex flex-col md:flex-row justify-between items-center">
           <div class="flex items-center space-x-4">
             <p class="text-gray-600 text-sm font-primea">
-              © 2025 Primea - Espace Organisateur
+              © {{ new Date().getFullYear() }} Primea - Espace Organisateur
             </p>
             <div class="flex items-center space-x-1 text-green-600">
               <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
