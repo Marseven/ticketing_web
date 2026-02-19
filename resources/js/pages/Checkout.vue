@@ -210,8 +210,8 @@
                 <div v-if="!isFreeOrder">
                   <label class="block text-sm font-semibold text-primea-blue mb-4">Moyen de paiement</label>
                   
-                  <div class="grid grid-cols-3 gap-4 mb-6">
-                    <button 
+                  <div class="grid grid-cols-2 gap-4 mb-6">
+                    <button
                       type="button"
                       @click="selectPaymentMethod('airtel')"
                       :class="[
@@ -249,24 +249,25 @@
                       <div class="bg-orange-500 text-white px-2 py-1 rounded text-xs font-bold" style="display: none">Moov Money</div>
                     </button>
 
-                    <button 
+                    <!-- Visa masqué temporairement - pas encore fonctionnel avec E-Billing -->
+                    <!--<button
                       type="button"
                       @click="selectPaymentMethod('visa')"
                       :class="[
                         'p-4 rounded-primea-lg border-2 transition-all text-center flex flex-col items-center justify-center min-h-[80px]',
-                        orderForm.paymentMethod === 'visa' 
-                          ? 'border-blue-500 bg-blue-50' 
+                        orderForm.paymentMethod === 'visa'
+                          ? 'border-blue-500 bg-blue-50'
                           : 'border-gray-200 hover:border-gray-300'
                       ]"
                     >
-                      <img 
-                        src="/images/vm.png" 
+                      <img
+                        src="/images/vm.png"
                         alt="Visa"
                         class="h-8 w-auto"
                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"
                       />
                       <div class="text-blue-600 font-bold text-sm" style="display: none">VISA</div>
-                    </button>
+                    </button>-->
                   </div>
 
                   <!-- Champs paiement Desktop -->
@@ -296,7 +297,8 @@
                     </p>
                   </div>
 
-                  <div v-if="orderForm.paymentMethod === 'visa'" class="space-y-4">
+                  <!-- Visa masqué temporairement -->
+                  <!--<div v-if="orderForm.paymentMethod === 'visa'" class="space-y-4">
                     <div class="bg-blue-50 border border-blue-200 rounded-primea-lg p-4 text-center">
                       <p class="text-blue-800 mb-4 font-semibold">Paiement Visa sécurisé</p>
                       <p class="text-blue-600 text-sm mb-4">Vous allez être redirigé vers notre partenaire de paiement sécurisé</p>
@@ -316,7 +318,7 @@
                       </button>
                       <p class="text-xs text-gray-500 mt-2">Paiement 100% sécurisé avec chiffrement SSL</p>
                     </div>
-                  </div>
+                  </div>-->
                 </div>
 
                 <!-- Message d'erreur Desktop -->
@@ -599,7 +601,7 @@
             <div v-if="!isFreeOrder">
               <label class="block text-sm font-semibold text-blue-900 mb-3">Moyen de paiement</label>
 
-              <div class="grid grid-cols-3 gap-3 mb-4">
+              <div class="grid grid-cols-2 gap-3 mb-4">
                 <button type="button" @click="selectPaymentMethod('airtel')"
                   :class="['p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center',
                     orderForm.paymentMethod === 'airtel' ? 'border-red-500 bg-red-50' : 'border-gray-200']">
@@ -612,13 +614,6 @@
                     orderForm.paymentMethod === 'moov' ? 'border-orange-500 bg-orange-50' : 'border-gray-200']">
                   <img src="/images/mm.png" alt="Moov" class="h-8 w-auto" onerror="this.style.display='none'" />
                   <span class="text-xs mt-1 font-semibold text-orange-600">Moov</span>
-                </button>
-
-                <button type="button" @click="selectPaymentMethod('visa')"
-                  :class="['p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center',
-                    orderForm.paymentMethod === 'visa' ? 'border-blue-500 bg-blue-50' : 'border-gray-200']">
-                  <img src="/images/vm.png" alt="Visa" class="h-8 w-auto" onerror="this.style.display='none'" />
-                  <span class="text-xs mt-1 font-semibold text-blue-600">Visa</span>
                 </button>
               </div>
 
@@ -634,11 +629,11 @@
                 <p v-if="phoneError" class="mt-1 text-sm text-red-600">{{ phoneError }}</p>
               </div>
 
-              <!-- Visa Info -->
-              <div v-if="orderForm.paymentMethod === 'visa'" class="bg-blue-50 rounded-xl p-4 text-center">
+              <!-- Visa masqué temporairement -->
+              <!--<div v-if="orderForm.paymentMethod === 'visa'" class="bg-blue-50 rounded-xl p-4 text-center">
                 <p class="text-blue-800 font-semibold mb-2">Paiement Visa sécurisé</p>
                 <p class="text-blue-600 text-xs">Vous serez redirigé vers notre partenaire de paiement</p>
-              </div>
+              </div>-->
             </div>
 
             <!-- Error Message -->
