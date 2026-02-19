@@ -52,7 +52,7 @@
       </div>
 
       <!-- Carte OpenStreetMap avec Leaflet -->
-      <div class="h-64 lg:h-80 rounded-primea-lg overflow-hidden shadow-primea" style="position: relative; z-index: 0;">
+      <div class="h-64 lg:h-80 rounded-primea-lg overflow-hidden shadow-primea" style="isolation: isolate; position: relative; z-index: 1;">
         <div
           ref="mapContainer"
           class="w-full h-full"
@@ -297,5 +297,15 @@ export default {
 
 .transition-all {
   transition: all 0.2s ease-in-out;
+}
+</style>
+
+<style>
+/* Force Leaflet map to stay within its stacking context */
+.leaflet-pane,
+.leaflet-control,
+.leaflet-top,
+.leaflet-bottom {
+  z-index: auto !important;
 }
 </style>
