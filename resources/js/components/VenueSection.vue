@@ -52,7 +52,7 @@
       </div>
 
       <!-- Carte OpenStreetMap avec Leaflet -->
-      <div class="h-64 lg:h-80 rounded-primea-lg overflow-hidden shadow-primea">
+      <div class="h-64 lg:h-80 rounded-primea-lg overflow-hidden shadow-primea" style="position: relative; z-index: 0;">
         <div
           ref="mapContainer"
           class="w-full h-full"
