@@ -373,6 +373,7 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
 import BannerCarousel from '../components/BannerCarousel.vue'
 
 export default {
@@ -502,23 +503,15 @@ export default {
 
     const loadHeroBanner = async () => {
       try {
-        const response = await fetch('/api/hero-banners/active', {
-          headers: { 'Accept': 'application/json' }
-        })
-
-        if (response.ok) {
-          const data = await response.json()
-          if (data.success && data.data) {
-            heroBanner.value = data.data
-          }
-        } else if (response.status !== 404) {
-          // Logger uniquement si ce n'est pas une 404 (pas de hero banner)
-          console.error('Erreur lors du chargement du hero banner:', response.status)
+        const response = await axios.get('/api/v1/hero-banners/active')
+        if (response.data && response.data.success && response.data.data) {
+          heroBanner.value = response.data.data
         }
-        // Si 404, c'est normal, on utilise l'image par défaut en silence
       } catch (error) {
-        console.error('Erreur lors du chargement du hero banner:', error)
-        // En cas d'erreur, on garde heroBanner à null pour utiliser l'image par défaut
+        if (error.response?.status !== 404) {
+          console.error('Erreur lors du chargement du hero banner:', error)
+        }
+        // En cas d'erreur, on garde heroBanner a null pour utiliser l'image par defaut
       }
     }
 

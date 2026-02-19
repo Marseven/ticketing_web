@@ -56,6 +56,7 @@
 
 <script>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import axios from 'axios'
 
 export default {
   name: 'BannerCarousel',
@@ -95,15 +96,14 @@ export default {
     const loadBanners = async () => {
       loading.value = true
       try {
-        const response = await fetch(`/api/banners/active?position=${props.position}`)
-        if (response.ok) {
-          const data = await response.json()
-          if (data.success) {
-            banners.value = data.data
-          }
+        const response = await axios.get(`/api/v1/banners/active`, {
+          params: { position: props.position }
+        })
+        if (response.data && response.data.success) {
+          banners.value = response.data.data
         }
       } catch (error) {
-        console.error('Erreur lors du chargement des bannières:', error)
+        console.error('Erreur lors du chargement des bannieres:', error)
       } finally {
         loading.value = false
       }

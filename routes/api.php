@@ -376,14 +376,8 @@ Route::prefix('v1')->group(function () {
         Route::get('notifications', [App\Http\Controllers\Admin\AdminController::class, 'notifications']);
         Route::put('notifications/{notification}/read', [App\Http\Controllers\Admin\AdminController::class, 'markNotificationAsRead']);
     });
+
+    // Routes publiques pour les bannieres
+    Route::get('banners/active', [App\Http\Controllers\Api\BannerController::class, 'getActive']);
+    Route::get('hero-banners/active', [App\Http\Controllers\Api\Admin\HeroBannerController::class, 'getActive']);
 });
-
-// Routes générales pour les ressources partagées
-Route::get('categories', [App\Http\Controllers\Api\CategoryController::class, 'index']);
-Route::get('venues', [App\Http\Controllers\Api\VenueController::class, 'index']);
-
-// Route publique pour les bannières
-Route::get('banners/active', [App\Http\Controllers\Api\BannerController::class, 'getActive']);
-
-// Route publique pour le hero banner actif
-Route::get('hero-banners/active', [App\Http\Controllers\Api\Admin\HeroBannerController::class, 'getActive']);
