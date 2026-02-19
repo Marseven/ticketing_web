@@ -573,13 +573,13 @@ export default {
   font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Hero image optimization - prevent pixelation */
+/* Hero image optimization - smooth rendering on large screens */
 .hero-image {
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
+  image-rendering: auto;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   transform: translateZ(0);
+  will-change: transform;
 }
 
 .line-clamp-2 {

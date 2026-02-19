@@ -144,7 +144,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-DqKgQBZc.js",
+    "file": "assets/js/app-BKefOu8v.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -210,7 +210,7 @@
       "resources/js/pages/scanner/ScannerApp.vue"
     ],
     "css": [
-      "assets/css/app-44S3FPNS.css",
+      "assets/css/app-Bwrc9O23.css",
       "assets/css/app-CYcAeqDt.css"
     ]
   },
@@ -245,7 +245,7 @@
     ]
   },
   "resources/js/pages/Checkout.vue": {
-    "file": "assets/js/Checkout-B1GVkPcS.js",
+    "file": "assets/js/Checkout-BHnVej0H.js",
     "name": "Checkout",
     "src": "resources/js/pages/Checkout.vue",
     "isDynamicEntry": true,
@@ -278,7 +278,7 @@
     ]
   },
   "resources/js/pages/EventDetail.vue": {
-    "file": "assets/js/EventDetail-Dmxwc_dS.js",
+    "file": "assets/js/EventDetail-BYKMMNcA.js",
     "name": "EventDetail",
     "src": "resources/js/pages/EventDetail.vue",
     "isDynamicEntry": true,
@@ -297,7 +297,7 @@
     ]
   },
   "resources/js/pages/Events.vue": {
-    "file": "assets/js/Events-DA70s_2B.js",
+    "file": "assets/js/Events-BOwOTQJZ.js",
     "name": "Events",
     "src": "resources/js/pages/Events.vue",
     "isDynamicEntry": true,

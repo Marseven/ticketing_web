@@ -57,6 +57,18 @@ class HeroBannerController extends Controller
             ], 422);
         }
 
+        // Vérifier les dimensions minimales pour les images (1920x600 pour un affichage HD sur PC)
+        if ($request->hasFile('media_file') && str_starts_with($request->file('media_file')->getMimeType(), 'image/')) {
+            $dimensions = getimagesize($request->file('media_file')->getPathname());
+            if ($dimensions && ($dimensions[0] < 1920 || $dimensions[1] < 600)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'L\'image doit faire au moins 1920x600 pixels pour un affichage optimal. Votre image: ' . $dimensions[0] . 'x' . $dimensions[1],
+                    'errors' => ['media_file' => ['Dimensions minimales: 1920x600px. Votre image: ' . $dimensions[0] . 'x' . $dimensions[1] . 'px']]
+                ], 422);
+            }
+        }
+
         // Déterminer l'URL du média
         $mediaUrl = null;
 
@@ -140,6 +152,18 @@ class HeroBannerController extends Controller
                 'message' => 'Erreurs de validation',
                 'errors' => $validator->errors()
             ], 422);
+        }
+
+        // Vérifier les dimensions minimales pour les images
+        if ($request->hasFile('media_file') && str_starts_with($request->file('media_file')->getMimeType(), 'image/')) {
+            $dimensions = getimagesize($request->file('media_file')->getPathname());
+            if ($dimensions && ($dimensions[0] < 1920 || $dimensions[1] < 600)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'L\'image doit faire au moins 1920x600 pixels pour un affichage optimal. Votre image: ' . $dimensions[0] . 'x' . $dimensions[1],
+                    'errors' => ['media_file' => ['Dimensions minimales: 1920x600px. Votre image: ' . $dimensions[0] . 'x' . $dimensions[1] . 'px']]
+                ], 422);
+            }
         }
 
         // Upload du nouveau média si fourni
