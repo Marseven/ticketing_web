@@ -223,22 +223,30 @@ class OrderController extends Controller
                 'is_guest_order' => true,
             ]);
 
-            // Créer les billets avec statut 'pending' en attendant la confirmation du paiement
+            // Créer les billets
+            $ticketStatus = $totalAmount == 0 ? 'issued' : 'pending';
+            $issuedAt = $totalAmount == 0 ? now() : null;
+
             for ($i = 0; $i < $validated['quantity']; $i++) {
                 Ticket::create([
                     'order_id' => $order->id,
                     'event_id' => $event->id,
                     'ticket_type_id' => $ticketType->id,
                     'schedule_id' => $event->schedules->where('status', 'active')->first()?->id,
-                    'buyer_id' => null, // NULL pour les guests - les infos sont dans la table orders
+                    'buyer_id' => null,
                     'code' => $this->generateTicketCode(),
-                    'status' => 'pending', // Statut pending en attendant le paiement
-                    'issued_at' => null, // Sera défini lors de la confirmation du paiement
+                    'status' => $ticketStatus,
+                    'issued_at' => $issuedAt,
                 ]);
             }
 
-            // Note: Le nombre de billets vendus est calculé dynamiquement en comptant les tickets
-            // avec status 'issued' ou 'used' UNIQUEMENT (pas 'pending' ni 'cancelled')
+            // Pour les commandes gratuites, confirmer immédiatement
+            if ($totalAmount == 0) {
+                $order->update([
+                    'status' => 'paid',
+                    'processed_at' => now(),
+                ]);
+            }
 
             DB::commit();
 

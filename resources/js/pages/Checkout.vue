@@ -199,13 +199,15 @@
                 <!-- Total Desktop -->
                 <div v-if="orderForm.quantity && orderForm.ticketTypeId" class="bg-primea-blue/5 rounded-primea-xl p-6">
                   <div class="flex justify-between items-center">
-                    <span class="text-lg font-semibold text-primea-blue">Total à payer :</span>
-                    <span class="text-3xl font-bold text-primea-blue">{{ formatPrice(totalAmount) }} FCFA</span>
+                    <span class="text-lg font-semibold text-primea-blue">{{ isFreeOrder ? 'Total :' : 'Total à payer :' }}</span>
+                    <span class="text-3xl font-bold" :class="isFreeOrder ? 'text-green-600' : 'text-primea-blue'">
+                      {{ isFreeOrder ? 'Gratuit' : formatPrice(totalAmount) + ' FCFA' }}
+                    </span>
                   </div>
                 </div>
 
                 <!-- Moyens de paiement Desktop -->
-                <div>
+                <div v-if="!isFreeOrder">
                   <label class="block text-sm font-semibold text-primea-blue mb-4">Moyen de paiement</label>
                   
                   <div class="grid grid-cols-3 gap-4 mb-6">
@@ -453,7 +455,7 @@
                     </svg>
                     Traitement en cours...
                   </span>
-                  <span v-else>Finaliser le paiement</span>
+                  <span v-else>{{ isFreeOrder ? 'Finaliser l\'achat' : 'Finaliser le paiement' }}</span>
                 </button>
 
                 <!-- Lien récupérer ticket Desktop -->
@@ -587,12 +589,14 @@
             <div v-if="orderForm.quantity && orderForm.ticketTypeId" class="bg-blue-50 rounded-xl p-4">
               <div class="flex justify-between items-center">
                 <span class="font-semibold text-blue-900">Total:</span>
-                <span class="text-2xl font-bold text-blue-900">{{ formatPrice(totalAmount) }} XAF</span>
+                <span class="text-2xl font-bold" :class="isFreeOrder ? 'text-green-600' : 'text-blue-900'">
+                  {{ isFreeOrder ? 'Gratuit' : formatPrice(totalAmount) + ' XAF' }}
+                </span>
               </div>
             </div>
 
             <!-- Payment Methods -->
-            <div>
+            <div v-if="!isFreeOrder">
               <label class="block text-sm font-semibold text-blue-900 mb-3">Moyen de paiement</label>
 
               <div class="grid grid-cols-3 gap-3 mb-4">
@@ -717,7 +721,7 @@
                 </svg>
                 Traitement...
               </span>
-              <span v-else>Finaliser le paiement</span>
+              <span v-else>{{ isFreeOrder ? 'Finaliser l\'achat' : 'Finaliser le paiement' }}</span>
             </button>
 
             <!-- Retrieve Ticket Link -->
@@ -964,18 +968,22 @@ export default {
 
     const totalAmount = computed(() => {
       if (!orderForm.value.quantity || !orderForm.value.ticketTypeId) return 0
-      
+
       const selectedTicketType = availableTicketTypes.value.find(
         type => type.id == orderForm.value.ticketTypeId
       )
-      
+
       if (!selectedTicketType) return 0
-      
+
       return selectedTicketType.price * orderForm.value.quantity
     })
 
+    const isFreeOrder = computed(() => {
+      return orderForm.value.quantity && orderForm.value.ticketTypeId && totalAmount.value === 0
+    })
+
     const isFormValid = computed(() => {
-      if (!orderForm.value.quantity || !orderForm.value.ticketTypeId || !orderForm.value.paymentMethod) {
+      if (!orderForm.value.quantity || !orderForm.value.ticketTypeId) {
         return false
       }
 
@@ -984,12 +992,20 @@ export default {
         return false
       }
 
+      // Pour les commandes gratuites, pas besoin de moyen de paiement
+      if (isFreeOrder.value) {
+        return true
+      }
+
+      if (!orderForm.value.paymentMethod) {
+        return false
+      }
+
       if (orderForm.value.paymentMethod === 'airtel' || orderForm.value.paymentMethod === 'moov') {
         return !!orderForm.value.phoneNumber && !phoneError.value
       }
 
       if (orderForm.value.paymentMethod === 'visa') {
-        // Pour Visa, on a juste besoin de la sélection puisque le paiement se fait par redirection
         return true
       }
 
@@ -1199,8 +1215,12 @@ export default {
           throw new Error('Veuillez remplir tous les champs requis')
         }
 
+        // Pour les commandes gratuites, créer directement sans paiement
+        if (isFreeOrder.value) {
+          await processFreeOrder()
+        }
         // Pour Mobile Money (Airtel/Moov), utiliser E-Billing avec USSD push
-        if (orderForm.value.paymentMethod === 'airtel' || orderForm.value.paymentMethod === 'moov') {
+        else if (orderForm.value.paymentMethod === 'airtel' || orderForm.value.paymentMethod === 'moov') {
           await processEBillingPayment()
         }
         // Pour Visa/Mastercard, rediriger vers ORABANK_NG
@@ -1246,6 +1266,35 @@ export default {
         }
       } finally {
         loading.value = false
+      }
+    }
+
+    const processFreeOrder = async () => {
+      try {
+        const orderData = {
+          event_slug: event.value.slug,
+          ticket_type_id: orderForm.value.ticketTypeId,
+          quantity: orderForm.value.quantity,
+          guest_name: isAuthenticated.value ? currentUser.value.name : orderForm.value.guestName,
+          guest_phone: isAuthenticated.value ? currentUser.value.phone : (orderForm.value.guestPhone || null),
+          guest_email: isAuthenticated.value ? currentUser.value.email : 'guest@primea.ga'
+        }
+
+        const orderResponse = isAuthenticated.value
+          ? await orderService.createOrder(orderData)
+          : await guestService.createGuestOrder(orderData)
+
+        if (!orderResponse.data.success) {
+          throw new Error(orderResponse.data.message || 'Erreur lors de la création de la commande')
+        }
+
+        const order = orderResponse.data.data.order
+
+        // Rediriger vers la page de succès
+        router.push(`/ticket-success?reference=${order.reference}`)
+      } catch (err) {
+        console.error('Erreur commande gratuite:', err)
+        throw err
       }
     }
 
@@ -1646,6 +1695,7 @@ export default {
       countdown,
       orderForm,
       totalAmount,
+      isFreeOrder,
       isFormValid,
       formatEventDate,
       eventTime,
@@ -1677,6 +1727,7 @@ export default {
       formatCountdown,
       formatPhoneForDisplay,
       // Méthodes de paiement
+      processFreeOrder,
       processEBillingPayment,
       processOrabankPayment,
       // Image
