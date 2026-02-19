@@ -85,7 +85,7 @@
           <button 
             @click="resendEmailVerification"
             :disabled="resendingEmail"
-            class="px-4 py-2 bg-yellow-500 text-white rounded-primea hover:bg-yellow-600 font-semibold transition-all duration-200 disabled:opacity-50"
+            class="px-4 py-2 bg-primea-yellow text-white rounded-primea hover:bg-primea-yellow font-semibold transition-all duration-200 disabled:opacity-50"
           >
             <span v-if="resendingEmail">Envoi...</span>
             <span v-else>Renvoyer</span>

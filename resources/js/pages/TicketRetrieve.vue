@@ -7,7 +7,7 @@
         alt="Événements"
         class="w-full h-full object-cover opacity-40"
       />
-      <div class="absolute inset-0 bg-blue-900/60"></div>
+      <div class="absolute inset-0 bg-primea-blue/60"></div>
     </div>
 
     <!-- Main Content -->
@@ -21,7 +21,7 @@
 
         <!-- Header -->
         <div class="text-center mb-8 md:mb-12 animate-fade-in">
-          <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-blue-900 md:text-white mb-3 md:mb-4">
+          <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-primea-blue md:text-white mb-3 md:mb-4">
             Vous avez perdu votre ticket ?
           </h1>
           <p class="text-lg md:text-xl text-gray-600 md:text-white/90">
@@ -37,7 +37,7 @@
             <div class="space-y-5">
               <!-- Reference Field -->
               <div>
-                <label for="reference" class="block text-sm font-semibold text-blue-900 mb-2">
+                <label for="reference" class="block text-sm font-semibold text-primea-blue mb-2">
                   Référence du ticket <span class="text-xs font-normal text-gray-500">(si disponible)</span>
                 </label>
                 <input
@@ -45,7 +45,7 @@
                   id="reference"
                   v-model="searchForm.reference"
                   placeholder="Ex: TKT-2024-ABC123 ou ID de transaction"
-                  class="w-full px-4 md:px-6 py-3 md:py-4 text-base border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-blue-900 transition-all duration-200 bg-white"
+                  class="w-full px-4 md:px-6 py-3 md:py-4 text-base border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-primea-blue transition-all duration-200 bg-white"
                 />
               </div>
 
@@ -66,7 +66,7 @@
                 <div class="mt-10 space-y-5">
                   <!-- Email -->
                   <div>
-                    <label for="email" class="block text-sm font-semibold text-blue-900 mb-2">
+                    <label for="email" class="block text-sm font-semibold text-primea-blue mb-2">
                       Email <span class="text-xs font-normal text-gray-500">(utilisé pour l'achat)</span>
                     </label>
                     <input
@@ -74,13 +74,13 @@
                       id="email"
                       v-model="searchForm.email"
                       placeholder="Ex: votreemail@example.com"
-                      class="w-full px-4 md:px-6 py-3 md:py-4 text-base border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-blue-900 transition-all duration-200 bg-white"
+                      class="w-full px-4 md:px-6 py-3 md:py-4 text-base border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-primea-blue transition-all duration-200 bg-white"
                     />
                   </div>
 
                   <!-- Phone Number -->
                   <div>
-                    <label for="phone" class="block text-sm font-semibold text-blue-900 mb-2">
+                    <label for="phone" class="block text-sm font-semibold text-primea-blue mb-2">
                       Numéro de téléphone <span class="text-xs font-normal text-gray-500">(utilisé pour l'achat)</span>
                     </label>
                     <PhoneInput
@@ -117,7 +117,7 @@
             <button
               type="submit"
               :disabled="loading || (!searchForm.reference && !searchForm.phone && !searchForm.email)"
-              class="w-full bg-blue-900 text-white py-4 px-6 rounded-xl text-base md:text-lg font-bold transition-all duration-200 shadow-lg hover:bg-yellow-500 hover:text-blue-900 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-900 disabled:hover:text-white transform hover:scale-105 disabled:transform-none"
+              class="w-full bg-primea-blue text-white py-4 px-6 rounded-xl text-base md:text-lg font-bold transition-all duration-200 shadow-lg hover:bg-primea-yellow hover:text-primea-blue disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primea-blue disabled:hover:text-white transform hover:scale-105 disabled:transform-none"
             >
               <span v-if="loading" class="flex items-center justify-center">
                 <svg class="w-5 md:w-6 h-5 md:h-6 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -139,7 +139,7 @@
 
         <!-- Found Tickets -->
         <div v-if="foundTickets.length > 0" class="mt-8">
-          <h3 class="text-lg md:text-xl font-bold text-blue-900 md:text-white mb-4 md:mb-6">Tickets trouvés :</h3>
+          <h3 class="text-lg md:text-xl font-bold text-primea-blue md:text-white mb-4 md:mb-6">Tickets trouvés :</h3>
           <div class="space-y-4">
             <TicketCard
               v-for="ticket in foundTickets"
@@ -153,7 +153,7 @@
 
         <!-- Help Section -->
         <div class="mt-8 md:mt-12 bg-white md:bg-white/10 md:backdrop-blur-sm rounded-2xl md:rounded-3xl p-6 md:p-8 border border-gray-200 md:border-white/20">
-          <h4 class="font-semibold text-blue-900 md:text-white mb-3 md:mb-4 text-base md:text-lg">Besoin d'aide ?</h4>
+          <h4 class="font-semibold text-primea-blue md:text-white mb-3 md:mb-4 text-base md:text-lg">Besoin d'aide ?</h4>
           <p class="text-sm text-gray-600 md:text-white/80 mb-4 md:mb-6">
             Si vous ne trouvez pas votre ticket, contactez notre support
           </p>
@@ -164,7 +164,7 @@
               </svg>
               Appeler le support
             </a>
-            <a href="mailto:support@ticketing.com" class="flex items-center justify-center px-4 md:px-6 py-3 border-2 border-gray-300 md:border-white/30 text-blue-900 md:text-white rounded-xl hover:bg-gray-100 md:hover:bg-white/10 transition-all duration-200 shadow-lg font-semibold text-sm md:text-base">
+            <a href="mailto:support@ticketing.com" class="flex items-center justify-center px-4 md:px-6 py-3 border-2 border-gray-300 md:border-white/30 text-primea-blue md:text-white rounded-xl hover:bg-gray-100 md:hover:bg-white/10 transition-all duration-200 shadow-lg font-semibold text-sm md:text-base">
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
               </svg>
@@ -177,7 +177,7 @@
         <div class="text-center mt-6 md:mt-8">
           <router-link
             to="/"
-            class="text-blue-900 md:text-white/90 hover:text-yellow-500 md:hover:text-yellow-500 font-semibold text-sm transition-colors duration-200 bg-gray-100 md:bg-white/10 md:backdrop-blur-sm px-6 py-3 rounded-xl border border-gray-200 md:border-white/20 hover:border-yellow-500 inline-block"
+            class="text-primea-blue md:text-white/90 hover:text-primea-yellow md:hover:text-primea-yellow font-semibold text-sm transition-colors duration-200 bg-gray-100 md:bg-white/10 md:backdrop-blur-sm px-6 py-3 rounded-xl border border-gray-200 md:border-white/20 hover:border-primea-yellow inline-block"
           >
             ← Retourner à l'accueil
           </router-link>

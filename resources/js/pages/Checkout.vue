@@ -47,6 +47,7 @@
                     :src="eventImageUrl"
                     :alt="event.title"
                     class="w-full h-full object-cover"
+                    loading="lazy"
                     @error="handleImageError"
                   />
                   <div v-else class="w-full h-full bg-primea-gradient flex items-center justify-center">
@@ -484,14 +485,14 @@
 
         <!-- Loading/Error States -->
         <div v-if="eventLoading" class="flex justify-center py-12 px-4">
-          <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-900 border-t-yellow-500"></div>
+          <div class="animate-spin rounded-full h-12 w-12 border-4 border-primea-blue border-t-primea-yellow"></div>
         </div>
 
         <div v-else-if="eventError" class="px-4">
           <div class="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
             <ExclamationCircleIcon class="w-12 h-12 text-red-500 mx-auto mb-3" />
             <p class="text-red-600 mb-4">{{ eventError }}</p>
-            <button @click="loadEvent" class="bg-blue-900 text-white px-6 py-2 rounded-lg font-semibold">
+            <button @click="loadEvent" class="bg-primea-blue text-white px-6 py-2 rounded-lg font-semibold">
               Réessayer
             </button>
           </div>
@@ -502,11 +503,11 @@
           <!-- Event Card -->
           <div class="bg-white rounded-xl shadow-md overflow-hidden mb-6">
             <div class="relative h-48">
-              <img v-if="eventImageUrl" :src="eventImageUrl" :alt="event.title" class="w-full h-full object-cover" @error="handleImageError" />
+              <img v-if="eventImageUrl" :src="eventImageUrl" :alt="event.title" class="w-full h-full object-cover" loading="lazy" @error="handleImageError" />
               <div v-else class="w-full h-full bg-gradient-to-br from-blue-900 to-blue-800 flex items-center justify-center">
                 <PhotoIcon class="w-16 h-16 text-white/30" />
               </div>
-              <div class="absolute inset-0 bg-blue-900/50"></div>
+              <div class="absolute inset-0 bg-primea-blue/50"></div>
 
               <!-- Compte à rebours en haut à droite -->
               <div v-if="!isEventPassed" class="absolute top-3 right-3 px-3 py-2 text-white">
@@ -531,7 +532,7 @@
                   </div>
                   <router-link
                     :to="`/events/${event.slug}`"
-                    class="bg-yellow-500 text-blue-900 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-yellow-400 transition-colors shadow-md"
+                    class="bg-primea-yellow text-primea-blue px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-primea-yellow transition-colors shadow-md"
                   >
                     À propos
                   </router-link>
@@ -545,7 +546,7 @@
             <ExclamationCircleIcon class="w-12 h-12 text-red-500 mx-auto mb-3" />
             <h3 class="text-lg font-semibold text-red-800 mb-2">Événement terminé</h3>
             <p class="text-red-600 text-sm mb-4">Cet événement s'est déjà déroulé.</p>
-            <router-link to="/events" class="bg-blue-900 text-white px-6 py-2 rounded-lg inline-block">
+            <router-link to="/events" class="bg-primea-blue text-white px-6 py-2 rounded-lg inline-block">
               Voir d'autres événements
             </router-link>
           </div>
@@ -555,9 +556,9 @@
 
             <!-- Ticket Type Selection -->
             <div>
-              <label class="block text-sm font-semibold text-blue-900 mb-2">Type de ticket</label>
+              <label class="block text-sm font-semibold text-primea-blue mb-2">Type de ticket</label>
               <select v-model="orderForm.ticketTypeId" required
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-900 focus:outline-none bg-white text-base"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primea-blue focus:outline-none bg-white text-base"
                 :disabled="availableTicketTypes.length === 0">
                 <option value="">Sélectionnez un type</option>
                 <option v-for="ticketType in availableTicketTypes" :key="ticketType.id" :value="ticketType.id">
@@ -568,21 +569,21 @@
 
             <!-- Quantity -->
             <div>
-              <label class="block text-sm font-semibold text-blue-900 mb-2">Nombre de tickets</label>
+              <label class="block text-sm font-semibold text-primea-blue mb-2">Nombre de tickets</label>
               <input type="number" v-model="orderForm.quantity" min="1" max="10" required
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-900 focus:outline-none text-base" />
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primea-blue focus:outline-none text-base" />
             </div>
 
             <!-- Guest Info (if not authenticated) -->
             <div v-if="!isAuthenticated" class="bg-blue-50 rounded-xl p-4 space-y-4">
-              <h4 class="text-sm font-semibold text-blue-900">Vos informations</h4>
+              <h4 class="text-sm font-semibold text-primea-blue">Vos informations</h4>
               <div>
-                <label class="block text-sm font-semibold text-blue-900 mb-2">Nom complet *</label>
+                <label class="block text-sm font-semibold text-primea-blue mb-2">Nom complet *</label>
                 <input type="text" v-model="orderForm.guestName" placeholder="Votre nom" required
-                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-900 focus:outline-none text-base" />
+                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primea-blue focus:outline-none text-base" />
               </div>
               <div>
-                <label class="block text-sm font-semibold text-blue-900 mb-2">Téléphone</label>
+                <label class="block text-sm font-semibold text-primea-blue mb-2">Téléphone</label>
                 <PhoneInput v-model="orderForm.guestPhone" placeholder="01 23 45 67" class="w-full" />
               </div>
             </div>
@@ -590,8 +591,8 @@
             <!-- Total -->
             <div v-if="orderForm.quantity && orderForm.ticketTypeId" class="bg-blue-50 rounded-xl p-4">
               <div class="flex justify-between items-center">
-                <span class="font-semibold text-blue-900">Total:</span>
-                <span class="text-2xl font-bold" :class="isFreeOrder ? 'text-green-600' : 'text-blue-900'">
+                <span class="font-semibold text-primea-blue">Total:</span>
+                <span class="text-2xl font-bold" :class="isFreeOrder ? 'text-green-600' : 'text-primea-blue'">
                   {{ isFreeOrder ? 'Gratuit' : formatPrice(totalAmount) + ' XAF' }}
                 </span>
               </div>
@@ -599,7 +600,7 @@
 
             <!-- Payment Methods -->
             <div v-if="!isFreeOrder">
-              <label class="block text-sm font-semibold text-blue-900 mb-3">Moyen de paiement</label>
+              <label class="block text-sm font-semibold text-primea-blue mb-3">Moyen de paiement</label>
 
               <div class="grid grid-cols-2 gap-3 mb-4">
                 <button type="button" @click="selectPaymentMethod('airtel')"
@@ -619,13 +620,13 @@
 
               <!-- Phone Number Input for Mobile Money -->
               <div v-if="orderForm.paymentMethod === 'airtel' || orderForm.paymentMethod === 'moov'">
-                <label class="block text-sm font-semibold text-blue-900 mb-2">
+                <label class="block text-sm font-semibold text-primea-blue mb-2">
                   Numéro {{ orderForm.paymentMethod === 'airtel' ? 'Airtel Money' : 'Moov Money' }}
                 </label>
                 <input type="tel" v-model="orderForm.phoneNumber" required maxlength="9" pattern="[0-9]{9}"
                   :placeholder="orderForm.paymentMethod === 'airtel' ? '074123456' : '062123456'"
                   @input="validatePhoneNumber"
-                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-900 focus:outline-none text-base" />
+                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primea-blue focus:outline-none text-base" />
                 <p v-if="phoneError" class="mt-1 text-sm text-red-600">{{ phoneError }}</p>
               </div>
 
@@ -708,7 +709,7 @@
 
             <!-- Submit Button -->
             <button v-if="!ussdPushActive" type="submit" :disabled="loading || !isFormValid"
-              class="w-full bg-blue-900 text-white py-4 px-6 rounded-xl text-base font-bold hover:bg-yellow-500 hover:text-blue-900 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+              class="w-full bg-primea-blue text-white py-4 px-6 rounded-xl text-base font-bold hover:bg-primea-yellow hover:text-primea-blue transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
               <span v-if="loading" class="flex items-center justify-center">
                 <svg class="w-5 h-5 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
                   <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25"/>
@@ -721,7 +722,7 @@
 
             <!-- Retrieve Ticket Link -->
             <div class="text-center pt-4">
-              <router-link to="/retrieve-ticket" class="text-blue-900 hover:text-yellow-500 text-sm font-semibold underline">
+              <router-link to="/retrieve-ticket" class="text-primea-blue hover:text-primea-yellow text-sm font-semibold underline">
                 Récupérer mon ticket perdu
               </router-link>
             </div>

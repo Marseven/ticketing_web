@@ -7,7 +7,7 @@
         alt="Événements"
         class="w-full h-full object-cover opacity-40"
       />
-      <div class="absolute inset-0 bg-blue-900/60"></div>
+      <div class="absolute inset-0 bg-primea-blue/60"></div>
     </div>
 
     <!-- Main Content -->
@@ -23,7 +23,7 @@
 
           <!-- Title -->
           <div class="text-center mb-6 md:mb-8">
-            <h1 class="text-2xl md:text-3xl font-bold text-blue-900 mb-2">
+            <h1 class="text-2xl md:text-3xl font-bold text-primea-blue mb-2">
               Bienvenue
             </h1>
             <p class="text-gray-600 text-sm md:text-base">
@@ -42,8 +42,8 @@
                   @click="switchLoginType('email')"
                   class="flex-1 py-3 px-4 text-sm font-semibold rounded-lg transition-all duration-200"
                   :class="loginType === 'email'
-                    ? 'bg-blue-900 text-white shadow-md'
-                    : 'bg-transparent text-gray-600 hover:bg-yellow-500 hover:text-blue-900'"
+                    ? 'bg-primea-blue text-white shadow-md'
+                    : 'bg-transparent text-gray-600 hover:bg-primea-yellow hover:text-primea-blue'"
                 >
                   Email
                 </button>
@@ -52,8 +52,8 @@
                   @click="switchLoginType('phone')"
                   class="flex-1 py-3 px-4 text-sm font-semibold rounded-lg transition-all duration-200"
                   :class="loginType === 'phone'
-                    ? 'bg-blue-900 text-white shadow-md'
-                    : 'bg-transparent text-gray-600 hover:bg-yellow-500 hover:text-blue-900'"
+                    ? 'bg-primea-blue text-white shadow-md'
+                    : 'bg-transparent text-gray-600 hover:bg-primea-yellow hover:text-primea-blue'"
                 >
                   Téléphone
                 </button>
@@ -62,7 +62,7 @@
 
             <!-- Email Field -->
             <div v-if="loginType === 'email'">
-              <label for="email" class="block text-sm font-semibold text-blue-900 mb-2">
+              <label for="email" class="block text-sm font-semibold text-primea-blue mb-2">
                 Adresse email
               </label>
               <input
@@ -70,14 +70,14 @@
                 id="email"
                 v-model="loginForm.login"
                 placeholder="votre.email@exemple.com"
-                class="w-full px-4 py-3 md:py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-blue-900 transition-all duration-200 bg-white text-base"
+                class="w-full px-4 py-3 md:py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primea-yellow focus:border-primea-blue transition-all duration-200 bg-white text-base"
                 required
               />
             </div>
 
             <!-- Phone Field -->
             <div v-if="loginType === 'phone'">
-              <label class="block text-sm font-semibold text-blue-900 mb-2">
+              <label class="block text-sm font-semibold text-primea-blue mb-2">
                 Numéro de téléphone
               </label>
               <PhoneInput
@@ -90,7 +90,7 @@
 
             <!-- Password Field -->
             <div>
-              <label for="password" class="block text-sm font-semibold text-blue-900 mb-2">
+              <label for="password" class="block text-sm font-semibold text-primea-blue mb-2">
                 Mot de passe
               </label>
               <div class="relative">
@@ -99,13 +99,13 @@
                   id="password"
                   v-model="loginForm.password"
                   placeholder="Votre mot de passe"
-                  class="w-full px-4 py-3 md:py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-blue-900 transition-all duration-200 pr-12 bg-white text-base"
+                  class="w-full px-4 py-3 md:py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primea-yellow focus:border-primea-blue transition-all duration-200 pr-12 bg-white text-base"
                   required
                 />
                 <button
                   type="button"
                   @click="togglePasswordVisibility"
-                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-900 transition-colors p-1"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primea-blue transition-colors p-1"
                 >
                   <svg v-if="showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -137,7 +137,7 @@
             <button
               type="submit"
               :disabled="loading"
-              class="w-full bg-blue-900 text-white py-4 px-6 rounded-xl text-base md:text-lg font-bold transition-all duration-200 shadow-lg hover:bg-yellow-500 hover:text-blue-900 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-900 disabled:hover:text-white transform hover:scale-105 disabled:transform-none"
+              class="w-full bg-primea-blue text-white py-4 px-6 rounded-xl text-base md:text-lg font-bold transition-all duration-200 shadow-lg hover:bg-primea-yellow hover:text-primea-blue disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primea-blue disabled:hover:text-white transform hover:scale-105 disabled:transform-none"
             >
               <span v-if="loading" class="flex items-center justify-center">
                 <svg class="w-5 h-5 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -153,7 +153,7 @@
             <div class="text-center">
               <router-link
                 to="/forgot-password"
-                class="text-sm text-blue-900 hover:text-yellow-500 font-semibold transition-colors duration-200 inline-block"
+                class="text-sm text-primea-blue hover:text-primea-yellow font-semibold transition-colors duration-200 inline-block"
               >
                 Mot de passe oublié ?
               </router-link>
@@ -167,7 +167,7 @@
               Vous n'avez pas de compte ?
               <router-link
                 to="/register"
-                class="text-blue-900 hover:text-yellow-500 font-bold transition-colors duration-200 ml-1"
+                class="text-primea-blue hover:text-primea-yellow font-bold transition-colors duration-200 ml-1"
               >
                 Créer un compte
               </router-link>

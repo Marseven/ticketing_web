@@ -7,7 +7,7 @@
         alt="Événements"
         class="w-full h-full object-cover opacity-40"
       />
-      <div class="absolute inset-0 bg-blue-900/60"></div>
+      <div class="absolute inset-0 bg-primea-blue/60"></div>
     </div>
 
     <!-- Main Content -->
@@ -23,7 +23,7 @@
 
           <!-- Title -->
           <div class="text-center mb-6 md:mb-8">
-            <h1 class="text-2xl md:text-3xl font-bold text-blue-900 mb-2">
+            <h1 class="text-2xl md:text-3xl font-bold text-primea-blue mb-2">
               Créer un compte
             </h1>
             <p class="text-gray-600 text-sm md:text-base">
@@ -35,7 +35,7 @@
           <form class="space-y-4 md:space-y-5" @submit.prevent="register">
             <!-- Full Name -->
             <div>
-              <label for="name" class="block text-sm font-semibold text-blue-900 mb-2">
+              <label for="name" class="block text-sm font-semibold text-primea-blue mb-2">
                 Nom complet <span class="text-red-500">*</span>
               </label>
               <input
@@ -43,28 +43,28 @@
                 v-model="form.name"
                 type="text"
                 required
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-blue-900 transition-all duration-200 bg-white text-base"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primea-yellow focus:border-primea-blue transition-all duration-200 bg-white text-base"
                 placeholder="Votre nom complet"
               />
             </div>
 
             <!-- Email -->
             <div>
-              <label for="email" class="block text-sm font-semibold text-blue-900 mb-2">
+              <label for="email" class="block text-sm font-semibold text-primea-blue mb-2">
                 Adresse email <span class="text-gray-400 text-xs font-normal">(optionnel)</span>
               </label>
               <input
                 id="email"
                 v-model="form.email"
                 type="email"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-blue-900 transition-all duration-200 bg-white text-base"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primea-yellow focus:border-primea-blue transition-all duration-200 bg-white text-base"
                 placeholder="votre@email.com"
               />
             </div>
 
             <!-- Phone -->
             <div>
-              <label for="phone" class="block text-sm font-semibold text-blue-900 mb-2">
+              <label for="phone" class="block text-sm font-semibold text-primea-blue mb-2">
                 Numéro de téléphone <span class="text-red-500">*</span>
               </label>
               <PhoneInput
@@ -78,7 +78,7 @@
 
             <!-- Phone Confirmation -->
             <div>
-              <label for="phone_confirmation" class="block text-sm font-semibold text-blue-900 mb-2">
+              <label for="phone_confirmation" class="block text-sm font-semibold text-primea-blue mb-2">
                 Confirmer le numéro de téléphone <span class="text-red-500">*</span>
               </label>
               <PhoneInput
@@ -92,7 +92,7 @@
 
             <!-- Password -->
             <div>
-              <label for="password" class="block text-sm font-semibold text-blue-900 mb-2">
+              <label for="password" class="block text-sm font-semibold text-primea-blue mb-2">
                 Mot de passe <span class="text-red-500">*</span>
               </label>
               <input
@@ -100,14 +100,14 @@
                 v-model="form.password"
                 type="password"
                 required
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-blue-900 transition-all duration-200 bg-white text-base"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primea-yellow focus:border-primea-blue transition-all duration-200 bg-white text-base"
                 placeholder="Votre mot de passe"
               />
             </div>
 
             <!-- Password Confirmation -->
             <div>
-              <label for="password_confirmation" class="block text-sm font-semibold text-blue-900 mb-2">
+              <label for="password_confirmation" class="block text-sm font-semibold text-primea-blue mb-2">
                 Confirmer le mot de passe <span class="text-red-500">*</span>
               </label>
               <input
@@ -115,7 +115,7 @@
                 v-model="form.password_confirmation"
                 type="password"
                 required
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-blue-900 transition-all duration-200 bg-white text-base"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primea-yellow focus:border-primea-blue transition-all duration-200 bg-white text-base"
                 placeholder="Confirmer votre mot de passe"
               />
             </div>
@@ -132,13 +132,13 @@
                 v-model="form.terms"
                 type="checkbox"
                 required
-                class="h-4 w-4 mt-0.5 text-blue-900 focus:ring-yellow-500 border-gray-300 rounded flex-shrink-0"
+                class="h-4 w-4 mt-0.5 text-primea-blue focus:ring-primea-yellow border-gray-300 rounded flex-shrink-0"
               />
               <label for="terms" class="ml-2 block text-sm text-gray-700">
                 J'accepte les
-                <a href="#" class="text-blue-900 hover:text-yellow-500 font-semibold transition-colors">conditions d'utilisation</a>
+                <a href="#" class="text-primea-blue hover:text-primea-yellow font-semibold transition-colors">conditions d'utilisation</a>
                 et la
-                <a href="#" class="text-blue-900 hover:text-yellow-500 font-semibold transition-colors">politique de confidentialité</a>
+                <a href="#" class="text-primea-blue hover:text-primea-yellow font-semibold transition-colors">politique de confidentialité</a>
                 <span class="text-red-500">*</span>
               </label>
             </div>
@@ -152,7 +152,7 @@
             <button
               type="submit"
               :disabled="loading"
-              class="w-full bg-blue-900 text-white py-4 px-6 rounded-xl text-base md:text-lg font-bold transition-all duration-200 shadow-lg hover:bg-yellow-500 hover:text-blue-900 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-900 disabled:hover:text-white transform hover:scale-105 disabled:transform-none"
+              class="w-full bg-primea-blue text-white py-4 px-6 rounded-xl text-base md:text-lg font-bold transition-all duration-200 shadow-lg hover:bg-primea-yellow hover:text-primea-blue disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primea-blue disabled:hover:text-white transform hover:scale-105 disabled:transform-none"
             >
               <span v-if="loading" class="flex items-center justify-center">
                 <svg class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24">
@@ -170,7 +170,7 @@
                 Vous avez déjà un compte ?
                 <router-link
                   to="/login"
-                  class="text-blue-900 hover:text-yellow-500 font-bold transition-colors duration-200 ml-1"
+                  class="text-primea-blue hover:text-primea-yellow font-bold transition-colors duration-200 ml-1"
                 >
                   Se connecter
                 </router-link>

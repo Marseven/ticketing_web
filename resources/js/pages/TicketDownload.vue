@@ -3,7 +3,7 @@
 
     <!-- Mobile Title -->
     <div class="md:hidden px-4 pt-6 pb-4">
-      <h1 class="text-xl font-bold text-blue-900 text-center">Votre ticket électronique</h1>
+      <h1 class="text-xl font-bold text-primea-blue text-center">Votre ticket électronique</h1>
     </div>
 
     <!-- Desktop Header -->
@@ -12,7 +12,7 @@
         <div class="max-w-6xl mx-auto">
           <div class="text-center">
             <img src="/images/logo.png" alt="Logo" class="h-16 mx-auto mb-6" />
-            <h1 class="text-3xl md:text-4xl font-bold text-blue-900 mb-4">Votre ticket électronique</h1>
+            <h1 class="text-3xl md:text-4xl font-bold text-primea-blue mb-4">Votre ticket électronique</h1>
             <p class="text-lg text-gray-600">Téléchargez ou capturez votre ticket pour l'événement</p>
           </div>
         </div>
@@ -25,7 +25,7 @@
 
         <!-- Loading State -->
         <div v-if="loading" class="text-center py-12">
-          <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-900"></div>
+          <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primea-blue"></div>
           <p class="mt-4 text-gray-600">Chargement du ticket...</p>
         </div>
 
@@ -38,7 +38,7 @@
           </div>
           <h3 class="text-lg font-semibold text-red-800 mb-2">Ticket introuvable</h3>
           <p class="text-red-600 mb-4">{{ error }}</p>
-          <button @click="loadTicket" class="bg-blue-900 text-white px-6 py-3 rounded-xl hover:bg-yellow-500 hover:text-blue-900 transition-colors font-semibold">
+          <button @click="loadTicket" class="bg-primea-blue text-white px-6 py-3 rounded-xl hover:bg-primea-yellow hover:text-primea-blue transition-colors font-semibold">
             Réessayer
           </button>
         </div>
@@ -60,7 +60,7 @@
 
             <!-- Section Title -->
             <div class="text-center mb-6">
-              <h2 class="text-lg font-bold text-blue-900">VOTRE TICKET</h2>
+              <h2 class="text-lg font-bold text-primea-blue">VOTRE TICKET</h2>
             </div>
 
             <!-- Ticket Display -->
@@ -77,7 +77,7 @@
                   'w-full py-4 px-6 rounded-xl font-bold transition-all duration-200 shadow-lg',
                   downloading
                     ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                    : 'bg-yellow-500 text-blue-900 hover:bg-yellow-600 transform hover:scale-105'
+                    : 'bg-primea-yellow text-primea-blue hover:bg-primea-yellow transform hover:scale-105'
                 ]"
               >
                 <span v-if="downloading" class="flex items-center justify-center gap-2">
@@ -94,7 +94,7 @@
             <!-- Ad Space -->
             <div class="bg-gray-200 rounded-2xl p-8 text-center mb-6">
               <div class="text-xl text-gray-400 font-light mb-4">ESPACE PUB</div>
-              <a href="#" class="text-blue-900 text-sm hover:text-yellow-500 font-semibold">En savoir plus...</a>
+              <a href="#" class="text-primea-blue text-sm hover:text-primea-yellow font-semibold">En savoir plus...</a>
             </div>
           </div>
 
@@ -111,24 +111,24 @@
 
               <!-- Instructions Card -->
               <div class="bg-white rounded-2xl shadow-lg p-6">
-                <h3 class="text-xl font-bold text-blue-900 mb-4">Comment utiliser votre ticket</h3>
+                <h3 class="text-xl font-bold text-primea-blue mb-4">Comment utiliser votre ticket</h3>
                 <div class="space-y-4 text-gray-600">
                   <div class="flex items-start gap-3">
-                    <div class="rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold bg-blue-900 text-white flex-shrink-0">1</div>
+                    <div class="rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold bg-primea-blue text-white flex-shrink-0">1</div>
                     <div>
                       <p class="font-semibold text-gray-800">Téléchargez votre ticket</p>
                       <p class="text-sm">Cliquez sur le bouton de téléchargement pour sauvegarder votre ticket en PDF</p>
                     </div>
                   </div>
                   <div class="flex items-start gap-3">
-                    <div class="rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold bg-blue-900 text-white flex-shrink-0">2</div>
+                    <div class="rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold bg-primea-blue text-white flex-shrink-0">2</div>
                     <div>
                       <p class="font-semibold text-gray-800">Présentez le QR code</p>
                       <p class="text-sm">À l'entrée, montrez le QR code pour validation</p>
                     </div>
                   </div>
                   <div class="flex items-start gap-3">
-                    <div class="rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold bg-yellow-500 text-blue-900 flex-shrink-0">!</div>
+                    <div class="rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold bg-primea-yellow text-primea-blue flex-shrink-0">!</div>
                     <div>
                       <p class="font-semibold text-red-600">Important</p>
                       <p class="text-sm">Ce ticket est personnel et à usage unique. Il ne peut être ni vendu ni donné</p>
@@ -139,7 +139,7 @@
 
               <!-- Actions Card -->
               <div class="bg-white rounded-2xl shadow-lg p-6">
-                <h3 class="text-xl font-bold text-blue-900 mb-4">Actions</h3>
+                <h3 class="text-xl font-bold text-primea-blue mb-4">Actions</h3>
                 <div class="space-y-3">
                   <button
                     @click="downloadTicket"
@@ -148,7 +148,7 @@
                       'w-full py-3 px-6 rounded-xl font-bold transition-all duration-200 shadow-lg flex items-center justify-center gap-2',
                       downloading
                         ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                        : 'bg-yellow-500 text-blue-900 hover:bg-yellow-600 transform hover:scale-105'
+                        : 'bg-primea-yellow text-primea-blue hover:bg-primea-yellow transform hover:scale-105'
                     ]"
                   >
                     <template v-if="downloading">
@@ -167,7 +167,7 @@
                   </button>
                   <button
                     @click="goBack"
-                    class="w-full border-2 border-blue-900 text-blue-900 py-3 px-6 rounded-xl font-semibold hover:bg-blue-900 hover:text-white transition-all duration-200"
+                    class="w-full border-2 border-primea-blue text-primea-blue py-3 px-6 rounded-xl font-semibold hover:bg-primea-blue hover:text-white transition-all duration-200"
                   >
                     Retour aux événements
                   </button>
@@ -356,7 +356,7 @@ export default {
           title: 'Téléchargement réussi !',
           html: `
             <p class="text-gray-600 mb-2">Votre ticket a été téléchargé :</p>
-            <p class="font-semibold text-blue-900">${fileName}</p>
+            <p class="font-semibold text-primea-blue">${fileName}</p>
             <p class="text-sm text-gray-500 mt-2">Vérifiez votre dossier Téléchargements</p>
           `,
           confirmButtonColor: '#272d63',

@@ -36,11 +36,11 @@
                 v-model="searchQuery"
                 @keyup.enter="searchEvents"
                 placeholder="| Chercher un événement"
-                class="w-full px-6 py-3 rounded-lg text-base bg-white/90 text-gray-800 placeholder-gray-600 focus:outline-none focus:bg-white focus:ring-2 focus:ring-yellow-500"
+                class="w-full px-6 py-3 rounded-lg text-base bg-white/90 text-gray-800 placeholder-gray-600 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primea-yellow"
               />
               <button
                 @click="searchEvents"
-                class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-950 text-white p-2 rounded-lg hover:bg-yellow-500 hover:text-blue-950 transition-colors"
+                class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primea-blue text-white p-2 rounded-lg hover:bg-primea-yellow hover:text-primea-blue transition-colors"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -59,7 +59,7 @@
           <div>
             <router-link
               to="/organizer-choice"
-              class="inline-block bg-blue-950 text-white px-6 py-2 rounded-lg text-xs font-semibold hover:bg-opacity-90 transition-colors shadow-lg"
+              class="inline-block bg-primea-blue text-white px-6 py-2 rounded-lg text-xs font-semibold hover:bg-opacity-90 transition-colors shadow-lg"
             >
               Créateur d'événements
             </router-link>
@@ -72,7 +72,7 @@
         <div class="flex items-center justify-between w-full max-w-md mx-auto text-white text-xs">
           <router-link
             to="/retrieve-ticket"
-            class="underline hover:text-yellow-500 transition-colors font-semibold"
+            class="underline hover:text-primea-yellow transition-colors font-semibold"
           >
             Récupérer mon ticket perdu...
           </router-link>
@@ -121,7 +121,7 @@
       <div class="px-4 max-w-7xl mx-auto">
         <!-- Loading State -->
         <div v-if="loading" class="flex justify-center py-12">
-          <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-950 border-t-yellow-500"></div>
+          <div class="animate-spin rounded-full h-12 w-12 border-4 border-primea-blue border-t-primea-yellow"></div>
         </div>
 
         <template v-else>
@@ -137,67 +137,70 @@
 
           <!-- Événements en cours -->
           <div v-if="upcomingEvents.length > 0" class="mb-12">
-            <h2 class="text-xl md:text-3xl font-bold text-center text-blue-950 mb-6 md:mb-8">
+            <h2 class="text-xl md:text-3xl font-bold text-center text-primea-blue mb-6 md:mb-8">
               Tous les événements en cours
             </h2>
-            <!-- Mobile: Métadonnées sur image -->
-            <div class="space-y-3 md:hidden">
-              <router-link
-                v-for="event in upcomingEvents"
-                :key="event.id"
-                :to="`/events/${event.slug}`"
-                class="block bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow"
-              >
-                <div class="h-40 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 relative overflow-hidden">
-                  <img
-                    v-if="event.image || event.cover_image || event.image_url"
-                    :src="event.image || event.cover_image || event.image_url"
-                    :alt="event.title"
-                    class="w-full h-full object-cover"
-                  />
-                  <div v-else class="w-full h-full bg-gradient-to-br from-blue-100 to-yellow-100 flex items-center justify-center">
-                    <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                  </div>
-                  <div class="absolute inset-0 bg-blue-900/50"></div>
-
-                  <!-- Contenu sur l'image -->
-                  <div class="absolute inset-0 p-3 text-white flex flex-col justify-between">
-                    <div>
-                      <div class="bg-yellow-500/20 backdrop-blur-sm rounded-lg px-2 py-0.5 mb-1 text-yellow-500 font-bold uppercase text-xs inline-block">
-                        {{ event.category?.name || 'ÉVÉNEMENT' }}
-                      </div>
-                      <h3 class="font-bold text-base leading-tight line-clamp-2">
-                        {{ event.title }}
-                      </h3>
+            <!-- Mobile: Carousel horizontal -->
+            <div class="md:hidden -mx-4">
+              <div class="flex gap-3 overflow-x-auto scroll-snap-x px-4 pb-4 hide-scrollbar">
+                <router-link
+                  v-for="event in upcomingEvents"
+                  :key="event.id"
+                  :to="`/events/${event.slug}`"
+                  class="flex-shrink-0 w-[80vw] bg-white rounded-xl shadow-md overflow-hidden snap-start"
+                >
+                  <div class="h-44 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 relative overflow-hidden">
+                    <img
+                      v-if="event.image || event.cover_image || event.image_url"
+                      :src="event.image || event.cover_image || event.image_url"
+                      :alt="event.title"
+                      class="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    <div v-else class="w-full h-full bg-gradient-to-br from-blue-100 to-yellow-100 flex items-center justify-center">
+                      <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                      </svg>
                     </div>
+                    <div class="absolute inset-0 bg-primea-blue/50"></div>
 
-                    <div>
-                      <div class="flex items-end justify-between">
-                        <div>
-                          <p class="text-xs leading-tight mb-1">
-                            {{ formatDate(event.event_date) }}
-                          </p>
-                          <p class="text-xs text-gray-200 leading-tight">
-                            {{ event.venue?.name || 'Lieu à définir' }}
-                          </p>
+                    <!-- Contenu sur l'image -->
+                    <div class="absolute inset-0 p-3 text-white flex flex-col justify-between">
+                      <div>
+                        <div class="bg-primea-yellow/20 backdrop-blur-sm rounded-lg px-2 py-0.5 mb-1 text-primea-yellow font-bold uppercase text-xs inline-block">
+                          {{ event.category?.name || 'ÉVÉNEMENT' }}
                         </div>
-                        <router-link
-                          :to="`/checkout/${event.slug}`"
-                          class="ticket-btn-animate bg-yellow-500 text-blue-950 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-yellow-400 transition-colors flex items-center gap-1 shadow-lg hover:shadow-xl"
-                          @click.stop
-                        >
-                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
-                          </svg>
-                          Prendre un ticket
-                        </router-link>
+                        <h3 class="font-bold text-base leading-tight line-clamp-2">
+                          {{ event.title }}
+                        </h3>
+                      </div>
+
+                      <div>
+                        <div class="flex items-end justify-between">
+                          <div>
+                            <p class="text-xs leading-tight mb-1">
+                              {{ formatDate(event.event_date) }}
+                            </p>
+                            <p class="text-xs text-gray-200 leading-tight">
+                              {{ event.venue?.name || 'Lieu à définir' }}
+                            </p>
+                          </div>
+                          <router-link
+                            :to="`/checkout/${event.slug}`"
+                            class="ticket-btn-animate bg-primea-yellow text-primea-blue px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-lg"
+                            @click.stop
+                          >
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+                            </svg>
+                            Prendre un ticket
+                          </router-link>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </router-link>
+                </router-link>
+              </div>
             </div>
 
             <!-- Desktop: Style classique -->
@@ -214,6 +217,7 @@
                     :src="event.image || event.cover_image || event.image_url"
                     :alt="event.title"
                     class="absolute inset-0 w-full h-full object-cover"
+                    loading="lazy"
                   />
                   <div v-else class="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-100 to-yellow-100 flex items-center justify-center">
                     <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -222,7 +226,7 @@
                   </div>
                 </div>
                 <div class="p-4">
-                  <h3 class="font-bold text-blue-950 text-base line-clamp-2 mb-2">
+                  <h3 class="font-bold text-primea-blue text-base line-clamp-2 mb-2">
                     {{ event.title }}
                   </h3>
                   <p class="text-sm text-gray-600 mb-1">
@@ -241,53 +245,56 @@
             <h2 class="text-xl md:text-3xl font-bold text-center text-gray-600 mb-6 md:mb-8">
               Événements passés
             </h2>
-            <!-- Mobile: Métadonnées sur image -->
-            <div class="space-y-3 md:hidden opacity-75">
-              <router-link
-                v-for="event in pastEvents"
-                :key="event.id"
-                :to="`/events/${event.slug}`"
-                class="block bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow grayscale"
-              >
-                <div class="h-40 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 relative overflow-hidden">
-                  <img
-                    v-if="event.image || event.cover_image || event.image_url"
-                    :src="event.image || event.cover_image || event.image_url"
-                    :alt="event.title"
-                    class="w-full h-full object-cover"
-                  />
-                  <div v-else class="w-full h-full bg-gradient-to-br from-blue-100 to-yellow-100 flex items-center justify-center">
-                    <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                  </div>
-                  <div class="absolute inset-0 bg-blue-900/50"></div>
-                  <div class="absolute top-2 right-2 bg-gray-600 text-white px-2 py-1 rounded-lg text-xs font-semibold">
-                    Terminé
-                  </div>
+            <!-- Mobile: Carousel horizontal -->
+            <div class="md:hidden -mx-4">
+              <div class="flex gap-3 overflow-x-auto scroll-snap-x px-4 pb-4 hide-scrollbar opacity-75">
+                <router-link
+                  v-for="event in pastEvents"
+                  :key="event.id"
+                  :to="`/events/${event.slug}`"
+                  class="flex-shrink-0 w-[80vw] bg-white rounded-xl shadow-md overflow-hidden grayscale snap-start"
+                >
+                  <div class="h-44 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 relative overflow-hidden">
+                    <img
+                      v-if="event.image || event.cover_image || event.image_url"
+                      :src="event.image || event.cover_image || event.image_url"
+                      :alt="event.title"
+                      class="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    <div v-else class="w-full h-full bg-gradient-to-br from-blue-100 to-yellow-100 flex items-center justify-center">
+                      <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                      </svg>
+                    </div>
+                    <div class="absolute inset-0 bg-primea-blue/50"></div>
+                    <div class="absolute top-2 right-2 bg-gray-600 text-white px-2 py-1 rounded-lg text-xs font-semibold">
+                      Terminé
+                    </div>
 
-                  <!-- Contenu sur l'image -->
-                  <div class="absolute inset-0 p-3 text-white flex flex-col justify-between">
-                    <div>
-                      <div class="bg-yellow-500/20 backdrop-blur-sm rounded-lg px-2 py-0.5 mb-1 text-yellow-500 font-bold uppercase text-xs inline-block">
-                        {{ event.category?.name || 'ÉVÉNEMENT' }}
+                    <!-- Contenu sur l'image -->
+                    <div class="absolute inset-0 p-3 text-white flex flex-col justify-between">
+                      <div>
+                        <div class="bg-primea-yellow/20 backdrop-blur-sm rounded-lg px-2 py-0.5 mb-1 text-primea-yellow font-bold uppercase text-xs inline-block">
+                          {{ event.category?.name || 'ÉVÉNEMENT' }}
+                        </div>
+                        <h3 class="font-bold text-base leading-tight line-clamp-2">
+                          {{ event.title }}
+                        </h3>
                       </div>
-                      <h3 class="font-bold text-base leading-tight line-clamp-2">
-                        {{ event.title }}
-                      </h3>
-                    </div>
 
-                    <div>
-                      <p class="text-xs leading-tight mb-1">
-                        {{ formatDate(event.event_date) }}
-                      </p>
-                      <p class="text-xs text-gray-200 leading-tight">
-                        {{ event.venue?.name || 'Lieu à définir' }}
-                      </p>
+                      <div>
+                        <p class="text-xs leading-tight mb-1">
+                          {{ formatDate(event.event_date) }}
+                        </p>
+                        <p class="text-xs text-gray-200 leading-tight">
+                          {{ event.venue?.name || 'Lieu à définir' }}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </router-link>
+                </router-link>
+              </div>
             </div>
 
             <!-- Desktop: Style classique -->
@@ -304,6 +311,7 @@
                     :src="event.image || event.cover_image || event.image_url"
                     :alt="event.title"
                     class="absolute inset-0 w-full h-full object-cover grayscale"
+                    loading="lazy"
                   />
                   <div v-else class="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-100 to-yellow-100 flex items-center justify-center grayscale">
                     <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -334,7 +342,7 @@
             <p class="text-gray-500 mb-4">Aucun événement disponible pour le moment.</p>
             <button
               @click="filterByCategory('all')"
-              class="bg-blue-950 text-white px-6 py-3 rounded-lg hover:bg-yellow-500 hover:text-blue-950 transition-colors"
+              class="bg-primea-blue text-white px-6 py-3 rounded-lg hover:bg-primea-yellow hover:text-primea-blue transition-colors"
             >
               Voir tous les événements
             </button>
@@ -667,5 +675,24 @@ export default {
   animation: pulse-scale-animation 2s ease-in-out infinite;
   transform-origin: center;
   display: inline-flex !important;
+}
+
+/* Horizontal scroll carousel */
+.scroll-snap-x {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.snap-start {
+  scroll-snap-align: start;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 </style>

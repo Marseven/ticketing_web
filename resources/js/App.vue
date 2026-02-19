@@ -2,11 +2,13 @@
   <div class="app-container">
     <!-- Header global: gère automatiquement mobile (avec burger) et desktop (menu normal) -->
     <NewHeader v-if="showHeader" />
-    <main>
+    <main :class="{ 'pb-20 md:pb-0': showBottomNav }">
       <router-view />
     </main>
     <!-- Footer global: gère automatiquement mobile et desktop -->
     <NewFooter v-if="showFooter" />
+    <!-- Mobile Bottom Navigation -->
+    <MobileBottomNav v-if="showBottomNav" />
     <!-- PWA Install Prompt -->
     <PWAInstallPrompt />
   </div>
@@ -17,6 +19,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import NewHeader from './components/layout/NewHeader.vue'
 import NewFooter from './components/layout/NewFooter.vue'
+import MobileBottomNav from './components/MobileBottomNav.vue'
 import PWAInstallPrompt from './components/PWAInstallPrompt.vue'
 
 export default {
@@ -24,35 +27,33 @@ export default {
   components: {
     NewHeader,
     NewFooter,
+    MobileBottomNav,
     PWAInstallPrompt
   },
   setup() {
     const route = useRoute()
 
-    // Masquer header/footer sur certaines pages
-    const showHeader = computed(() => {
+    const isSpecialRoute = computed(() => {
       const hiddenRoutes = ['scanner']
-      // Masquer aussi sur les routes admin et organisateur qui ont leur propre layout
       const isAdminRoute = route.path && route.path.startsWith('/admin')
       const isOrganizerRoute = route.path && route.path.startsWith('/organizer')
-      // Le header global s'affiche sur desktop (md:block) pour les pages guest/client
-      // Sur mobile, chaque page a son propre header intégré
-      return !hiddenRoutes.includes(route.name) && !isAdminRoute && !isOrganizerRoute
+      return hiddenRoutes.includes(route.name) || isAdminRoute || isOrganizerRoute
     })
 
-    const showFooter = computed(() => {
-      const hiddenRoutes = ['scanner']
-      // Masquer aussi sur les routes admin et organisateur qui ont leur propre layout
-      const isAdminRoute = route.path && route.path.startsWith('/admin')
-      const isOrganizerRoute = route.path && route.path.startsWith('/organizer')
-      // Le footer global s'affiche sur desktop (md:block) pour les pages guest/client
-      // Sur mobile, chaque page a son propre footer si nécessaire
-      return !hiddenRoutes.includes(route.name) && !isAdminRoute && !isOrganizerRoute
+    const showHeader = computed(() => !isSpecialRoute.value)
+    const showFooter = computed(() => !isSpecialRoute.value)
+
+    const showBottomNav = computed(() => {
+      if (isSpecialRoute.value) return false
+      // Masquer sur les pages de checkout/payment pour ne pas distraire
+      const noNavRoutes = ['checkout', 'payment', 'ticket-success', 'payment-success']
+      return !noNavRoutes.includes(route.name)
     })
 
     return {
       showHeader,
-      showFooter
+      showFooter,
+      showBottomNav
     }
   }
 }

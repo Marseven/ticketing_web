@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-950 via-blue-900 to-blue-950 flex items-center justify-center px-4 py-12">
+  <div class="min-h-screen bg-gradient-to-br from-primea-blue via-primea-blue to-primea-blue flex items-center justify-center px-4 py-12">
     <div class="max-w-md w-full">
       <!-- Logo et titre -->
       <div class="text-center mb-8 animate-fade-in">
@@ -17,7 +17,7 @@
         <!-- Bouton Se connecter -->
         <router-link
           to="/login-organizer"
-          class="block w-full bg-blue-950 text-white py-4 px-6 rounded-xl text-center text-lg font-bold transition-all duration-200 shadow-lg hover:bg-yellow-500 hover:text-blue-950 transform hover:scale-105"
+          class="block w-full bg-primea-blue text-white py-4 px-6 rounded-xl text-center text-lg font-bold transition-all duration-200 shadow-lg hover:bg-primea-yellow hover:text-primea-blue transform hover:scale-105"
         >
           <div class="flex items-center justify-center gap-3">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,7 +42,7 @@
         <!-- Bouton Créer un compte -->
         <router-link
           to="/register-organizer"
-          class="block w-full bg-white border-2 border-blue-950 text-blue-950 py-4 px-6 rounded-xl text-center text-lg font-bold transition-all duration-200 hover:bg-blue-950 hover:text-white transform hover:scale-105"
+          class="block w-full bg-white border-2 border-primea-blue text-primea-blue py-4 px-6 rounded-xl text-center text-lg font-bold transition-all duration-200 hover:bg-primea-blue hover:text-white transform hover:scale-105"
         >
           <div class="flex items-center justify-center gap-3">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -56,7 +56,7 @@
         <div class="pt-4 text-center border-t border-gray-200">
           <router-link
             to="/"
-            class="text-sm text-blue-950 hover:text-yellow-500 font-semibold transition-colors inline-flex items-center gap-2"
+            class="text-sm text-primea-blue hover:text-primea-yellow font-semibold transition-colors inline-flex items-center gap-2"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
@@ -70,7 +70,7 @@
       <div class="mt-6 text-center text-white/80 text-sm">
         <p>
           Vous êtes un utilisateur régulier ?
-          <router-link to="/login" class="underline hover:text-yellow-500 transition-colors font-semibold ml-1">
+          <router-link to="/login" class="underline hover:text-primea-yellow transition-colors font-semibold ml-1">
             Connectez-vous ici
           </router-link>
         </p>

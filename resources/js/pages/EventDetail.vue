@@ -3,7 +3,7 @@
     <!-- Loading State -->
     <div v-if="loading" class="loading-container">
       <div class="flex items-center justify-center min-h-screen">
-        <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-900 border-t-yellow-500"></div>
+        <div class="animate-spin rounded-full h-16 w-16 border-4 border-primea-blue border-t-primea-yellow"></div>
       </div>
     </div>
 
@@ -12,7 +12,7 @@
       <div class="flex items-center justify-center min-h-screen bg-gray-50 px-4">
         <div class="text-center bg-white p-8 md:p-12 rounded-2xl shadow-lg max-w-md w-full">
           <div class="text-red-600 text-lg md:text-xl mb-6 font-semibold">{{ error }}</div>
-          <button @click="loadEvent" class="w-full md:w-auto bg-blue-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-yellow-500 hover:text-blue-900 transition-all duration-200">
+          <button @click="loadEvent" class="w-full md:w-auto bg-primea-blue text-white px-8 py-3 rounded-xl font-bold hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200">
             Réessayer
           </button>
         </div>
@@ -45,7 +45,7 @@
       <section class="bg-white">
         <div class="max-w-7xl mx-auto px-4 py-6 md:py-8">
           <!-- Event Title -->
-          <h1 class="text-2xl md:text-4xl lg:text-5xl font-bold text-blue-900 mb-3 md:mb-4 leading-tight">
+          <h1 class="text-2xl md:text-4xl lg:text-5xl font-bold text-primea-blue mb-3 md:mb-4 leading-tight">
             {{ event.title }}
           </h1>
 
@@ -54,7 +54,7 @@
             <!-- Date -->
             <div class="flex items-center gap-3 text-gray-700">
               <div class="bg-blue-100 p-2 rounded-lg flex-shrink-0">
-                <svg class="w-5 h-5 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-primea-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
               </div>
@@ -64,7 +64,7 @@
             <!-- Time -->
             <div class="flex items-center gap-3 text-gray-700">
               <div class="bg-blue-100 p-2 rounded-lg flex-shrink-0">
-                <svg class="w-5 h-5 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-primea-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
               </div>
@@ -75,7 +75,7 @@
           <!-- Organizer Info (if available) -->
           <div v-if="event.organizer" class="mb-4 pb-4 border-b border-gray-200">
             <p class="text-sm text-gray-600">Organisé par</p>
-            <p class="font-bold text-blue-900">{{ event.organizer.name || event.organizer.organization_name }}</p>
+            <p class="font-bold text-primea-blue">{{ event.organizer.name || event.organizer.organization_name }}</p>
           </div>
 
           <!-- Desktop: Two Column Layout -->
@@ -84,9 +84,9 @@
             <div class="lg:col-span-2 space-y-4">
               <!-- Description - Mobile Only (before tickets) -->
               <div class="md:hidden bg-white p-4 rounded-2xl border border-gray-200">
-                <h2 class="text-lg font-bold text-blue-900 mb-3 flex items-center gap-2">
+                <h2 class="text-lg font-bold text-primea-blue mb-3 flex items-center gap-2">
                   <div class="bg-blue-100 p-2 rounded-lg">
-                    <svg class="w-5 h-5 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-primea-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                   </div>
@@ -104,7 +104,7 @@
 
               <!-- Ticket Types Section -->
               <div class="bg-gray-50 p-4 md:p-6 rounded-2xl">
-                <h3 class="text-lg md:text-xl font-bold text-blue-900 mb-3 flex items-center gap-2">
+                <h3 class="text-lg md:text-xl font-bold text-primea-blue mb-3 flex items-center gap-2">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
                   </svg>
@@ -115,11 +115,11 @@
                   <div
                     v-for="ticketType in event.ticket_types"
                     :key="ticketType.id"
-                    class="bg-white p-4 rounded-xl border-2 border-gray-200 hover:border-blue-900 transition-all duration-200"
+                    class="bg-white p-4 rounded-xl border-2 border-gray-200 hover:border-primea-blue transition-all duration-200"
                   >
                     <div class="flex items-start justify-between gap-4">
                       <div class="flex-1 min-w-0">
-                        <h4 class="font-bold text-blue-900 mb-1 text-base md:text-lg">{{ ticketType.name }}</h4>
+                        <h4 class="font-bold text-primea-blue mb-1 text-base md:text-lg">{{ ticketType.name }}</h4>
                         <p v-if="ticketType.description" class="text-sm text-gray-600 mb-2 line-clamp-2">{{ ticketType.description }}</p>
                         <div class="flex items-center gap-2 text-xs md:text-sm">
                           <span class="text-gray-500">Places disponibles:</span>
@@ -130,7 +130,7 @@
                       </div>
 
                       <div class="text-right flex-shrink-0">
-                        <div class="text-xl md:text-2xl font-bold text-blue-900">
+                        <div class="text-xl md:text-2xl font-bold text-primea-blue">
                           <span v-if="ticketType.price > 0">{{ formatPrice(ticketType.price) }}</span>
                           <span v-else class="text-green-600">GRATUIT</span>
                         </div>
@@ -144,7 +144,7 @@
                 <div v-else class="bg-white p-4 rounded-xl border-2 border-gray-200">
                   <div class="flex items-start justify-between gap-4">
                     <div class="flex-1">
-                      <h4 class="font-bold text-blue-900 mb-1">Billet standard</h4>
+                      <h4 class="font-bold text-primea-blue mb-1">Billet standard</h4>
                       <p class="text-sm text-gray-600 mb-2">Accès général à l'événement</p>
                       <div class="flex items-center gap-2 text-sm">
                         <span class="text-gray-500">Places disponibles:</span>
@@ -155,7 +155,7 @@
                     </div>
 
                     <div class="text-right">
-                      <div class="text-2xl font-bold text-blue-900">
+                      <div class="text-2xl font-bold text-primea-blue">
                         <span v-if="minPrice > 0">{{ formatPrice(minPrice) }}</span>
                         <span v-else class="text-green-600">GRATUIT</span>
                       </div>
@@ -167,9 +167,9 @@
 
               <!-- Description - Desktop Only (after tickets) -->
               <div class="hidden md:block bg-white p-4 md:p-6 rounded-2xl border border-gray-200">
-                <h2 class="text-lg md:text-xl font-bold text-blue-900 mb-3 flex items-center gap-2">
+                <h2 class="text-lg md:text-xl font-bold text-primea-blue mb-3 flex items-center gap-2">
                   <div class="bg-blue-100 p-2 rounded-lg">
-                    <svg class="w-5 h-5 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-primea-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                   </div>
@@ -193,9 +193,9 @@
 
               <!-- Similar Events (Desktop only, mobile shows at bottom) -->
               <div v-if="similarEvents.length > 0" class="hidden md:block bg-white p-6 rounded-2xl border border-gray-200">
-                <h2 class="text-xl font-bold text-blue-900 mb-4 flex items-center gap-2">
+                <h2 class="text-xl font-bold text-primea-blue mb-4 flex items-center gap-2">
                   <div class="bg-blue-100 p-2 rounded-lg">
-                    <svg class="w-5 h-5 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-primea-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                     </svg>
                   </div>
@@ -227,7 +227,7 @@
 
           <!-- Similar Events (Mobile only) -->
           <div v-if="similarEvents.length > 0" class="md:hidden mt-6 bg-white p-4 rounded-2xl border border-gray-200">
-            <h2 class="text-lg font-bold text-blue-900 mb-3 flex items-center gap-2">
+            <h2 class="text-lg font-bold text-primea-blue mb-3 flex items-center gap-2">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
               </svg>
@@ -247,14 +247,14 @@
     </div>
 
     <!-- Fixed Bottom Action Bar (Mobile Only) -->
-    <div v-if="event && !loading && !error" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 md:hidden z-40 shadow-lg">
+    <div v-if="event && !loading && !error" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 md:hidden z-40 shadow-lg" style="padding-bottom: max(1rem, env(safe-area-inset-bottom))">
       <div class="flex items-center gap-3">
         <FavoriteButton :eventId="event.id" />
 
         <button
           v-if="canPurchaseTickets"
           @click="goToBooking"
-          class="ticket-btn-animate flex-1 bg-blue-900 text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-yellow-500 hover:text-blue-900 transition-all duration-200 shadow-lg flex items-center justify-center gap-2"
+          class="ticket-btn-animate flex-1 bg-primea-blue text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 shadow-lg flex items-center justify-center gap-2"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
@@ -280,7 +280,7 @@
           <button
             v-if="canPurchaseTickets"
             @click="goToBooking"
-            class="ticket-btn-animate bg-blue-900 text-white px-10 py-4 rounded-xl text-lg font-bold hover:bg-yellow-500 hover:text-blue-900 transition-all duration-200 shadow-lg flex items-center justify-center gap-3"
+            class="ticket-btn-animate bg-primea-blue text-white px-10 py-4 rounded-xl text-lg font-bold hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 shadow-lg flex items-center justify-center gap-3"
           >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>

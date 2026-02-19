@@ -3,7 +3,7 @@
     <div class="sm:mx-auto sm:w-full sm:max-w-2xl">
       <!-- Logo et titre -->
       <div class="text-center mb-8">
-        <h2 class="text-3xl font-extrabold text-blue-950">
+        <h2 class="text-3xl font-extrabold text-primea-blue">
           Inscription Organisateur
         </h2>
         <p class="mt-2 text-sm text-gray-600">
@@ -16,7 +16,7 @@
         <form @submit.prevent="handleRegister" class="space-y-6">
           <!-- Section Informations Utilisateur -->
           <div class="border-b border-gray-200 pb-6">
-            <h3 class="text-lg font-medium text-blue-950 mb-4">
+            <h3 class="text-lg font-medium text-primea-blue mb-4">
               Informations Personnelles
             </h3>
 
@@ -30,7 +30,7 @@
                 v-model="formData.name"
                 type="text"
                 required
-                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-950 focus:border-blue-950"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primea-blue focus:border-primea-blue"
                 :class="{ 'border-red-500': errors.name }"
               />
               <p v-if="errors.name" class="mt-1 text-sm text-red-600">{{ errors.name }}</p>
@@ -45,7 +45,7 @@
                 id="email"
                 v-model="formData.email"
                 type="email"
-                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-950 focus:border-blue-950"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primea-blue focus:border-primea-blue"
                 :class="{ 'border-red-500': errors.email }"
               />
               <p v-if="errors.email" class="mt-1 text-sm text-red-600">{{ errors.email }}</p>
@@ -62,7 +62,7 @@
                 type="tel"
                 required
                 placeholder="Ex: 6XXXXXXXX"
-                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-950 focus:border-blue-950"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primea-blue focus:border-primea-blue"
                 :class="{ 'border-red-500': errors.phone }"
               />
               <p v-if="errors.phone" class="mt-1 text-sm text-red-600">{{ errors.phone }}</p>
@@ -79,7 +79,7 @@
                   v-model="formData.password"
                   type="password"
                   required
-                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-950 focus:border-blue-950"
+                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primea-blue focus:border-primea-blue"
                   :class="{ 'border-red-500': errors.password }"
                 />
                 <p v-if="errors.password" class="mt-1 text-sm text-red-600">{{ errors.password }}</p>
@@ -94,7 +94,7 @@
                   v-model="formData.password_confirmation"
                   type="password"
                   required
-                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-950 focus:border-blue-950"
+                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primea-blue focus:border-primea-blue"
                 />
               </div>
             </div>
@@ -102,7 +102,7 @@
 
           <!-- Section Informations Organisation -->
           <div class="pt-4">
-            <h3 class="text-lg font-medium text-blue-950 mb-4">
+            <h3 class="text-lg font-medium text-primea-blue mb-4">
               Informations de l'Organisation
             </h3>
 
@@ -117,7 +117,7 @@
                 type="text"
                 required
                 placeholder="Ex: Ma Compagnie, Mon Entreprise, etc."
-                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-950 focus:border-blue-950"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primea-blue focus:border-primea-blue"
                 :class="{ 'border-red-500': errors.organization_name }"
               />
               <p v-if="errors.organization_name" class="mt-1 text-sm text-red-600">{{ errors.organization_name }}</p>
@@ -135,7 +135,7 @@
                 id="description"
                 v-model="formData.description"
                 rows="3"
-                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-950 focus:border-blue-950"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primea-blue focus:border-primea-blue"
                 placeholder="Présentez brièvement votre organisation..."
               ></textarea>
             </div>
@@ -160,7 +160,7 @@
             <button
               type="submit"
               :disabled="loading"
-              class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-950 hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-950 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primea-blue hover:bg-primea-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primea-blue disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="loading" class="flex items-center">
                 <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -177,7 +177,7 @@
           <div class="text-center mt-4">
             <p class="text-sm text-gray-600">
               Vous avez déjà un compte organisateur ?
-              <router-link to="/login-organizer" class="font-medium text-blue-950 hover:text-yellow-500">
+              <router-link to="/login-organizer" class="font-medium text-primea-blue hover:text-primea-yellow">
                 Se connecter
               </router-link>
             </p>

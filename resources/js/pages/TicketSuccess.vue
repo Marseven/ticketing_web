@@ -130,7 +130,7 @@
 
             <router-link
               to="/"
-              class="text-center bg-primea-yellow text-primea-blue px-6 py-3 rounded-primea hover:bg-yellow-500 transition-all duration-200 font-semibold"
+              class="text-center bg-primea-yellow text-primea-blue px-6 py-3 rounded-primea hover:bg-primea-yellow transition-all duration-200 font-semibold"
             >
               Retour à l'accueil
             </router-link>

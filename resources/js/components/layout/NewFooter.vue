@@ -53,25 +53,25 @@
 
           <!-- Quick Links -->
           <div>
-            <h3 class="font-bold text-blue-950 text-lg mb-4">Liens rapides</h3>
+            <h3 class="font-bold text-primea-blue text-lg mb-4">Liens rapides</h3>
             <ul class="space-y-2">
               <li>
-                <router-link :to="{ name: 'events' }" class="text-gray-600 hover:text-yellow-500 transition-colors">
+                <router-link :to="{ name: 'events' }" class="text-gray-600 hover:text-primea-yellow transition-colors">
                   Tous les événements
                 </router-link>
               </li>
               <li>
-                <a href="#" class="text-gray-600 hover:text-yellow-500 transition-colors">
+                <a href="#" class="text-gray-600 hover:text-primea-yellow transition-colors">
                   Comment ça marche
                 </a>
               </li>
               <li>
-                <router-link :to="{ name: 'organizer-choice' }" class="text-gray-600 hover:text-yellow-500 transition-colors">
+                <router-link :to="{ name: 'organizer-choice' }" class="text-gray-600 hover:text-primea-yellow transition-colors">
                   Devenir organisateur
                 </router-link>
               </li>
               <li>
-                <router-link :to="{ name: 'ticket-retrieve' }" class="text-gray-600 hover:text-yellow-500 transition-colors">
+                <router-link :to="{ name: 'ticket-retrieve' }" class="text-gray-600 hover:text-primea-yellow transition-colors">
                   Récupérer mon ticket
                 </router-link>
               </li>
@@ -80,25 +80,25 @@
 
           <!-- Support -->
           <div>
-            <h3 class="font-bold text-blue-950 text-lg mb-4">Support</h3>
+            <h3 class="font-bold text-primea-blue text-lg mb-4">Support</h3>
             <ul class="space-y-2">
               <li>
-                <a href="#" class="text-gray-600 hover:text-yellow-500 transition-colors">
+                <a href="#" class="text-gray-600 hover:text-primea-yellow transition-colors">
                   Centre d'aide
                 </a>
               </li>
               <li>
-                <a href="#" class="text-gray-600 hover:text-yellow-500 transition-colors">
+                <a href="#" class="text-gray-600 hover:text-primea-yellow transition-colors">
                   Conditions d'utilisation
                 </a>
               </li>
               <li>
-                <a href="#" class="text-gray-600 hover:text-yellow-500 transition-colors">
+                <a href="#" class="text-gray-600 hover:text-primea-yellow transition-colors">
                   Politique de confidentialité
                 </a>
               </li>
               <li>
-                <a href="#" class="text-gray-600 hover:text-yellow-500 transition-colors">
+                <a href="#" class="text-gray-600 hover:text-primea-yellow transition-colors">
                   Contact
                 </a>
               </li>
@@ -107,7 +107,7 @@
 
           <!-- Social Networks -->
           <div>
-            <h3 class="font-bold text-blue-950 text-lg mb-4">Suivez-nous</h3>
+            <h3 class="font-bold text-primea-blue text-lg mb-4">Suivez-nous</h3>
             <div class="flex space-x-4">
               <a href="#" class="text-gray-600 hover:text-green-600 transition-colors">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
