@@ -448,8 +448,7 @@
                   v-if="!ussdPushActive"
                   type="submit"
                   :disabled="loading || !isFormValid"
-                  class="w-full bg-primea-blue text-white py-4 px-6 rounded-primea-lg text-lg font-bold hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 shadow-primea-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                  style="background-color: #272d63;"
+                  class="w-full bg-primea-blue text-white py-4 px-6 rounded-primea-lg text-lg font-bold transition-all duration-200 shadow-primea-lg transform disabled:cursor-not-allowed disabled:transform-none checkout-submit-btn"
                 >
                   <span v-if="loading" class="flex items-center justify-center">
                     <svg class="w-6 h-6 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -709,7 +708,7 @@
 
             <!-- Submit Button -->
             <button v-if="!ussdPushActive" type="submit" :disabled="loading || !isFormValid"
-              class="w-full bg-primea-blue text-white py-4 px-6 rounded-xl text-base font-bold hover:bg-primea-yellow hover:text-primea-blue transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+              class="w-full bg-primea-blue text-white py-4 px-6 rounded-xl text-base font-bold transition-all shadow-lg disabled:cursor-not-allowed checkout-submit-btn">
               <span v-if="loading" class="flex items-center justify-center">
                 <svg class="w-5 h-5 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
                   <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25"/>
@@ -1808,6 +1807,22 @@ export default {
 
 .shadow-primea-lg {
   box-shadow: 0 8px 30px rgba(39, 45, 99, 0.15);
+}
+
+/* Bouton paiement — contraste garanti */
+.checkout-submit-btn {
+  background-color: #272d63 !important;
+  color: #fff !important;
+}
+.checkout-submit-btn:hover:not(:disabled) {
+  background-color: #fab511 !important;
+  color: #272d63 !important;
+  transform: scale(1.05);
+}
+.checkout-submit-btn:disabled {
+  background-color: #272d63 !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  opacity: 0.7;
 }
 
 /* Container */
