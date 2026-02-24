@@ -199,12 +199,26 @@
 
                 <!-- Total Desktop -->
                 <div v-if="orderForm.quantity && orderForm.ticketTypeId" class="bg-primea-blue/5 rounded-primea-xl p-6">
-                  <div class="flex justify-between items-center">
-                    <span class="text-lg font-semibold text-primea-blue">{{ isFreeOrder ? 'Total :' : 'Total à payer :' }}</span>
-                    <span class="text-3xl font-bold" :class="isFreeOrder ? 'text-green-600' : 'text-primea-blue'">
-                      {{ isFreeOrder ? 'Gratuit' : formatPrice(totalAmount) + ' FCFA' }}
-                    </span>
-                  </div>
+                  <template v-if="isFreeOrder">
+                    <div class="flex justify-between items-center">
+                      <span class="text-lg font-semibold text-primea-blue">Total :</span>
+                      <span class="text-3xl font-bold text-green-600">Gratuit</span>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <div class="flex justify-between items-center text-sm text-gray-600 mb-1">
+                      <span>Sous-total</span>
+                      <span>{{ formatPrice(totalAmount) }} FCFA</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm text-gray-500 mb-2">
+                      <span>Frais de service</span>
+                      <span>{{ formatPrice(Math.round(feesAmount)) }} FCFA</span>
+                    </div>
+                    <div class="border-t border-primea-blue/10 pt-2 flex justify-between items-center">
+                      <span class="text-lg font-semibold text-primea-blue">Total à payer :</span>
+                      <span class="text-3xl font-bold text-primea-blue">{{ formatPrice(Math.round(totalWithFees)) }} FCFA</span>
+                    </div>
+                  </template>
                 </div>
 
                 <!-- Moyens de paiement Desktop -->
@@ -357,7 +371,7 @@
                       </div>
                       
                       <p class="text-blue-600 text-sm mb-4">
-                        Montant: <span class="font-semibold">{{ formatPrice(totalAmount) }} FCFA</span>
+                        Montant: <span class="font-semibold">{{ formatPrice(Math.round(totalWithFees)) }} FCFA</span>
                       </p>
                       
                       <!-- Boutons d'action -->
@@ -589,12 +603,26 @@
 
             <!-- Total -->
             <div v-if="orderForm.quantity && orderForm.ticketTypeId" class="bg-blue-50 rounded-xl p-4">
-              <div class="flex justify-between items-center">
-                <span class="font-semibold text-primea-blue">Total:</span>
-                <span class="text-2xl font-bold" :class="isFreeOrder ? 'text-green-600' : 'text-primea-blue'">
-                  {{ isFreeOrder ? 'Gratuit' : formatPrice(totalAmount) + ' XAF' }}
-                </span>
-              </div>
+              <template v-if="isFreeOrder">
+                <div class="flex justify-between items-center">
+                  <span class="font-semibold text-primea-blue">Total:</span>
+                  <span class="text-2xl font-bold text-green-600">Gratuit</span>
+                </div>
+              </template>
+              <template v-else>
+                <div class="flex justify-between items-center text-sm text-gray-600 mb-1">
+                  <span>Sous-total</span>
+                  <span>{{ formatPrice(totalAmount) }} XAF</span>
+                </div>
+                <div class="flex justify-between items-center text-sm text-gray-500 mb-2">
+                  <span>Frais de service</span>
+                  <span>{{ formatPrice(Math.round(feesAmount)) }} XAF</span>
+                </div>
+                <div class="border-t border-primea-blue/10 pt-2 flex justify-between items-center">
+                  <span class="font-semibold text-primea-blue">Total:</span>
+                  <span class="text-2xl font-bold text-primea-blue">{{ formatPrice(Math.round(totalWithFees)) }} XAF</span>
+                </div>
+              </template>
             </div>
 
             <!-- Payment Methods -->
@@ -993,6 +1021,16 @@ export default {
       if (!selectedTicketType) return 0
 
       return selectedTicketType.price * orderForm.value.quantity
+    })
+
+    // Frais de service (10%, même calcul que le backend)
+    const feesAmount = computed(() => {
+      if (totalAmount.value === 0) return 0
+      return totalAmount.value * 0.10
+    })
+
+    const totalWithFees = computed(() => {
+      return totalAmount.value + feesAmount.value
     })
 
     const isFreeOrder = computed(() => {
@@ -1711,6 +1749,8 @@ export default {
       countdown,
       orderForm,
       totalAmount,
+      feesAmount,
+      totalWithFees,
       isFreeOrder,
       isFormValid,
       formatEventDate,

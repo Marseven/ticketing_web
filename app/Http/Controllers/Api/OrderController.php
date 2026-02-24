@@ -231,14 +231,12 @@ class OrderController extends Controller
             $unitPrice = $ticketType->price ?? 0;
             $baseAmount = $unitPrice * $validated['quantity']; // Prix base total
 
-            // Frais de service (5% du prix de base, ajoutés au total)
+            // Frais de service (10% du prix de base, ajoutés au total)
             $feesAmount = $this->calculateFees($baseAmount);
-
-            // TVA (18% sur les frais uniquement - payée par la plateforme)
-            $taxAmount = $this->calculateTaxes($feesAmount);
+            $taxAmount = 0;
 
             // Montant total payé par le client
-            $totalAmount = $baseAmount + $feesAmount + $taxAmount;
+            $totalAmount = $baseAmount + $feesAmount;
 
             // Montant net reversé à l'organisateur (100% du prix de base)
             $subtotalAmount = $baseAmount;
@@ -336,18 +334,8 @@ class OrderController extends Controller
      */
     private function calculateFees(float $subtotal): float
     {
-        // Frais de service de 5%
-        return $subtotal * 0.05;
-    }
-
-    /**
-     * Calculate taxes for the order
-     * TVA appliquée uniquement sur les frais de service
-     */
-    private function calculateTaxes(float $feesAmount): float
-    {
-        // TVA de 18% au Gabon (appliquée sur les frais)
-        return $feesAmount * 0.18;
+        // Frais de service de 10%
+        return $subtotal * 0.10;
     }
 
     /**

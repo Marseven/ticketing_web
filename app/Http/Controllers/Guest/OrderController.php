@@ -182,25 +182,23 @@ class OrderController extends Controller
             // Les informations seront stockées directement dans la table orders
 
             // ============================================
-            // MODÈLE DE CALCUL DES REVENUS - NE PAS MODIFIER
+            // MODÈLE DE CALCUL DES REVENUS
             // ============================================
             // L'organisateur reçoit 100% du prix qu'il définit
-            // Les frais (5%) et la TVA (18%) sont AJOUTÉS au total payé par le client
+            // Les frais de service (10%) sont AJOUTÉS au total payé par le client
             //
             // Exemple: Billet à 1000 XAF, quantité 4
             // - baseAmount (organisateur reçoit) = 4 × 1000 = 4000 XAF
-            // - feesAmount (frais plateforme) = 5% de 4000 = 200 XAF
-            // - taxAmount (TVA sur frais) = 18% de 200 = 36 XAF
-            // - totalAmount (client paie) = 4000 + 200 + 36 = 4236 XAF
-            // - subtotalAmount (organisateur reçoit) = 4000 XAF ✓
+            // - feesAmount (frais plateforme) = 10% de 4000 = 400 XAF
+            // - totalAmount (client paie) = 4000 + 400 = 4400 XAF
             // ============================================
 
             $unitPrice = $ticketType->price ?? 0;
             $baseAmount = $unitPrice * $validated['quantity'];
 
             $feesAmount = $this->calculateFees($baseAmount);
-            $taxAmount = $this->calculateTaxes($feesAmount);
-            $totalAmount = $baseAmount + $feesAmount + $taxAmount;
+            $taxAmount = 0;
+            $totalAmount = $baseAmount + $feesAmount;
 
             // IMPORTANT: subtotal_amount = 100% du prix de base pour l'organisateur
             $subtotalAmount = $baseAmount;
@@ -407,18 +405,8 @@ class OrderController extends Controller
      */
     private function calculateFees(float $subtotal): float
     {
-        // Frais de service de 5%
-        return $subtotal * 0.05;
-    }
-
-    /**
-     * Calculate taxes for the order
-     * TVA appliquée uniquement sur les frais de service
-     */
-    private function calculateTaxes(float $feesAmount): float
-    {
-        // TVA de 18% au Gabon (appliquée sur les frais)
-        return $feesAmount * 0.18;
+        // Frais de service de 10%
+        return $subtotal * 0.10;
     }
 
     /**
