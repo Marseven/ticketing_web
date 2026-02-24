@@ -808,6 +808,28 @@ export default {
     const currentPayment = ref(null)
     const createdOrder = ref(null) // Stocker la commande créée pour éviter les duplicatas
 
+    // Traduction des erreurs de paiement en messages compréhensibles
+    const mapPaymentError = (rawMessage, errorCode) => {
+      const msg = (rawMessage || '').toLowerCase()
+
+      if (msg.includes('not accepted') || errorCode === 406)
+        return 'Le paiement a été refusé. Vérifiez que votre numéro est correct et que votre solde est suffisant.'
+      if (msg.includes('timeout') || msg.includes('timed out'))
+        return 'Le délai de connexion avec l\'opérateur a expiré. Veuillez réessayer.'
+      if (msg.includes('insufficient') || msg.includes('solde'))
+        return 'Solde insuffisant sur votre compte mobile.'
+      if (msg.includes('invalid') && msg.includes('phone'))
+        return 'Le numéro de téléphone saisi est invalide.'
+      if (msg.includes('subscriber') || msg.includes('abonné'))
+        return 'Ce numéro n\'est pas reconnu par l\'opérateur. Vérifiez le numéro.'
+      if (msg.includes('cancelled') || msg.includes('annul'))
+        return 'La transaction a été annulée.'
+      if (errorCode === 500 || msg.includes('server') || msg.includes('internal'))
+        return 'Le service de paiement est temporairement indisponible. Réessayez dans quelques instants.'
+
+      return rawMessage || 'Une erreur est survenue lors du paiement. Veuillez réessayer.'
+    }
+
     // Formulaire d'achat
     const orderForm = ref({
       quantity: 1,
@@ -1392,10 +1414,9 @@ export default {
               gateway: orderForm.value.paymentMethod
             })
 
-            // Lever une erreur avec un message détaillé
-            const errorMessage = pushResult.details
-              ? `${pushResult.message}\nDétails: ${pushResult.details}`
-              : pushResult.message || 'Erreur lors de l\'envoi du push USSD'
+            // Construire un message utilisateur compréhensible
+            const rawMessage = pushResult.message || ''
+            const errorMessage = mapPaymentError(rawMessage, pushResult.error_code)
 
             throw new Error(errorMessage)
           }

@@ -871,8 +871,7 @@ class PaymentController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => $result['message'] ?? 'Erreur lors de l\'envoi du push USSD',
-                'details' => $result['details'] ?? null,
+                'message' => $this->translatePaymentError($result['message'] ?? '', $result['status'] ?? null),
                 'error_code' => $result['status'] ?? null
             ], 400);
 
@@ -1360,8 +1359,7 @@ class PaymentController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => $result['message'] ?? 'Erreur lors de l\'envoi du push USSD',
-                'details' => $result['details'] ?? null,
+                'message' => $this->translatePaymentError($result['message'] ?? '', $result['status'] ?? null),
                 'error_code' => $result['status'] ?? null
             ], 400);
 
@@ -1398,5 +1396,37 @@ class PaymentController extends Controller
             'cancelled' => 'Annulé',
             default => 'Inconnu',
         };
+    }
+
+    /**
+     * Translate raw payment gateway errors to user-friendly French messages.
+     */
+    private function translatePaymentError(string $rawMessage, ?int $statusCode = null): string
+    {
+        $msg = strtolower($rawMessage);
+
+        if (str_contains($msg, 'not accepted')) {
+            return 'Le paiement a été refusé. Vérifiez que votre numéro est correct et que votre solde est suffisant.';
+        }
+        if (str_contains($msg, 'timeout') || str_contains($msg, 'timed out')) {
+            return 'Le délai de connexion avec l\'opérateur a expiré. Veuillez réessayer.';
+        }
+        if (str_contains($msg, 'insufficient') || str_contains($msg, 'solde')) {
+            return 'Solde insuffisant sur votre compte mobile.';
+        }
+        if (str_contains($msg, 'invalid') && str_contains($msg, 'phone')) {
+            return 'Le numéro de téléphone saisi est invalide.';
+        }
+        if (str_contains($msg, 'subscriber') || str_contains($msg, 'abonné')) {
+            return 'Ce numéro n\'est pas reconnu par l\'opérateur. Vérifiez le numéro.';
+        }
+        if (str_contains($msg, 'cancel')) {
+            return 'La transaction a été annulée.';
+        }
+        if ($statusCode === 500 || str_contains($msg, 'server') || str_contains($msg, 'internal')) {
+            return 'Le service de paiement est temporairement indisponible. Réessayez dans quelques instants.';
+        }
+
+        return $rawMessage ?: 'Une erreur est survenue lors du paiement. Veuillez réessayer.';
     }
 }
