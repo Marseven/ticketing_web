@@ -1406,7 +1406,7 @@ class PaymentController extends Controller
         $msg = strtolower($rawMessage);
 
         if (str_contains($msg, 'not accepted')) {
-            return 'Le paiement a été refusé. Vérifiez que votre numéro est correct et que votre solde est suffisant.';
+            return 'Une erreur s\'est produite, veuillez réessayer.';
         }
         if (str_contains($msg, 'timeout') || str_contains($msg, 'timed out')) {
             return 'Le délai de connexion avec l\'opérateur a expiré. Veuillez réessayer.';

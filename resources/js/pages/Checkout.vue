@@ -813,7 +813,7 @@ export default {
       const msg = (rawMessage || '').toLowerCase()
 
       if (msg.includes('not accepted') || errorCode === 406)
-        return 'Le paiement a été refusé. Vérifiez que votre numéro est correct et que votre solde est suffisant.'
+        return 'Une erreur s\'est produite, veuillez réessayer.'
       if (msg.includes('timeout') || msg.includes('timed out'))
         return 'Le délai de connexion avec l\'opérateur a expiré. Veuillez réessayer.'
       if (msg.includes('insufficient') || msg.includes('solde'))
