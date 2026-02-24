@@ -357,6 +357,11 @@ export const organizerService = {
     })
   },
 
+  // Supprimer un événement (brouillon sans ventes uniquement)
+  deleteEvent(id) {
+    return api.delete(`/organizer/events/${id}`)
+  },
+
   // Récupérer les détails d'un événement
   getEvent(id) {
     return api.get(`/organizer/events/${id}`)

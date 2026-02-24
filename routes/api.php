@@ -163,6 +163,7 @@ Route::prefix('v1')->group(function () {
         Route::put('events/{id}', [App\Http\Controllers\Api\OrganizerController::class, 'updateEvent']);
         Route::post('events/{id}', [App\Http\Controllers\Api\OrganizerController::class, 'updateEvent']); // Pour FormData avec method spoofing
         Route::get('events/{id}', [App\Http\Controllers\Api\OrganizerController::class, 'getEvent']);
+        Route::delete('events/{id}', [App\Http\Controllers\Api\OrganizerController::class, 'deleteEvent']);
         Route::get('events/{id}/stats', [App\Http\Controllers\Api\OrganizerController::class, 'getEventStats']);
         Route::get('events/{eventId}/sales', [App\Http\Controllers\Api\OrganizerController::class, 'eventSales']);
         // Récurrence et prix variables

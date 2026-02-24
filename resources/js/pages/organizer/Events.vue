@@ -122,9 +122,9 @@
               <div class="absolute top-4 left-4">
                 <span 
                   class="px-3 py-1 rounded-full text-xs font-semibold"
-                  :class="getStatusClass(event.status)"
+                  :class="getStatusClass(event)"
                 >
-                  {{ getStatusText(event.status) }}
+                  {{ getStatusText(event) }}
                 </span>
               </div>
               <div class="absolute top-4 right-4">
@@ -161,17 +161,24 @@
               </div>
               
               <div class="flex space-x-2">
-                <router-link 
+                <router-link
                   :to="{ name: 'organizer-event-detail', params: { slug: event.slug } }"
                   class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-center text-sm font-medium hover:bg-blue-700 transition-colors"
                 >
                   Voir détails
                 </router-link>
-                <button 
+                <button
                   @click="duplicateEvent(event)"
                   class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors"
                 >
                   Dupliquer
+                </button>
+                <button
+                  v-if="!(event.tickets_sold > 0)"
+                  @click="deleteEvent(event)"
+                  class="bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors"
+                >
+                  Supprimer
                 </button>
               </div>
             </div>
@@ -246,6 +253,7 @@
                     Modifier
                   </button>
                   <button
+                    v-if="!(event.tickets_sold > 0)"
                     @click="deleteEvent(event)"
                     class="text-red-600 hover:text-red-900"
                   >
@@ -310,6 +318,7 @@
                 Modifier
               </button>
               <button
+                v-if="!(event.tickets_sold > 0)"
                 @click="deleteEvent(event)"
                 class="text-xs font-medium text-red-600 py-2 px-3 bg-red-50 rounded-lg"
               >
@@ -614,20 +623,20 @@ export default {
 
       if (result.isConfirmed) {
         try {
-          // TODO: Implémenter la suppression via API
-          // await organizerService.deleteEvent(event.id)
+          await organizerService.deleteEvent(event.id)
           await loadEvents()
-          
+
           Swal.fire(
             'Supprimé !',
             'L\'événement a été supprimé.',
             'success'
           )
         } catch (error) {
+          const msg = error.response?.data?.message || 'Impossible de supprimer l\'événement'
           Swal.fire({
             icon: 'error',
             title: 'Erreur',
-            text: 'Impossible de supprimer l\'événement'
+            text: msg
           })
         }
       }

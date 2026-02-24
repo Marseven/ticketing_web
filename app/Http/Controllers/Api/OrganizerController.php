@@ -1915,6 +1915,65 @@ class OrganizerController extends Controller
     }
 
     /**
+     * Delete a draft event with no sales
+     */
+    public function deleteEvent(Request $request, $id): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user->is_organizer) {
+            return response()->json([
+                'message' => 'Accès refusé.',
+            ], 403);
+        }
+
+        $organizerIds = $user->organizers->pluck('id');
+
+        $event = Event::whereIn('organizer_id', $organizerIds)->find($id);
+
+        if (!$event) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Événement introuvable'
+            ], 404);
+        }
+
+        // Check no tickets have been sold
+        $soldTickets = $event->tickets()->whereIn('status', ['issued', 'used'])->count();
+        if ($soldTickets > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => "Impossible de supprimer cet événement : {$soldTickets} ticket(s) vendu(s). Annulez les tickets avant de supprimer."
+            ], 400);
+        }
+
+        try {
+            DB::transaction(function () use ($event) {
+                $event->recurrenceRule()->delete();
+                $event->tickets()->delete();
+                $event->ticketTypes()->delete();
+                $event->schedules()->delete();
+                $event->delete();
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Événement supprimé avec succès'
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Erreur suppression événement', [
+                'event_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la suppression de l\'événement'
+            ], 500);
+        }
+    }
+
+    /**
      * Get event stats (for detail page)
      */
     public function getEventStats(Request $request, $eventId): JsonResponse
