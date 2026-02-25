@@ -649,6 +649,7 @@ class TicketController extends Controller
                     $imageData = @file_get_contents($ticket->event->image_url);
                     if ($imageData && strlen($imageData) > 1000) {
                         $eventImageBase64 = 'data:image/jpeg;base64,' . base64_encode($imageData);
+                        $imageLoaded = true;
 
                         Log::info('✅ Image événement téléchargée depuis URL', [
                             'url' => $ticket->event->image_url,
@@ -663,12 +664,31 @@ class TicketController extends Controller
                 }
             }
 
+            // Calculer les dimensions de l'image pour maintenir les proportions
+            $imageWidth = 0;
+            $imageHeight = 0;
+            if ($imageLoaded) {
+                if (isset($eventImagePath) && file_exists($eventImagePath)) {
+                    $imageSize = @getimagesize($eventImagePath);
+                } elseif (isset($imageData)) {
+                    $imageSize = @getimagesizefromstring($imageData);
+                } else {
+                    $imageSize = false;
+                }
+                if ($imageSize) {
+                    $imageWidth = $imageSize[0];
+                    $imageHeight = $imageSize[1];
+                }
+            }
+
             // Préparer les données pour le PDF
             $data = [
                 'ticket' => $ticket,
                 'qrCodeBase64' => $qrCodeBase64,
                 'logoBase64' => $logoBase64,
                 'eventImageBase64' => $eventImageBase64,
+                'imageWidth' => $imageWidth,
+                'imageHeight' => $imageHeight,
                 'event' => $ticket->event,
                 'ticketType' => $ticket->ticketType,
                 'buyer' => $ticket->buyer,
@@ -683,9 +703,9 @@ class TicketController extends Controller
                 'has_logo' => !empty($logoBase64)
             ]);
 
-            // Générer le PDF
+            // Générer le PDF (format A5 pour impression)
             $pdf = Pdf::loadView('pdf.ticket', $data)
-                      ->setPaper('a4', 'portrait');
+                      ->setPaper('a5', 'portrait');
 
             Log::info('✅ PDF généré avec succès', ['code' => $code]);
 

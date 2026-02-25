@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ticket - {{ $ticket->code }}</title>
     <style>
+        @font-face {
+            font-family: 'Inter';
+            font-weight: normal;
+            font-style: normal;
+            src: url('{{ storage_path("fonts/Inter-Regular.ttf") }}') format('truetype');
+        }
+        @font-face {
+            font-family: 'Inter';
+            font-weight: bold;
+            font-style: normal;
+            src: url('{{ storage_path("fonts/Inter-Bold.ttf") }}') format('truetype');
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,39 +25,38 @@
         }
 
         body {
-            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
             background: #f5f5f5;
-            padding: 10px;
+            padding: 8px;
         }
 
         .ticket {
             background: white;
-            max-width: 700px;
+            max-width: 100%;
             margin: 0 auto;
-            border-radius: 8px;
+            border-radius: 6px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
         }
 
         /* ===== SECTION IMAGE EVENEMENT ===== */
         .event-image-section {
             width: 100%;
-            height: 280px;
+            height: 180px;
             overflow: hidden;
             background: linear-gradient(135deg, #272d63 0%, #4a5098 100%);
             position: relative;
+            text-align: center;
         }
 
         .event-image-section img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            display: block;
         }
 
         /* Header alternatif sans image */
         .event-header-no-image {
             width: 100%;
-            height: 200px;
+            height: 140px;
             background: linear-gradient(135deg, #272d63 0%, #4a5098 100%);
             display: flex;
             flex-direction: column;
@@ -52,38 +64,38 @@
             align-items: center;
             color: white;
             text-align: center;
-            padding: 20px;
+            padding: 15px;
         }
 
         .event-header-no-image .logo {
-            width: 80px;
+            width: 60px;
             height: auto;
-            margin-bottom: 15px;
-        }
-
-        .event-header-no-image h1 {
-            font-size: 28px;
-            font-weight: bold;
             margin-bottom: 10px;
         }
 
+        .event-header-no-image h1 {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
         .event-header-no-image p {
-            font-size: 14px;
+            font-size: 12px;
             opacity: 0.9;
         }
 
         /* ===== SECTION INFORMATIONS ===== */
         .ticket-info-section {
-            padding: 25px 30px;
+            padding: 18px 20px;
             position: relative;
         }
 
         /* Code du ticket en haut à droite */
         .ticket-number {
             position: absolute;
-            top: 20px;
-            right: 30px;
-            font-size: 14px;
+            top: 15px;
+            right: 20px;
+            font-size: 11px;
             font-weight: bold;
             color: #dc2626;
             font-family: 'Courier New', monospace;
@@ -99,7 +111,7 @@
             display: table-cell;
             width: 55%;
             vertical-align: top;
-            padding-right: 20px;
+            padding-right: 15px;
         }
 
         .info-right {
@@ -111,24 +123,24 @@
 
         /* Titre événement */
         .event-title {
-            font-size: 22px;
+            font-size: 17px;
             font-weight: bold;
             color: #272d63;
             text-transform: uppercase;
             line-height: 1.2;
-            margin-bottom: 15px;
-            padding-right: 80px; /* Espace pour le numéro de ticket */
+            margin-bottom: 12px;
+            padding-right: 60px;
         }
 
         /* Détails événement */
         .event-details {
-            margin-bottom: 20px;
+            margin-bottom: 14px;
         }
 
         .event-details p {
-            font-size: 14px;
+            font-size: 11px;
             color: #374151;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             line-height: 1.4;
         }
 
@@ -143,22 +155,22 @@
 
         /* Prix */
         .ticket-price {
-            font-size: 36px;
+            font-size: 28px;
             font-weight: bold;
             color: #dc2626;
-            margin: 20px 0;
+            margin: 14px 0;
             letter-spacing: -1px;
         }
 
         /* Section avertissement */
         .warning-section {
-            margin-top: 20px;
-            padding-top: 15px;
+            margin-top: 14px;
+            padding-top: 10px;
             border-top: 1px solid #e5e7eb;
         }
 
         .warning-title {
-            font-size: 11px;
+            font-size: 9px;
             font-weight: bold;
             color: #dc2626;
             margin-bottom: 2px;
@@ -166,7 +178,7 @@
         }
 
         .warning-text {
-            font-size: 10px;
+            font-size: 8px;
             color: #dc2626;
             line-height: 1.3;
             letter-spacing: 0.3px;
@@ -174,16 +186,16 @@
 
         /* Logo Primea */
         .primea-logo {
-            margin-top: 20px;
+            margin-top: 14px;
         }
 
         .primea-logo img {
-            height: 35px;
+            height: 28px;
             width: auto;
         }
 
         .primea-logo-text {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
             color: #272d63;
         }
@@ -193,25 +205,25 @@
         }
 
         .primea-tagline {
-            font-size: 8px;
+            font-size: 7px;
             color: #6b7280;
             margin-top: 2px;
         }
 
         /* ===== SECTION QR CODE ===== */
         .qr-code-container {
-            padding: 10px;
+            padding: 6px;
         }
 
         .qr-code-container img {
-            width: 200px;
-            height: 200px;
+            width: 150px;
+            height: 150px;
             border: none;
         }
 
         .qr-unique-text {
-            margin-top: 12px;
-            font-size: 12px;
+            margin-top: 8px;
+            font-size: 10px;
         }
 
         .qr-unique-text .red {
@@ -221,22 +233,22 @@
 
         .qr-unique-text .gray {
             color: #6b7280;
-            font-size: 11px;
+            font-size: 9px;
         }
 
         /* ===== INFORMATIONS TITULAIRE ===== */
         .buyer-section {
             background: #f8fafc;
-            padding: 15px 30px;
+            padding: 12px 20px;
             border-top: 2px dashed #e5e7eb;
         }
 
         .buyer-section-title {
-            font-size: 11px;
+            font-size: 9px;
             font-weight: 600;
             color: #272d63;
             text-transform: uppercase;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .buyer-info-row {
@@ -247,7 +259,7 @@
         .buyer-info-item {
             display: table-cell;
             width: 50%;
-            font-size: 12px;
+            font-size: 10px;
         }
 
         .buyer-info-item .label {
@@ -263,8 +275,8 @@
         .ticket-footer {
             background: #272d63;
             color: white;
-            padding: 12px 30px;
-            font-size: 10px;
+            padding: 10px 20px;
+            font-size: 8px;
             text-align: center;
         }
 
@@ -275,7 +287,7 @@
 
         .ticket-code-footer {
             font-family: 'Courier New', monospace;
-            font-size: 11px;
+            font-size: 9px;
             letter-spacing: 1px;
         }
     </style>
@@ -285,7 +297,26 @@
         <!-- Section Image Événement -->
         @if($eventImageBase64)
             <div class="event-image-section">
-                <img src="{{ $eventImageBase64 }}" alt="{{ $event->title }}">
+                @php
+                    // Calculer les dimensions pour maintenir les proportions (comportement "cover")
+                    $containerW = 560;
+                    $containerH = 180;
+                    $imgW = $imageWidth ?? 0;
+                    $imgH = $imageHeight ?? 0;
+
+                    if ($imgW > 0 && $imgH > 0) {
+                        $scaleX = $containerW / $imgW;
+                        $scaleY = $containerH / $imgH;
+                        $scale = max($scaleX, $scaleY);
+                        $renderW = round($imgW * $scale);
+                        $renderH = round($imgH * $scale);
+                    } else {
+                        $renderW = $containerW;
+                        $renderH = $containerH;
+                    }
+                @endphp
+                <img src="{{ $eventImageBase64 }}" alt="{{ $event->title }}"
+                     style="width: {{ $renderW }}px; height: {{ $renderH }}px;">
             </div>
         @else
             <div class="event-header-no-image">
