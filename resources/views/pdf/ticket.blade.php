@@ -22,12 +22,17 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
         }
 
         body {
             font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
             background: #f5f5f5;
             padding: 8px;
+        }
+
+        p, span, h1, h2, h3, div {
+            font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
         }
 
         .ticket {
@@ -146,11 +151,13 @@
 
         .event-details .label {
             color: #6b7280;
+            font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
         }
 
         .event-details .value {
             font-weight: 600;
             color: #1f2937;
+            font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
         }
 
         /* Prix */
@@ -160,6 +167,7 @@
             color: #dc2626;
             margin: 14px 0;
             letter-spacing: -1px;
+            font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
         }
 
         /* Section avertissement */
@@ -175,6 +183,7 @@
             color: #dc2626;
             margin-bottom: 2px;
             letter-spacing: 0.5px;
+            font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
         }
 
         .warning-text {
@@ -182,6 +191,7 @@
             color: #dc2626;
             line-height: 1.3;
             letter-spacing: 0.3px;
+            font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
         }
 
         /* Logo Primea */
@@ -229,11 +239,13 @@
         .qr-unique-text .red {
             color: #dc2626;
             font-weight: 600;
+            font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
         }
 
         .qr-unique-text .gray {
             color: #6b7280;
             font-size: 9px;
+            font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
         }
 
         /* ===== INFORMATIONS TITULAIRE ===== */
@@ -249,6 +261,7 @@
             color: #272d63;
             text-transform: uppercase;
             margin-bottom: 6px;
+            font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
         }
 
         .buyer-info-row {
@@ -264,11 +277,13 @@
 
         .buyer-info-item .label {
             color: #6b7280;
+            font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
         }
 
         .buyer-info-item .value {
             font-weight: 600;
             color: #1f2937;
+            font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
         }
 
         /* ===== FOOTER ===== */
@@ -278,11 +293,13 @@
             padding: 10px 20px;
             font-size: 8px;
             text-align: center;
+            font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
         }
 
         .ticket-footer p {
             margin: 2px 0;
             opacity: 0.9;
+            font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
         }
 
         .ticket-code-footer {
