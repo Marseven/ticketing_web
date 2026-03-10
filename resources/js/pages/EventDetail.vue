@@ -113,9 +113,11 @@
 
                 <div v-if="event.ticket_types && event.ticket_types.length > 0" class="space-y-2">
                   <div
-                    v-for="ticketType in event.ticket_types"
+                    v-for="(ticketType, index) in event.ticket_types"
                     :key="ticketType.id"
-                    class="bg-white p-4 rounded-xl border-2 border-gray-200 hover:border-primea-blue transition-all duration-200"
+                    class="bg-white p-4 rounded-xl border-2 border-gray-200 hover:border-primea-blue transition-all duration-200 cursor-pointer"
+                    :style="{ borderLeftWidth: '4px', borderLeftColor: ticketColors[index % ticketColors.length] }"
+                    @click="goToBookingWithType(ticketType.id)"
                   >
                     <div class="flex items-start justify-between gap-4">
                       <div class="flex-1 min-w-0">
@@ -135,6 +137,7 @@
                           <span v-else class="text-green-600">GRATUIT</span>
                         </div>
                         <div class="text-xs text-gray-500">XAF</div>
+                        <div class="text-xs font-semibold text-primea-blue mt-1">Réserver →</div>
                       </div>
                     </div>
                   </div>
@@ -343,6 +346,9 @@ export default {
     const router = useRouter()
     const eventsStore = useEventsStore()
 
+    // Couleurs pour les catégories de tickets
+    const ticketColors = ['#272d63', '#fab511', '#059669', '#dc2626', '#7c3aed', '#ea580c']
+
     // State
     const event = ref(null)
     const similarEvents = ref([])
@@ -466,6 +472,10 @@ export default {
       router.push(`/checkout/${route.params.slug}`)
     }
 
+    const goToBookingWithType = (ticketTypeId) => {
+      router.push(`/checkout/${route.params.slug}?ticketType=${ticketTypeId}`)
+    }
+
     const loadEvent = async () => {
       const eventSlug = route.params.slug
       if (!eventSlug) return
@@ -548,7 +558,9 @@ export default {
       formatFullDate,
       formatTime,
       formatPrice,
+      ticketColors,
       goToBooking,
+      goToBookingWithType,
       loadEvent,
       getQuantityDisplayCount,
       getQuantityDisplay,

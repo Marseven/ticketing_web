@@ -281,7 +281,7 @@
               <div class="flex items-center justify-between">
                 <div>
                   <p class="font-medium text-gray-900">Mot de passe</p>
-                  <p class="text-sm text-gray-500">Dernière modification il y a 3 mois</p>
+                  <p class="text-sm text-gray-500">{{ passwordChangedLabel }}</p>
                 </div>
                 <button 
                   @click="showPasswordModal = true"
@@ -585,6 +585,8 @@ export default {
       confirmation: ''
     })
 
+    const passwordChangedAt = ref(null)
+
     const user = computed(() => authStore.user)
     const userInitial = computed(() => user.value?.name?.charAt(0).toUpperCase() || 'U')
     
@@ -595,6 +597,26 @@ export default {
     const hasCountryField = computed(() => true)
     const hasBirthdateField = computed(() => true)
     const hasLanguageField = computed(() => true)
+
+    const passwordChangedLabel = computed(() => {
+      if (!passwordChangedAt.value) return 'Jamais modifié'
+      const date = new Date(passwordChangedAt.value)
+      const now = new Date()
+      const diffMs = now - date
+      const diffMinutes = Math.floor(diffMs / (1000 * 60))
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+      const diffMonths = Math.floor(diffDays / 30)
+
+      if (diffMinutes < 5) return 'Modifié à l\'instant'
+      if (diffMinutes < 60) return `Modifié il y a ${diffMinutes} minute${diffMinutes > 1 ? 's' : ''}`
+      if (diffHours < 24) return `Modifié il y a ${diffHours} heure${diffHours > 1 ? 's' : ''}`
+      if (diffDays === 1) return 'Modifié hier'
+      if (diffDays < 30) return `Modifié il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`
+      if (diffMonths < 12) return `Modifié il y a ${diffMonths} mois`
+      const years = Math.floor(diffMonths / 12)
+      return `Modifié il y a ${years} an${years > 1 ? 's' : ''}`
+    })
 
     const profileForm = ref({
       name: '',
@@ -637,6 +659,9 @@ export default {
           language: profile.language || 'fr'
         }
         
+        // Stocker la date de changement de mot de passe
+        passwordChangedAt.value = profile.password_changed_at || null
+
         // Vérifier le statut de vérification d'email
         emailVerified.value = !!profile.email_verified_at
       } catch (err) {
@@ -841,6 +866,11 @@ export default {
         })
         
         successMessage.value = response.data.message || 'Mot de passe mis à jour avec succès'
+        if (response.data.password_changed_at) {
+          passwordChangedAt.value = response.data.password_changed_at
+        } else {
+          passwordChangedAt.value = new Date().toISOString()
+        }
         showPasswordModal.value = false
         passwordForm.value = {
           currentPassword: '',
@@ -1017,6 +1047,7 @@ export default {
       emailVerified,
       resendingEmail,
       resendEmailVerification,
+      passwordChangedLabel,
       updateProfile,
       updatePassword,
       updatePreferences,

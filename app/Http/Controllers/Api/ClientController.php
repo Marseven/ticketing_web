@@ -49,6 +49,7 @@ class ClientController extends Controller
                 'email_notifications' => $metadata['email_notifications'] ?? true,
                 'sms_notifications' => $metadata['sms_notifications'] ?? true,
                 'email_verified_at' => $user->email_verified_at,
+                'password_changed_at' => $user->password_changed_at,
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at->format('d/m/Y H:i:s'),
             ],
@@ -280,11 +281,13 @@ class ClientController extends Controller
 
         // Mettre à jour le mot de passe
         $user->update([
-            'password' => Hash::make($request->new_password)
+            'password' => Hash::make($request->new_password),
+            'password_changed_at' => now(),
         ]);
 
         return response()->json([
-            'message' => 'Mot de passe mis à jour avec succès'
+            'message' => 'Mot de passe mis à jour avec succès',
+            'password_changed_at' => $user->password_changed_at,
         ]);
     }
 

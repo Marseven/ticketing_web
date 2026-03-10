@@ -90,12 +90,23 @@
                     <p class="font-semibold text-primea-blue">{{ ticket.ticket_type?.name || 'Ticket' }}</p>
                     <p class="text-sm text-gray-600">Code: {{ ticket.code }}</p>
                   </div>
-                  <router-link
-                    :to="`/ticket/${ticket.code}/download`"
-                    class="bg-primea-blue text-white px-4 py-2 rounded-primea text-sm hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200"
-                  >
-                    Télécharger
-                  </router-link>
+                  <div class="flex items-center gap-2">
+                    <button
+                      @click="shareTicket(ticket)"
+                      class="border-2 border-primea-blue text-primea-blue px-3 py-2 rounded-primea text-sm hover:bg-primea-blue hover:text-white transition-all duration-200"
+                      title="Partager"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                      </svg>
+                    </button>
+                    <router-link
+                      :to="`/ticket/${ticket.code}/download`"
+                      class="bg-primea-blue text-white px-4 py-2 rounded-primea text-sm hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200"
+                    >
+                      Télécharger
+                    </router-link>
+                  </div>
                 </div>
               </div>
             </div>
@@ -147,6 +158,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/vue/24/outline'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'TicketSuccess',
@@ -265,6 +277,44 @@ export default {
       }
     }
 
+    const shareTicket = async (ticket) => {
+      const ticketUrl = `${window.location.origin}/ticket/${ticket.code}/download`
+      const shareData = {
+        title: `Ticket - ${order.value?.event?.title || 'Événement'}`,
+        text: `Mon ticket ${ticket.ticket_type?.name || ''} pour ${order.value?.event?.title || 'l\'événement'}`,
+        url: ticketUrl
+      }
+
+      if (navigator.share) {
+        try {
+          await navigator.share(shareData)
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            console.error('Erreur de partage:', err)
+          }
+        }
+      } else {
+        try {
+          await navigator.clipboard.writeText(ticketUrl)
+          Swal.fire({
+            icon: 'success',
+            title: 'Lien copié !',
+            text: 'Le lien du ticket a été copié dans le presse-papiers',
+            confirmButtonColor: '#272d63',
+            timer: 2000,
+            showConfirmButton: false
+          })
+        } catch {
+          Swal.fire({
+            icon: 'info',
+            title: 'Lien du ticket',
+            text: ticketUrl,
+            confirmButtonColor: '#272d63'
+          })
+        }
+      }
+    }
+
     const downloadAllTickets = () => {
       if (!tickets.value || tickets.value.length === 0) return
 
@@ -288,6 +338,7 @@ export default {
       tickets,
       formatPrice,
       formatDate,
+      shareTicket,
       downloadAllTickets
     }
   }

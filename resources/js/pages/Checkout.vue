@@ -336,6 +336,14 @@
                   </div>-->
                 </div>
 
+                <!-- Badge paiement sécurisé Desktop -->
+                <div class="flex items-center justify-center gap-2 bg-green-50 border border-green-200 rounded-primea-lg p-3">
+                  <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                  </svg>
+                  <span class="text-green-700 text-sm font-semibold">Paiement 100% sécurisé</span>
+                </div>
+
                 <!-- Message d'erreur Desktop -->
                 <div v-if="error" class="bg-red-50 border-2 border-red-200 rounded-primea-lg p-4">
                   <p class="text-red-600 text-sm">{{ error }}</p>
@@ -662,6 +670,14 @@
                 <p class="text-blue-800 font-semibold mb-2">Paiement Visa sécurisé</p>
                 <p class="text-blue-600 text-xs">Vous serez redirigé vers notre partenaire de paiement</p>
               </div>-->
+            </div>
+
+            <!-- Badge paiement sécurisé Mobile -->
+            <div class="flex items-center justify-center gap-2 bg-green-50 border border-green-200 rounded-xl p-3">
+              <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+              <span class="text-green-700 text-sm font-semibold">Paiement 100% sécurisé</span>
             </div>
 
             <!-- Error Message -->
@@ -1122,7 +1138,7 @@ export default {
         const data = await eventsStore.fetchEvent(eventSlug)
         event.value = data.event
 
-        // Sélectionner par défaut le billet le moins cher
+        // Pré-sélectionner le type de ticket depuis le query param ou le moins cher
         if (event.value?.ticket_types && event.value.ticket_types.length > 0) {
           const available = event.value.ticket_types.filter(t => {
             if (t.remaining_quantity !== undefined && t.remaining_quantity !== null) return t.remaining_quantity > 0
@@ -1131,8 +1147,14 @@ export default {
             return (t.quantity - (t.sold || 0)) > 0
           })
           if (available.length > 0) {
-            const cheapest = available.reduce((min, t) => parseFloat(t.price) < parseFloat(min.price) ? t : min, available[0])
-            orderForm.value.ticketTypeId = cheapest.id
+            const queryTicketType = route.query.ticketType
+            const preSelected = queryTicketType ? available.find(t => t.id == queryTicketType) : null
+            if (preSelected) {
+              orderForm.value.ticketTypeId = preSelected.id
+            } else {
+              const cheapest = available.reduce((min, t) => parseFloat(t.price) < parseFloat(min.price) ? t : min, available[0])
+              orderForm.value.ticketTypeId = cheapest.id
+            }
           }
         }
 

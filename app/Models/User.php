@@ -35,6 +35,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'avatar_url',
         'avatar_file',
         'metadata',
+        'password_changed_at',
     ];
 
     /**
@@ -57,6 +58,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'phone_verified_at' => 'datetime',
+            'password_changed_at' => 'datetime',
             'last_login_at' => 'datetime',
             'password' => 'hashed',
             'is_organizer' => 'boolean',

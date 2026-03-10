@@ -64,30 +64,68 @@
             </div>
 
             <!-- Ticket Display -->
-            <div class="mb-6">
+            <div ref="ticketMobileRef" class="mb-6">
               <TicketComponent :ticket="ticket" size="small" />
             </div>
 
-            <!-- Download Button -->
-            <div class="mb-8">
+            <!-- Download & Share Buttons -->
+            <div class="mb-8 space-y-3">
+              <div class="grid grid-cols-2 gap-3">
+                <button
+                  @click="downloadTicket"
+                  :disabled="downloading"
+                  :class="[
+                    'py-4 px-4 rounded-xl font-bold transition-all duration-200 shadow-lg flex items-center justify-center gap-2',
+                    downloading
+                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                      : 'bg-primea-yellow text-primea-blue hover:bg-primea-yellow transform hover:scale-105'
+                  ]"
+                >
+                  <span v-if="downloading" class="flex items-center justify-center gap-2">
+                    <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </span>
+                  <span v-else>
+                    <svg class="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    PDF
+                  </span>
+                </button>
+                <button
+                  @click="downloadTicketAsImage"
+                  :disabled="downloadingImage"
+                  :class="[
+                    'py-4 px-4 rounded-xl font-bold transition-all duration-200 shadow-lg flex items-center justify-center gap-2',
+                    downloadingImage
+                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                      : 'bg-primea-blue text-white hover:bg-primea-yellow hover:text-primea-blue transform hover:scale-105'
+                  ]"
+                >
+                  <span v-if="downloadingImage" class="flex items-center justify-center gap-2">
+                    <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </span>
+                  <span v-else>
+                    <svg class="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    JPG
+                  </span>
+                </button>
+              </div>
               <button
-                @click="downloadTicket"
-                :disabled="downloading"
-                :class="[
-                  'w-full py-4 px-6 rounded-xl font-bold transition-all duration-200 shadow-lg',
-                  downloading
-                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                    : 'bg-primea-yellow text-primea-blue hover:bg-primea-yellow transform hover:scale-105'
-                ]"
+                @click="shareTicket"
+                class="w-full py-3 px-6 rounded-xl font-semibold border-2 border-primea-blue text-primea-blue hover:bg-primea-blue hover:text-white transition-all duration-200 flex items-center justify-center gap-2"
               >
-                <span v-if="downloading" class="flex items-center justify-center gap-2">
-                  <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Téléchargement...
-                </span>
-                <span v-else>Télécharger le PDF</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                </svg>
+                Partager le ticket
               </button>
             </div>
 
@@ -102,7 +140,7 @@
           <div class="hidden md:grid md:grid-cols-1 lg:grid-cols-3 gap-6">
 
             <!-- Ticket Column -->
-            <div class="lg:col-span-2 flex justify-center items-start">
+            <div ref="ticketDesktopRef" class="lg:col-span-2 flex justify-center items-start">
               <TicketComponent :ticket="ticket" size="large" />
             </div>
 
@@ -166,6 +204,39 @@
                     </template>
                   </button>
                   <button
+                    @click="downloadTicketAsImage"
+                    :disabled="downloadingImage"
+                    :class="[
+                      'w-full py-3 px-6 rounded-xl font-bold transition-all duration-200 shadow-lg flex items-center justify-center gap-2',
+                      downloadingImage
+                        ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                        : 'bg-primea-blue text-white hover:bg-primea-yellow hover:text-primea-blue transform hover:scale-105'
+                    ]"
+                  >
+                    <template v-if="downloadingImage">
+                      <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Téléchargement...
+                    </template>
+                    <template v-else>
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                      </svg>
+                      Télécharger en JPG
+                    </template>
+                  </button>
+                  <button
+                    @click="shareTicket"
+                    class="w-full py-3 px-6 rounded-xl font-bold transition-all duration-200 shadow-lg bg-primea-blue text-white hover:bg-primea-yellow hover:text-primea-blue flex items-center justify-center gap-2"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                    </svg>
+                    Partager le ticket
+                  </button>
+                  <button
                     @click="goBack"
                     class="w-full border-2 border-primea-blue text-primea-blue py-3 px-6 rounded-xl font-semibold hover:bg-primea-blue hover:text-white transition-all duration-200"
                   >
@@ -184,6 +255,7 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import html2canvas from 'html2canvas'
 import TicketComponent from '../components/TicketComponent.vue'
 import { ticketService } from '../services/api.js'
 import Swal from 'sweetalert2'
@@ -197,11 +269,16 @@ export default {
     const route = useRoute()
     const router = useRouter()
 
+    // Template refs
+    const ticketMobileRef = ref(null)
+    const ticketDesktopRef = ref(null)
+
     // Reactive state
     const ticket = ref(null)
     const loading = ref(true)
     const error = ref('')
     const downloading = ref(false)
+    const downloadingImage = ref(false)
 
     // Load ticket data from API
     const loadTicket = async () => {
@@ -377,6 +454,93 @@ export default {
       }
     }
 
+    const downloadTicketAsImage = async () => {
+      if (downloadingImage.value) return
+
+      downloadingImage.value = true
+      const ticketCode = route.params.id
+      const fileName = `ticket-${ticketCode}.jpg`
+
+      try {
+        // Déterminer quel élément capturer (mobile ou desktop)
+        const targetRef = window.innerWidth < 768 ? ticketMobileRef.value : ticketDesktopRef.value
+        if (!targetRef) {
+          throw new Error('Élément ticket introuvable')
+        }
+
+        const canvas = await html2canvas(targetRef, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff'
+        })
+
+        // Convertir en JPG et télécharger
+        const link = document.createElement('a')
+        link.download = fileName
+        link.href = canvas.toDataURL('image/jpeg', 0.95)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Image téléchargée !',
+          html: `<p class="text-gray-600 mb-2">Votre ticket a été sauvegardé en JPG :</p><p class="font-semibold text-primea-blue">${fileName}</p>`,
+          confirmButtonColor: '#272d63',
+          confirmButtonText: 'Parfait !'
+        })
+      } catch (err) {
+        console.error('Erreur capture image:', err)
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: 'Impossible de générer l\'image du ticket. Veuillez réessayer.',
+          confirmButtonColor: '#272d63'
+        })
+      } finally {
+        downloadingImage.value = false
+      }
+    }
+
+    const shareTicket = async () => {
+      const ticketUrl = window.location.href
+      const shareData = {
+        title: `Ticket - ${ticket.value?.event?.title || 'Événement'}`,
+        text: `Mon ticket ${ticket.value?.ticketType || ''} pour ${ticket.value?.event?.title || 'l\'événement'}`,
+        url: ticketUrl
+      }
+
+      if (navigator.share) {
+        try {
+          await navigator.share(shareData)
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            console.error('Erreur de partage:', err)
+          }
+        }
+      } else {
+        try {
+          await navigator.clipboard.writeText(ticketUrl)
+          Swal.fire({
+            icon: 'success',
+            title: 'Lien copié !',
+            text: 'Le lien du ticket a été copié dans le presse-papiers',
+            confirmButtonColor: '#272d63',
+            timer: 2000,
+            showConfirmButton: false
+          })
+        } catch {
+          Swal.fire({
+            icon: 'info',
+            title: 'Lien du ticket',
+            text: ticketUrl,
+            confirmButtonColor: '#272d63'
+          })
+        }
+      }
+    }
+
     const goBack = () => {
       router.back()
     }
@@ -387,13 +551,18 @@ export default {
     })
 
     return {
+      ticketMobileRef,
+      ticketDesktopRef,
       ticket,
       loading,
       error,
       downloading,
+      downloadingImage,
       formatEventDate,
       formatPrice,
       downloadTicket,
+      downloadTicketAsImage,
+      shareTicket,
       goBack,
       loadTicket
     }
