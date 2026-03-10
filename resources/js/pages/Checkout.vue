@@ -1122,9 +1122,18 @@ export default {
         const data = await eventsStore.fetchEvent(eventSlug)
         event.value = data.event
 
-        // Si l'événement n'a qu'un seul type de ticket, le sélectionner automatiquement
-        if (event.value?.ticket_types && event.value.ticket_types.length === 1) {
-          orderForm.value.ticketTypeId = event.value.ticket_types[0].id
+        // Sélectionner par défaut le billet le moins cher
+        if (event.value?.ticket_types && event.value.ticket_types.length > 0) {
+          const available = event.value.ticket_types.filter(t => {
+            if (t.remaining_quantity !== undefined && t.remaining_quantity !== null) return t.remaining_quantity > 0
+            if (t.available_quantity !== undefined && t.available_quantity !== null) return (t.available_quantity - (t.sold_quantity || 0)) > 0
+            if (t.available_quantity === null) return true
+            return (t.quantity - (t.sold || 0)) > 0
+          })
+          if (available.length > 0) {
+            const cheapest = available.reduce((min, t) => parseFloat(t.price) < parseFloat(min.price) ? t : min, available[0])
+            orderForm.value.ticketTypeId = cheapest.id
+          }
         }
 
         // Démarrer le compte à rebours après avoir chargé l'événement
