@@ -64,7 +64,7 @@
             </div>
 
             <!-- Ticket Display -->
-            <div ref="ticketMobileRef" class="mb-6">
+            <div ref="ticketMobileRef" class="mb-6 flex justify-center">
               <TicketComponent :ticket="ticket" size="small" />
             </div>
 
