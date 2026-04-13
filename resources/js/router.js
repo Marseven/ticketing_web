@@ -67,6 +67,13 @@ const Analytics = () => import(/* webpackChunkName: "admin-analytics" */ './page
 const BannerManagement = () => import(/* webpackChunkName: "admin-banners" */ './pages/admin/BannerManagement.vue');
 const HeroBannerManagement = () => import(/* webpackChunkName: "admin-banners" */ './pages/admin/HeroBannerManagement.vue');
 
+// Pages statiques
+const HowItWorks = () => import('./pages/static/HowItWorks.vue');
+const Help = () => import('./pages/static/Help.vue');
+const Terms = () => import('./pages/static/Terms.vue');
+const Privacy = () => import('./pages/static/Privacy.vue');
+const Contact = () => import('./pages/static/Contact.vue');
+
 // Scanner
 const ScannerApp = () => import('./pages/scanner/ScannerApp.vue');
 
@@ -90,7 +97,14 @@ const routes = [
     { path: '/ticket/:id', component: TicketDownload, name: 'ticket-view' },
     { path: '/ticket-success', component: TicketSuccess, name: 'ticket-success' },
     { path: '/payment-success', component: PaymentSuccess, name: 'payment-success' },
-    
+
+    // Pages statiques
+    { path: '/how-it-works', component: HowItWorks, name: 'how-it-works' },
+    { path: '/help', component: Help, name: 'help' },
+    { path: '/terms', component: Terms, name: 'terms' },
+    { path: '/privacy', component: Privacy, name: 'privacy' },
+    { path: '/contact', component: Contact, name: 'contact' },
+
     // Routes espace client
     { 
         path: '/account',

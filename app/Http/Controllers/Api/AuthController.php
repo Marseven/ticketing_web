@@ -71,6 +71,22 @@ class AuthController extends Controller
             'phone.unique' => 'Ce numéro de téléphone est déjà utilisé',
         ]);
 
+        // Normaliser le numéro de téléphone au format international +241XXXXXXXX
+        $phone = $request->phone;
+        $digits = preg_replace('/[^0-9]/', '', $phone);
+        if (strlen($digits) === 8) {
+            // Format local sans indicatif : 07XXXXXX → +24107XXXXXX
+            $phone = '+241' . $digits;
+        } elseif (strlen($digits) === 9 && str_starts_with($digits, '0')) {
+            // Format local avec 0 : 007XXXXXX → +24107XXXXXX
+            $phone = '+241' . $digits;
+        } elseif (strlen($digits) >= 11 && str_starts_with($digits, '241')) {
+            // Format 241XXXXXXXX → +241XXXXXXXX
+            $phone = '+' . $digits;
+        } elseif (!str_starts_with($phone, '+')) {
+            $phone = '+' . $digits;
+        }
+
         \DB::beginTransaction();
 
         try {
@@ -78,7 +94,7 @@ class AuthController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'phone' => $request->phone,
+                'phone' => $phone,
                 'is_organizer' => $request->is_organizer ?? false,
                 'status' => 'active',
                 'email_verified_at' => null, // L'email n'est pas encore vérifié

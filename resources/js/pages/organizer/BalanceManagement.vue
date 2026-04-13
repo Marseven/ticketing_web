@@ -8,7 +8,7 @@
           <h1 class="text-xl md:text-3xl font-bold text-primea-blue font-primea mb-1 md:mb-2">Mon Solde</h1>
           <p class="text-gray-600 font-primea text-xs md:text-sm hidden sm:block">Consultez votre solde et effectuez des demandes de versement</p>
         </div>
-        <button @click="$router.push('/organizer/payouts/history')"
+        <button @click="scrollToHistory"
                 class="bg-primea-blue text-white px-4 py-2 rounded-primea hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 font-primea text-sm w-full sm:w-auto text-center">
           <svg class="w-4 h-4 md:w-5 md:h-5 inline mr-1 md:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
@@ -147,12 +147,11 @@
       </div>
 
       <!-- Recent Payouts -->
-      <div class="bg-white rounded-lg shadow">
+      <div id="payout-history" class="bg-white rounded-lg shadow">
         <div class="p-6 border-b">
           <div class="flex justify-between items-center">
             <h2 class="text-xl font-bold">Payouts Récents</h2>
-            <button @click="$router.push('/organizer/payouts/history')" 
-                    class="text-blue-600 hover:text-blue-800 text-sm">Voir tout</button>
+            <span class="text-gray-400 text-sm">Tous les versements</span>
           </div>
         </div>
         
@@ -426,6 +425,10 @@ const submitPayoutRequest = async () => {
   }
 }
 
+
+const scrollToHistory = () => {
+  document.getElementById('payout-history')?.scrollIntoView({ behavior: 'smooth' })
+}
 
 const getRecentPayouts = (gateway) => {
   return recentPayouts.value.filter(p => p.gateway === gateway).slice(0, 3)

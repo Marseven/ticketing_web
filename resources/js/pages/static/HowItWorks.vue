@@ -1,0 +1,110 @@
+<template>
+  <div class="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+      <!-- Header -->
+      <div class="text-center mb-16">
+        <h1 class="text-3xl sm:text-4xl font-bold text-primea-blue mb-4">
+          Comment ca marche ?
+        </h1>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          Achetez vos billets en toute simplicite en seulement 3 etapes.
+          Primea vous accompagne de la decouverte de l'evenement jusqu'a votre entree.
+        </p>
+      </div>
+
+      <!-- Steps -->
+      <div class="space-y-16">
+        <!-- Step 1 -->
+        <div class="flex flex-col md:flex-row items-center gap-8">
+          <div class="flex-shrink-0 w-20 h-20 rounded-full bg-primea-blue flex items-center justify-center">
+            <span class="text-3xl font-bold text-primea-yellow">1</span>
+          </div>
+          <div class="flex-1 text-center md:text-left">
+            <h2 class="text-2xl font-bold text-primea-blue mb-3">
+              Parcourez les evenements
+            </h2>
+            <p class="text-gray-600 leading-relaxed">
+              Explorez notre catalogue d'evenements disponibles au Gabon et dans la sous-region.
+              Concerts, festivals, conferences, spectacles... Filtrez par categorie, date ou lieu
+              pour trouver l'evenement qui vous correspond. Chaque evenement dispose d'une page
+              detaillee avec toutes les informations necessaires : lieu, horaires, description
+              et types de billets disponibles.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="flex flex-col md:flex-row-reverse items-center gap-8">
+          <div class="flex-shrink-0 w-20 h-20 rounded-full bg-primea-blue flex items-center justify-center">
+            <span class="text-3xl font-bold text-primea-yellow">2</span>
+          </div>
+          <div class="flex-1 text-center md:text-right">
+            <h2 class="text-2xl font-bold text-primea-blue mb-3">
+              Achetez vos billets
+            </h2>
+            <p class="text-gray-600 leading-relaxed">
+              Selectionnez le type de billet souhaite (Standard, VIP, etc.) et la quantite.
+              Procedez au paiement en toute securite via nos differents moyens de paiement :
+              Airtel Money, Moov Money, carte bancaire ou E-Billing. Vous pouvez acheter
+              en tant qu'invite ou en creant un compte pour retrouver facilement vos commandes.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="flex flex-col md:flex-row items-center gap-8">
+          <div class="flex-shrink-0 w-20 h-20 rounded-full bg-primea-blue flex items-center justify-center">
+            <span class="text-3xl font-bold text-primea-yellow">3</span>
+          </div>
+          <div class="flex-1 text-center md:text-left">
+            <h2 class="text-2xl font-bold text-primea-blue mb-3">
+              Recevez votre e-ticket avec QR code
+            </h2>
+            <p class="text-gray-600 leading-relaxed">
+              Une fois le paiement confirme, votre billet electronique est genere instantanement
+              avec un QR code unique et securise. Vous pouvez le telecharger en PDF, le consulter
+              dans votre espace personnel ou le recevoir par email. Le jour de l'evenement,
+              presentez simplement votre QR code a l'entree pour un scan rapide et une verification
+              immediate. C'est aussi simple que ca !
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA Section -->
+      <div class="mt-20 text-center bg-gray-50 rounded-2xl p-8 sm:p-12">
+        <h3 class="text-2xl font-bold text-primea-blue mb-4">
+          Pret a decouvrir les evenements ?
+        </h3>
+        <p class="text-gray-600 mb-6">
+          Rejoignez des milliers d'utilisateurs qui font confiance a Primea pour leurs sorties.
+        </p>
+        <router-link
+          to="/events"
+          class="inline-block bg-primea-yellow text-primea-blue font-semibold px-8 py-3 rounded-lg hover:opacity-90 transition-opacity"
+        >
+          Voir les evenements
+        </router-link>
+      </div>
+
+      <!-- Back link -->
+      <div class="mt-12 text-center">
+        <router-link
+          to="/"
+          class="text-primea-blue hover:text-primea-yellow font-medium transition-colors"
+        >
+          &larr; Retour a l'accueil
+        </router-link>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'HowItWorks',
+};
+</script>
+
+<style scoped>
+</style>

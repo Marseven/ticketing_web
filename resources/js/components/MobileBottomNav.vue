@@ -60,7 +60,7 @@ const navItems = computed(() => {
     )
   } else {
     items.push(
-      { to: '/retrieve-ticket', icon: 'tickets', label: 'Mon Ticket', matchPaths: ['/retrieve-ticket'] },
+      { to: '/retrieve-ticket', icon: 'tickets', label: 'Retrouver', matchPaths: ['/retrieve-ticket'] },
       { to: '/login', icon: 'profile', label: 'Connexion', matchPaths: ['/login', '/register'] }
     )
   }

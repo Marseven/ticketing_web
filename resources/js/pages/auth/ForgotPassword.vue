@@ -156,7 +156,7 @@ export default {
           } else if (status === 429) {
             error.value = 'Trop de tentatives. Veuillez réessayer dans quelques minutes.'
           } else if (status >= 500) {
-            error.value = 'Erreur du serveur. Veuillez réessayer plus tard.'
+            error.value = data.message || 'Le service d\'envoi d\'email est temporairement indisponible. Veuillez réessayer dans quelques minutes.'
           } else {
             error.value = data.message || 'Une erreur est survenue'
           }

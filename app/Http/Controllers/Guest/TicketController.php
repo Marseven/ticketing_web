@@ -237,15 +237,20 @@ class TicketController extends Controller
             });
         }
 
-        // Recherche par téléphone
+        // Recherche par téléphone (normalisation pour matcher indépendamment du format)
         if ($request->filled('phone')) {
             $phone = $request->input('phone');
-            $query->where(function($q) use ($phone) {
-                $q->whereHas('buyer', function($buyerQuery) use ($phone) {
-                    $buyerQuery->where('phone', 'LIKE', "%{$phone}%");
+            // Extraire uniquement les chiffres
+            $digits = preg_replace('/[^0-9]/', '', $phone);
+            // Prendre les 8 derniers chiffres (format Gabon standard sans indicatif)
+            $shortPhone = strlen($digits) >= 8 ? substr($digits, -8) : $digits;
+
+            $query->where(function($q) use ($shortPhone) {
+                $q->whereHas('buyer', function($buyerQuery) use ($shortPhone) {
+                    $buyerQuery->whereRaw("REPLACE(REPLACE(REPLACE(phone, '+', ''), ' ', ''), '-', '') LIKE ?", ["%{$shortPhone}%"]);
                 })
-                ->orWhereHas('order', function($orderQuery) use ($phone) {
-                    $orderQuery->where('guest_phone', 'LIKE', "%{$phone}%");
+                ->orWhereHas('order', function($orderQuery) use ($shortPhone) {
+                    $orderQuery->whereRaw("REPLACE(REPLACE(REPLACE(guest_phone, '+', ''), ' ', ''), '-', '') LIKE ?", ["%{$shortPhone}%"]);
                 });
             });
         }

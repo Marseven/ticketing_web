@@ -3,18 +3,20 @@
     <nav class="max-w-7xl mx-auto px-4 py-3">
       <div class="flex items-center justify-between">
         <!-- Logo Primea avec badge organisateur -->
-        <router-link :to="{ name: 'organizer-dashboard' }" class="flex items-center group">
-          <img 
-            src="/images/logo.png" 
-            alt="Primea" 
-            class="h-10 w-auto transition-transform duration-200 group-hover:scale-105"
-          />
-          <div class="ml-3 hidden md:block">
+        <div class="flex items-center gap-3">
+          <router-link to="/" class="group">
+            <img
+              src="/images/logo.png"
+              alt="Primea"
+              class="h-10 w-auto transition-transform duration-200 group-hover:scale-105"
+            />
+          </router-link>
+          <router-link :to="{ name: 'organizer-dashboard' }" class="hidden md:block">
             <span class="text-xs text-primea-yellow bg-primea-yellow/10 px-2 py-1 rounded-full font-semibold font-primea">
               Espace Organisateur
             </span>
-          </div>
-        </router-link>
+          </router-link>
+        </div>
 
         <!-- Navigation Desktop -->
         <div class="hidden lg:flex items-center space-x-6">

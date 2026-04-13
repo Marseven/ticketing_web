@@ -122,16 +122,35 @@
               />
               <label for="terms" class="ml-2 block text-sm text-gray-700">
                 J'accepte les
-                <a href="#" class="text-primea-blue hover:text-primea-yellow font-semibold transition-colors">conditions d'utilisation</a>
+                <router-link to="/terms" class="text-primea-blue hover:text-primea-yellow font-semibold transition-colors">conditions d'utilisation</router-link>
                 et la
-                <a href="#" class="text-primea-blue hover:text-primea-yellow font-semibold transition-colors">politique de confidentialité</a>
+                <router-link to="/privacy" class="text-primea-blue hover:text-primea-yellow font-semibold transition-colors">politique de confidentialité</router-link>
                 <span class="text-red-500">*</span>
               </label>
             </div>
 
             <!-- Error Message -->
-            <div v-if="error" class="bg-red-50 border-2 border-red-200 rounded-xl p-4">
+            <div v-if="error && !isConflictError" class="bg-red-50 border-2 border-red-200 rounded-xl p-4">
               <p class="text-red-600 text-sm font-medium">{{ error }}</p>
+            </div>
+
+            <!-- Conflict Error (email/phone already used) -->
+            <div v-if="isConflictError" class="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-4">
+              <p class="text-yellow-800 text-sm font-medium mb-3">{{ error }}</p>
+              <div class="flex flex-col sm:flex-row gap-2">
+                <router-link
+                  to="/login"
+                  class="inline-flex items-center justify-center px-4 py-2 bg-primea-blue text-white rounded-lg text-sm font-semibold hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200"
+                >
+                  Se connecter
+                </router-link>
+                <router-link
+                  to="/forgot-password"
+                  class="inline-flex items-center justify-center px-4 py-2 border-2 border-primea-blue text-primea-blue rounded-lg text-sm font-semibold hover:bg-primea-blue hover:text-white transition-all duration-200"
+                >
+                  Mot de passe oublié ?
+                </router-link>
+              </div>
             </div>
 
             <!-- Submit Button -->
@@ -186,6 +205,7 @@ export default {
     const authStore = useAuthStore()
     const loading = ref(false)
     const error = ref('')
+    const isConflictError = ref(false)
 
     const form = ref({
       name: '',
@@ -217,6 +237,7 @@ export default {
     const register = async () => {
       // Client-side validation
       error.value = ''
+      isConflictError.value = false
 
       if (!form.value.name || form.value.name.trim().length < 2) {
         error.value = 'Le nom complet doit contenir au moins 2 caractères'
@@ -280,21 +301,28 @@ export default {
           if (status === 422) {
             // Validation errors
             if (data.errors) {
-              // Display all validation errors clearly
               const errors = data.errors
-              const errorMessages = []
 
-              if (errors.name) errorMessages.push(`Nom: ${errors.name[0]}`)
-              if (errors.email) errorMessages.push(`Email: ${errors.email[0]}`)
-              if (errors.phone) errorMessages.push(`Téléphone: ${errors.phone[0]}`)
-              if (errors.password) errorMessages.push(`Mot de passe: ${errors.password[0]}`)
-
-              if (errorMessages.length > 0) {
-                error.value = errorMessages.join(' • ')
+              // Check if it's a uniqueness conflict (email or phone already taken)
+              const isUnique = (errors.email && errors.email[0]?.includes('déjà')) ||
+                               (errors.phone && errors.phone[0]?.includes('déjà'))
+              if (isUnique) {
+                isConflictError.value = true
+                error.value = errors.email?.[0] || errors.phone?.[0] || 'Cet email ou ce numéro de téléphone est déjà associé à un compte.'
               } else {
-                // If no details, display first error message
-                const firstError = Object.values(errors)[0]
-                error.value = Array.isArray(firstError) ? firstError[0] : firstError
+                // Display all validation errors clearly
+                const errorMessages = []
+                if (errors.name) errorMessages.push(`Nom: ${errors.name[0]}`)
+                if (errors.email) errorMessages.push(`Email: ${errors.email[0]}`)
+                if (errors.phone) errorMessages.push(`Téléphone: ${errors.phone[0]}`)
+                if (errors.password) errorMessages.push(`Mot de passe: ${errors.password[0]}`)
+
+                if (errorMessages.length > 0) {
+                  error.value = errorMessages.join(' • ')
+                } else {
+                  const firstError = Object.values(errors)[0]
+                  error.value = Array.isArray(firstError) ? firstError[0] : firstError
+                }
               }
             } else if (data.message) {
               error.value = data.message
@@ -303,7 +331,8 @@ export default {
             }
           } else if (status === 409) {
             // Conflict (email or phone already used)
-            error.value = data.message || 'Cet email ou ce numéro de téléphone est déjà utilisé'
+            isConflictError.value = true
+            error.value = data.message || 'Cet email ou ce numéro de téléphone est déjà associé à un compte.'
           } else if (status === 429) {
             // Too many attempts
             error.value = 'Trop de tentatives. Veuillez réessayer dans quelques minutes.'
@@ -329,6 +358,7 @@ export default {
       form,
       loading,
       error,
+      isConflictError,
       register
     }
   }

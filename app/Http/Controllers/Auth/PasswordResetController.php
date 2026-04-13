@@ -51,12 +51,22 @@ class PasswordResetController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Erreur forgot password', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'email' => $request->email,
             ]);
+
+            // Identifier le type d'erreur pour un message plus utile
+            $message = 'Erreur lors de l\'envoi de l\'email de réinitialisation.';
+            if (str_contains($e->getMessage(), 'smtp') || str_contains($e->getMessage(), 'SMTP') || str_contains($e->getMessage(), 'mail')) {
+                $message = 'Le service d\'envoi d\'email est temporairement indisponible. Veuillez réessayer dans quelques minutes.';
+            } elseif (str_contains($e->getMessage(), 'Connection') || str_contains($e->getMessage(), 'timeout')) {
+                $message = 'Problème de connexion au service d\'email. Veuillez réessayer.';
+            }
 
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de l\'envoi de l\'email de réinitialisation.'
+                'message' => $message
             ], 500);
         }
     }
