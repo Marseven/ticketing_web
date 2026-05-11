@@ -193,7 +193,12 @@ class OrganizerController extends Controller
     }
 
     /**
-     * Get organizer balances (PAYIN uniquement depuis SHAP API)
+     * Get organizer balances from local organizer_balances table.
+     *
+     * Source de vérité = table organizer_balances (alimentée par
+     * PayoutService::processSuccessfulPayment lors du webhook E-Billing).
+     * L'API SHAP retourne un solde global plateforme, pas un solde par
+     * organisateur — donc inutilisable ici.
      */
     public function balances(Request $request): JsonResponse
     {
@@ -206,51 +211,40 @@ class OrganizerController extends Controller
         }
 
         try {
-            // Récupérer les balances depuis l'API SHAP
-            $shapPayoutService = app(\App\Services\ShapPayoutService::class);
-            $balanceResult = $shapPayoutService->getBalance();
+            $organizerIds = $user->organizers->pluck('id');
 
-            if (!$balanceResult['success']) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $balanceResult['message'] ?? 'Impossible de récupérer les soldes SHAP',
-                    'error_code' => $balanceResult['error_code'] ?? 'SHAP_ERROR'
-                ], 500);
-            }
+            $balances = \App\Models\OrganizerBalance::whereIn('organizer_id', $organizerIds)
+                ->orderBy('gateway')
+                ->get([
+                    'id', 'organizer_id', 'gateway', 'balance', 'pending_balance',
+                    'phone_number', 'auto_payout_enabled', 'auto_payout_threshold',
+                ]);
 
-            // Filtrer uniquement les balances PAYIN (garder par opérateur)
-            $payinBalances = [];
+            $totalBalance = (float) $balances->sum('balance');
 
-            foreach ($balanceResult['data']['balances'] ?? [] as $balance) {
-                if (isset($balance['category']) && $balance['category'] === 'PAYIN') {
-                    $payinBalances[] = $balance;
-                }
-            }
-
-            \Illuminate\Support\Facades\Log::info('📊 Balances PAYIN récupérées', [
+            \Illuminate\Support\Facades\Log::info('📊 Soldes organisateur récupérés', [
                 'user_id' => $user->id,
-                'payin_balances_count' => count($payinBalances),
-                'payin_balances' => $payinBalances
+                'organizer_ids' => $organizerIds->toArray(),
+                'balances_count' => $balances->count(),
+                'total_balance' => $totalBalance,
             ]);
 
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'balances' => $payinBalances
-                ]
+                    'balances' => $balances,
+                    'total_balance' => $totalBalance,
+                ],
             ]);
-
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Erreur récupération balances SHAP', [
+            \Illuminate\Support\Facades\Log::error('Erreur récupération soldes organisateur', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur lors de la récupération des soldes',
-                'error' => $e->getMessage()
             ], 500);
         }
     }

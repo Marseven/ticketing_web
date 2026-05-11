@@ -103,7 +103,7 @@
 
             <div v-if="balance.auto_payout_enabled" class="text-sm text-gray-600 font-primea">
               <p>Seuil: {{ formatAmount(balance.auto_payout_threshold) }} XAF</p>
-              <p v-if="balance.payout_phone_number">Téléphone: {{ balance.payout_phone_number }}</p>
+              <p v-if="balance.phone_number">Téléphone: {{ balance.phone_number }}</p>
               <p class="text-xs text-gray-500 mt-1">Configuration gérée par l'administrateur</p>
             </div>
             <div v-else class="text-sm text-gray-600 font-primea">
@@ -309,14 +309,14 @@ const loadBalances = async () => {
             balance: 0,
             auto_payout_enabled: false,
             auto_payout_threshold: 10000,
-            payout_phone_number: null
+            phone_number: null
           },
           {
             gateway: 'moovmoney4',
             balance: 0,
             auto_payout_enabled: false,
             auto_payout_threshold: 10000,
-            payout_phone_number: null
+            phone_number: null
           }
         ]
         console.log('Default balances created:', balances.value)
@@ -335,14 +335,14 @@ const loadBalances = async () => {
         balance: 0,
         auto_payout_enabled: false,
         auto_payout_threshold: 10000,
-        payout_phone_number: null
+        phone_number: null
       },
       {
         gateway: 'moovmoney4',
         balance: 0,
         auto_payout_enabled: false,
         auto_payout_threshold: 10000,
-        payout_phone_number: null
+        phone_number: null
       }
     ]
     
@@ -385,7 +385,7 @@ const requestPayout = (balance) => {
     gateway: balance.gateway,
     available_balance: balance.balance,
     amount: '',
-    phone_number: balance.payout_phone_number || '',
+    phone_number: balance.phone_number || '',
   })
   showPayoutModal.value = true
 }
