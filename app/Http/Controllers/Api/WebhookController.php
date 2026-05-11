@@ -585,10 +585,12 @@ class WebhookController extends Controller
 
                 $order->update(['status' => 'cancelled']);
 
-                // Annuler tous les tickets de cette commande pour libérer le stock
+                // Annuler tous les tickets de cette commande pour libérer le stock.
+                // Note: l'enum tickets.status n'a pas 'cancelled' — on utilise 'void'
+                // (cf. migration 2026_02_19_110434_fix_tickets_status_enum_and_issued_at).
                 foreach ($order->tickets as $ticket) {
                     $ticket->update([
-                        'status' => 'cancelled',
+                        'status' => 'void',
                         'issued_at' => null
                     ]);
                 }

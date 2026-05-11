@@ -44,7 +44,7 @@ class Order extends Model
      */
     public function organizer(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'organizer_id');
+        return $this->belongsTo(Organizer::class, 'organizer_id');
     }
 
     /**

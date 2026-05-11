@@ -124,53 +124,72 @@ class PayoutService
     }
 
     /**
-     * Déduire le gateway depuis les champs payment_system et sub_payment_system
+     * Déduire le gateway depuis les champs payment_system, sub_payment_system
+     * ou en dernier recours depuis le provider initial du paiement.
      */
     private function deduceGateway(Payment $payment): string
     {
-        // Vérifier sub_payment_system en premier (plus spécifique)
         $subPaymentSystem = strtolower($payment->sub_payment_system ?? '');
         $paymentSystem = strtolower($payment->payment_system ?? '');
 
-        // Mapping des payment systems vers nos gateways
+        // Mapping label -> gateway interne (ordre important: clés plus spécifiques en premier).
         $mapping = [
             'airtel money' => 'airtelmoney',
             'airtelmoney' => 'airtelmoney',
             'airtel' => 'airtelmoney',
+            'am' => 'airtelmoney',
             'moov money' => 'moovmoney4',
             'moovmoney' => 'moovmoney4',
             'moov' => 'moovmoney4',
+            'mm' => 'moovmoney4',
+            'mc' => 'moovmoney4',
+            'visa card' => 'ORABANK_NG',
+            'mastercard' => 'ORABANK_NG',
+            'visa' => 'ORABANK_NG',
+            'orabank_ng' => 'ORABANK_NG',
+            'orabank' => 'ORABANK_NG',
+            'card' => 'ORABANK_NG',
         ];
 
-        // Essayer sub_payment_system d'abord
-        foreach ($mapping as $key => $gateway) {
-            if (str_contains($subPaymentSystem, $key)) {
-                Log::info('Gateway déduit depuis sub_payment_system', [
-                    'payment_id' => $payment->id,
-                    'sub_payment_system' => $payment->sub_payment_system,
-                    'deduced_gateway' => $gateway
-                ]);
-                return $gateway;
+        foreach ([$subPaymentSystem, $paymentSystem] as $source) {
+            if ($source === '') {
+                continue;
+            }
+            foreach ($mapping as $key => $gateway) {
+                if (str_contains($source, $key)) {
+                    Log::info('Gateway déduit depuis payment_system/sub_payment_system', [
+                        'payment_id' => $payment->id,
+                        'source' => $source,
+                        'matched_key' => $key,
+                        'deduced_gateway' => $gateway,
+                    ]);
+                    return $gateway;
+                }
             }
         }
 
-        // Puis essayer payment_system
-        foreach ($mapping as $key => $gateway) {
-            if (str_contains($paymentSystem, $key)) {
-                Log::info('Gateway déduit depuis payment_system', [
-                    'payment_id' => $payment->id,
-                    'payment_system' => $payment->payment_system,
-                    'deduced_gateway' => $gateway
-                ]);
-                return $gateway;
-            }
+        // Fallback sur le provider initial du paiement (airtel, moov, card, bank)
+        $providerFallback = match (strtolower($payment->provider ?? '')) {
+            'airtel' => 'airtelmoney',
+            'moov' => 'moovmoney4',
+            'card' => 'ORABANK_NG',
+            default => null,
+        };
+
+        if ($providerFallback !== null) {
+            Log::warning('Gateway non identifié via payment_system - fallback sur provider', [
+                'payment_id' => $payment->id,
+                'provider' => $payment->provider,
+                'deduced_gateway' => $providerFallback,
+            ]);
+            return $providerFallback;
         }
 
-        // Par défaut si rien n'est trouvé
-        Log::warning('Gateway non identifié - utilisation d\'airtelmoney par défaut', [
+        Log::error('Gateway impossible à déduire - utilisation airtelmoney par défaut', [
             'payment_id' => $payment->id,
+            'provider' => $payment->provider,
             'payment_system' => $payment->payment_system,
-            'sub_payment_system' => $payment->sub_payment_system
+            'sub_payment_system' => $payment->sub_payment_system,
         ]);
 
         return 'airtelmoney';

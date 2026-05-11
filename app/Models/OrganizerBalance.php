@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 
 class OrganizerBalance extends Model
 {
@@ -44,14 +45,26 @@ class OrganizerBalance extends Model
     }
 
     /**
-     * Déduire du solde (après un payout)
+     * Déduire du solde (après un payout).
+     *
+     * Atomique: l'UPDATE conditionnel SQL garantit qu'aucun over-draft ne peut
+     * se produire même si deux processus tentent simultanément de déduire
+     * (deux demandes de payout concurrentes, par ex.).
      */
     public function deductBalance(float $amount): bool
     {
-        if ($this->balance >= $amount) {
-            $this->decrement('balance', $amount);
+        $affected = static::where('id', $this->id)
+            ->where('balance', '>=', $amount)
+            ->update([
+                'balance' => DB::raw('balance - ' . (float) $amount),
+                'updated_at' => now(),
+            ]);
+
+        if ($affected > 0) {
+            $this->refresh();
             return true;
         }
+
         return false;
     }
 
