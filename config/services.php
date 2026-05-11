@@ -35,4 +35,17 @@ return [
         ],
     ],
 
+    'ebilling' => [
+        'username' => env('EBILLING_USERNAME'),
+        'shared_key' => env('EBILLING_SHARED_KEY'),
+        'server_url' => env('EBILLING_SERVER_URL'),
+        'post_url' => env('EBILLING_POST_URL'),
+        // Webhook hardening: comma-separated IP whitelist and optional shared
+        // secret expected in header X-Webhook-Secret (or query "token").
+        // When both are empty, the webhook stays open but every call is
+        // logged with a warning so misuse is auditable.
+        'webhook_allowed_ips' => env('EBILLING_WEBHOOK_ALLOWED_IPS', ''),
+        'webhook_secret' => env('EBILLING_WEBHOOK_SECRET'),
+    ],
+
 ];

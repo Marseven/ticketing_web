@@ -392,7 +392,14 @@ class WebhookController extends Controller
      */
     public function ebilling(Request $request): JsonResponse
     {
-        Log::info('Webhook E-Billing reçu', $request->all());
+        Log::info('Webhook E-Billing reçu', [
+            'ip' => $request->ip(),
+            'payload' => $request->all(),
+        ]);
+
+        if (!$this->isAuthorizedEBillingRequest($request)) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+        }
 
         // Valider les données du webhook E-Billing
         $reference = $request->input('reference');
@@ -480,6 +487,56 @@ class WebhookController extends Controller
             'VISA' => 'Visa Card',
             default => $paymentSystem ?? 'Inconnu'
         };
+    }
+
+    /**
+     * Verify the inbound E-Billing webhook is authorized.
+     *
+     * Two complementary checks, both configured via config/services.php:
+     *   - services.ebilling.webhook_allowed_ips: comma-separated whitelist
+     *   - services.ebilling.webhook_secret: shared secret expected in the
+     *     "X-Webhook-Secret" header (or "?token=" query param fallback)
+     *
+     * When neither is configured, the call is accepted but logged as a
+     * warning so the gap is auditable. When at least one is set, every
+     * configured check must pass.
+     */
+    private function isAuthorizedEBillingRequest(Request $request): bool
+    {
+        $allowedIpsCsv = (string) config('services.ebilling.webhook_allowed_ips', '');
+        $secret = config('services.ebilling.webhook_secret');
+
+        $allowedIps = array_filter(array_map('trim', explode(',', $allowedIpsCsv)));
+
+        if (empty($allowedIps) && empty($secret)) {
+            Log::warning('⚠️ Webhook E-Billing reçu sans contrôle d\'accès configuré', [
+                'ip' => $request->ip(),
+                'hint' => 'Définir EBILLING_WEBHOOK_ALLOWED_IPS et/ou EBILLING_WEBHOOK_SECRET dans .env',
+            ]);
+            return true;
+        }
+
+        if (!empty($allowedIps) && !in_array($request->ip(), $allowedIps, true)) {
+            Log::error('⛔ Webhook E-Billing rejeté: IP non autorisée', [
+                'ip' => $request->ip(),
+                'allowed' => $allowedIps,
+            ]);
+            return false;
+        }
+
+        if (!empty($secret)) {
+            $provided = $request->header('X-Webhook-Secret') ?: $request->query('token');
+            if (!is_string($provided) || !hash_equals($secret, $provided)) {
+                Log::error('⛔ Webhook E-Billing rejeté: secret invalide', [
+                    'ip' => $request->ip(),
+                    'has_header' => $request->headers->has('X-Webhook-Secret'),
+                    'has_query_token' => $request->query->has('token'),
+                ]);
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
