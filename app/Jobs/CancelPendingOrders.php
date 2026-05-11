@@ -56,12 +56,13 @@ class CancelPendingOrders implements ShouldQueue
                 $order->status = 'cancelled';
                 $order->save();
 
-                // Annuler les tickets associés pour libérer le stock
+                // Annuler les tickets associés pour libérer le stock.
+                // Note: l'enum tickets.status n'a pas 'cancelled' — on utilise 'void'.
                 $ticketsCancelled = 0;
                 foreach ($order->tickets as $ticket) {
                     if ($ticket->status === 'pending') {
                         $ticket->update([
-                            'status' => 'cancelled',
+                            'status' => 'void',
                             'issued_at' => null
                         ]);
                         $ticketsCancelled++;

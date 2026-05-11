@@ -600,20 +600,20 @@ class PayoutService
     }
 
     /**
-     * Programmer une vérification de statut pour un payout asynchrone
+     * Programmer une vérification de statut pour un payout asynchrone.
+     *
+     * Le job se re-dispatche tant que SHAP renvoie un statut non final, avec
+     * un backoff croissant (cf. CheckPayoutStatusJob::ATTEMPT_DELAYS).
      */
     private function scheduleStatusCheck(Payout $payout): void
     {
-        // Pour l'instant, on log simplement. Dans une vraie app, on utiliserait
-        // Laravel Queue/Jobs pour programmer des vérifications périodiques
         Log::info('Programmation vérification statut payout', [
             'payout_id' => $payout->id,
             'external_reference' => $payout->external_reference,
-            'check_needed_in' => '5 minutes'
+            'first_check_in_seconds' => 300,
         ]);
-        
-        // TODO: Implémenter avec Laravel Queue
-        // dispatch(new CheckPayoutStatusJob($payout))->delay(now()->addMinutes(5));
+
+        \App\Jobs\CheckPayoutStatusJob::dispatch($payout->id)->delay(now()->addMinutes(5));
     }
 
     /**
