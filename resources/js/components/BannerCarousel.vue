@@ -1,55 +1,85 @@
 <template>
   <div v-if="banners.length > 0" class="banner-carousel mb-8">
-    <div class="relative">
-      <!-- Bannière active -->
-      <div class="banner-slide">
-        <a v-if="activeBanner.link_url"
-           :href="activeBanner.link_url"
-           target="_blank"
-           rel="noopener noreferrer"
-           class="block">
-          <img :src="activeBanner.image_url"
-               :alt="activeBanner.title"
-               class="w-full h-auto rounded-lg shadow-lg object-cover banner-image">
-        </a>
-        <div v-else>
-          <img :src="activeBanner.image_url"
-               :alt="activeBanner.title"
-               class="w-full h-auto rounded-lg shadow-lg object-cover banner-image">
+    <div class="w-full aspect-[16/3] sm:aspect-[20/3] md:aspect-[24/3] lg:aspect-[28/3] xl:aspect-[32/3]">
+      <div class="relative w-full h-full overflow-hidden rounded-lg shadow-lg bg-white">
+        <!-- Badge Ad -->
+        <div class="absolute top-1 right-1 sm:top-2 sm:right-2 z-20">
+          <span class="bg-gray-800/80 text-white text-[8px] sm:text-[10px] font-semibold px-1 sm:px-2 py-0.5 rounded backdrop-blur-sm">
+            Ad
+          </span>
         </div>
 
-        <!-- Informations optionnelles de la bannière -->
-        <div v-if="showInfo && activeBanner.description"
-             class="mt-4 text-center">
-          <h3 class="text-lg font-bold text-gray-900">{{ activeBanner.title }}</h3>
-          <p class="text-sm text-gray-600 mt-1">{{ activeBanner.description }}</p>
+        <!-- Dots de navigation -->
+        <div
+          v-if="banners.length > 1"
+          class="absolute bottom-1 sm:bottom-2 left-0 right-0 flex justify-center gap-1 sm:gap-2 z-10"
+        >
+          <button
+            v-for="(banner, index) in banners"
+            :key="banner.id"
+            type="button"
+            :aria-label="`Afficher la publicité ${index + 1}`"
+            :aria-current="index === currentIndex ? 'true' : 'false'"
+            class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-colors"
+            :class="index === currentIndex ? 'bg-white' : 'bg-white/50 hover:bg-white/80'"
+            @click="goToSlide(index)"
+          />
         </div>
-      </div>
 
-      <!-- Indicateurs de navigation (si plusieurs bannières) -->
-      <div v-if="banners.length > 1" class="flex justify-center mt-4 space-x-2">
-        <button v-for="(banner, index) in banners" :key="banner.id"
-                @click="goToSlide(index)"
-                class="w-3 h-3 rounded-full transition-all duration-200"
-                :class="index === currentIndex ? 'bg-blue-900 w-8' : 'bg-gray-300 hover:bg-gray-400'">
-        </button>
-      </div>
+        <!-- Boutons précédent/suivant -->
+        <div
+          v-if="banners.length > 1 && showNavButtons"
+          class="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-2 sm:px-3 pointer-events-none z-10"
+        >
+          <button
+            type="button"
+            aria-label="Précédent"
+            class="pointer-events-auto bg-white/75 hover:bg-white rounded-full p-1.5 sm:p-2 shadow text-primea-blue hover:text-primea-yellow transition-colors"
+            @click="prevSlide"
+          >
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            aria-label="Suivant"
+            class="pointer-events-auto bg-white/75 hover:bg-white rounded-full p-1.5 sm:p-2 shadow text-primea-blue hover:text-primea-yellow transition-colors"
+            @click="nextSlide"
+          >
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
 
-      <!-- Boutons de navigation (optionnels) -->
-      <div v-if="banners.length > 1 && showNavButtons" class="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-4 pointer-events-none">
-        <button @click="prevSlide"
-                class="pointer-events-auto bg-white bg-opacity-75 hover:bg-opacity-100 rounded-full p-2 shadow-lg transition-all duration-200 text-blue-900 hover:text-yellow-500">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-          </svg>
-        </button>
-        <button @click="nextSlide"
-                class="pointer-events-auto bg-white bg-opacity-75 hover:bg-opacity-100 rounded-full p-2 shadow-lg transition-all duration-200 text-blue-900 hover:text-yellow-500">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-          </svg>
-        </button>
+        <!-- Slide -->
+        <component
+          :is="activeBanner.link_url ? 'a' : 'div'"
+          v-bind="activeBanner.link_url ? {
+            href: activeBanner.link_url,
+            target: '_blank',
+            rel: 'noopener sponsored',
+          } : {}"
+          class="block w-full h-full"
+          :aria-label="activeBanner.title"
+        >
+          <div class="w-full h-full flex items-center justify-center">
+            <img
+              :src="activeBanner.image_url"
+              :alt="activeBanner.title"
+              class="max-w-full max-h-full object-contain object-center"
+              loading="lazy"
+            />
+          </div>
+        </component>
       </div>
+    </div>
+
+    <!-- Informations optionnelles sous la bannière -->
+    <div v-if="showInfo && activeBanner.description" class="mt-3 text-center">
+      <h3 class="text-lg font-bold text-gray-900">{{ activeBanner.title }}</h3>
+      <p class="text-sm text-gray-600 mt-1">{{ activeBanner.description }}</p>
     </div>
   </div>
 </template>
@@ -169,31 +199,11 @@ export default {
 .banner-carousel {
   position: relative;
   max-width: 100%;
-}
-
-.banner-slide {
-  position: relative;
-  animation: fadeIn 0.5s ease-in-out;
-}
-
-.banner-image {
-  max-height: 400px;
-  width: 100%;
-  object-fit: cover;
-}
-
-@media (max-width: 768px) {
-  .banner-image {
-    max-height: 250px;
-  }
+  animation: fadeIn 0.4s ease-in-out;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 </style>
