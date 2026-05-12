@@ -436,25 +436,7 @@ class PayoutService
 
             // Envoyer la notification PayoutCreated uniquement si le payout n'a pas échoué immédiatement
             if ($payout && $payout->status !== 'failed') {
-                try {
-                    if ($organizer->user) {
-                        $organizer->user->notify(new PayoutCreated($payout));
-                        Log::info('Notification PayoutCreated envoyée', [
-                            'payout_id' => $payout->id,
-                            'organizer_id' => $organizer->id
-                        ]);
-                    } else {
-                        Log::warning('Notification PayoutCreated non envoyée - organizer sans user', [
-                            'payout_id' => $payout->id,
-                            'organizer_id' => $organizer->id
-                        ]);
-                    }
-                } catch (\Exception $e) {
-                    Log::error('Erreur envoi notification PayoutCreated', [
-                        'payout_id' => $payout->id,
-                        'error' => $e->getMessage()
-                    ]);
-                }
+                $this->notifyOrganizerMembers($organizer, new PayoutCreated($payout), 'PayoutCreated', $payout->id);
             }
 
             return $payout;
@@ -513,27 +495,8 @@ class PayoutService
                     'final_status' => 'success'
                 ]);
 
-                // Envoyer la notification PayoutSuccessful
-                try {
-                    if ($payout->organizer && $payout->organizer->user) {
-                        $payout->organizer->user->notify(new PayoutSuccessful($payout));
-                        Log::info('Notification PayoutSuccessful envoyée', [
-                            'payout_id' => $payout->id,
-                            'organizer_id' => $payout->organizer_id
-                        ]);
-                    } else {
-                        Log::warning('Notification PayoutSuccessful non envoyée - organizer ou user manquant', [
-                            'payout_id' => $payout->id,
-                            'organizer_id' => $payout->organizer_id,
-                            'has_organizer' => isset($payout->organizer),
-                            'has_user' => $payout->organizer && isset($payout->organizer->user)
-                        ]);
-                    }
-                } catch (\Exception $e) {
-                    Log::error('Erreur envoi notification PayoutSuccessful', [
-                        'payout_id' => $payout->id,
-                        'error' => $e->getMessage()
-                    ]);
+                if ($payout->organizer) {
+                    $this->notifyOrganizerMembers($payout->organizer, new PayoutSuccessful($payout), 'PayoutSuccessful', $payout->id);
                 }
             } else {
                 // Remettre le montant dans le solde si le payout échoue
@@ -565,27 +528,8 @@ class PayoutService
                     'callback_data' => $callbackData
                 ]);
 
-                // Envoyer la notification PayoutFailed
-                try {
-                    if ($payout->organizer && $payout->organizer->user) {
-                        $payout->organizer->user->notify(new PayoutFailed($payout));
-                        Log::info('Notification PayoutFailed envoyée', [
-                            'payout_id' => $payout->id,
-                            'organizer_id' => $payout->organizer_id
-                        ]);
-                    } else {
-                        Log::warning('Notification PayoutFailed non envoyée - organizer ou user manquant', [
-                            'payout_id' => $payout->id,
-                            'organizer_id' => $payout->organizer_id,
-                            'has_organizer' => isset($payout->organizer),
-                            'has_user' => $payout->organizer && isset($payout->organizer->user)
-                        ]);
-                    }
-                } catch (\Exception $e) {
-                    Log::error('Erreur envoi notification PayoutFailed', [
-                        'payout_id' => $payout->id,
-                        'error' => $e->getMessage()
-                    ]);
+                if ($payout->organizer) {
+                    $this->notifyOrganizerMembers($payout->organizer, new PayoutFailed($payout), 'PayoutFailed', $payout->id);
                 }
             }
 
@@ -601,20 +545,20 @@ class PayoutService
     }
 
     /**
-     * Programmer une vérification de statut pour un payout asynchrone.
+     * Marquer un payout comme nécessitant un polling.
      *
-     * Le job se re-dispatche tant que SHAP renvoie un statut non final, avec
-     * un backoff croissant (cf. CheckPayoutStatusJob::ATTEMPT_DELAYS).
+     * Aucun dispatch synchrone ici: l'hébergement mutualisé (Hostinger)
+     * n'expose pas de queue worker permanent. Le scheduler Laravel exécute
+     * `php artisan payout:check-status` toutes les 5 minutes via un unique
+     * cron job, qui appelle PayoutService::checkPendingPayouts() et balaie
+     * tous les payouts en statut pending/processing.
      */
     private function scheduleStatusCheck(Payout $payout): void
     {
-        Log::info('Programmation vérification statut payout', [
+        Log::info('Payout asynchrone enregistré pour polling cron', [
             'payout_id' => $payout->id,
             'external_reference' => $payout->external_reference,
-            'first_check_in_seconds' => 300,
         ]);
-
-        \App\Jobs\CheckPayoutStatusJob::dispatch($payout->id)->delay(now()->addMinutes(5));
     }
 
     /**
@@ -833,5 +777,44 @@ class PayoutService
                     'phone_number' => $balance->phone_number,
                 ];
             })->toArray();
+    }
+
+    /**
+     * Notifier tous les utilisateurs rattachés à un organizer.
+     *
+     * Un Organizer peut avoir plusieurs membres via la table pivot
+     * organizer_user — on les notifie tous (pas seulement le "owner"),
+     * et on isole chaque envoi pour qu'une exception sur un destinataire
+     * ne bloque pas les autres.
+     */
+    private function notifyOrganizerMembers(Organizer $organizer, $notification, string $label, ?int $payoutId = null): void
+    {
+        $members = $organizer->users()->get();
+
+        if ($members->isEmpty()) {
+            Log::warning("Notification {$label} non envoyée - aucun user rattaché à l'organizer", [
+                'payout_id' => $payoutId,
+                'organizer_id' => $organizer->id,
+            ]);
+            return;
+        }
+
+        foreach ($members as $user) {
+            try {
+                $user->notify($notification);
+                Log::info("Notification {$label} envoyée", [
+                    'payout_id' => $payoutId,
+                    'organizer_id' => $organizer->id,
+                    'user_id' => $user->id,
+                ]);
+            } catch (\Exception $e) {
+                Log::error("Erreur envoi notification {$label}", [
+                    'payout_id' => $payoutId,
+                    'organizer_id' => $organizer->id,
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
     }
 }

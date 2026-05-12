@@ -12,6 +12,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Faire confiance aux reverse proxies pour récupérer la vraie IP
+        // client. Sans ça, $request->ip() renvoie l'IP du proxy Hostinger,
+        // ce qui casse le filtre IP du webhook E-Billing.
+        $middleware->trustProxies(
+            at: '*',
+            headers: \Illuminate\Http\Request::HEADER_X_FORWARDED_FOR
+                | \Illuminate\Http\Request::HEADER_X_FORWARDED_HOST
+                | \Illuminate\Http\Request::HEADER_X_FORWARDED_PORT
+                | \Illuminate\Http\Request::HEADER_X_FORWARDED_PROTO
+        );
+
         $middleware->alias([
             'organizer' => \App\Http\Middleware\OrganizerMiddleware::class,
             'admin.access' => \App\Http\Middleware\AdminAccess::class,
