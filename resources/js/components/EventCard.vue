@@ -1,21 +1,20 @@
 <template>
   <article v-if="event && event.title" class="event-card-modern group cursor-pointer" @click="goToEvent">
     <!-- Image de l'événement -->
-    <div class="event-image">
-      <img
-        v-if="eventImageUrl"
-        :src="eventImageUrl"
-        :alt="event.title"
-        loading="lazy"
-        class="w-full h-full object-cover"
-        @error="handleImageError"
-      />
-      <div
-        v-else
-        class="w-full h-full bg-gradient-to-br from-blue-100 to-yellow-100 flex items-center justify-center"
-      >
-        <CalendarIcon size="2xl" class="primea-text-gray-400" />
-      </div>
+    <SmartImage
+      :src="eventImageUrl"
+      :alt="event.title"
+      aspect-ratio="16/9"
+      fit="contain"
+      rounded="none"
+      class="event-image"
+      @error="handleImageError"
+    >
+      <template #placeholder>
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-100 to-yellow-100 flex items-center justify-center">
+          <CalendarIcon size="2xl" class="primea-text-gray-400" />
+        </div>
+      </template>
 
       <!-- Badge de catégorie -->
       <div v-if="event.category?.name || event.category_name" class="absolute top-4 left-4">
@@ -55,11 +54,11 @@
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-          </svg>
+        </svg>
           Voir détails
         </button>
       </div>
-    </div>
+    </SmartImage>
 
     <!-- Contenu de la carte -->
     <div class="p-6">
@@ -131,12 +130,14 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Swal from 'sweetalert2'
 import CalendarIcon from './icons/CalendarIcon.vue'
+import SmartImage from './SmartImage.vue'
 import { ClockIcon, MapPinIcon } from '@heroicons/vue/24/outline'
 
 export default {
   name: 'EventCard',
   components: {
     CalendarIcon,
+    SmartImage,
     ClockIcon,
     MapPinIcon
   },
@@ -452,18 +453,12 @@ export default {
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
 }
 
-.event-image {
-  position: relative;
-  overflow: hidden;
-  height: 200px;
-}
-
-.event-image img {
+.event-card-modern .event-image {
   transition: transform 0.5s ease;
 }
 
-.event-card-modern:hover .event-image img {
-  transform: scale(1.1);
+.event-card-modern:hover .event-image {
+  transform: scale(1.03);
 }
 
 .line-clamp-2 {

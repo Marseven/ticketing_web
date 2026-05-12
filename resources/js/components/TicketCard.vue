@@ -1,16 +1,15 @@
 <template>
   <div class="ticket-component bg-white rounded-primea-xl overflow-hidden font-primea max-w-sm shadow-primea-lg">
     <!-- Image de l'événement -->
-    <div class="relative">
-      <div class="relative overflow-hidden bg-primea-gradient h-40">
-        <img
-          :src="ticket.event.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800'"
-          :alt="ticket.event.title"
-          class="w-full h-full object-cover"
-        />
-        <div class="absolute inset-0 bg-black/30"></div>
-      </div>
-    </div>
+    <SmartImage
+      :src="ticket.event.image"
+      :alt="ticket.event.title"
+      aspect-ratio="16/9"
+      fit="contain"
+      rounded="none"
+    >
+      <div class="absolute inset-0 bg-black/30 pointer-events-none"></div>
+    </SmartImage>
 
     <!-- Corps du ticket avec bordure pointillée -->
     <div class="p-4 bg-gray-50 border-t-4 border-dashed border-gray-300 text-sm">
@@ -105,9 +104,11 @@
 
 <script>
 import { computed } from 'vue'
+import SmartImage from './SmartImage.vue'
 
 export default {
   name: 'TicketCard',
+  components: { SmartImage },
   props: {
     ticket: {
       type: Object,

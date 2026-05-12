@@ -41,19 +41,20 @@
             <div class="space-y-8">
               <!-- Carte événement -->
               <div class="bg-white rounded-primea-xl shadow-primea overflow-hidden">
-                <div class="relative h-64">
-                  <img
-                    v-if="eventImageUrl"
-                    :src="eventImageUrl"
-                    :alt="event.title"
-                    class="w-full h-full object-cover"
-                    loading="lazy"
-                    @error="handleImageError"
-                  />
-                  <div v-else class="w-full h-full bg-primea-gradient flex items-center justify-center">
-                    <PhotoIcon class="w-24 h-24 text-white/50" />
-                  </div>
-                  <div class="absolute inset-0 bg-primea-blue/60"></div>
+                <SmartImage
+                  :src="eventImageUrl"
+                  :alt="event?.title"
+                  aspect-ratio="16/9"
+                  fit="contain"
+                  rounded="none"
+                  @error="handleImageError"
+                >
+                  <template #placeholder>
+                    <div class="absolute inset-0 bg-primea-gradient flex items-center justify-center">
+                      <PhotoIcon class="w-24 h-24 text-white/50" />
+                    </div>
+                  </template>
+                  <div class="absolute inset-0 bg-primea-blue/60 pointer-events-none"></div>
                   <div class="absolute inset-0 p-6 text-white flex flex-col justify-end">
                     <div class="bg-primea-yellow text-primea-blue px-3 py-1 rounded-primea text-sm font-bold w-fit mb-2">
                       {{ getCategoryName() }}
@@ -61,7 +62,7 @@
                     <h2 class="text-2xl font-bold mb-2">{{ event?.title || 'Chargement...' }}</h2>
                     <p class="text-white/90">{{ formatEventDate }}</p>
                   </div>
-                </div>
+                </SmartImage>
                 
                 <div class="p-6">
                   <div class="space-y-3">
@@ -523,12 +524,20 @@
         <div v-else-if="event" class="px-4 pb-24">
           <!-- Event Card -->
           <div class="bg-white rounded-xl shadow-md overflow-hidden mb-6">
-            <div class="relative h-48">
-              <img v-if="eventImageUrl" :src="eventImageUrl" :alt="event.title" class="w-full h-full object-cover" loading="lazy" @error="handleImageError" />
-              <div v-else class="w-full h-full bg-gradient-to-br from-blue-900 to-blue-800 flex items-center justify-center">
-                <PhotoIcon class="w-16 h-16 text-white/30" />
-              </div>
-              <div class="absolute inset-0 bg-primea-blue/50"></div>
+            <SmartImage
+              :src="eventImageUrl"
+              :alt="event.title"
+              aspect-ratio="16/9"
+              fit="contain"
+              rounded="none"
+              @error="handleImageError"
+            >
+              <template #placeholder>
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-900 to-blue-800 flex items-center justify-center">
+                  <PhotoIcon class="w-16 h-16 text-white/30" />
+                </div>
+              </template>
+              <div class="absolute inset-0 bg-primea-blue/50 pointer-events-none"></div>
 
               <!-- Compte à rebours en haut à droite -->
               <div v-if="!isEventPassed" class="absolute top-3 right-3 px-3 py-2 text-white">
@@ -559,7 +568,7 @@
                   </router-link>
                 </div>
               </div>
-            </div>
+            </SmartImage>
           </div>
 
           <!-- Event Passed Message -->
@@ -796,6 +805,7 @@ import { useAuthStore } from '../stores/auth'
 import { guestService, orderService } from '../services/api'
 import PhoneInput from '../components/PhoneInput.vue'
 import BannerCarousel from '../components/BannerCarousel.vue'
+import SmartImage from '../components/SmartImage.vue'
 import {
   ExclamationCircleIcon,
   PhotoIcon,
@@ -808,6 +818,7 @@ export default {
   components: {
     PhoneInput,
     BannerCarousel,
+    SmartImage,
     ExclamationCircleIcon,
     PhotoIcon,
     MapPinIcon,

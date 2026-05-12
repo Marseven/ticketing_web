@@ -24,20 +24,24 @@
       <!-- Event Image Hero (Mobile: full width, Desktop: container with rounded corners) -->
       <section class="relative md:px-4 md:py-6">
         <div class="max-w-7xl mx-auto">
-          <div class="w-full h-64 md:h-96 lg:h-[500px] overflow-hidden md:rounded-2xl">
-            <img
-              v-if="eventImageUrl"
-              :src="eventImageUrl"
-              :alt="event.title"
-              class="w-full h-full object-cover"
-              @error="handleImageError"
-            />
-            <div v-else class="w-full h-full bg-gradient-to-br from-blue-900 to-blue-800 flex items-center justify-center">
-              <svg class="w-24 h-24 md:w-32 md:h-32 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-              </svg>
-            </div>
-          </div>
+          <SmartImage
+            :src="eventImageUrl"
+            :alt="event.title"
+            aspect-ratio="16/9"
+            fit="contain"
+            rounded="none"
+            eager
+            class="md:!rounded-2xl"
+            @error="handleImageError"
+          >
+            <template #placeholder>
+              <div class="absolute inset-0 bg-gradient-to-br from-blue-900 to-blue-800 flex items-center justify-center">
+                <svg class="w-24 h-24 md:w-32 md:h-32 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+              </div>
+            </template>
+          </SmartImage>
         </div>
       </section>
 
@@ -330,6 +334,7 @@ import FavoriteButton from '../components/FavoriteButton.vue'
 import ScheduleSection from '../components/ScheduleSection.vue'
 import VenueSection from '../components/VenueSection.vue'
 import ShareCard from '../components/ShareCard.vue'
+import SmartImage from '../components/SmartImage.vue'
 
 export default {
   name: 'EventDetail',
@@ -339,7 +344,8 @@ export default {
     FavoriteButton,
     ScheduleSection,
     VenueSection,
-    ShareCard
+    ShareCard,
+    SmartImage
   },
   setup() {
     const route = useRoute()

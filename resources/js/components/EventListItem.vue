@@ -1,21 +1,23 @@
 <template>
   <article class="card-elegant p-6 flex flex-col md:flex-row gap-6 group hover:shadow-lg transition-all duration-300 cursor-pointer" @click="goToEvent">
     <!-- Image -->
-    <div class="md:w-48 h-32 md:h-auto overflow-hidden rounded-lg flex-shrink-0">
-      <img 
-        v-if="event.image_url" 
-        :src="event.image_url" 
-        :alt="event.title" 
-        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-      />
-      <div 
-        v-else 
-        class="w-full h-full bg-gradient-to-br from-blue-100 to-yellow-100 flex items-center justify-center"
+    <div class="md:w-48 flex-shrink-0">
+      <SmartImage
+        :src="event.image_url"
+        :alt="event.title"
+        aspect-ratio="4/3"
+        fit="contain"
+        rounded="lg"
+        class="group-hover:scale-[1.02] transition-transform duration-300"
       >
-        <svg class="w-8 h-8 primea-text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 8a4 4 0 11-8 0 4 4 0 018 0z"/>
-        </svg>
-      </div>
+        <template #placeholder>
+          <div class="absolute inset-0 bg-gradient-to-br from-blue-100 to-yellow-100 flex items-center justify-center">
+            <svg class="w-8 h-8 primea-text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 8a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+          </div>
+        </template>
+      </SmartImage>
     </div>
 
     <!-- Contenu -->
@@ -96,9 +98,11 @@
 <script>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import SmartImage from './SmartImage.vue'
 
 export default {
   name: 'EventListItem',
+  components: { SmartImage },
   props: {
     event: {
       type: Object,
