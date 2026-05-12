@@ -1,7 +1,7 @@
 <template>
   <div class="home bg-white min-h-screen">
     <!-- Hero Section -->
-    <section class="relative min-h-[500px] md:min-h-[600px] flex flex-col justify-between">
+    <section class="relative min-h-[360px] md:min-h-[600px] flex flex-col justify-between">
       <!-- Background Media (Image or Video) -->
       <div class="absolute inset-0">
         <!-- Video -->
@@ -26,10 +26,10 @@
       </div>
 
       <!-- Content Centré -->
-      <div class="relative z-10 w-full flex-1 flex items-center justify-center px-4 py-8">
+      <div class="relative z-10 w-full flex-1 flex items-center justify-center px-4 py-4 md:py-8">
         <div class="w-full max-w-2xl mx-auto text-center">
           <!-- Search Bar (75% de largeur et centré) -->
-          <div class="mb-8 flex justify-center">
+          <div class="mb-4 md:mb-8 flex justify-center">
             <div class="relative w-3/4">
               <input
                 type="text"
@@ -50,7 +50,7 @@
           </div>
 
           <!-- Slogan (taille réduite) -->
-          <h1 class="text-xl md:text-2xl lg:text-3xl font-bold text-white mb-6 uppercase">
+          <h1 class="text-lg md:text-2xl lg:text-3xl font-bold text-white mb-3 md:mb-6 uppercase">
             SE PROCURER UN TICKET<br>
             N'A JAMAIS ÉTÉ AUSSI SIMPLE !
           </h1>
@@ -68,7 +68,7 @@
       </div>
 
       <!-- Links en bas -->
-      <div class="relative z-10 w-full px-4 pb-6">
+      <div class="relative z-10 w-full px-4 pb-3 md:pb-6">
         <div class="flex items-center justify-between w-full max-w-md mx-auto text-white text-xs">
           <router-link
             to="/retrieve-ticket"
