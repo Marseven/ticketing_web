@@ -414,6 +414,16 @@
         </form>
       </div>
     </div>
+
+    <ImageCropper
+      v-model:open="cropperOpen"
+      :src="cropperSrc"
+      aspect-ratio="16/9"
+      :file-name="cropperFileName"
+      title="Recadrer la couverture de l'événement"
+      @cropped="onImageCropped"
+      @cancel="onCropCancel"
+    />
   </div>
 </template>
 
@@ -422,6 +432,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { organizerService } from '../../services/api';
 import Swal from 'sweetalert2';
+import ImageCropper from '../../components/ImageCropper.vue';
 import { 
   ArrowLeftIcon,
   ExclamationTriangleIcon,
@@ -756,19 +767,36 @@ const cancelNewVenue = () => {
   form.new_venue_address = '';
 };
 
+const cropperOpen = ref(false);
+const cropperSrc = ref('');
+const cropperFileName = ref('event-cover.jpg');
+
 const handleImageUpload = (event) => {
   const file = event.target.files[0];
-  if (file) {
-    // Stocker le fichier pour l'upload
-    form.image_file = file;
-    form.image_url = ''; // Clear URL si on upload un fichier
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      form.image_preview = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  }
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    cropperSrc.value = e.target.result;
+    cropperFileName.value = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+    cropperOpen.value = true;
+  };
+  reader.readAsDataURL(file);
+};
+
+const onImageCropped = (croppedFile) => {
+  form.image_file = croppedFile;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    form.image_preview = e.target.result;
+    form.image_url = '';
+  };
+  reader.readAsDataURL(croppedFile);
+  cropperSrc.value = '';
+};
+
+const onCropCancel = () => {
+  cropperSrc.value = '';
 };
 
 const handleImageUrl = () => {

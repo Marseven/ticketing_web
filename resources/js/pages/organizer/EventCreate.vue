@@ -394,6 +394,16 @@
         </div>
       </form>
     </div>
+
+    <ImageCropper
+      v-model:open="cropperOpen"
+      :src="cropperSrc"
+      aspect-ratio="16/9"
+      :file-name="cropperFileName"
+      title="Recadrer la couverture de l'événement"
+      @cropped="onImageCropped"
+      @cancel="onCropCancel"
+    />
   </div>
 </template>
 
@@ -402,6 +412,7 @@ import { ref, reactive, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { organizerService } from '../../services/api';
 import Swal from 'sweetalert2';
+import ImageCropper from '../../components/ImageCropper.vue';
 import { 
   ArrowLeftIcon,
   PlusIcon,
@@ -492,17 +503,40 @@ const cancelNewVenue = () => {
   form.new_venue_address = '';
 };
 
+const cropperOpen = ref(false);
+const cropperSrc = ref('');
+const cropperFileName = ref('event-cover.jpg');
+
 const handleImageUpload = (event) => {
   const file = event.target.files[0];
-  if (file) {
-    form.image_file = file;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      form.image_preview = e.target.result;
-      form.image_url = ''; // Clear URL if file is selected
-    };
-    reader.readAsDataURL(file);
-  }
+  if (!file) return;
+
+  // Lire l'image pour ouvrir le cropper. Le fichier final sera produit
+  // par ImageCropper (recadré au ratio 16/9 pour rester cohérent avec
+  // l'affichage SmartImage).
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    cropperSrc.value = e.target.result;
+    cropperFileName.value = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+    cropperOpen.value = true;
+  };
+  reader.readAsDataURL(file);
+};
+
+const onImageCropped = (croppedFile) => {
+  form.image_file = croppedFile;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    form.image_preview = e.target.result;
+    form.image_url = '';
+  };
+  reader.readAsDataURL(croppedFile);
+  cropperSrc.value = '';
+};
+
+const onCropCancel = () => {
+  cropperSrc.value = '';
+  if (imageInput.value) imageInput.value.value = '';
 };
 
 const handleImageUrl = () => {

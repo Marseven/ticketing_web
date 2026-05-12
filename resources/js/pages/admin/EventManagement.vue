@@ -246,11 +246,12 @@
 
               <div class="md:col-span-2">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Image de l'événement</label>
-                <ImageUpload 
+                <ImageUpload
                   v-model="eventForm.image"
                   entity-type="events"
                   size="medium"
                   alt-text="Image de l'événement"
+                  aspect-ratio="16/9"
                   @change="handleImageChange"
                 />
               </div>

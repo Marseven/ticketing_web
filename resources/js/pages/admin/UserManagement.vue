@@ -159,11 +159,12 @@
 
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Photo de profil</label>
-              <ImageUpload 
+              <ImageUpload
                 v-model="userForm.avatar"
                 entity-type="users"
                 size="medium"
                 alt-text="Photo de profil"
+                aspect-ratio="1/1"
                 @change="handleImageChange"
               />
             </div>

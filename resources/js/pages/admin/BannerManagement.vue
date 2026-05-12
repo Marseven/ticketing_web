@@ -305,15 +305,27 @@
         </form>
       </div>
     </div>
+
+    <ImageCropper
+      v-model:open="cropperOpen"
+      :src="cropperSrc"
+      :aspect-ratio="cropperAspectRatio"
+      :file-name="cropperFileName"
+      title="Recadrer la bannière"
+      @cropped="onImageCropped"
+      @cancel="onCropCancel"
+    />
   </div>
 </template>
 
 <script>
 import { ref, reactive, computed, onMounted } from 'vue'
 import Swal from 'sweetalert2'
+import ImageCropper from '../../components/ImageCropper.vue'
 
 export default {
   name: 'BannerManagement',
+  components: { ImageCropper },
   setup() {
     const loading = ref(false)
     const uploading = ref(false)
@@ -402,21 +414,45 @@ export default {
       }
     }
 
+    const cropperOpen = ref(false)
+    const cropperSrc = ref('')
+    const cropperFileName = ref('banner.jpg')
+
+    // Ratio selon la position: header-top est un bandeau très large,
+    // les autres positions sont plus proches d'un 16/9.
+    const cropperAspectRatio = computed(() => {
+      return bannerForm.position === 'header-top' ? '32/3' : '16/9'
+    })
+
     const handleImageUpload = (event) => {
       const file = event.target.files[0]
-      if (file) {
-        if (file.size > 2048 * 1024) {
-          Swal.fire({ icon: 'warning', title: 'Attention', text: 'L\'image ne doit pas dépasser 2MB', confirmButtonColor: '#272d63' })
-          return
-        }
+      if (!file) return
 
-        imageFile.value = file
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          imagePreview.value = e.target.result
-        }
-        reader.readAsDataURL(file)
+      if (file.size > 2048 * 1024) {
+        Swal.fire({ icon: 'warning', title: 'Attention', text: 'L\'image ne doit pas dépasser 2MB', confirmButtonColor: '#272d63' })
+        return
       }
+
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        cropperSrc.value = e.target.result
+        cropperFileName.value = file.name.replace(/\.[^.]+$/, '') + '.jpg'
+        cropperOpen.value = true
+      }
+      reader.readAsDataURL(file)
+    }
+
+    const onImageCropped = (croppedFile) => {
+      imageFile.value = croppedFile
+      const reader = new FileReader()
+      reader.onload = (e) => { imagePreview.value = e.target.result }
+      reader.readAsDataURL(croppedFile)
+      cropperSrc.value = ''
+    }
+
+    const onCropCancel = () => {
+      cropperSrc.value = ''
+      if (imageInput.value) imageInput.value.value = ''
     }
 
     const removeImage = () => {
@@ -638,6 +674,12 @@ export default {
       removeImage,
       createBanner,
       editBanner,
+      cropperOpen,
+      cropperSrc,
+      cropperFileName,
+      cropperAspectRatio,
+      onImageCropped,
+      onCropCancel,
       updateBanner,
       toggleBannerStatus,
       deleteBanner,

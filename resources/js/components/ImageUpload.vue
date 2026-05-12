@@ -102,14 +102,26 @@
     <div v-if="loading" class="loading-overlay">
       <div class="loading-spinner"></div>
     </div>
+
+    <!-- Modal de cadrage -->
+    <ImageCropper
+      v-model:open="cropperOpen"
+      :src="cropperSrc"
+      :aspect-ratio="aspectRatio || '16/9'"
+      :file-name="cropperFileName"
+      @cropped="onCropped"
+      @cancel="onCropCancel"
+    />
   </div>
 </template>
 
 <script>
 import { ref, computed, watch } from 'vue'
+import ImageCropper from './ImageCropper.vue'
 
 export default {
   name: 'ImageUpload',
+  components: { ImageCropper },
   props: {
     modelValue: {
       type: Object,
@@ -131,10 +143,22 @@ export default {
     altText: {
       type: String,
       default: 'Image'
+    },
+    /**
+     * Ratio cible imposé à l'upload (ex "16/9", "1/1", "21/9").
+     * Si défini, ouvre le ImageCropper après sélection du fichier.
+     * Si null, comportement legacy: upload direct sans recadrage.
+     */
+    aspectRatio: {
+      type: [String, Number],
+      default: null,
     }
   },
   emits: ['update:modelValue', 'change'],
   setup(props, { emit }) {
+    const cropperOpen = ref(false)
+    const cropperSrc = ref('')
+    const cropperFileName = ref('cropped-image.jpg')
     const activeTab = ref('upload')
     const selectedFile = ref(null)
     const previewUrl = ref('')
@@ -188,27 +212,48 @@ export default {
     // Traitement du fichier sélectionné
     const handleFile = (file) => {
       error.value = ''
-      
+
       // Validation du type de fichier
       if (!file.type.startsWith('image/')) {
         error.value = 'Veuillez sélectionner un fichier image valide.'
         return
       }
-      
+
       // Validation de la taille (5MB max)
       if (file.size > 5 * 1024 * 1024) {
         error.value = 'L\'image ne doit pas dépasser 5MB.'
         return
       }
-      
-      selectedFile.value = file
-      
-      // Créer une prévisualisation
+
       const reader = new FileReader()
       reader.onload = (e) => {
-        previewUrl.value = e.target.result
+        if (props.aspectRatio) {
+          // Ouvrir le cropper, valider/upload se fera depuis onCropped
+          cropperSrc.value = e.target.result
+          cropperFileName.value = file.name.replace(/\.[^.]+$/, '') + '.jpg'
+          cropperOpen.value = true
+        } else {
+          selectedFile.value = file
+          previewUrl.value = e.target.result
+        }
       }
       reader.readAsDataURL(file)
+    }
+
+    // Quand l'utilisateur valide le cadrage
+    const onCropped = (croppedFile) => {
+      selectedFile.value = croppedFile
+      const reader = new FileReader()
+      reader.onload = (e) => { previewUrl.value = e.target.result }
+      reader.readAsDataURL(croppedFile)
+      cropperSrc.value = ''
+    }
+
+    const onCropCancel = () => {
+      cropperSrc.value = ''
+      // Réinitialiser l'input file pour permettre une nouvelle sélection
+      const input = document.querySelector('.image-upload-component input[type="file"]')
+      if (input) input.value = ''
     }
 
     // Upload du fichier
@@ -353,7 +398,12 @@ export default {
       validateImageUrl,
       confirmUrl,
       removeImage,
-      formatFileSize
+      formatFileSize,
+      cropperOpen,
+      cropperSrc,
+      cropperFileName,
+      onCropped,
+      onCropCancel,
     }
   }
 }

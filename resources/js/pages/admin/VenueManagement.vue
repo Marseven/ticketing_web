@@ -170,6 +170,7 @@
                 entity-type="venues"
                 size="medium"
                 alt-text="Image du lieu"
+                aspect-ratio="16/9"
               />
             </div>
             
