@@ -78,6 +78,19 @@
             Billets physiques
           </router-link>
 
+          <!-- Import MyTicketO (legacy) -->
+          <router-link to="/admin/legacy-import"
+                       class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-colors duration-200"
+                       :class="getMenuItemClass('/admin/legacy-import')"
+                       :style="getMenuItemStyle('/admin/legacy-import')"
+                       @mouseover="handleMenuHover($event, '/admin/legacy-import')"
+                       @mouseleave="handleMenuLeave($event, '/admin/legacy-import')">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10a2 2 0 002 2h12a2 2 0 002-2V7M4 7l8 5 8-5M4 7l8-4 8 4" />
+            </svg>
+            Import MyTicketO
+          </router-link>
+
           <!-- Suivi des Achats -->
           <router-link to="/admin/orders"
                        class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-colors duration-200"
@@ -532,6 +545,7 @@ export default {
         '/admin/events': 'Gestion des Événements',
         '/admin/events-approval': 'Validation des Événements',
         '/admin/physical-tickets': 'Billets Physiques',
+        '/admin/legacy-import': 'Import MyTicketO',
         '/admin/orders': 'Suivi des Achats',
         '/admin/payments': 'Suivi des Paiements',
         '/admin/payouts': 'Gestion des Payouts',

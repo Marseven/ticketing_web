@@ -278,6 +278,13 @@ Route::prefix('v1')->group(function () {
 
         // Impression d'un lot de billets physiques
         Route::get('physical-tickets/batches/{batchReference}/print', [App\Http\Controllers\Admin\PhysicalTicketController::class, 'printBatch']);
+
+        // Import des données legacy MyTicketO
+        Route::prefix('legacy-import')->group(function () {
+            Route::get('status', [App\Http\Controllers\Admin\LegacyImportController::class, 'status']);
+            Route::post('preview', [App\Http\Controllers\Admin\LegacyImportController::class, 'preview']);
+            Route::post('run', [App\Http\Controllers\Admin\LegacyImportController::class, 'run']);
+        });
         
         // Gestion des payouts
         Route::prefix('payouts')->group(function () {

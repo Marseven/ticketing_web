@@ -15,6 +15,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 /**
@@ -29,6 +30,7 @@ class LegacyImport extends Command
 {
     protected $signature = 'legacy:import
         {--all : Importer aussi les événements passés (par défaut: à venir seulement)}
+        {--fresh : Purger les données existantes (events, ventes, organisateurs, clients) avant import — conserve admins et données de référence}
         {--dry-run : Simuler sans écrire}';
 
     protected $description = 'Importer les données legacy MyTicketO vers le schéma actuel';
@@ -62,6 +64,9 @@ class LegacyImport extends Command
         }
 
         DB::transaction(function () use ($eventIds) {
+            if ($this->option('fresh') && !$this->dry) {
+                $this->purgeExisting();
+            }
             $this->importUsers();          // clients
             $this->importOwners($eventIds); // organisateurs (+ users)
             $this->importEvents($eventIds); // events (+ venues, catégories)
@@ -373,6 +378,44 @@ class LegacyImport extends Command
             $n++;
         }
         $this->line('  checkins: ' . $n);
+    }
+
+    /**
+     * Purger les données transactionnelles/métier existantes avant un import
+     * "remplacement". CONSERVE : admins, user_types, event_categories, roles,
+     * privileges, settings, banners, hero_banners.
+     */
+    private function purgeExisting(): void
+    {
+        $this->warn('  ⚠ Purge des données existantes…');
+
+        $adminTypeId = DB::table('user_types')->where('name', 'admin')->value('id');
+
+        // Ordre FK-safe (checks désactivés par sécurité).
+        $truncate = [
+            'notifications', 'checkins', 'tickets', 'payments', 'order_items', 'orders',
+            'ticket_prices', 'ticket_types', 'event_schedules', 'event_recurrence_rules',
+            'events', 'organizer_balances', 'payouts', 'organizer_user', 'venues', 'organizers',
+        ];
+
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        try {
+            foreach ($truncate as $table) {
+                if (Schema::hasTable($table)) {
+                    DB::table($table)->truncate();
+                }
+            }
+            // Utilisateurs : supprimer clients + organisateurs, garder les admins.
+            $usersQuery = DB::table('users');
+            if ($adminTypeId) {
+                $usersQuery->where('user_type_id', '!=', $adminTypeId)->orWhereNull('user_type_id');
+            }
+            $usersQuery->delete();
+        } finally {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        }
+
+        $this->line('  ✔ Purge terminée (admins et données de référence conservés)');
     }
 
     // ---------- Helpers ----------
