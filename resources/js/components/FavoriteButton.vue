@@ -39,10 +39,10 @@ export default {
 
 <style scoped>
 .text-primea-yellow {
-  color: #fab511;
+  color: #F5C070;
 }
 
 button:hover .text-primea-yellow {
-  color: #fab511 !important;
+  color: #F5C070 !important;
 }
 </style>

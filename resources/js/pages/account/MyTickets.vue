@@ -432,35 +432,35 @@ export default {
 }
 
 .text-primea-blue {
-  color: #272d63;
+  color: #004B5E;
 }
 
 .bg-primea-blue {
-  background-color: #272d63;
+  background-color: #004B5E;
 }
 
 .text-primea-yellow {
-  color: #fab511;
+  color: #F5C070;
 }
 
 .bg-primea-yellow {
-  background-color: #fab511;
+  background-color: #F5C070;
 }
 
 .hover\:bg-primea-yellow:hover {
-  background-color: #fab511;
+  background-color: #F5C070;
 }
 
 .hover\:text-primea-blue:hover {
-  color: #272d63;
+  color: #004B5E;
 }
 
 .hover\:bg-primea-blue:hover {
-  background-color: #272d63;
+  background-color: #004B5E;
 }
 
 .border-primea-blue {
-  border-color: #272d63;
+  border-color: #004B5E;
 }
 
 .rounded-primea {
@@ -473,23 +473,23 @@ export default {
 
 /* Boutons d'action */
 .btn-view {
-  background-color: #272d63;
+  background-color: #004B5E;
   color: white;
 }
 
 .btn-view:hover {
-  background-color: #fab511;
-  color: #272d63;
+  background-color: #F5C070;
+  color: #004B5E;
 }
 
 .btn-download {
-  border: 2px solid #fab511;
+  border: 2px solid #F5C070;
   background-color: white;
-  color: #fab511;
+  color: #F5C070;
 }
 
 .btn-download:hover {
-  background-color: #fab511;
-  color: #272d63;
+  background-color: #F5C070;
+  color: #004B5E;
 }
 </style>

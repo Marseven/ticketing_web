@@ -111,8 +111,8 @@ export default {
 <style scoped>
 /* Variables CSS MyTicketO */
 :root {
-  --primea-blue: #272d63;
-  --primea-yellow: #fab511;
+  --primea-blue: #004B5E;
+  --primea-yellow: #F5C070;
   --primea-white: #ffffff;
   --primea-blue-dark: #1a1e47;
   --primea-yellow-dark: #e09f0e;
@@ -182,11 +182,11 @@ export default {
 
 /* Ombres MyTicketO */
 .shadow-primea {
-  box-shadow: 0 4px 20px rgba(39, 45, 99, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 75, 94, 0.1);
 }
 
 .shadow-primea-lg {
-  box-shadow: 0 8px 30px rgba(39, 45, 99, 0.15);
+  box-shadow: 0 8px 30px rgba(0, 75, 94, 0.15);
 }
 
 /* Police MyTicketO */
@@ -237,7 +237,7 @@ export default {
 
 .from-primea-blue {
   --tw-gradient-from: var(--primea-blue);
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(39, 45, 99, 0));
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(0, 75, 94, 0));
 }
 
 .to-primea-blue-dark {

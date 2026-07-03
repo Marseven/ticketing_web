@@ -350,7 +350,7 @@ const loadBalances = async () => {
       title: 'Erreur',
       text: 'Impossible de charger les soldes. Affichage des valeurs par défaut.',
       icon: 'warning',
-      confirmButtonColor: '#272d63'
+      confirmButtonColor: '#004B5E'
     })
   } finally {
     loading.value = false
@@ -399,7 +399,7 @@ const submitPayoutRequest = async () => {
         title: 'Succès !',
         text: 'Demande de versement envoyée avec succès',
         icon: 'success',
-        confirmButtonColor: '#272d63'
+        confirmButtonColor: '#004B5E'
       })
       showPayoutModal.value = false
       loadBalances()
@@ -409,7 +409,7 @@ const submitPayoutRequest = async () => {
         title: 'Erreur',
         text: response.data.message || 'Erreur lors de la demande',
         icon: 'error',
-        confirmButtonColor: '#272d63'
+        confirmButtonColor: '#004B5E'
       })
     }
   } catch (error) {
@@ -418,7 +418,7 @@ const submitPayoutRequest = async () => {
       title: 'Erreur technique',
       text: 'Une erreur est survenue lors de la demande',
       icon: 'error',
-      confirmButtonColor: '#272d63'
+      confirmButtonColor: '#004B5E'
     })
   } finally {
     requestingPayout.value = false
@@ -446,7 +446,7 @@ const viewPayoutDetails = (payout) => {
       </div>
     `,
     icon: 'info',
-    confirmButtonColor: '#272d63'
+    confirmButtonColor: '#004B5E'
   })
 }
 
@@ -521,35 +521,35 @@ onMounted(() => {
 
 /* Couleurs MyTicketO */
 .text-primea-blue {
-  color: #272d63;
+  color: #004B5E;
 }
 
 .text-primea-yellow {
-  color: #fab511;
+  color: #F5C070;
 }
 
 .bg-primea-blue {
-  background-color: #272d63;
+  background-color: #004B5E;
 }
 
 .bg-primea-yellow {
-  background-color: #fab511;
+  background-color: #F5C070;
 }
 
 .hover\:bg-primea-blue:hover {
-  background-color: #272d63;
+  background-color: #004B5E;
 }
 
 .hover\:bg-primea-yellow:hover {
-  background-color: #fab511;
+  background-color: #F5C070;
 }
 
 .hover\:text-primea-blue:hover {
-  color: #272d63;
+  color: #004B5E;
 }
 
 .hover\:text-primea-yellow:hover {
-  color: #fab511;
+  color: #F5C070;
 }
 
 /* Coins arrondis MyTicketO */

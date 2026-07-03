@@ -2,7 +2,7 @@
   <div class="analytics-dashboard p-6">
     <!-- Header -->
     <div class="mb-8">
-      <div class="text-white rounded-lg p-6" style="background: linear-gradient(135deg, #272d63 0%, #1a1e47 100%);">
+      <div class="text-white rounded-lg p-6" style="background: linear-gradient(135deg, #004B5E 0%, #1a1e47 100%);">
         <h2 class="text-2xl font-bold mb-2">Analytics Avancées</h2>
         <p class="text-white opacity-80">Analyses détaillées, prédictions et exports des données de la plateforme</p>
       </div>
@@ -258,7 +258,7 @@
               <tr v-for="(event, index) in topEvents" :key="event.id" class="hover:bg-gray-50">
                 <td class="px-4 py-4">
                   <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white"
-                       :style="`background-color: ${index < 3 ? '#fab511' : '#272d63'}`">
+                       :style="`background-color: ${index < 3 ? '#F5C070' : '#004B5E'}`">
                     {{ index + 1 }}
                   </div>
                 </td>

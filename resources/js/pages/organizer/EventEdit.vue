@@ -683,7 +683,7 @@ const updateEvent = async () => {
       title: 'Succès !',
       text: 'Événement mis à jour avec succès !',
       icon: 'success',
-      confirmButtonColor: '#272d63'
+      confirmButtonColor: '#004B5E'
     });
     
     router.push({ name: 'organizer-event-detail', params: { slug: event.value.slug } });
@@ -705,7 +705,7 @@ const updateEvent = async () => {
       title: 'Erreur',
       text: errorMessage,
       icon: 'error',
-      confirmButtonColor: '#272d63'
+      confirmButtonColor: '#004B5E'
     });
   } finally {
     saving.value = false;
@@ -718,7 +718,7 @@ const publishEvent = async () => {
     text: 'Êtes-vous sûr de vouloir publier cet événement ?',
     icon: 'question',
     showCancelButton: true,
-    confirmButtonColor: '#272d63',
+    confirmButtonColor: '#004B5E',
     cancelButtonColor: '#6b7280',
     confirmButtonText: 'Oui, publier',
     cancelButtonText: 'Annuler'
@@ -738,7 +738,7 @@ const publishEvent = async () => {
         title: 'Succès !',
         text: 'Événement publié avec succès !',
         icon: 'success',
-        confirmButtonColor: '#272d63'
+        confirmButtonColor: '#004B5E'
       });
     } catch (err) {
       console.error('Erreur publication:', err);
@@ -746,7 +746,7 @@ const publishEvent = async () => {
         title: 'Erreur',
         text: 'Erreur lors de la publication de l\'événement',
         icon: 'error',
-        confirmButtonColor: '#272d63'
+        confirmButtonColor: '#004B5E'
       });
     }
   }
@@ -948,39 +948,39 @@ onMounted(async () => {
 
 /* Couleurs MyTicketO */
 .text-primea-blue {
-  color: #272d63;
+  color: #004B5E;
 }
 
 .text-primea-yellow {
-  color: #fab511;
+  color: #F5C070;
 }
 
 .bg-primea-blue {
-  background-color: #272d63;
+  background-color: #004B5E;
 }
 
 .bg-primea-yellow {
-  background-color: #fab511;
+  background-color: #F5C070;
 }
 
 .border-primea-blue {
-  border-color: #272d63;
+  border-color: #004B5E;
 }
 
 .hover\:bg-primea-blue:hover {
-  background-color: #272d63;
+  background-color: #004B5E;
 }
 
 .hover\:bg-primea-yellow:hover {
-  background-color: #fab511;
+  background-color: #F5C070;
 }
 
 .hover\:text-primea-blue:hover {
-  color: #272d63;
+  color: #004B5E;
 }
 
 .hover\:text-primea-yellow:hover {
-  color: #fab511;
+  color: #F5C070;
 }
 
 /* Coins arrondis MyTicketO */
@@ -990,7 +990,7 @@ onMounted(async () => {
 
 /* Ombres MyTicketO */
 .shadow-primea {
-  box-shadow: 0 2px 15px rgba(39, 45, 99, 0.08);
+  box-shadow: 0 2px 15px rgba(0, 75, 94, 0.08);
 }
 
 /* Police MyTicketO */

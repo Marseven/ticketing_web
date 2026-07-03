@@ -353,7 +353,7 @@ export default {
     const eventsStore = useEventsStore()
 
     // Couleurs pour les catégories de tickets
-    const ticketColors = ['#272d63', '#fab511', '#059669', '#dc2626', '#7c3aed', '#ea580c']
+    const ticketColors = ['#004B5E', '#F5C070', '#059669', '#dc2626', '#7c3aed', '#ea580c']
 
     // State
     const event = ref(null)

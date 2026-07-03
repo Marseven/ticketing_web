@@ -17,7 +17,7 @@
             vertical-align: top;
             page-break-inside: avoid;
         }
-        .ticket .event { font-size: 12px; font-weight: bold; color: #272d63; margin-bottom: 4px; }
+        .ticket .event { font-size: 12px; font-weight: bold; color: #004B5E; margin-bottom: 4px; }
         .ticket .meta { font-size: 9px; color: #555; margin-bottom: 6px; }
         .ticket img { width: 130px; height: 130px; }
         .ticket .code { font-size: 10px; font-family: DejaVu Sans Mono, monospace; margin-top: 4px; letter-spacing: 1px; }

@@ -350,15 +350,15 @@ export default {
         
         const data = await response.json()
         if (data.success) {
-          Swal.fire({ icon: 'success', title: 'Succès', text: 'Configuration mise à jour avec succès', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Configuration mise à jour avec succès', confirmButtonColor: '#004B5E' })
           showConfigModal.value = false
           loadBalances()
         } else {
-          Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Erreur lors de la mise à jour', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Erreur lors de la mise à jour', confirmButtonColor: '#004B5E' })
         }
       } catch (error) {
         console.error('Erreur sauvegarde config:', error)
-        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur technique', confirmButtonColor: '#272d63' })
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur technique', confirmButtonColor: '#004B5E' })
       } finally {
         savingConfig.value = false
       }

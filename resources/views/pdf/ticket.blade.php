@@ -49,7 +49,7 @@
             width: 100%;
             height: 180px;
             overflow: hidden;
-            background: linear-gradient(135deg, #272d63 0%, #4a5098 100%);
+            background: linear-gradient(135deg, #004B5E 0%, #4a5098 100%);
             position: relative;
             text-align: center;
         }
@@ -62,7 +62,7 @@
         .event-header-no-image {
             width: 100%;
             height: 140px;
-            background: linear-gradient(135deg, #272d63 0%, #4a5098 100%);
+            background: linear-gradient(135deg, #004B5E 0%, #4a5098 100%);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -130,7 +130,7 @@
         .event-title {
             font-size: 17px;
             font-weight: bold;
-            color: #272d63;
+            color: #004B5E;
             text-transform: uppercase;
             line-height: 1.2;
             margin-bottom: 12px;
@@ -207,11 +207,11 @@
         .primea-logo-text {
             font-size: 20px;
             font-weight: bold;
-            color: #272d63;
+            color: #004B5E;
         }
 
         .primea-logo-text span {
-            color: #fab511;
+            color: #F5C070;
         }
 
         .primea-tagline {
@@ -258,7 +258,7 @@
         .buyer-section-title {
             font-size: 9px;
             font-weight: 600;
-            color: #272d63;
+            color: #004B5E;
             text-transform: uppercase;
             margin-bottom: 6px;
             font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
@@ -288,7 +288,7 @@
 
         /* ===== FOOTER ===== */
         .ticket-footer {
-            background: #272d63;
+            background: #004B5E;
             color: white;
             padding: 10px 20px;
             font-size: 8px;

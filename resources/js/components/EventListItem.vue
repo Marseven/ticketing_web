@@ -210,11 +210,11 @@ export default {
 
 .btn-gradient-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(39, 45, 99, 0.3);
+  box-shadow: 0 10px 20px rgba(0, 75, 94, 0.3);
 }
 
 .primea-text-blue {
-  color: #272d63;
+  color: #004B5E;
 }
 
 .primea-text-gray-400 {
@@ -292,7 +292,7 @@ export default {
 }
 
 :root {
-  --primea-blue: #272d63;
+  --primea-blue: #004B5E;
   --primea-white: #ffffff;
   --primea-blue-dark: #1a1e47;
   --font-primary: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

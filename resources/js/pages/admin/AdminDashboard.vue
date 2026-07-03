@@ -2,7 +2,7 @@
   <div class="admin-dashboard p-6">
     <!-- Welcome Section -->
     <div class="mb-8">
-      <div class="text-white rounded-lg p-6" style="background: linear-gradient(135deg, #272d63 0%, #1a1e47 100%);">
+      <div class="text-white rounded-lg p-6" style="background: linear-gradient(135deg, #004B5E 0%, #1a1e47 100%);">
         <h2 class="text-2xl font-bold mb-2">Tableau de Bord MyTicketO</h2>
         <p class="text-white opacity-80">Supervision des paiements et transactions de la plateforme</p>
       </div>
@@ -18,28 +18,28 @@
       <div class="flex md:grid gap-3 md:gap-6 mb-8 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 md:grid-cols-2 lg:grid-cols-4">
         <div class="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto" @click="$router.push('/admin/payments')">
           <div class="flex items-center">
-            <div class="p-2 rounded-lg" style="background-color: rgba(39, 45, 99, 0.1);">
-              <svg class="w-6 h-6" style="color: #272d63;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-2 rounded-lg" style="background-color: rgba(0, 75, 94, 0.1);">
+              <svg class="w-6 h-6" style="color: #004B5E;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
               </svg>
             </div>
             <div class="ml-4">
               <p class="text-sm text-gray-600">Revenus Total</p>
-              <p class="text-2xl font-bold" style="color: #272d63;">{{ formatAmount(stats.total_revenue || 0) }} XAF</p>
+              <p class="text-2xl font-bold" style="color: #004B5E;">{{ formatAmount(stats.total_revenue || 0) }} XAF</p>
             </div>
           </div>
         </div>
 
         <div class="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto" @click="$router.push('/admin/orders')">
           <div class="flex items-center">
-            <div class="p-2 rounded-lg" style="background-color: rgba(250, 181, 17, 0.1);">
-              <svg class="w-6 h-6" style="color: #fab511;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-2 rounded-lg" style="background-color: rgba(245, 192, 112, 0.1);">
+              <svg class="w-6 h-6" style="color: #F5C070;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
               </svg>
             </div>
             <div class="ml-4">
               <p class="text-sm text-gray-600">Tickets Vendus</p>
-              <p class="text-2xl font-bold" style="color: #fab511;">{{ stats.tickets_sold || 0 }}</p>
+              <p class="text-2xl font-bold" style="color: #F5C070;">{{ stats.tickets_sold || 0 }}</p>
             </div>
           </div>
         </div>
@@ -77,42 +77,42 @@
       <div class="flex md:grid gap-3 md:gap-6 mb-8 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 md:grid-cols-2 lg:grid-cols-4">
         <div class="bg-white rounded-lg shadow p-6 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
           <div class="flex items-center">
-            <div class="p-2 rounded-lg" style="background-color: rgba(39, 45, 99, 0.1);">
-              <svg class="w-6 h-6" style="color: #272d63;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-2 rounded-lg" style="background-color: rgba(0, 75, 94, 0.1);">
+              <svg class="w-6 h-6" style="color: #004B5E;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
               </svg>
             </div>
             <div class="ml-4">
               <p class="text-sm text-gray-600">Paiements Réussis</p>
-              <p class="text-2xl font-bold" style="color: #272d63;">{{ stats.successful_payments || 0 }}</p>
+              <p class="text-2xl font-bold" style="color: #004B5E;">{{ stats.successful_payments || 0 }}</p>
             </div>
           </div>
         </div>
 
         <div class="bg-white rounded-lg shadow p-6 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
           <div class="flex items-center">
-            <div class="p-2 rounded-lg" style="background-color: rgba(250, 181, 17, 0.1);">
-              <svg class="w-6 h-6" style="color: #fab511;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-2 rounded-lg" style="background-color: rgba(245, 192, 112, 0.1);">
+              <svg class="w-6 h-6" style="color: #F5C070;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
             </div>
             <div class="ml-4">
               <p class="text-sm text-gray-600">Paiements En Attente</p>
-              <p class="text-2xl font-bold" style="color: #fab511;">{{ stats.pending_payments || 0 }}</p>
+              <p class="text-2xl font-bold" style="color: #F5C070;">{{ stats.pending_payments || 0 }}</p>
             </div>
           </div>
         </div>
 
         <div class="bg-white rounded-lg shadow p-6 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
           <div class="flex items-center">
-            <div class="p-2 rounded-lg" style="background-color: rgba(39, 45, 99, 0.15);">
-              <svg class="w-6 h-6" style="color: #272d63;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-2 rounded-lg" style="background-color: rgba(0, 75, 94, 0.15);">
+              <svg class="w-6 h-6" style="color: #004B5E;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
               </svg>
             </div>
             <div class="ml-4">
               <p class="text-sm text-gray-600">Commission Plateforme</p>
-              <p class="text-2xl font-bold" style="color: #272d63;">{{ formatAmount(stats.platform_commission || 0) }} XAF</p>
+              <p class="text-2xl font-bold" style="color: #004B5E;">{{ formatAmount(stats.platform_commission || 0) }} XAF</p>
             </div>
           </div>
         </div>
@@ -138,11 +138,11 @@
         <div class="lg:col-span-2">
           <div class="bg-white rounded-lg shadow p-6">
             <div class="flex justify-between items-center mb-4">
-              <h2 class="text-xl font-bold" style="color: #272d63;">Paiements Récents</h2>
+              <h2 class="text-xl font-bold" style="color: #004B5E;">Paiements Récents</h2>
               <button @click="$router.push('/admin/payments')" 
-                      class="text-sm transition-colors duration-200" style="color: #272d63;"
-                      @mouseover="$event.currentTarget.style.color = '#fab511'"
-                      @mouseleave="$event.currentTarget.style.color = '#272d63'">Voir tous</button>
+                      class="text-sm transition-colors duration-200" style="color: #004B5E;"
+                      @mouseover="$event.currentTarget.style.color = '#F5C070'"
+                      @mouseleave="$event.currentTarget.style.color = '#004B5E'">Voir tous</button>
             </div>
             
             <div v-if="recentOrders.length === 0" class="text-center text-gray-500 py-8">
@@ -172,12 +172,12 @@
                     <td class="px-4 py-4 text-sm">
                       <span v-if="order.status === 'pending'"
                             class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                            style="background-color: rgba(250, 181, 17, 0.1); color: #fab511;">
+                            style="background-color: rgba(245, 192, 112, 0.1); color: #F5C070;">
                         {{ getOrderStatusName(order.status) }}
                       </span>
                       <span v-else-if="order.status === 'paid'"
                             class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                            style="background-color: rgba(39, 45, 99, 0.1); color: #272d63;">
+                            style="background-color: rgba(0, 75, 94, 0.1); color: #004B5E;">
                         {{ getOrderStatusName(order.status) }}
                       </span>
                       <span v-else
@@ -202,14 +202,14 @@
             <div class="space-y-3">
               <div class="flex justify-between items-center">
                 <span class="text-sm text-gray-600">Paiements SHAP</span>
-                <span class="inline-flex px-2 py-1 text-xs rounded-full" style="background-color: rgba(39, 45, 99, 0.1); color: #272d63;">
+                <span class="inline-flex px-2 py-1 text-xs rounded-full" style="background-color: rgba(0, 75, 94, 0.1); color: #004B5E;">
                   Opérationnel
                 </span>
               </div>
 
               <div class="flex justify-between items-center">
                 <span class="text-sm text-gray-600">Base de données</span>
-                <span class="inline-flex px-2 py-1 text-xs rounded-full" style="background-color: rgba(39, 45, 99, 0.1); color: #272d63;">
+                <span class="inline-flex px-2 py-1 text-xs rounded-full" style="background-color: rgba(0, 75, 94, 0.1); color: #004B5E;">
                   Opérationnel
                 </span>
               </div>
@@ -411,7 +411,7 @@ export default {
         if (data.success) {
           const balances = data.data.balances
           const total = balances.reduce((sum, b) => sum + b.amount, 0)
-          Swal.fire({ icon: 'info', title: 'Information', text: `Solde SHAP total: ${formatAmount(total)} XAF`, confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'info', title: 'Information', text: `Solde SHAP total: ${formatAmount(total)} XAF`, confirmButtonColor: '#004B5E' })
         }
       } catch (error) {
         console.error('Erreur vérification solde SHAP:', error)

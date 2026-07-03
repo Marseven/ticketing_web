@@ -480,7 +480,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur export:', error)
-        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors de l\'export des données', confirmButtonColor: '#272d63' })
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors de l\'export des données', confirmButtonColor: '#004B5E' })
       }
     }
 

@@ -388,43 +388,43 @@ onMounted(() => {
 
 /* Couleurs MyTicketO */
 .text-primea-blue {
-  color: #272d63;
+  color: #004B5E;
 }
 
 .text-primea-yellow {
-  color: #fab511;
+  color: #F5C070;
 }
 
 .bg-primea-blue {
-  background-color: #272d63;
+  background-color: #004B5E;
 }
 
 .bg-primea-yellow {
-  background-color: #fab511;
+  background-color: #F5C070;
 }
 
 .border-primea-blue {
-  border-color: #272d63;
+  border-color: #004B5E;
 }
 
 .border-primea-yellow {
-  border-color: #fab511;
+  border-color: #F5C070;
 }
 
 .hover\:bg-primea-blue:hover {
-  background-color: #272d63;
+  background-color: #004B5E;
 }
 
 .hover\:bg-primea-yellow:hover {
-  background-color: #fab511;
+  background-color: #F5C070;
 }
 
 .hover\:text-primea-blue:hover {
-  color: #272d63;
+  color: #004B5E;
 }
 
 .hover\:text-primea-yellow:hover {
-  color: #fab511;
+  color: #F5C070;
 }
 
 /* Coins arrondis MyTicketO */
@@ -434,7 +434,7 @@ onMounted(() => {
 
 /* Ombres MyTicketO */
 .shadow-primea {
-  box-shadow: 0 2px 15px rgba(39, 45, 99, 0.08);
+  box-shadow: 0 2px 15px rgba(0, 75, 94, 0.08);
 }
 
 /* Police MyTicketO */

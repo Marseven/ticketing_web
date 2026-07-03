@@ -265,8 +265,8 @@ export default {
 <style scoped>
 /* Variables CSS MyTicketO */
 :root {
-  --primea-blue: #272d63;
-  --primea-yellow: #fab511;
+  --primea-blue: #004B5E;
+  --primea-yellow: #F5C070;
   --primea-white: #ffffff;
   --primea-blue-dark: #1a1e47;
   --primea-yellow-dark: #e09f0e;
@@ -323,7 +323,7 @@ export default {
 
 /* Ombres MyTicketO */
 .shadow-primea-lg {
-  box-shadow: 0 8px 30px rgba(39, 45, 99, 0.15);
+  box-shadow: 0 8px 30px rgba(0, 75, 94, 0.15);
 }
 
 /* Police MyTicketO */

@@ -68,7 +68,7 @@
         <div class="flex md:grid gap-3 md:gap-6 mb-8 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 md:grid-cols-4">
           <div class="bg-white rounded-primea shadow-primea p-6 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
             <div class="flex items-center">
-              <div class="p-2 rounded-lg" style="background-color: rgba(39, 45, 99, 0.1);">
+              <div class="p-2 rounded-lg" style="background-color: rgba(0, 75, 94, 0.1);">
                 <TicketIcon class="w-6 h-6 text-primea-blue" />
               </div>
               <div class="ml-4">
@@ -80,7 +80,7 @@
 
           <div class="bg-white rounded-primea shadow-primea p-6 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
             <div class="flex items-center">
-              <div class="p-2 rounded-lg" style="background-color: rgba(39, 45, 99, 0.15);">
+              <div class="p-2 rounded-lg" style="background-color: rgba(0, 75, 94, 0.15);">
                 <CurrencyDollarIcon class="w-6 h-6 text-primea-blue" />
               </div>
               <div class="ml-4">
@@ -92,7 +92,7 @@
 
           <div class="bg-white rounded-primea shadow-primea p-6 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
             <div class="flex items-center">
-              <div class="p-2 rounded-lg" style="background-color: rgba(250, 181, 17, 0.15);">
+              <div class="p-2 rounded-lg" style="background-color: rgba(245, 192, 112, 0.15);">
                 <UsersIcon class="w-6 h-6 text-primea-yellow" />
               </div>
               <div class="ml-4">
@@ -104,7 +104,7 @@
 
           <div class="bg-white rounded-primea shadow-primea p-6 flex-shrink-0 w-[calc(50%-0.375rem)] md:w-auto">
             <div class="flex items-center">
-              <div class="p-2 rounded-lg" style="background-color: rgba(39, 45, 99, 0.2);">
+              <div class="p-2 rounded-lg" style="background-color: rgba(0, 75, 94, 0.2);">
                 <CalendarIcon class="w-6 h-6 text-primea-blue" />
               </div>
               <div class="ml-4">
@@ -467,7 +467,7 @@ const publishEvent = async () => {
     text: 'Êtes-vous sûr de vouloir publier cet événement ?',
     icon: 'question',
     showCancelButton: true,
-    confirmButtonColor: '#272d63',
+    confirmButtonColor: '#004B5E',
     cancelButtonColor: '#6b7280',
     confirmButtonText: 'Oui, publier',
     cancelButtonText: 'Annuler'
@@ -487,7 +487,7 @@ const publishEvent = async () => {
         title: 'Succès !',
         text: 'Événement publié avec succès !',
         icon: 'success',
-        confirmButtonColor: '#272d63'
+        confirmButtonColor: '#004B5E'
       });
     } catch (err) {
       console.error('Erreur publication:', err);
@@ -495,7 +495,7 @@ const publishEvent = async () => {
         title: 'Erreur',
         text: 'Erreur lors de la publication de l\'événement',
         icon: 'error',
-        confirmButtonColor: '#272d63'
+        confirmButtonColor: '#004B5E'
       });
     }
   }
@@ -532,7 +532,7 @@ const exportData = () => {
     title: 'Export des données',
     text: 'Fonctionnalité d\'export en cours de développement',
     icon: 'info',
-    confirmButtonColor: '#272d63'
+    confirmButtonColor: '#004B5E'
   });
 };
 
@@ -703,39 +703,39 @@ onMounted(() => {
 
 /* Couleurs MyTicketO */
 .text-primea-blue {
-  color: #272d63;
+  color: #004B5E;
 }
 
 .text-primea-yellow {
-  color: #fab511;
+  color: #F5C070;
 }
 
 .bg-primea-blue {
-  background-color: #272d63;
+  background-color: #004B5E;
 }
 
 .bg-primea-yellow {
-  background-color: #fab511;
+  background-color: #F5C070;
 }
 
 .border-primea-blue {
-  border-color: #272d63;
+  border-color: #004B5E;
 }
 
 .hover\:bg-primea-blue:hover {
-  background-color: #272d63;
+  background-color: #004B5E;
 }
 
 .hover\:bg-primea-yellow:hover {
-  background-color: #fab511;
+  background-color: #F5C070;
 }
 
 .hover\:text-primea-blue:hover {
-  color: #272d63;
+  color: #004B5E;
 }
 
 .hover\:text-primea-yellow:hover {
-  color: #fab511;
+  color: #F5C070;
 }
 
 /* Coins arrondis MyTicketO */
@@ -745,7 +745,7 @@ onMounted(() => {
 
 /* Ombres MyTicketO */
 .shadow-primea {
-  box-shadow: 0 2px 15px rgba(39, 45, 99, 0.08);
+  box-shadow: 0 2px 15px rgba(0, 75, 94, 0.08);
 }
 
 /* Police MyTicketO */

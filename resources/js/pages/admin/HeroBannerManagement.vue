@@ -3,14 +3,14 @@
     <!-- Header -->
     <div class="mb-6 flex justify-between items-center">
       <div>
-        <h1 class="text-2xl font-bold" style="color: #272d63;">Gestion du Hero Banner</h1>
+        <h1 class="text-2xl font-bold" style="color: #004B5E;">Gestion du Hero Banner</h1>
         <p class="text-gray-600 mt-1">Gérez les images/vidéos de la bannière d'accueil</p>
       </div>
       <button @click="showCreateModal = true"
               class="text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
-              style="background-color: #272d63;"
-              @mouseover="$event.currentTarget.style.backgroundColor = '#fab511'"
-              @mouseleave="$event.currentTarget.style.backgroundColor = '#272d63'">
+              style="background-color: #004B5E;"
+              @mouseover="$event.currentTarget.style.backgroundColor = '#F5C070'"
+              @mouseleave="$event.currentTarget.style.backgroundColor = '#004B5E'">
         <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
         </svg>
@@ -26,13 +26,13 @@
           <input type="text" v-model="filters.search"
                  placeholder="Titre..."
                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                 style="--tw-ring-color: #272d63;">
+                 style="--tw-ring-color: #004B5E;">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Type</label>
           <select v-model="filters.type"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                  style="--tw-ring-color: #272d63;">
+                  style="--tw-ring-color: #004B5E;">
             <option value="">Tous les types</option>
             <option value="image">Image</option>
             <option value="video">Vidéo</option>
@@ -42,7 +42,7 @@
           <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
           <select v-model="filters.is_active"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                  style="--tw-ring-color: #272d63;">
+                  style="--tw-ring-color: #004B5E;">
             <option value="">Tous les statuts</option>
             <option value="true">Actif</option>
             <option value="false">Inactif</option>
@@ -53,7 +53,7 @@
 
     <!-- Loading -->
     <div v-if="loading" class="flex justify-center items-center h-64">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2" style="border-color: #272d63;"></div>
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2" style="border-color: #004B5E;"></div>
     </div>
 
     <!-- Hero Banners Grid -->
@@ -97,7 +97,7 @@
 
           <!-- Info -->
           <div class="p-4">
-            <h3 class="text-lg font-bold mb-2" style="color: #272d63;">
+            <h3 class="text-lg font-bold mb-2" style="color: #004B5E;">
               {{ heroBanner.title || 'Sans titre' }}
             </h3>
 
@@ -115,9 +115,9 @@
               </button>
               <button @click="editHeroBanner(heroBanner)"
                       class="flex-1 text-sm px-3 py-2 rounded transition-colors duration-200"
-                      style="color: #272d63; background-color: rgba(39, 45, 99, 0.1);"
-                      @mouseover="$event.currentTarget.style.backgroundColor = '#fab511'; $event.currentTarget.style.color = '#fff'"
-                      @mouseleave="$event.currentTarget.style.backgroundColor = 'rgba(39, 45, 99, 0.1)'; $event.currentTarget.style.color = '#272d63'">
+                      style="color: #004B5E; background-color: rgba(0, 75, 94, 0.1);"
+                      @mouseover="$event.currentTarget.style.backgroundColor = '#F5C070'; $event.currentTarget.style.color = '#fff'"
+                      @mouseleave="$event.currentTarget.style.backgroundColor = 'rgba(0, 75, 94, 0.1)'; $event.currentTarget.style.color = '#004B5E'">
                 Modifier
               </button>
               <button @click="deleteHeroBanner(heroBanner)"
@@ -144,7 +144,7 @@
     <!-- Create/Edit Modal -->
     <div v-if="showCreateModal || showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-        <h3 class="text-lg font-bold mb-4" style="color: #272d63;">
+        <h3 class="text-lg font-bold mb-4" style="color: #004B5E;">
           {{ showCreateModal ? 'Nouveau Hero Banner' : 'Modifier le Hero Banner' }}
         </h3>
 
@@ -221,7 +221,7 @@
                 <input type="url" v-model="heroBannerForm.media_url"
                        placeholder="https://..."
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                       style="--tw-ring-color: #272d63;">
+                       style="--tw-ring-color: #004B5E;">
                 <p class="text-xs text-gray-500 mt-1">URL de l'image ou vidéo externe</p>
                 <p v-if="heroBannerForm.type === 'image'" class="text-xs text-amber-600 font-medium mt-1 flex items-center gap-1">
                   <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -237,7 +237,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">Titre (optionnel)</label>
               <input type="text" v-model="heroBannerForm.title"
                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                     style="--tw-ring-color: #272d63;">
+                     style="--tw-ring-color: #004B5E;">
             </div>
 
             <!-- Display Order -->
@@ -245,14 +245,14 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">Ordre d'affichage</label>
               <input type="number" v-model="heroBannerForm.display_order" min="0"
                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                     style="--tw-ring-color: #272d63;">
+                     style="--tw-ring-color: #004B5E;">
             </div>
 
             <!-- Active Status -->
             <div class="flex items-center">
               <input type="checkbox" v-model="heroBannerForm.is_active" id="is_active"
                      class="h-4 w-4 rounded border-gray-300"
-                     style="color: #272d63;">
+                     style="color: #004B5E;">
               <label for="is_active" class="ml-2 block text-sm text-gray-700">
                 Hero banner actif
               </label>
@@ -263,9 +263,9 @@
             <button type="submit"
                     :disabled="uploading"
                     class="flex-1 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50"
-                    style="background-color: #272d63;"
-                    @mouseover="!uploading && ($event.currentTarget.style.backgroundColor = '#fab511')"
-                    @mouseleave="!uploading && ($event.currentTarget.style.backgroundColor = '#272d63')">
+                    style="background-color: #004B5E;"
+                    @mouseover="!uploading && ($event.currentTarget.style.backgroundColor = '#F5C070')"
+                    @mouseleave="!uploading && ($event.currentTarget.style.backgroundColor = '#004B5E')">
               <span v-if="uploading">Envoi en cours...</span>
               <span v-else>{{ showCreateModal ? 'Créer' : 'Modifier' }}</span>
             </button>
@@ -375,7 +375,7 @@ export default {
       const file = event.target.files[0]
       if (file) {
         if (file.size > 10240 * 1024) {
-          Swal.fire({ icon: 'warning', title: 'Attention', text: 'Le fichier ne doit pas dépasser 10MB', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'warning', title: 'Attention', text: 'Le fichier ne doit pas dépasser 10MB', confirmButtonColor: '#004B5E' })
           return
         }
 
@@ -398,11 +398,11 @@ export default {
 
     const createHeroBanner = async () => {
       if (uploadMode.value === 'file' && !mediaFile.value) {
-        Swal.fire({ icon: 'warning', title: 'Attention', text: 'Veuillez sélectionner un fichier', confirmButtonColor: '#272d63' })
+        Swal.fire({ icon: 'warning', title: 'Attention', text: 'Veuillez sélectionner un fichier', confirmButtonColor: '#004B5E' })
         return
       }
       if (uploadMode.value === 'url' && !heroBannerForm.media_url) {
-        Swal.fire({ icon: 'warning', title: 'Attention', text: 'Veuillez fournir une URL', confirmButtonColor: '#272d63' })
+        Swal.fire({ icon: 'warning', title: 'Attention', text: 'Veuillez fournir une URL', confirmButtonColor: '#004B5E' })
         return
       }
 
@@ -519,7 +519,7 @@ export default {
         showCancelButton: true,
         confirmButtonText: 'Oui',
         cancelButtonText: 'Annuler',
-        confirmButtonColor: '#272d63',
+        confirmButtonColor: '#004B5E',
         cancelButtonColor: '#d33'
       })
       if (!result.isConfirmed) return

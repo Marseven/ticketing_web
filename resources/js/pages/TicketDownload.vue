@@ -436,7 +436,7 @@ export default {
             <p class="font-semibold text-primea-blue">${fileName}</p>
             <p class="text-sm text-gray-500 mt-2">Vérifiez votre dossier Téléchargements</p>
           `,
-          confirmButtonColor: '#272d63',
+          confirmButtonColor: '#004B5E',
           confirmButtonText: 'Parfait !'
         })
 
@@ -446,7 +446,7 @@ export default {
           icon: 'error',
           title: 'Erreur de téléchargement',
           text: 'Impossible de télécharger le ticket. Veuillez réessayer.',
-          confirmButtonColor: '#272d63',
+          confirmButtonColor: '#004B5E',
           confirmButtonText: 'Réessayer'
         })
       } finally {
@@ -487,7 +487,7 @@ export default {
           icon: 'success',
           title: 'Image téléchargée !',
           html: `<p class="text-gray-600 mb-2">Votre ticket a été sauvegardé en JPG :</p><p class="font-semibold text-primea-blue">${fileName}</p>`,
-          confirmButtonColor: '#272d63',
+          confirmButtonColor: '#004B5E',
           confirmButtonText: 'Parfait !'
         })
       } catch (err) {
@@ -496,7 +496,7 @@ export default {
           icon: 'error',
           title: 'Erreur',
           text: 'Impossible de générer l\'image du ticket. Veuillez réessayer.',
-          confirmButtonColor: '#272d63'
+          confirmButtonColor: '#004B5E'
         })
       } finally {
         downloadingImage.value = false
@@ -526,7 +526,7 @@ export default {
             icon: 'success',
             title: 'Lien copié !',
             text: 'Le lien du ticket a été copié dans le presse-papiers',
-            confirmButtonColor: '#272d63',
+            confirmButtonColor: '#004B5E',
             timer: 2000,
             showConfirmButton: false
           })
@@ -535,7 +535,7 @@ export default {
             icon: 'info',
             title: 'Lien du ticket',
             text: ticketUrl,
-            confirmButtonColor: '#272d63'
+            confirmButtonColor: '#004B5E'
           })
         }
       }

@@ -204,13 +204,13 @@ const submitApprove = async () => {
     const data = await res.json()
     if (data.success) {
       approveModal.open = false
-      Swal.fire({ icon: 'success', title: 'Approuvé', text: 'Événement approuvé.', confirmButtonColor: '#272d63' })
+      Swal.fire({ icon: 'success', title: 'Approuvé', text: 'Événement approuvé.', confirmButtonColor: '#004B5E' })
       loadEvents()
     } else {
-      Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Échec', confirmButtonColor: '#272d63' })
+      Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Échec', confirmButtonColor: '#004B5E' })
     }
   } catch (e) {
-    Swal.fire({ icon: 'error', title: 'Erreur technique', text: 'Réessayez.', confirmButtonColor: '#272d63' })
+    Swal.fire({ icon: 'error', title: 'Erreur technique', text: 'Réessayez.', confirmButtonColor: '#004B5E' })
   } finally {
     submitting.value = false
   }
@@ -226,13 +226,13 @@ const submitReject = async () => {
     const data = await res.json()
     if (data.success) {
       rejectModal.open = false
-      Swal.fire({ icon: 'success', title: 'Rejeté', text: 'Événement rejeté.', confirmButtonColor: '#272d63' })
+      Swal.fire({ icon: 'success', title: 'Rejeté', text: 'Événement rejeté.', confirmButtonColor: '#004B5E' })
       loadEvents()
     } else {
-      Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Échec', confirmButtonColor: '#272d63' })
+      Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Échec', confirmButtonColor: '#004B5E' })
     }
   } catch (e) {
-    Swal.fire({ icon: 'error', title: 'Erreur technique', text: 'Réessayez.', confirmButtonColor: '#272d63' })
+    Swal.fire({ icon: 'error', title: 'Erreur technique', text: 'Réessayez.', confirmButtonColor: '#004B5E' })
   } finally {
     submitting.value = false
   }

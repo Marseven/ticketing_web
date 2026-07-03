@@ -792,31 +792,31 @@ export default {
 }
 
 .text-primea-blue {
-  color: #272d63;
+  color: #004B5E;
 }
 
 .bg-primea-blue {
-  background-color: #272d63;
+  background-color: #004B5E;
 }
 
 .text-primea-yellow {
-  color: #fab511;
+  color: #F5C070;
 }
 
 .bg-primea-yellow {
-  background-color: #fab511;
+  background-color: #F5C070;
 }
 
 .hover\:bg-primea-yellow:hover {
-  background-color: #fab511 !important;
+  background-color: #F5C070 !important;
 }
 
 .hover\:text-primea-blue:hover {
-  color: #272d63 !important;
+  color: #004B5E !important;
 }
 
 .hover\:text-primea-yellow:hover {
-  color: #fab511;
+  color: #F5C070;
 }
 
 .rounded-primea {
@@ -832,11 +832,11 @@ export default {
 }
 
 .shadow-primea {
-  box-shadow: 0 4px 20px rgba(39, 45, 99, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 75, 94, 0.1);
 }
 
 .shadow-primea-lg {
-  box-shadow: 0 8px 30px rgba(39, 45, 99, 0.15);
+  box-shadow: 0 8px 30px rgba(0, 75, 94, 0.15);
 }
 
 .transition-colors {

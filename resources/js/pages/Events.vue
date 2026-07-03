@@ -654,14 +654,14 @@ export default {
 <style scoped>
 /* Variables CSS */
 :root {
-  --primea-blue: #272d63;
-  --primea-yellow: #fab511;
+  --primea-blue: #004B5E;
+  --primea-yellow: #F5C070;
   --primea-white: #ffffff;
 }
 
 /* Background */
 .bg-primea-gradient {
-  background: linear-gradient(135deg, var(--primea-blue) 0%, #1a1f4a 100%);
+  background: linear-gradient(135deg, var(--primea-blue) 0%, #1F9E9A 100%);
 }
 
 /* Espacement des éléments */
@@ -702,11 +702,11 @@ export default {
 
 /* Custom shadows */
 .shadow-primea {
-  box-shadow: 0 4px 20px rgba(39, 45, 99, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 75, 94, 0.1);
 }
 
 .shadow-primea-lg {
-  box-shadow: 0 8px 30px rgba(39, 45, 99, 0.15);
+  box-shadow: 0 8px 30px rgba(0, 75, 94, 0.15);
 }
 
 /* Rounded corners */

@@ -388,7 +388,7 @@ export default {
             .slice(0, 50)
         } else {
           console.error('Event slug, ID and title are all missing!', props.event)
-          Swal.fire({ icon: 'error', title: 'Erreur', text: 'Impossible de réserver - informations manquantes', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'error', title: 'Erreur', text: 'Impossible de réserver - informations manquantes', confirmButtonColor: '#004B5E' })
           return
         }
       }
@@ -492,7 +492,7 @@ export default {
 
 .btn-gradient-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(39, 45, 99, 0.3);
+  box-shadow: 0 10px 20px rgba(0, 75, 94, 0.3);
 }
 
 .btn-gradient-secondary {
@@ -514,11 +514,11 @@ export default {
 
 .btn-gradient-secondary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(250, 181, 17, 0.3);
+  box-shadow: 0 10px 20px rgba(245, 192, 112, 0.3);
 }
 
 .primea-text-blue {
-  color: #272d63;
+  color: #004B5E;
 }
 
 .primea-text-white {
@@ -530,8 +530,8 @@ export default {
 }
 
 :root {
-  --primea-blue: #272d63;
-  --primea-yellow: #fab511;
+  --primea-blue: #004B5E;
+  --primea-yellow: #F5C070;
   --primea-white: #ffffff;
   --primea-blue-dark: #1a1e47;
   --primea-yellow-dark: #e09f0e;
@@ -541,10 +541,10 @@ export default {
 /* Animations pour les boutons de réservation */
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 4px 6px -1px rgba(250, 181, 17, 0.3), 0 0 0 0 rgba(250, 181, 17, 0.4);
+    box-shadow: 0 4px 6px -1px rgba(245, 192, 112, 0.3), 0 0 0 0 rgba(245, 192, 112, 0.4);
   }
   50% {
-    box-shadow: 0 4px 6px -1px rgba(250, 181, 17, 0.3), 0 0 20px 5px rgba(250, 181, 17, 0.2);
+    box-shadow: 0 4px 6px -1px rgba(245, 192, 112, 0.3), 0 0 20px 5px rgba(245, 192, 112, 0.2);
   }
 }
 
@@ -603,7 +603,7 @@ export default {
   content: '';
   position: absolute;
   inset: -5px;
-  border: 2px solid rgba(250, 181, 17, 0.8);
+  border: 2px solid rgba(245, 192, 112, 0.8);
   border-radius: 0.5rem;
   opacity: 0;
   transform: scale(0.7);
@@ -615,7 +615,7 @@ export default {
 .ticket-button:hover {
   animation: bounce-subtle 0.6s ease-in-out infinite;
   transform: scale(1.05);
-  box-shadow: 0 8px 16px -2px rgba(250, 181, 17, 0.5);
+  box-shadow: 0 8px 16px -2px rgba(245, 192, 112, 0.5);
 }
 
 .ticket-button:hover .ticket-icon {
@@ -643,10 +643,10 @@ export default {
 /* Animation pour le bouton principal de réservation */
 @keyframes pulse-blue {
   0%, 100% {
-    box-shadow: 0 4px 6px -1px rgba(39, 45, 99, 0.3), 0 0 0 0 rgba(39, 45, 99, 0.4);
+    box-shadow: 0 4px 6px -1px rgba(0, 75, 94, 0.3), 0 0 0 0 rgba(0, 75, 94, 0.4);
   }
   50% {
-    box-shadow: 0 4px 6px -1px rgba(39, 45, 99, 0.3), 0 0 15px 3px rgba(39, 45, 99, 0.15);
+    box-shadow: 0 4px 6px -1px rgba(0, 75, 94, 0.3), 0 0 15px 3px rgba(0, 75, 94, 0.15);
   }
 }
 

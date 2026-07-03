@@ -3,14 +3,14 @@
     <!-- Header -->
     <div class="mb-6 flex justify-between items-center">
       <div>
-        <h1 class="text-2xl font-bold" style="color: #272d63;">Gestion des Lieux</h1>
+        <h1 class="text-2xl font-bold" style="color: #004B5E;">Gestion des Lieux</h1>
         <p class="text-gray-600 mt-1">Gérez les lieux et salles d'événements</p>
       </div>
       <button @click="showCreateModal = true" 
               class="text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
-              style="background-color: #272d63;"
-              @mouseover="$event.currentTarget.style.backgroundColor = '#fab511'"
-              @mouseleave="$event.currentTarget.style.backgroundColor = '#272d63'">
+              style="background-color: #004B5E;"
+              @mouseover="$event.currentTarget.style.backgroundColor = '#F5C070'"
+              @mouseleave="$event.currentTarget.style.backgroundColor = '#004B5E'">
         <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
         </svg>
@@ -26,13 +26,13 @@
           <input type="text" v-model="filters.search" 
                  placeholder="Nom du lieu..."
                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                 style="--tw-ring-color: #272d63;">
+                 style="--tw-ring-color: #004B5E;">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Ville</label>
           <select v-model="filters.city" 
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                  style="--tw-ring-color: #272d63;">
+                  style="--tw-ring-color: #004B5E;">
             <option value="">Toutes les villes</option>
             <option v-for="city in cities" :key="city" :value="city">{{ city }}</option>
           </select>
@@ -41,7 +41,7 @@
           <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
           <select v-model="filters.status" 
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                  style="--tw-ring-color: #272d63;">
+                  style="--tw-ring-color: #004B5E;">
             <option value="">Tous les statuts</option>
             <option value="active">Actif</option>
             <option value="inactive">Inactif</option>
@@ -50,9 +50,9 @@
         <div class="flex items-end">
           <button @click="loadVenues" 
                   class="w-full text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
-                  style="background-color: #fab511;"
-                  @mouseover="$event.currentTarget.style.backgroundColor = '#272d63'"
-                  @mouseleave="$event.currentTarget.style.backgroundColor = '#fab511'">
+                  style="background-color: #F5C070;"
+                  @mouseover="$event.currentTarget.style.backgroundColor = '#004B5E'"
+                  @mouseleave="$event.currentTarget.style.backgroundColor = '#F5C070'">
             Filtrer
           </button>
         </div>
@@ -61,7 +61,7 @@
 
     <!-- Loading -->
     <div v-if="loading" class="flex justify-center items-center h-64">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2" style="border-color: #272d63;"></div>
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2" style="border-color: #004B5E;"></div>
     </div>
 
     <!-- Venues Grid -->
@@ -91,7 +91,7 @@
         
         <!-- Venue Info -->
         <div class="p-4">
-          <h3 class="text-lg font-semibold mb-2" style="color: #272d63;">{{ venue.name }}</h3>
+          <h3 class="text-lg font-semibold mb-2" style="color: #004B5E;">{{ venue.name }}</h3>
           <div class="space-y-2 text-sm text-gray-600">
             <div class="flex items-center">
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,9 +117,9 @@
           <div class="flex space-x-2 mt-4">
             <button @click="editVenue(venue)" 
                     class="flex-1 text-sm px-3 py-2 rounded transition-colors duration-200"
-                    style="color: #272d63; background-color: rgba(39, 45, 99, 0.1);"
-                    @mouseover="$event.currentTarget.style.backgroundColor = '#fab511'; $event.currentTarget.style.color = '#fff'"
-                    @mouseleave="$event.currentTarget.style.backgroundColor = 'rgba(39, 45, 99, 0.1)'; $event.currentTarget.style.color = '#272d63'">
+                    style="color: #004B5E; background-color: rgba(0, 75, 94, 0.1);"
+                    @mouseover="$event.currentTarget.style.backgroundColor = '#F5C070'; $event.currentTarget.style.color = '#fff'"
+                    @mouseleave="$event.currentTarget.style.backgroundColor = 'rgba(0, 75, 94, 0.1)'; $event.currentTarget.style.color = '#004B5E'">
               Modifier
             </button>
             <button @click="deleteVenue(venue)" 
@@ -143,7 +143,7 @@
     <!-- Create/Edit Modal -->
     <div v-if="showCreateModal || showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-90vh overflow-y-auto">
-        <h3 class="text-lg font-bold mb-4" style="color: #272d63;">
+        <h3 class="text-lg font-bold mb-4" style="color: #004B5E;">
           {{ showCreateModal ? 'Nouveau Lieu' : 'Modifier le Lieu' }}
         </h3>
         
@@ -153,14 +153,14 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">Nom du lieu *</label>
               <input type="text" v-model="venueForm.name" required
                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                     style="--tw-ring-color: #272d63;">
+                     style="--tw-ring-color: #004B5E;">
             </div>
             
             <div class="md:col-span-2">
               <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
               <textarea v-model="venueForm.description" rows="3"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                        style="--tw-ring-color: #272d63;"></textarea>
+                        style="--tw-ring-color: #004B5E;"></textarea>
             </div>
 
             <div class="md:col-span-2">
@@ -178,42 +178,42 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">Adresse *</label>
               <input type="text" v-model="venueForm.address" required
                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                     style="--tw-ring-color: #272d63;">
+                     style="--tw-ring-color: #004B5E;">
             </div>
             
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Ville *</label>
               <input type="text" v-model="venueForm.city" required
                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                     style="--tw-ring-color: #272d63;">
+                     style="--tw-ring-color: #004B5E;">
             </div>
             
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Code postal</label>
               <input type="text" v-model="venueForm.postal_code"
                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                     style="--tw-ring-color: #272d63;">
+                     style="--tw-ring-color: #004B5E;">
             </div>
             
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Pays</label>
               <input type="text" v-model="venueForm.country"
                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                     style="--tw-ring-color: #272d63;">
+                     style="--tw-ring-color: #004B5E;">
             </div>
             
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Capacité *</label>
               <input type="number" v-model="venueForm.capacity" required min="1"
                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                     style="--tw-ring-color: #272d63;">
+                     style="--tw-ring-color: #004B5E;">
             </div>
             
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
               <select v-model="venueForm.status" 
                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                      style="--tw-ring-color: #272d63;">
+                      style="--tw-ring-color: #004B5E;">
                 <option value="active">Actif</option>
                 <option value="inactive">Inactif</option>
               </select>
@@ -223,23 +223,23 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
               <input type="tel" v-model="venueForm.phone"
                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                     style="--tw-ring-color: #272d63;">
+                     style="--tw-ring-color: #004B5E;">
             </div>
             
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
               <input type="email" v-model="venueForm.email"
                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                     style="--tw-ring-color: #272d63;">
+                     style="--tw-ring-color: #004B5E;">
             </div>
           </div>
 
           <div class="flex space-x-3 mt-6">
             <button type="submit" 
                     class="flex-1 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
-                    style="background-color: #272d63;"
-                    @mouseover="$event.currentTarget.style.backgroundColor = '#fab511'"
-                    @mouseleave="$event.currentTarget.style.backgroundColor = '#272d63'">
+                    style="background-color: #004B5E;"
+                    @mouseover="$event.currentTarget.style.backgroundColor = '#F5C070'"
+                    @mouseleave="$event.currentTarget.style.backgroundColor = '#004B5E'">
               {{ showCreateModal ? 'Créer' : 'Modifier' }}
             </button>
             <button type="button" @click="closeModals"
@@ -598,7 +598,7 @@ export default {
     }
     
     const deleteVenue = async (venue) => {
-      const result = await Swal.fire({ icon: 'warning', title: 'Confirmation', text: `Êtes-vous sûr de vouloir supprimer le lieu "${venue.name}" ?`, showCancelButton: true, confirmButtonColor: '#272d63', cancelButtonColor: '#d33', confirmButtonText: 'Oui', cancelButtonText: 'Annuler' })
+      const result = await Swal.fire({ icon: 'warning', title: 'Confirmation', text: `Êtes-vous sûr de vouloir supprimer le lieu "${venue.name}" ?`, showCancelButton: true, confirmButtonColor: '#004B5E', cancelButtonColor: '#d33', confirmButtonText: 'Oui', cancelButtonText: 'Annuler' })
       if (!result.isConfirmed) return
 
       try {

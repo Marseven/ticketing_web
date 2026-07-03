@@ -2,7 +2,7 @@
   <div class="profile-management p-6">
     <!-- Header -->
     <div class="mb-6">
-      <h1 class="text-2xl font-bold mb-2" style="color: #272d63;">Mon Profil</h1>
+      <h1 class="text-2xl font-bold mb-2" style="color: #004B5E;">Mon Profil</h1>
       <p class="text-gray-600">Gérez vos informations personnelles et préférences</p>
     </div>
 
@@ -11,14 +11,14 @@
       <div class="flex items-center space-x-6">
         <div class="relative">
           <div class="w-24 h-24 rounded-full flex items-center justify-center text-white text-2xl font-bold"
-               style="background-color: #272d63;">
+               style="background-color: #004B5E;">
             {{ getInitials(profile.name) }}
           </div>
           <button @click="changeAvatar" 
                   class="absolute bottom-0 right-0 text-white p-2 rounded-full transition-colors duration-200"
-                  style="background-color: #fab511;"
-                  @mouseover="$event.currentTarget.style.backgroundColor = '#272d63'"
-                  @mouseleave="$event.currentTarget.style.backgroundColor = '#fab511'">
+                  style="background-color: #F5C070;"
+                  @mouseover="$event.currentTarget.style.backgroundColor = '#004B5E'"
+                  @mouseleave="$event.currentTarget.style.backgroundColor = '#F5C070'">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -26,7 +26,7 @@
           </button>
         </div>
         <div class="flex-1">
-          <h3 class="text-xl font-bold" style="color: #272d63;">{{ profile.name }}</h3>
+          <h3 class="text-xl font-bold" style="color: #004B5E;">{{ profile.name }}</h3>
           <p class="text-gray-600 mb-1">{{ profile.email }}</p>
           <div class="flex items-center space-x-4 text-sm text-gray-500">
             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -44,41 +44,41 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Personal Information -->
       <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-semibold mb-4" style="color: #272d63;">Informations Personnelles</h3>
+        <h3 class="text-lg font-semibold mb-4" style="color: #004B5E;">Informations Personnelles</h3>
         <form @submit.prevent="updateProfile" class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Nom complet *</label>
             <input type="text" v-model="profileForm.name" required
                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                   style="--tw-ring-color: #272d63;">
+                   style="--tw-ring-color: #004B5E;">
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
             <input type="email" v-model="profileForm.email" required
                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                   style="--tw-ring-color: #272d63;">
+                   style="--tw-ring-color: #004B5E;">
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
             <input type="tel" v-model="profileForm.phone"
                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                   style="--tw-ring-color: #272d63;">
+                   style="--tw-ring-color: #004B5E;">
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Poste</label>
             <input type="text" v-model="profileForm.position"
                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                   style="--tw-ring-color: #272d63;">
+                   style="--tw-ring-color: #004B5E;">
           </div>
           
           <button type="submit" :disabled="updatingProfile"
                   class="w-full text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
-                  style="background-color: #272d63;"
-                  @mouseover="$event.currentTarget.style.backgroundColor = '#fab511'"
-                  @mouseleave="$event.currentTarget.style.backgroundColor = '#272d63'">
+                  style="background-color: #004B5E;"
+                  @mouseover="$event.currentTarget.style.backgroundColor = '#F5C070'"
+                  @mouseleave="$event.currentTarget.style.backgroundColor = '#004B5E'">
             {{ updatingProfile ? 'Mise à jour...' : 'Mettre à jour' }}
           </button>
         </form>
@@ -86,36 +86,36 @@
 
       <!-- Change Password -->
       <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-semibold mb-4" style="color: #272d63;">Changer le Mot de Passe</h3>
+        <h3 class="text-lg font-semibold mb-4" style="color: #004B5E;">Changer le Mot de Passe</h3>
         <form @submit.prevent="changePassword" class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Mot de passe actuel *</label>
             <input type="password" v-model="passwordForm.current_password" required
                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                   style="--tw-ring-color: #272d63;">
+                   style="--tw-ring-color: #004B5E;">
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Nouveau mot de passe *</label>
             <input type="password" v-model="passwordForm.new_password" required
                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                   style="--tw-ring-color: #272d63;">
+                   style="--tw-ring-color: #004B5E;">
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Confirmer le mot de passe *</label>
             <input type="password" v-model="passwordForm.new_password_confirmation" required
                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                   style="--tw-ring-color: #272d63;">
+                   style="--tw-ring-color: #004B5E;">
           </div>
           
           <div v-if="passwordError" class="text-red-600 text-sm">{{ passwordError }}</div>
           
           <button type="submit" :disabled="changingPassword"
                   class="w-full text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
-                  style="background-color: #fab511;"
-                  @mouseover="$event.currentTarget.style.backgroundColor = '#272d63'"
-                  @mouseleave="$event.currentTarget.style.backgroundColor = '#fab511'">
+                  style="background-color: #F5C070;"
+                  @mouseover="$event.currentTarget.style.backgroundColor = '#004B5E'"
+                  @mouseleave="$event.currentTarget.style.backgroundColor = '#F5C070'">
             {{ changingPassword ? 'Changement...' : 'Changer le mot de passe' }}
           </button>
         </form>
@@ -126,7 +126,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
       <!-- Preferences -->
       <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-semibold mb-4" style="color: #272d63;">Préférences</h3>
+        <h3 class="text-lg font-semibold mb-4" style="color: #004B5E;">Préférences</h3>
         <div class="space-y-4">
           <div class="flex items-center justify-between">
             <div>
@@ -136,7 +136,7 @@
             <label class="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" v-model="preferences.email_notifications" class="sr-only peer">
               <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
-                   :style="preferences.email_notifications ? { backgroundColor: '#272d63' } : {}"></div>
+                   :style="preferences.email_notifications ? { backgroundColor: '#004B5E' } : {}"></div>
             </label>
           </div>
           
@@ -148,7 +148,7 @@
             <label class="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" v-model="preferences.two_factor_enabled" class="sr-only peer">
               <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
-                   :style="preferences.two_factor_enabled ? { backgroundColor: '#fab511' } : {}"></div>
+                   :style="preferences.two_factor_enabled ? { backgroundColor: '#F5C070' } : {}"></div>
             </label>
           </div>
           
@@ -156,7 +156,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-2">Langue de l'interface</label>
             <select v-model="preferences.language" 
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                    style="--tw-ring-color: #272d63;">
+                    style="--tw-ring-color: #004B5E;">
               <option value="fr">Français</option>
               <option value="en">English</option>
             </select>
@@ -166,7 +166,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-2">Fuseau horaire</label>
             <select v-model="preferences.timezone" 
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                    style="--tw-ring-color: #272d63;">
+                    style="--tw-ring-color: #004B5E;">
               <option value="Africa/Libreville">Libreville (GMT+1)</option>
               <option value="Africa/Lagos">Lagos (GMT+1)</option>
               <option value="UTC">UTC (GMT+0)</option>
@@ -182,16 +182,16 @@
 
       <!-- Security & Sessions -->
       <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-semibold mb-4" style="color: #272d63;">Sécurité & Sessions</h3>
+        <h3 class="text-lg font-semibold mb-4" style="color: #004B5E;">Sécurité & Sessions</h3>
         
         <!-- Account Stats -->
         <div class="grid grid-cols-2 gap-4 mb-6">
           <div class="text-center p-3 bg-gray-50 rounded-lg">
-            <div class="text-xl font-bold" style="color: #272d63;">{{ profile.login_count || 0 }}</div>
+            <div class="text-xl font-bold" style="color: #004B5E;">{{ profile.login_count || 0 }}</div>
             <div class="text-sm text-gray-600">Connexions</div>
           </div>
           <div class="text-center p-3 bg-gray-50 rounded-lg">
-            <div class="text-xl font-bold" style="color: #fab511;">{{ activeSessions.length }}</div>
+            <div class="text-xl font-bold" style="color: #F5C070;">{{ activeSessions.length }}</div>
             <div class="text-sm text-gray-600">Sessions actives</div>
           </div>
         </div>
@@ -203,8 +203,8 @@
                class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
             <div class="flex items-center">
               <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3"
-                   style="background-color: rgba(39, 45, 99, 0.1);">
-                <svg class="w-4 h-4" style="color: #272d63;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   style="background-color: rgba(0, 75, 94, 0.1);">
+                <svg class="w-4 h-4" style="color: #004B5E;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                 </svg>
               </div>
@@ -243,11 +243,11 @@
     <!-- Avatar Upload Modal -->
     <div v-if="showAvatarModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-        <h3 class="text-lg font-bold mb-4" style="color: #272d63;">Changer la photo de profil</h3>
+        <h3 class="text-lg font-bold mb-4" style="color: #004B5E;">Changer la photo de profil</h3>
         
         <div class="text-center mb-4">
           <div class="w-24 h-24 mx-auto rounded-full flex items-center justify-center text-white text-2xl font-bold"
-               style="background-color: #272d63;">
+               style="background-color: #004B5E;">
             {{ getInitials(profile.name) }}
           </div>
           <p class="text-sm text-gray-600 mt-2">Fonctionnalité à venir : upload d'image</p>
@@ -260,9 +260,9 @@
           </button>
           <button @click="showAvatarModal = false"
                   class="flex-1 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
-                  style="background-color: #272d63;"
-                  @mouseover="$event.currentTarget.style.backgroundColor = '#fab511'"
-                  @mouseleave="$event.currentTarget.style.backgroundColor = '#272d63'">
+                  style="background-color: #004B5E;"
+                  @mouseover="$event.currentTarget.style.backgroundColor = '#F5C070'"
+                  @mouseleave="$event.currentTarget.style.backgroundColor = '#004B5E'">
             Fermer
           </button>
         </div>
@@ -398,20 +398,20 @@ export default {
             profile.value = { ...profile.value, ...profileForm }
             localStorage.setItem('userName', profileForm.name)
             localStorage.setItem('userEmail', profileForm.email)
-            Swal.fire({ icon: 'success', title: 'Succès', text: 'Profil mis à jour avec succès', confirmButtonColor: '#272d63' })
+            Swal.fire({ icon: 'success', title: 'Succès', text: 'Profil mis à jour avec succès', confirmButtonColor: '#004B5E' })
           }
         } else {
           profile.value = { ...profile.value, ...profileForm }
           localStorage.setItem('userName', profileForm.name)
           localStorage.setItem('userEmail', profileForm.email)
-          Swal.fire({ icon: 'success', title: 'Succès', text: 'Profil mis à jour avec succès (simulé)', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Profil mis à jour avec succès (simulé)', confirmButtonColor: '#004B5E' })
         }
       } catch (error) {
         console.log('API non disponible, mise à jour locale')
         profile.value = { ...profile.value, ...profileForm }
         localStorage.setItem('userName', profileForm.name)
         localStorage.setItem('userEmail', profileForm.email)
-        Swal.fire({ icon: 'success', title: 'Succès', text: 'Profil mis à jour avec succès (simulé)', confirmButtonColor: '#272d63' })
+        Swal.fire({ icon: 'success', title: 'Succès', text: 'Profil mis à jour avec succès (simulé)', confirmButtonColor: '#004B5E' })
       } finally {
         updatingProfile.value = false
       }
@@ -450,7 +450,7 @@ export default {
               new_password: '',
               new_password_confirmation: ''
             })
-            Swal.fire({ icon: 'success', title: 'Succès', text: 'Mot de passe changé avec succès', confirmButtonColor: '#272d63' })
+            Swal.fire({ icon: 'success', title: 'Succès', text: 'Mot de passe changé avec succès', confirmButtonColor: '#004B5E' })
           }
         } else {
           Object.assign(passwordForm, {
@@ -458,7 +458,7 @@ export default {
             new_password: '',
             new_password_confirmation: ''
           })
-          Swal.fire({ icon: 'success', title: 'Succès', text: 'Mot de passe changé avec succès (simulé)', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Mot de passe changé avec succès (simulé)', confirmButtonColor: '#004B5E' })
         }
       } catch (error) {
         console.log('API non disponible, changement simulé')
@@ -467,7 +467,7 @@ export default {
           new_password: '',
           new_password_confirmation: ''
         })
-        Swal.fire({ icon: 'success', title: 'Succès', text: 'Mot de passe changé avec succès (simulé)', confirmButtonColor: '#272d63' })
+        Swal.fire({ icon: 'success', title: 'Succès', text: 'Mot de passe changé avec succès (simulé)', confirmButtonColor: '#004B5E' })
       } finally {
         changingPassword.value = false
       }
@@ -487,13 +487,13 @@ export default {
         })
         
         if (response.ok) {
-          Swal.fire({ icon: 'success', title: 'Succès', text: 'Préférences sauvegardées avec succès', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Préférences sauvegardées avec succès', confirmButtonColor: '#004B5E' })
         } else {
-          Swal.fire({ icon: 'success', title: 'Succès', text: 'Préférences sauvegardées avec succès (simulé)', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Préférences sauvegardées avec succès (simulé)', confirmButtonColor: '#004B5E' })
         }
       } catch (error) {
         console.log('API non disponible, sauvegarde simulée')
-        Swal.fire({ icon: 'success', title: 'Succès', text: 'Préférences sauvegardées avec succès (simulé)', confirmButtonColor: '#272d63' })
+        Swal.fire({ icon: 'success', title: 'Succès', text: 'Préférences sauvegardées avec succès (simulé)', confirmButtonColor: '#004B5E' })
       } finally {
         updatingPreferences.value = false
       }
@@ -509,7 +509,7 @@ export default {
         title: 'Confirmation',
         text: 'Êtes-vous sûr de vouloir révoquer cette session ?',
         showCancelButton: true,
-        confirmButtonColor: '#272d63',
+        confirmButtonColor: '#004B5E',
         cancelButtonColor: '#d33',
         confirmButtonText: 'Oui',
         cancelButtonText: 'Annuler'
@@ -541,7 +541,7 @@ export default {
         title: 'Confirmation',
         text: 'Cela déconnectera toutes les autres sessions. Continuer ?',
         showCancelButton: true,
-        confirmButtonColor: '#272d63',
+        confirmButtonColor: '#004B5E',
         cancelButtonColor: '#d33',
         confirmButtonText: 'Oui',
         cancelButtonText: 'Annuler'
@@ -559,19 +559,19 @@ export default {
 
         if (response.ok) {
           activeSessions.value = activeSessions.value.filter(s => s.current)
-          Swal.fire({ icon: 'success', title: 'Succès', text: 'Toutes les autres sessions ont été déconnectées', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Toutes les autres sessions ont été déconnectées', confirmButtonColor: '#004B5E' })
         } else {
           activeSessions.value = activeSessions.value.filter(s => s.current)
-          Swal.fire({ icon: 'success', title: 'Succès', text: 'Toutes les autres sessions ont été déconnectées (simulé)', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Toutes les autres sessions ont été déconnectées (simulé)', confirmButtonColor: '#004B5E' })
         }
       } catch (error) {
         activeSessions.value = activeSessions.value.filter(s => s.current)
-        Swal.fire({ icon: 'success', title: 'Succès', text: 'Toutes les autres sessions ont été déconnectées (simulé)', confirmButtonColor: '#272d63' })
+        Swal.fire({ icon: 'success', title: 'Succès', text: 'Toutes les autres sessions ont été déconnectées (simulé)', confirmButtonColor: '#004B5E' })
       }
     }
     
     const downloadAccountData = () => {
-      Swal.fire({ icon: 'info', title: 'Information', text: 'Téléchargement des données du compte (fonctionnalité à venir)', confirmButtonColor: '#272d63' })
+      Swal.fire({ icon: 'info', title: 'Information', text: 'Téléchargement des données du compte (fonctionnalité à venir)', confirmButtonColor: '#004B5E' })
     }
     
     // Utils

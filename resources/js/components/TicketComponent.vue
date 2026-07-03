@@ -244,8 +244,8 @@ export default {
 <style scoped>
 /* Variables CSS MyTicketO */
 :root {
-  --primea-blue: #272d63;
-  --primea-yellow: #fab511;
+  --primea-blue: #004B5E;
+  --primea-yellow: #F5C070;
   --primea-white: #ffffff;
   --font-primary: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -276,7 +276,7 @@ export default {
 }
 
 .shadow-primea-lg {
-  box-shadow: 0 8px 30px rgba(39, 45, 99, 0.15);
+  box-shadow: 0 8px 30px rgba(0, 75, 94, 0.15);
 }
 
 /* Animations et effets */
@@ -286,6 +286,6 @@ export default {
 
 .ticket-component:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(39, 45, 99, 0.2);
+  box-shadow: 0 12px 40px rgba(0, 75, 94, 0.2);
 }
 </style>

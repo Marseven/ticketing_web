@@ -3,14 +3,14 @@
     <!-- Header -->
     <div class="mb-6 flex justify-between items-center">
       <div>
-        <h1 class="text-2xl font-bold" style="color: #272d63;">Gestion des Catégories</h1>
+        <h1 class="text-2xl font-bold" style="color: #004B5E;">Gestion des Catégories</h1>
         <p class="text-gray-600 mt-1">Organisez et gérez les catégories d'événements</p>
       </div>
       <button @click="showCreateModal = true" 
               class="text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
-              style="background-color: #272d63;"
-              @mouseover="$event.currentTarget.style.backgroundColor = '#fab511'"
-              @mouseleave="$event.currentTarget.style.backgroundColor = '#272d63'">
+              style="background-color: #004B5E;"
+              @mouseover="$event.currentTarget.style.backgroundColor = '#F5C070'"
+              @mouseleave="$event.currentTarget.style.backgroundColor = '#004B5E'">
         <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
         </svg>
@@ -26,13 +26,13 @@
           <input type="text" v-model="filters.search" 
                  placeholder="Nom de catégorie..."
                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                 style="--tw-ring-color: #272d63;">
+                 style="--tw-ring-color: #004B5E;">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
           <select v-model="filters.status" 
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                  style="--tw-ring-color: #272d63;">
+                  style="--tw-ring-color: #004B5E;">
             <option value="">Tous les statuts</option>
             <option value="active">Actif</option>
             <option value="inactive">Inactif</option>
@@ -41,9 +41,9 @@
         <div class="flex items-end">
           <button @click="loadCategories" 
                   class="w-full text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
-                  style="background-color: #fab511;"
-                  @mouseover="$event.currentTarget.style.backgroundColor = '#272d63'"
-                  @mouseleave="$event.currentTarget.style.backgroundColor = '#fab511'">
+                  style="background-color: #F5C070;"
+                  @mouseover="$event.currentTarget.style.backgroundColor = '#004B5E'"
+                  @mouseleave="$event.currentTarget.style.backgroundColor = '#F5C070'">
             Filtrer
           </button>
         </div>
@@ -52,7 +52,7 @@
 
     <!-- Loading -->
     <div v-if="loading" class="flex justify-center items-center h-64">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2" style="border-color: #272d63;"></div>
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2" style="border-color: #004B5E;"></div>
     </div>
 
     <!-- Categories Table -->
@@ -89,7 +89,7 @@
                 <p class="text-sm text-gray-900">{{ category.description || 'Aucune description' }}</p>
               </td>
               <td class="px-6 py-4">
-                <span class="text-sm font-medium" style="color: #272d63;">{{ category.events_count || 0 }} événements</span>
+                <span class="text-sm font-medium" style="color: #004B5E;">{{ category.events_count || 0 }} événements</span>
               </td>
               <td class="px-6 py-4">
                 <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
@@ -104,9 +104,9 @@
                 <div class="flex space-x-2">
                   <button @click="editCategory(category)" 
                           class="text-sm px-3 py-1 rounded transition-colors duration-200"
-                          style="color: #272d63; background-color: rgba(39, 45, 99, 0.1);"
-                          @mouseover="$event.currentTarget.style.backgroundColor = '#fab511'; $event.currentTarget.style.color = '#fff'"
-                          @mouseleave="$event.currentTarget.style.backgroundColor = 'rgba(39, 45, 99, 0.1)'; $event.currentTarget.style.color = '#272d63'">
+                          style="color: #004B5E; background-color: rgba(0, 75, 94, 0.1);"
+                          @mouseover="$event.currentTarget.style.backgroundColor = '#F5C070'; $event.currentTarget.style.color = '#fff'"
+                          @mouseleave="$event.currentTarget.style.backgroundColor = 'rgba(0, 75, 94, 0.1)'; $event.currentTarget.style.color = '#004B5E'">
                     Modifier
                   </button>
                   <button @click="deleteCategory(category)" 
@@ -140,7 +140,7 @@
                 @click="changePage(page)"
                 class="px-3 py-2 text-sm rounded-lg transition-colors duration-200"
                 :class="page === pagination.current_page ? 'text-white' : 'text-gray-700 hover:bg-gray-100'"
-                :style="page === pagination.current_page ? { backgroundColor: '#272d63' } : {}">
+                :style="page === pagination.current_page ? { backgroundColor: '#004B5E' } : {}">
           {{ page }}
         </button>
       </div>
@@ -149,7 +149,7 @@
     <!-- Create/Edit Modal -->
     <div v-if="showCreateModal || showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-        <h3 class="text-lg font-bold mb-4" style="color: #272d63;">
+        <h3 class="text-lg font-bold mb-4" style="color: #004B5E;">
           {{ showCreateModal ? 'Nouvelle Catégorie' : 'Modifier la Catégorie' }}
         </h3>
         
@@ -159,14 +159,14 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">Nom *</label>
               <input type="text" v-model="categoryForm.name" required
                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                     style="--tw-ring-color: #272d63;">
+                     style="--tw-ring-color: #004B5E;">
             </div>
             
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
               <textarea v-model="categoryForm.description" rows="3"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                        style="--tw-ring-color: #272d63;"></textarea>
+                        style="--tw-ring-color: #004B5E;"></textarea>
             </div>
             
             <div>
@@ -179,7 +179,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
               <select v-model="categoryForm.status" 
                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                      style="--tw-ring-color: #272d63;">
+                      style="--tw-ring-color: #004B5E;">
                 <option value="active">Actif</option>
                 <option value="inactive">Inactif</option>
               </select>
@@ -189,9 +189,9 @@
           <div class="flex space-x-3 mt-6">
             <button type="submit" 
                     class="flex-1 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
-                    style="background-color: #272d63;"
-                    @mouseover="$event.currentTarget.style.backgroundColor = '#fab511'"
-                    @mouseleave="$event.currentTarget.style.backgroundColor = '#272d63'">
+                    style="background-color: #004B5E;"
+                    @mouseover="$event.currentTarget.style.backgroundColor = '#F5C070'"
+                    @mouseleave="$event.currentTarget.style.backgroundColor = '#004B5E'">
               {{ showCreateModal ? 'Créer' : 'Modifier' }}
             </button>
             <button type="button" @click="closeModals"
@@ -226,7 +226,7 @@ export default {
     const categoryForm = reactive({
       name: '',
       description: '',
-      color: '#272d63',
+      color: '#004B5E',
       status: 'active'
     })
     
@@ -330,7 +330,7 @@ export default {
           name: 'Concerts',
           slug: 'concerts',
           description: 'Événements musicaux et concerts live',
-          color: '#272d63',
+          color: '#004B5E',
           status: 'active',
           events_count: 25,
           created_at: new Date()
@@ -340,7 +340,7 @@ export default {
           name: 'Conférences',
           slug: 'conferences',
           description: 'Événements professionnels et éducatifs',
-          color: '#fab511',
+          color: '#F5C070',
           status: 'active',
           events_count: 12,
           created_at: new Date(Date.now() - 86400000)
@@ -467,7 +467,7 @@ export default {
     }
     
     const deleteCategory = async (category) => {
-      const result = await Swal.fire({ icon: 'warning', title: 'Confirmation', text: `Êtes-vous sûr de vouloir supprimer la catégorie "${category.name}" ?`, showCancelButton: true, confirmButtonColor: '#272d63', cancelButtonColor: '#d33', confirmButtonText: 'Oui', cancelButtonText: 'Annuler' })
+      const result = await Swal.fire({ icon: 'warning', title: 'Confirmation', text: `Êtes-vous sûr de vouloir supprimer la catégorie "${category.name}" ?`, showCancelButton: true, confirmButtonColor: '#004B5E', cancelButtonColor: '#d33', confirmButtonText: 'Oui', cancelButtonText: 'Annuler' })
       if (!result.isConfirmed) return
 
       try {
@@ -505,7 +505,7 @@ export default {
       Object.assign(categoryForm, {
         name: '',
         description: '',
-        color: '#272d63',
+        color: '#004B5E',
         status: 'active'
       })
     }

@@ -6,7 +6,7 @@
          @click.stop>
       
       <!-- Logo -->
-      <div class="flex items-center justify-center h-16 px-4" style="background-color: #272d63;">
+      <div class="flex items-center justify-center h-16 px-4" style="background-color: #004B5E;">
         <img src="/images/logo_white.png" alt="MyTicketO" class="h-10" />
       </div>
 
@@ -135,9 +135,9 @@
           <div>
             <button @click="showUsersMenu = !showUsersMenu"
                     class="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-colors duration-200"
-                    :style="isUserMenuActive ? { backgroundColor: '#272d63', color: '#ffffff' } : { backgroundColor: 'transparent', color: '#374151' }"
-                    @mouseover="$event.currentTarget.style.backgroundColor = isUserMenuActive ? '#272d63' : '#fab511'; $event.currentTarget.style.color = '#ffffff'"
-                    @mouseleave="$event.currentTarget.style.backgroundColor = isUserMenuActive ? '#272d63' : 'transparent'; $event.currentTarget.style.color = isUserMenuActive ? '#ffffff' : '#374151'">
+                    :style="isUserMenuActive ? { backgroundColor: '#004B5E', color: '#ffffff' } : { backgroundColor: 'transparent', color: '#374151' }"
+                    @mouseover="$event.currentTarget.style.backgroundColor = isUserMenuActive ? '#004B5E' : '#F5C070'; $event.currentTarget.style.color = '#ffffff'"
+                    @mouseleave="$event.currentTarget.style.backgroundColor = isUserMenuActive ? '#004B5E' : 'transparent'; $event.currentTarget.style.color = isUserMenuActive ? '#ffffff' : '#374151'">
               <div class="flex items-center">
                 <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
@@ -151,59 +151,59 @@
             </button>
 
             <!-- Submenu -->
-            <div v-show="showUsersMenu" class="ml-8 mt-1 space-y-1 border-l-2 pl-3" style="border-color: #272d63;">
+            <div v-show="showUsersMenu" class="ml-8 mt-1 space-y-1 border-l-2 pl-3" style="border-color: #004B5E;">
               <router-link to="/admin/user-types"
                            class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors duration-200"
-                           :style="$route.path === '/admin/user-types' ? { backgroundColor: 'rgba(39, 45, 99, 0.1)', color: '#272d63', fontWeight: '600' } : { color: '#6b7280' }"
-                           @mouseover="if ($route.path !== '/admin/user-types') { $event.currentTarget.style.backgroundColor = '#fab511'; $event.currentTarget.style.color = '#ffffff' }"
+                           :style="$route.path === '/admin/user-types' ? { backgroundColor: 'rgba(0, 75, 94, 0.1)', color: '#004B5E', fontWeight: '600' } : { color: '#6b7280' }"
+                           @mouseover="if ($route.path !== '/admin/user-types') { $event.currentTarget.style.backgroundColor = '#F5C070'; $event.currentTarget.style.color = '#ffffff' }"
                            @mouseleave="if ($route.path !== '/admin/user-types') { $event.currentTarget.style.backgroundColor = 'transparent'; $event.currentTarget.style.color = '#6b7280' }">
                 Types d'Utilisateurs
               </router-link>
 
               <router-link to="/admin/privileges"
                            class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors duration-200"
-                           :style="$route.path === '/admin/privileges' ? { backgroundColor: 'rgba(39, 45, 99, 0.1)', color: '#272d63', fontWeight: '600' } : { color: '#6b7280' }"
-                           @mouseover="if ($route.path !== '/admin/privileges') { $event.currentTarget.style.backgroundColor = '#fab511'; $event.currentTarget.style.color = '#ffffff' }"
+                           :style="$route.path === '/admin/privileges' ? { backgroundColor: 'rgba(0, 75, 94, 0.1)', color: '#004B5E', fontWeight: '600' } : { color: '#6b7280' }"
+                           @mouseover="if ($route.path !== '/admin/privileges') { $event.currentTarget.style.backgroundColor = '#F5C070'; $event.currentTarget.style.color = '#ffffff' }"
                            @mouseleave="if ($route.path !== '/admin/privileges') { $event.currentTarget.style.backgroundColor = 'transparent'; $event.currentTarget.style.color = '#6b7280' }">
                 Privileges
               </router-link>
 
               <router-link to="/admin/roles"
                            class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors duration-200"
-                           :style="$route.path === '/admin/roles' ? { backgroundColor: 'rgba(39, 45, 99, 0.1)', color: '#272d63', fontWeight: '600' } : { color: '#6b7280' }"
-                           @mouseover="if ($route.path !== '/admin/roles') { $event.currentTarget.style.backgroundColor = '#fab511'; $event.currentTarget.style.color = '#ffffff' }"
+                           :style="$route.path === '/admin/roles' ? { backgroundColor: 'rgba(0, 75, 94, 0.1)', color: '#004B5E', fontWeight: '600' } : { color: '#6b7280' }"
+                           @mouseover="if ($route.path !== '/admin/roles') { $event.currentTarget.style.backgroundColor = '#F5C070'; $event.currentTarget.style.color = '#ffffff' }"
                            @mouseleave="if ($route.path !== '/admin/roles') { $event.currentTarget.style.backgroundColor = 'transparent'; $event.currentTarget.style.color = '#6b7280' }">
                 Roles
               </router-link>
 
               <router-link to="/admin/admins"
                            class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors duration-200"
-                           :style="$route.path === '/admin/admins' ? { backgroundColor: 'rgba(39, 45, 99, 0.1)', color: '#272d63', fontWeight: '600' } : { color: '#6b7280' }"
-                           @mouseover="if ($route.path !== '/admin/admins') { $event.currentTarget.style.backgroundColor = '#fab511'; $event.currentTarget.style.color = '#ffffff' }"
+                           :style="$route.path === '/admin/admins' ? { backgroundColor: 'rgba(0, 75, 94, 0.1)', color: '#004B5E', fontWeight: '600' } : { color: '#6b7280' }"
+                           @mouseover="if ($route.path !== '/admin/admins') { $event.currentTarget.style.backgroundColor = '#F5C070'; $event.currentTarget.style.color = '#ffffff' }"
                            @mouseleave="if ($route.path !== '/admin/admins') { $event.currentTarget.style.backgroundColor = 'transparent'; $event.currentTarget.style.color = '#6b7280' }">
                 Admins
               </router-link>
 
               <router-link to="/admin/clients"
                            class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors duration-200"
-                           :style="$route.path === '/admin/clients' ? { backgroundColor: 'rgba(39, 45, 99, 0.1)', color: '#272d63', fontWeight: '600' } : { color: '#6b7280' }"
-                           @mouseover="if ($route.path !== '/admin/clients') { $event.currentTarget.style.backgroundColor = '#fab511'; $event.currentTarget.style.color = '#ffffff' }"
+                           :style="$route.path === '/admin/clients' ? { backgroundColor: 'rgba(0, 75, 94, 0.1)', color: '#004B5E', fontWeight: '600' } : { color: '#6b7280' }"
+                           @mouseover="if ($route.path !== '/admin/clients') { $event.currentTarget.style.backgroundColor = '#F5C070'; $event.currentTarget.style.color = '#ffffff' }"
                            @mouseleave="if ($route.path !== '/admin/clients') { $event.currentTarget.style.backgroundColor = 'transparent'; $event.currentTarget.style.color = '#6b7280' }">
                 Clients
               </router-link>
 
               <router-link to="/admin/organizers-users"
                            class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors duration-200"
-                           :style="$route.path === '/admin/organizers-users' ? { backgroundColor: 'rgba(39, 45, 99, 0.1)', color: '#272d63', fontWeight: '600' } : { color: '#6b7280' }"
-                           @mouseover="if ($route.path !== '/admin/organizers-users') { $event.currentTarget.style.backgroundColor = '#fab511'; $event.currentTarget.style.color = '#ffffff' }"
+                           :style="$route.path === '/admin/organizers-users' ? { backgroundColor: 'rgba(0, 75, 94, 0.1)', color: '#004B5E', fontWeight: '600' } : { color: '#6b7280' }"
+                           @mouseover="if ($route.path !== '/admin/organizers-users') { $event.currentTarget.style.backgroundColor = '#F5C070'; $event.currentTarget.style.color = '#ffffff' }"
                            @mouseleave="if ($route.path !== '/admin/organizers-users') { $event.currentTarget.style.backgroundColor = 'transparent'; $event.currentTarget.style.color = '#6b7280' }">
                 Organisateurs Users
               </router-link>
 
               <router-link to="/admin/trashed-users"
                            class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors duration-200"
-                           :style="$route.path === '/admin/trashed-users' ? { backgroundColor: 'rgba(39, 45, 99, 0.1)', color: '#272d63', fontWeight: '600' } : { color: '#6b7280' }"
-                           @mouseover="if ($route.path !== '/admin/trashed-users') { $event.currentTarget.style.backgroundColor = '#fab511'; $event.currentTarget.style.color = '#ffffff' }"
+                           :style="$route.path === '/admin/trashed-users' ? { backgroundColor: 'rgba(0, 75, 94, 0.1)', color: '#004B5E', fontWeight: '600' } : { color: '#6b7280' }"
+                           @mouseover="if ($route.path !== '/admin/trashed-users') { $event.currentTarget.style.backgroundColor = '#F5C070'; $event.currentTarget.style.color = '#ffffff' }"
                            @mouseleave="if ($route.path !== '/admin/trashed-users') { $event.currentTarget.style.backgroundColor = 'transparent'; $event.currentTarget.style.color = '#6b7280' }">
                 Corbeille
               </router-link>
@@ -305,9 +305,9 @@
             <div class="flex items-center space-x-4">
               <!-- Mobile menu toggle -->
               <button @click="toggleSidebar" class="lg:hidden p-2 rounded-md transition-colors duration-200"
-                      style="color: #272d63;"
-                      @mouseover="$event.currentTarget.style.backgroundColor = '#fab511'; $event.currentTarget.style.color = '#272d63'"
-                      @mouseleave="$event.currentTarget.style.backgroundColor = 'transparent'; $event.currentTarget.style.color = '#272d63'">
+                      style="color: #004B5E;"
+                      @mouseover="$event.currentTarget.style.backgroundColor = '#F5C070'; $event.currentTarget.style.color = '#004B5E'"
+                      @mouseleave="$event.currentTarget.style.backgroundColor = 'transparent'; $event.currentTarget.style.color = '#004B5E'">
                 <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
@@ -315,7 +315,7 @@
 
               <div>
                 <!-- Page Title -->
-                <h1 class="text-2xl font-semibold" style="color: #272d63;">{{ pageTitle }}</h1>
+                <h1 class="text-2xl font-semibold" style="color: #004B5E;">{{ pageTitle }}</h1>
                 
                 <!-- Breadcrumb -->
                 <nav class="flex mt-1" aria-label="Breadcrumb">
@@ -626,7 +626,7 @@ export default {
     // Utilitaire pour les styles de menu
     const getMenuItemStyle = (path) => {
       return route.path === path ? 
-        { backgroundColor: '#272d63', borderColor: '#fab511', color: '#ffffff' } : 
+        { backgroundColor: '#004B5E', borderColor: '#F5C070', color: '#ffffff' } : 
         { backgroundColor: 'transparent' }
     }
     
@@ -635,12 +635,12 @@ export default {
     }
     
     const handleMenuHover = (event, path) => {
-      event.currentTarget.style.backgroundColor = route.path === path ? '#272d63' : '#fab511'
+      event.currentTarget.style.backgroundColor = route.path === path ? '#004B5E' : '#F5C070'
       event.currentTarget.style.color = '#ffffff'
     }
     
     const handleMenuLeave = (event, path) => {
-      event.currentTarget.style.backgroundColor = route.path === path ? '#272d63' : 'transparent'
+      event.currentTarget.style.backgroundColor = route.path === path ? '#004B5E' : 'transparent'
       event.currentTarget.style.color = route.path === path ? '#ffffff' : '#374151'
     }
 
@@ -677,7 +677,7 @@ export default {
     }
 
     const logout = async () => {
-      const result = await Swal.fire({ icon: 'question', title: 'Déconnexion', text: 'Êtes-vous sûr de vouloir vous déconnecter ?', showCancelButton: true, confirmButtonColor: '#272d63', cancelButtonColor: '#d33', confirmButtonText: 'Oui, me déconnecter', cancelButtonText: 'Annuler' })
+      const result = await Swal.fire({ icon: 'question', title: 'Déconnexion', text: 'Êtes-vous sûr de vouloir vous déconnecter ?', showCancelButton: true, confirmButtonColor: '#004B5E', cancelButtonColor: '#d33', confirmButtonText: 'Oui, me déconnecter', cancelButtonText: 'Annuler' })
       if (result.isConfirmed) {
         authUtils.clearAuth()
         window.location.href = '/'

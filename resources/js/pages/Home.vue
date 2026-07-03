@@ -658,7 +658,7 @@ export default {
   content: '';
   position: absolute;
   inset: -5px;
-  border: 2px solid rgba(250, 181, 17, 0.8);
+  border: 2px solid rgba(245, 192, 112, 0.8);
   border-radius: 0.5rem;
   opacity: 0;
   transform: scale(0.7);

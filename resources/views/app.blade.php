@@ -9,13 +9,13 @@
     <meta name="description" content="MyTicketO - Plateforme de billetterie en ligne pour événements au Gabon. Achetez vos billets en ligne facilement.">
 
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#272d63">
+    <meta name="theme-color" content="#004B5E">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="MyTicketO">
     <meta name="application-name" content="MyTicketO">
-    <meta name="msapplication-TileColor" content="#272d63">
+    <meta name="msapplication-TileColor" content="#004B5E">
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="format-detection" content="telephone=no">
 

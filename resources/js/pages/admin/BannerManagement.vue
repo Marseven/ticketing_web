@@ -3,14 +3,14 @@
     <!-- Header -->
     <div class="mb-6 flex justify-between items-center">
       <div>
-        <h1 class="text-2xl font-bold" style="color: #272d63;">Gestion des Bannières Publicitaires</h1>
+        <h1 class="text-2xl font-bold" style="color: #004B5E;">Gestion des Bannières Publicitaires</h1>
         <p class="text-gray-600 mt-1">Gérez les bannières publicitaires affichées sur le site</p>
       </div>
       <button @click="showCreateModal = true"
               class="text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
-              style="background-color: #272d63;"
-              @mouseover="$event.currentTarget.style.backgroundColor = '#fab511'"
-              @mouseleave="$event.currentTarget.style.backgroundColor = '#272d63'">
+              style="background-color: #004B5E;"
+              @mouseover="$event.currentTarget.style.backgroundColor = '#F5C070'"
+              @mouseleave="$event.currentTarget.style.backgroundColor = '#004B5E'">
         <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
         </svg>
@@ -26,13 +26,13 @@
           <input type="text" v-model="filters.search"
                  placeholder="Titre de la bannière..."
                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                 style="--tw-ring-color: #272d63;">
+                 style="--tw-ring-color: #004B5E;">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Position</label>
           <select v-model="filters.position"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                  style="--tw-ring-color: #272d63;">
+                  style="--tw-ring-color: #004B5E;">
             <option value="">Toutes les positions</option>
             <option value="header-top">En-tete - Bandeau publicitaire</option>
             <option value="home">Accueil - Zone principale</option>
@@ -47,7 +47,7 @@
           <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
           <select v-model="filters.is_active"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                  style="--tw-ring-color: #272d63;">
+                  style="--tw-ring-color: #004B5E;">
             <option value="">Tous les statuts</option>
             <option value="true">Actif</option>
             <option value="false">Inactif</option>
@@ -56,9 +56,9 @@
         <div class="flex items-end">
           <button @click="loadBanners"
                   class="w-full text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
-                  style="background-color: #fab511;"
-                  @mouseover="$event.currentTarget.style.backgroundColor = '#272d63'"
-                  @mouseleave="$event.currentTarget.style.backgroundColor = '#fab511'">
+                  style="background-color: #F5C070;"
+                  @mouseover="$event.currentTarget.style.backgroundColor = '#004B5E'"
+                  @mouseleave="$event.currentTarget.style.backgroundColor = '#F5C070'">
             Filtrer
           </button>
         </div>
@@ -67,7 +67,7 @@
 
     <!-- Loading -->
     <div v-if="loading" class="flex justify-center items-center h-64">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2" style="border-color: #272d63;"></div>
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2" style="border-color: #004B5E;"></div>
     </div>
 
     <!-- Banners Grid -->
@@ -105,7 +105,7 @@
 
           <!-- Banner Info -->
           <div class="p-4">
-            <h3 class="text-lg font-bold mb-2" style="color: #272d63;">{{ banner.title }}</h3>
+            <h3 class="text-lg font-bold mb-2" style="color: #004B5E;">{{ banner.title }}</h3>
             <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ banner.description || 'Aucune description' }}</p>
 
             <div class="flex items-center justify-between text-xs text-gray-500 mb-2">
@@ -144,9 +144,9 @@
               </button>
               <button @click="editBanner(banner)"
                       class="flex-1 text-sm px-3 py-2 rounded transition-colors duration-200"
-                      style="color: #272d63; background-color: rgba(39, 45, 99, 0.1);"
-                      @mouseover="$event.currentTarget.style.backgroundColor = '#fab511'; $event.currentTarget.style.color = '#fff'"
-                      @mouseleave="$event.currentTarget.style.backgroundColor = 'rgba(39, 45, 99, 0.1)'; $event.currentTarget.style.color = '#272d63'">
+                      style="color: #004B5E; background-color: rgba(0, 75, 94, 0.1);"
+                      @mouseover="$event.currentTarget.style.backgroundColor = '#F5C070'; $event.currentTarget.style.color = '#fff'"
+                      @mouseleave="$event.currentTarget.style.backgroundColor = 'rgba(0, 75, 94, 0.1)'; $event.currentTarget.style.color = '#004B5E'">
                 Modifier
               </button>
               <button @click="deleteBanner(banner)"
@@ -173,7 +173,7 @@
     <!-- Create/Edit Modal -->
     <div v-if="showCreateModal || showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-        <h3 class="text-lg font-bold mb-4" style="color: #272d63;">
+        <h3 class="text-lg font-bold mb-4" style="color: #004B5E;">
           {{ showCreateModal ? 'Nouvelle Bannière' : 'Modifier la Bannière' }}
         </h3>
 
@@ -212,7 +212,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">Titre *</label>
               <input type="text" v-model="bannerForm.title" required
                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                     style="--tw-ring-color: #272d63;">
+                     style="--tw-ring-color: #004B5E;">
             </div>
 
             <!-- Description -->
@@ -220,7 +220,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
               <textarea v-model="bannerForm.description" rows="3"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                        style="--tw-ring-color: #272d63;"></textarea>
+                        style="--tw-ring-color: #004B5E;"></textarea>
             </div>
 
             <!-- Link URL -->
@@ -229,7 +229,7 @@
               <input type="url" v-model="bannerForm.link_url"
                      placeholder="https://..."
                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                     style="--tw-ring-color: #272d63;">
+                     style="--tw-ring-color: #004B5E;">
             </div>
 
             <div class="grid grid-cols-2 gap-4">
@@ -238,7 +238,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Position *</label>
                 <select v-model="bannerForm.position" required
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                        style="--tw-ring-color: #272d63;">
+                        style="--tw-ring-color: #004B5E;">
                   <option value="header-top">En-tete - Bandeau publicitaire</option>
                   <option value="home">Accueil - Zone principale</option>
                   <option value="home-top">Accueil - Avant le contenu</option>
@@ -254,7 +254,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Ordre</label>
                 <input type="number" v-model="bannerForm.order" min="0"
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                       style="--tw-ring-color: #272d63;">
+                       style="--tw-ring-color: #004B5E;">
               </div>
             </div>
 
@@ -264,7 +264,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Date de début</label>
                 <input type="datetime-local" v-model="bannerForm.start_date"
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                       style="--tw-ring-color: #272d63;">
+                       style="--tw-ring-color: #004B5E;">
               </div>
 
               <!-- End Date -->
@@ -272,7 +272,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Date de fin</label>
                 <input type="datetime-local" v-model="bannerForm.end_date"
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                       style="--tw-ring-color: #272d63;">
+                       style="--tw-ring-color: #004B5E;">
               </div>
             </div>
 
@@ -280,7 +280,7 @@
             <div class="flex items-center">
               <input type="checkbox" v-model="bannerForm.is_active" id="is_active"
                      class="h-4 w-4 rounded border-gray-300"
-                     style="color: #272d63;">
+                     style="color: #004B5E;">
               <label for="is_active" class="ml-2 block text-sm text-gray-700">
                 Bannière active
               </label>
@@ -291,9 +291,9 @@
             <button type="submit"
                     :disabled="uploading"
                     class="flex-1 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50"
-                    style="background-color: #272d63;"
-                    @mouseover="!uploading && ($event.currentTarget.style.backgroundColor = '#fab511')"
-                    @mouseleave="!uploading && ($event.currentTarget.style.backgroundColor = '#272d63')">
+                    style="background-color: #004B5E;"
+                    @mouseover="!uploading && ($event.currentTarget.style.backgroundColor = '#F5C070')"
+                    @mouseleave="!uploading && ($event.currentTarget.style.backgroundColor = '#004B5E')">
               <span v-if="uploading">Envoi en cours...</span>
               <span v-else>{{ showCreateModal ? 'Créer' : 'Modifier' }}</span>
             </button>
@@ -429,7 +429,7 @@ export default {
       if (!file) return
 
       if (file.size > 2048 * 1024) {
-        Swal.fire({ icon: 'warning', title: 'Attention', text: 'L\'image ne doit pas dépasser 2MB', confirmButtonColor: '#272d63' })
+        Swal.fire({ icon: 'warning', title: 'Attention', text: 'L\'image ne doit pas dépasser 2MB', confirmButtonColor: '#004B5E' })
         return
       }
 
@@ -465,7 +465,7 @@ export default {
 
     const createBanner = async () => {
       if (!imageFile.value) {
-        Swal.fire({ icon: 'warning', title: 'Attention', text: 'Veuillez sélectionner une image', confirmButtonColor: '#272d63' })
+        Swal.fire({ icon: 'warning', title: 'Attention', text: 'Veuillez sélectionner une image', confirmButtonColor: '#004B5E' })
         return
       }
 
@@ -582,7 +582,7 @@ export default {
         title: 'Confirmation',
         text: `Êtes-vous sûr de vouloir supprimer la bannière "${banner.title}" ?`,
         showCancelButton: true,
-        confirmButtonColor: '#272d63',
+        confirmButtonColor: '#004B5E',
         cancelButtonColor: '#d33',
         confirmButtonText: 'Oui, supprimer',
         cancelButtonText: 'Annuler'

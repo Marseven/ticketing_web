@@ -27,12 +27,12 @@ blockquote {
 }
 
 a {
-    color: #272d63;
+    color: #004B5E;
     text-decoration: none;
 }
 
 a:hover {
-    color: #fab511;
+    color: #F5C070;
 }
 
 a img {
@@ -42,7 +42,7 @@ a img {
 /* Typography */
 
 h1 {
-    color: #272d63;
+    color: #004B5E;
     font-size: 28px;
     font-weight: bold;
     margin-top: 0;
@@ -50,7 +50,7 @@ h1 {
 }
 
 h2 {
-    color: #272d63;
+    color: #004B5E;
     font-size: 22px;
     font-weight: bold;
     margin-top: 0;
@@ -58,7 +58,7 @@ h2 {
 }
 
 h3 {
-    color: #272d63;
+    color: #004B5E;
     font-size: 18px;
     font-weight: bold;
     margin-top: 0;
@@ -110,7 +110,7 @@ img {
 }
 
 .header a {
-    color: #272d63;
+    color: #004B5E;
     font-size: 22px;
     font-weight: bold;
     text-decoration: none;
@@ -146,7 +146,7 @@ img {
     border-color: #e2e8f0;
     border-radius: 16px;
     border-width: 1px;
-    box-shadow: 0 4px 20px rgba(39, 45, 99, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 75, 94, 0.1);
     margin: 0 auto;
     padding: 0;
     width: 570px;
@@ -184,7 +184,7 @@ img {
 }
 
 .footer a {
-    color: #272d63;
+    color: #004B5E;
 }
 
 /* Tables */
@@ -200,7 +200,7 @@ img {
 .table th {
     background-color: #f8fafc;
     border-bottom: 1px solid #e2e8f0;
-    color: #272d63;
+    color: #004B5E;
     font-weight: bold;
     padding: 10px;
     text-align: left;
@@ -242,11 +242,11 @@ img {
 
 .button-blue,
 .button-primary {
-    background-color: #272d63;
-    border-bottom: 8px solid #272d63;
-    border-left: 18px solid #272d63;
-    border-right: 18px solid #272d63;
-    border-top: 8px solid #272d63;
+    background-color: #004B5E;
+    border-bottom: 8px solid #004B5E;
+    border-left: 18px solid #004B5E;
+    border-right: 18px solid #004B5E;
+    border-top: 8px solid #004B5E;
 }
 
 .button-green,
@@ -259,12 +259,12 @@ img {
 }
 
 .button-yellow {
-    background-color: #fab511;
-    border-bottom: 8px solid #fab511;
-    border-left: 18px solid #fab511;
-    border-right: 18px solid #fab511;
-    border-top: 8px solid #fab511;
-    color: #272d63;
+    background-color: #F5C070;
+    border-bottom: 8px solid #F5C070;
+    border-left: 18px solid #F5C070;
+    border-right: 18px solid #F5C070;
+    border-top: 8px solid #F5C070;
+    color: #004B5E;
 }
 
 .button-red,
@@ -279,7 +279,7 @@ img {
 /* Panels */
 
 .panel {
-    border-left: #272d63 solid 4px;
+    border-left: #004B5E solid 4px;
     margin: 21px 0;
 }
 
@@ -290,19 +290,19 @@ img {
 }
 
 .panel-content h1 {
-    color: #272d63;
+    color: #004B5E;
     font-size: 18px;
     margin: 0 0 10px 0;
 }
 
 .panel-content h2 {
-    color: #272d63;
+    color: #004B5E;
     font-size: 16px;
     margin: 0 0 8px 0;
 }
 
 .panel-content h3 {
-    color: #272d63;
+    color: #004B5E;
     font-size: 14px;
     margin: 0 0 6px 0;
 }
@@ -325,19 +325,19 @@ img {
 /* MyTicketO specific */
 
 .primea-brand {
-    color: #272d63;
+    color: #004B5E;
     font-weight: bold;
 }
 
 .primea-highlight {
-    background-color: #fab511;
-    color: #272d63;
+    background-color: #F5C070;
+    color: #004B5E;
     padding: 2px 6px;
     border-radius: 4px;
     font-weight: bold;
 }
 
 .primea-divider {
-    border-top: 2px solid #272d63;
+    border-top: 2px solid #004B5E;
     margin: 20px 0;
 }

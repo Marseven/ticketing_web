@@ -30,7 +30,7 @@
           <button
             @click="openInGoogleMaps"
             class="bg-primea-blue text-white px-6 py-3 rounded-primea-lg font-semibold hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 flex items-center justify-center gap-2"
-            style="background-color: #272d63; color: #ffffff;"
+            style="background-color: #004B5E; color: #ffffff;"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
@@ -41,7 +41,7 @@
           <button
             @click="getDirections"
             class="bg-white border-2 border-primea-blue text-primea-blue px-6 py-3 rounded-primea-lg font-semibold hover:bg-primea-blue hover:text-white transition-all duration-200 flex items-center justify-center gap-2"
-            style="background-color: #ffffff; color: #272d63; border: 2px solid #272d63;"
+            style="background-color: #ffffff; color: #004B5E; border: 2px solid #004B5E;"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -97,8 +97,8 @@ export default {
         <div style="
           width: 40px;
           height: 40px;
-          background-color: #272d63;
-          border: 3px solid #fab511;
+          background-color: #004B5E;
+          border: 3px solid #F5C070;
           border-radius: 50% 50% 50% 0;
           transform: rotate(-45deg);
           display: flex;
@@ -140,7 +140,7 @@ export default {
         // Ajouter une popup
         const popupContent = `
           <div style="font-family: 'Inter', 'Myriad Pro', sans-serif; min-width: 200px;">
-            <h3 style="color: #272d63; margin: 0 0 8px 0; font-weight: 600; font-size: 16px;">${props.event.venue_name}</h3>
+            <h3 style="color: #004B5E; margin: 0 0 8px 0; font-weight: 600; font-size: 16px;">${props.event.venue_name}</h3>
             <p style="margin: 0 0 4px 0; color: #666; font-size: 14px;">${props.event.venue_address}</p>
             <p style="margin: 0; color: #666; font-size: 14px;">${props.event.venue_city}</p>
           </div>
@@ -236,8 +236,8 @@ export default {
 <style scoped>
 /* Variables CSS MyTicketO */
 :root {
-  --primea-blue: #272d63;
-  --primea-yellow: #fab511;
+  --primea-blue: #004B5E;
+  --primea-yellow: #F5C070;
   --primea-white: #ffffff;
 }
 
@@ -278,7 +278,7 @@ export default {
 }
 
 .shadow-primea {
-  box-shadow: 0 4px 20px rgba(39, 45, 99, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 75, 94, 0.1);
 }
 
 /* Animations */

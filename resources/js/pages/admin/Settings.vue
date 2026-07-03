@@ -2,41 +2,41 @@
   <div class="settings-management p-6">
     <!-- Header -->
     <div class="mb-6">
-      <h1 class="text-2xl font-bold mb-2" style="color: #272d63;">Paramètres Système</h1>
+      <h1 class="text-2xl font-bold mb-2" style="color: #004B5E;">Paramètres Système</h1>
       <p class="text-gray-600">Configurez les paramètres généraux de la plateforme MyTicketO</p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Configuration Générale -->
       <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-semibold mb-4" style="color: #272d63;">Configuration Générale</h3>
+        <h3 class="text-lg font-semibold mb-4" style="color: #004B5E;">Configuration Générale</h3>
         <form @submit.prevent="saveGeneralSettings" class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Nom de la plateforme *</label>
             <input type="text" v-model="generalForm.platform_name" required
                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                   style="--tw-ring-color: #272d63;">
+                   style="--tw-ring-color: #004B5E;">
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">URL du site *</label>
             <input type="url" v-model="generalForm.site_url" required
                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                   style="--tw-ring-color: #272d63;">
+                   style="--tw-ring-color: #004B5E;">
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Email de contact *</label>
             <input type="email" v-model="generalForm.contact_email" required
                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                   style="--tw-ring-color: #272d63;">
+                   style="--tw-ring-color: #004B5E;">
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Fuseau horaire</label>
             <select v-model="generalForm.timezone" 
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                    style="--tw-ring-color: #272d63;">
+                    style="--tw-ring-color: #004B5E;">
               <option value="Africa/Libreville">Libreville (GMT+1)</option>
               <option value="Africa/Lagos">Lagos (GMT+1)</option>
               <option value="UTC">UTC (GMT+0)</option>
@@ -48,7 +48,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-2">Devise</label>
             <select v-model="generalForm.currency" 
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                    style="--tw-ring-color: #272d63;">
+                    style="--tw-ring-color: #004B5E;">
               <option value="XAF">Franc CFA (XAF)</option>
               <option value="EUR">Euro (EUR)</option>
               <option value="USD">Dollar US (USD)</option>
@@ -57,9 +57,9 @@
           
           <button type="submit" :disabled="savingGeneral"
                   class="w-full text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
-                  style="background-color: #272d63;"
-                  @mouseover="$event.currentTarget.style.backgroundColor = '#fab511'"
-                  @mouseleave="$event.currentTarget.style.backgroundColor = '#272d63'">
+                  style="background-color: #004B5E;"
+                  @mouseover="$event.currentTarget.style.backgroundColor = '#F5C070'"
+                  @mouseleave="$event.currentTarget.style.backgroundColor = '#004B5E'">
             {{ savingGeneral ? 'Sauvegarde...' : 'Sauvegarder' }}
           </button>
         </form>
@@ -67,7 +67,7 @@
 
       <!-- Moyens de Paiement -->
       <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-semibold mb-4" style="color: #272d63;">Moyens de Paiement</h3>
+        <h3 class="text-lg font-semibold mb-4" style="color: #004B5E;">Moyens de Paiement</h3>
         <div class="space-y-4">
           <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
             <div class="flex items-center">
@@ -82,7 +82,7 @@
             <label class="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" v-model="paymentForm.airtel_money" class="sr-only peer">
               <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"
-                   :style="paymentForm.airtel_money ? { backgroundColor: '#272d63' } : {}"></div>
+                   :style="paymentForm.airtel_money ? { backgroundColor: '#004B5E' } : {}"></div>
             </label>
           </div>
           
@@ -99,7 +99,7 @@
             <label class="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" v-model="paymentForm.moov_money" class="sr-only peer">
               <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"
-                   :style="paymentForm.moov_money ? { backgroundColor: '#fab511' } : {}"></div>
+                   :style="paymentForm.moov_money ? { backgroundColor: '#F5C070' } : {}"></div>
             </label>
           </div>
           
@@ -123,9 +123,9 @@
           
           <button @click="savePaymentSettings" :disabled="savingPayment"
                   class="w-full text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
-                  style="background-color: #fab511;"
-                  @mouseover="$event.currentTarget.style.backgroundColor = '#272d63'"
-                  @mouseleave="$event.currentTarget.style.backgroundColor = '#fab511'">
+                  style="background-color: #F5C070;"
+                  @mouseover="$event.currentTarget.style.backgroundColor = '#004B5E'"
+                  @mouseleave="$event.currentTarget.style.backgroundColor = '#F5C070'">
             {{ savingPayment ? 'Sauvegarde...' : 'Sauvegarder les paiements' }}
           </button>
         </div>
@@ -133,7 +133,7 @@
 
       <!-- Notifications -->
       <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-semibold mb-4" style="color: #272d63;">Paramètres de Notifications</h3>
+        <h3 class="text-lg font-semibold mb-4" style="color: #004B5E;">Paramètres de Notifications</h3>
         <div class="space-y-4">
           <div class="flex items-center justify-between">
             <div>
@@ -143,7 +143,7 @@
             <label class="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" v-model="notificationForm.email_enabled" class="sr-only peer">
               <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"
-                   :style="notificationForm.email_enabled ? { backgroundColor: '#272d63' } : {}"></div>
+                   :style="notificationForm.email_enabled ? { backgroundColor: '#004B5E' } : {}"></div>
             </label>
           </div>
           
@@ -155,7 +155,7 @@
             <label class="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" v-model="notificationForm.sms_enabled" class="sr-only peer">
               <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"
-                   :style="notificationForm.sms_enabled ? { backgroundColor: '#fab511' } : {}"></div>
+                   :style="notificationForm.sms_enabled ? { backgroundColor: '#F5C070' } : {}"></div>
             </label>
           </div>
           
@@ -179,7 +179,7 @@
 
       <!-- Sécurité et Maintenance -->
       <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-semibold mb-4" style="color: #272d63;">Sécurité et Maintenance</h3>
+        <h3 class="text-lg font-semibold mb-4" style="color: #004B5E;">Sécurité et Maintenance</h3>
         <div class="space-y-6">
           <!-- Mode Maintenance -->
           <div class="p-4 border border-orange-200 bg-orange-50 rounded-lg">
@@ -203,7 +203,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">Message de maintenance</label>
               <textarea v-model="maintenanceForm.maintenance_message" rows="3"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                        style="--tw-ring-color: #272d63;"
+                        style="--tw-ring-color: #004B5E;"
                         placeholder="Le site est temporairement en maintenance..."></textarea>
             </div>
           </div>
@@ -216,13 +216,13 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Commission fixe (XAF)</label>
                 <input type="number" v-model="commissionForm.fixed_commission" min="0" step="100"
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                       style="--tw-ring-color: #272d63;">
+                       style="--tw-ring-color: #004B5E;">
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Commission % du ticket</label>
                 <input type="number" v-model="commissionForm.percentage_commission" min="0" max="100" step="0.1"
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                       style="--tw-ring-color: #272d63;">
+                       style="--tw-ring-color: #004B5E;">
               </div>
             </div>
           </div>
@@ -239,35 +239,35 @@
     <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="bg-white rounded-lg shadow p-4 text-center">
         <div class="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center"
-             style="background-color: rgba(39, 45, 99, 0.1);">
-          <svg class="w-6 h-6" style="color: #272d63;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+             style="background-color: rgba(0, 75, 94, 0.1);">
+          <svg class="w-6 h-6" style="color: #004B5E;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
           </svg>
         </div>
-        <h4 class="font-medium mb-2" style="color: #272d63;">Exporter Configuration</h4>
+        <h4 class="font-medium mb-2" style="color: #004B5E;">Exporter Configuration</h4>
         <button @click="exportSettings" 
                 class="text-sm px-4 py-2 rounded transition-colors duration-200"
-                style="color: #272d63; background-color: rgba(39, 45, 99, 0.1);"
-                @mouseover="$event.currentTarget.style.backgroundColor = '#fab511'; $event.currentTarget.style.color = '#fff'"
-                @mouseleave="$event.currentTarget.style.backgroundColor = 'rgba(39, 45, 99, 0.1)'; $event.currentTarget.style.color = '#272d63'">
+                style="color: #004B5E; background-color: rgba(0, 75, 94, 0.1);"
+                @mouseover="$event.currentTarget.style.backgroundColor = '#F5C070'; $event.currentTarget.style.color = '#fff'"
+                @mouseleave="$event.currentTarget.style.backgroundColor = 'rgba(0, 75, 94, 0.1)'; $event.currentTarget.style.color = '#004B5E'">
           Exporter
         </button>
       </div>
       
       <div class="bg-white rounded-lg shadow p-4 text-center">
         <div class="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center"
-             style="background-color: rgba(250, 181, 17, 0.1);">
-          <svg class="w-6 h-6" style="color: #fab511;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+             style="background-color: rgba(245, 192, 112, 0.1);">
+          <svg class="w-6 h-6" style="color: #F5C070;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
           </svg>
         </div>
-        <h4 class="font-medium mb-2" style="color: #272d63;">Importer Configuration</h4>
+        <h4 class="font-medium mb-2" style="color: #004B5E;">Importer Configuration</h4>
         <input type="file" ref="importFile" @change="importSettings" accept=".json" class="hidden">
         <button @click="$refs.importFile.click()" 
                 class="text-sm px-4 py-2 rounded transition-colors duration-200"
-                style="color: #fab511; background-color: rgba(250, 181, 17, 0.1);"
-                @mouseover="$event.currentTarget.style.backgroundColor = '#272d63'; $event.currentTarget.style.color = '#fff'"
-                @mouseleave="$event.currentTarget.style.backgroundColor = 'rgba(250, 181, 17, 0.1)'; $event.currentTarget.style.color = '#fab511'">
+                style="color: #F5C070; background-color: rgba(245, 192, 112, 0.1);"
+                @mouseover="$event.currentTarget.style.backgroundColor = '#004B5E'; $event.currentTarget.style.color = '#fff'"
+                @mouseleave="$event.currentTarget.style.backgroundColor = 'rgba(245, 192, 112, 0.1)'; $event.currentTarget.style.color = '#F5C070'">
           Importer
         </button>
       </div>
@@ -278,7 +278,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
           </svg>
         </div>
-        <h4 class="font-medium mb-2" style="color: #272d63;">Réinitialiser</h4>
+        <h4 class="font-medium mb-2" style="color: #004B5E;">Réinitialiser</h4>
         <button @click="resetAllSettings" 
                 class="text-sm text-red-600 hover:text-red-800 px-4 py-2 bg-red-100 hover:bg-red-200 rounded transition-colors duration-200">
           Tout Réinitialiser
@@ -408,13 +408,13 @@ export default {
         })
         
         if (response.ok) {
-          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres généraux sauvegardés avec succès', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres généraux sauvegardés avec succès', confirmButtonColor: '#004B5E' })
         } else {
-          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres généraux sauvegardés avec succès (simulé)', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres généraux sauvegardés avec succès (simulé)', confirmButtonColor: '#004B5E' })
         }
       } catch (error) {
         console.log('API non disponible, sauvegarde simulée')
-        Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres généraux sauvegardés avec succès (simulé)', confirmButtonColor: '#272d63' })
+        Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres généraux sauvegardés avec succès (simulé)', confirmButtonColor: '#004B5E' })
       } finally {
         savingGeneral.value = false
       }
@@ -434,13 +434,13 @@ export default {
         })
         
         if (response.ok) {
-          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de paiement sauvegardés avec succès', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de paiement sauvegardés avec succès', confirmButtonColor: '#004B5E' })
         } else {
-          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de paiement sauvegardés avec succès (simulé)', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de paiement sauvegardés avec succès (simulé)', confirmButtonColor: '#004B5E' })
         }
       } catch (error) {
         console.log('API non disponible, sauvegarde simulée')
-        Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de paiement sauvegardés avec succès (simulé)', confirmButtonColor: '#272d63' })
+        Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de paiement sauvegardés avec succès (simulé)', confirmButtonColor: '#004B5E' })
       } finally {
         savingPayment.value = false
       }
@@ -460,13 +460,13 @@ export default {
         })
         
         if (response.ok) {
-          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de notification sauvegardés avec succès', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de notification sauvegardés avec succès', confirmButtonColor: '#004B5E' })
         } else {
-          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de notification sauvegardés avec succès (simulé)', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de notification sauvegardés avec succès (simulé)', confirmButtonColor: '#004B5E' })
         }
       } catch (error) {
         console.log('API non disponible, sauvegarde simulée')
-        Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de notification sauvegardés avec succès (simulé)', confirmButtonColor: '#272d63' })
+        Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de notification sauvegardés avec succès (simulé)', confirmButtonColor: '#004B5E' })
       } finally {
         savingNotifications.value = false
       }
@@ -489,13 +489,13 @@ export default {
         })
         
         if (response.ok) {
-          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de sécurité sauvegardés avec succès', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de sécurité sauvegardés avec succès', confirmButtonColor: '#004B5E' })
         } else {
-          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de sécurité sauvegardés avec succès (simulé)', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de sécurité sauvegardés avec succès (simulé)', confirmButtonColor: '#004B5E' })
         }
       } catch (error) {
         console.log('API non disponible, sauvegarde simulée')
-        Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de sécurité sauvegardés avec succès (simulé)', confirmButtonColor: '#272d63' })
+        Swal.fire({ icon: 'success', title: 'Succès', text: 'Paramètres de sécurité sauvegardés avec succès (simulé)', confirmButtonColor: '#004B5E' })
       } finally {
         savingSecurity.value = false
       }
@@ -536,7 +536,7 @@ export default {
             title: 'Confirmation',
             text: 'Êtes-vous sûr de vouloir importer cette configuration ? Cela remplacera tous les paramètres actuels.',
             showCancelButton: true,
-            confirmButtonColor: '#272d63',
+            confirmButtonColor: '#004B5E',
             cancelButtonColor: '#d33',
             confirmButtonText: 'Oui',
             cancelButtonText: 'Annuler'
@@ -549,9 +549,9 @@ export default {
           if (settings.maintenance) Object.assign(maintenanceForm, settings.maintenance)
           if (settings.commission) Object.assign(commissionForm, settings.commission)
 
-          Swal.fire({ icon: 'success', title: 'Succès', text: 'Configuration importée avec succès', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Configuration importée avec succès', confirmButtonColor: '#004B5E' })
         } catch (error) {
-          Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors de l\'importation du fichier : format invalide', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors de l\'importation du fichier : format invalide', confirmButtonColor: '#004B5E' })
         }
       }
       reader.readAsText(file)
@@ -566,7 +566,7 @@ export default {
         title: 'Confirmation',
         text: 'Êtes-vous sûr de vouloir réinitialiser tous les paramètres ? Cette action est irréversible.',
         showCancelButton: true,
-        confirmButtonColor: '#272d63',
+        confirmButtonColor: '#004B5E',
         cancelButtonColor: '#d33',
         confirmButtonText: 'Oui',
         cancelButtonText: 'Annuler'
@@ -574,7 +574,7 @@ export default {
       if (!result.isConfirmed) return
 
       loadMockData()
-      Swal.fire({ icon: 'success', title: 'Succès', text: 'Tous les paramètres ont été réinitialisés aux valeurs par défaut', confirmButtonColor: '#272d63' })
+      Swal.fire({ icon: 'success', title: 'Succès', text: 'Tous les paramètres ont été réinitialisés aux valeurs par défaut', confirmButtonColor: '#004B5E' })
     }
 
     // Lifecycle

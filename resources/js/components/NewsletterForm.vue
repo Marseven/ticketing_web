@@ -107,7 +107,7 @@ export default {
 .search-bar-modern {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  border: 2px solid rgba(39, 45, 99, 0.1);
+  border: 2px solid rgba(0, 75, 94, 0.1);
   border-radius: 12px;
   padding: 12px 16px;
   transition: all 0.3s ease;
@@ -117,7 +117,7 @@ export default {
 .search-bar-modern:focus {
   outline: none;
   border-color: var(--primea-blue);
-  box-shadow: 0 0 0 4px rgba(39, 45, 99, 0.1);
+  box-shadow: 0 0 0 4px rgba(0, 75, 94, 0.1);
   transform: translateY(-2px);
 }
 
@@ -143,7 +143,7 @@ export default {
 
 .btn-gradient-secondary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(250, 181, 17, 0.3);
+  box-shadow: 0 10px 20px rgba(245, 192, 112, 0.3);
 }
 
 .btn-gradient-secondary:disabled {
@@ -295,8 +295,8 @@ export default {
 }
 
 :root {
-  --primea-blue: #272d63;
-  --primea-yellow: #fab511;
+  --primea-blue: #004B5E;
+  --primea-yellow: #F5C070;
   --primea-yellow-dark: #e09f0e;
   --font-primary: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }

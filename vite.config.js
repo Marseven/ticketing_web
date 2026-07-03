@@ -24,7 +24,7 @@ export default defineConfig({
                 name: 'MyTicketO - Billetterie en ligne',
                 short_name: 'MyTicketO',
                 description: 'Plateforme de billetterie en ligne pour événements au Gabon',
-                theme_color: '#272d63',
+                theme_color: '#004B5E',
                 background_color: '#ffffff',
                 display: 'standalone',
                 orientation: 'portrait',

@@ -499,14 +499,14 @@ export default {
         
         const data = await response.json()
         if (data.success) {
-          Swal.fire({ icon: 'success', title: 'Succès', text: `Statut mis à jour: ${getStatusName(data.data.status)}`, confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'success', title: 'Succès', text: `Statut mis à jour: ${getStatusName(data.data.status)}`, confirmButtonColor: '#004B5E' })
           loadPayments()
         } else {
-          Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Erreur lors de la vérification', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Erreur lors de la vérification', confirmButtonColor: '#004B5E' })
         }
       } catch (error) {
         console.error('Erreur vérification statut:', error)
-        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur technique', confirmButtonColor: '#272d63' })
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur technique', confirmButtonColor: '#004B5E' })
       }
     }
 
@@ -539,7 +539,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur export:', error)
-        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors de l\'export des données', confirmButtonColor: '#272d63' })
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors de l\'export des données', confirmButtonColor: '#004B5E' })
       }
     }
 

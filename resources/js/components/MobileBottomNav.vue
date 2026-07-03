@@ -109,7 +109,7 @@ onUnmounted(() => {
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(39, 45, 99, 0.08);
+  border-top: 1px solid rgba(0, 75, 94, 0.08);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -149,7 +149,7 @@ onUnmounted(() => {
 }
 
 .nav-item--active {
-  color: #272d63;
+  color: #004B5E;
 }
 
 .nav-icon {
@@ -182,6 +182,6 @@ onUnmounted(() => {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background-color: #fab511;
+  background-color: #F5C070;
 }
 </style>

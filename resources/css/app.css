@@ -62,27 +62,27 @@ body {
 
 /* Classes utilitaires Primea */
 .text-primea-blue {
-    color: #272d63;
+    color: #004B5E;
 }
 
 .text-primea-yellow {
-    color: #fab511;
+    color: #F5C070;
 }
 
 .bg-primea-blue {
-    background-color: #272d63;
+    background-color: #004B5E;
 }
 
 .bg-primea-yellow {
-    background-color: #fab511;
+    background-color: #F5C070;
 }
 
 .border-primea-blue {
-    border-color: #272d63;
+    border-color: #004B5E;
 }
 
 .border-primea-yellow {
-    border-color: #fab511;
+    border-color: #F5C070;
 }
 
 /* Custom line-height override */
@@ -124,7 +124,7 @@ body {
     content: '';
     position: absolute;
     inset: -5px;
-    border: 2px solid rgba(250, 181, 17, 0.8);
+    border: 2px solid rgba(245, 192, 112, 0.8);
     border-radius: 0.5rem;
     opacity: 0;
     transform: scale(0.7);

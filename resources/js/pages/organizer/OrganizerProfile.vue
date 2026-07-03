@@ -445,7 +445,7 @@ const updatePersonalInfo = async () => {
         title: 'Succès !',
         text: 'Informations personnelles mises à jour',
         icon: 'success',
-        confirmButtonColor: '#272d63'
+        confirmButtonColor: '#004B5E'
       });
       editPersonal.value = false;
       
@@ -460,7 +460,7 @@ const updatePersonalInfo = async () => {
       title: 'Erreur',
       text: 'Impossible de mettre à jour les informations',
       icon: 'error',
-      confirmButtonColor: '#272d63'
+      confirmButtonColor: '#004B5E'
     });
   } finally {
     updatingPersonal.value = false;
@@ -480,7 +480,7 @@ const updateOrganizationInfo = async () => {
         title: 'Succès !',
         text: 'Informations de l\'organisation mises à jour',
         icon: 'success',
-        confirmButtonColor: '#272d63'
+        confirmButtonColor: '#004B5E'
       });
       editOrganization.value = false;
       
@@ -495,7 +495,7 @@ const updateOrganizationInfo = async () => {
       title: 'Erreur',
       text: 'Impossible de mettre à jour les informations de l\'organisation',
       icon: 'error',
-      confirmButtonColor: '#272d63'
+      confirmButtonColor: '#004B5E'
     });
   } finally {
     updatingOrganization.value = false;
@@ -508,7 +508,7 @@ const updatePassword = async () => {
       title: 'Erreur',
       text: 'Les mots de passe ne correspondent pas',
       icon: 'error',
-      confirmButtonColor: '#272d63'
+      confirmButtonColor: '#004B5E'
     });
     return;
   }
@@ -525,7 +525,7 @@ const updatePassword = async () => {
         title: 'Succès !',
         text: 'Mot de passe mis à jour avec succès',
         icon: 'success',
-        confirmButtonColor: '#272d63'
+        confirmButtonColor: '#004B5E'
       });
       
       // Réinitialiser le formulaire
@@ -541,7 +541,7 @@ const updatePassword = async () => {
       title: 'Erreur',
       text: 'Impossible de changer le mot de passe',
       icon: 'error',
-      confirmButtonColor: '#272d63'
+      confirmButtonColor: '#004B5E'
     });
   } finally {
     updatingPassword.value = false;
@@ -559,7 +559,7 @@ const handleAvatarUpload = async (event) => {
       title: 'Erreur',
       text: 'Veuillez sélectionner un fichier image',
       icon: 'error',
-      confirmButtonColor: '#272d63'
+      confirmButtonColor: '#004B5E'
     });
     return;
   }
@@ -569,7 +569,7 @@ const handleAvatarUpload = async (event) => {
       title: 'Erreur',
       text: 'L\'image ne doit pas dépasser 5MB',
       icon: 'error',
-      confirmButtonColor: '#272d63'
+      confirmButtonColor: '#004B5E'
     });
     return;
   }
@@ -599,7 +599,7 @@ const handleAvatarUpload = async (event) => {
         title: 'Succès !',
         text: 'Photo de profil mise à jour',
         icon: 'success',
-        confirmButtonColor: '#272d63'
+        confirmButtonColor: '#004B5E'
       });
       
       // Recharger les données du profil pour s'assurer de la synchronisation
@@ -613,7 +613,7 @@ const handleAvatarUpload = async (event) => {
       title: 'Erreur',
       text: 'Impossible de télécharger la photo',
       icon: 'error',
-      confirmButtonColor: '#272d63'
+      confirmButtonColor: '#004B5E'
     });
   } finally {
     uploadingAvatar.value = false;
@@ -632,7 +632,7 @@ const handleLogoUpload = async (event) => {
       title: 'Erreur',
       text: 'Veuillez sélectionner un fichier image',
       icon: 'error',
-      confirmButtonColor: '#272d63'
+      confirmButtonColor: '#004B5E'
     });
     return;
   }
@@ -642,7 +642,7 @@ const handleLogoUpload = async (event) => {
       title: 'Erreur',
       text: 'L\'image ne doit pas dépasser 5MB',
       icon: 'error',
-      confirmButtonColor: '#272d63'
+      confirmButtonColor: '#004B5E'
     });
     return;
   }
@@ -669,7 +669,7 @@ const handleLogoUpload = async (event) => {
         title: 'Succès !',
         text: 'Logo de l\'organisation mis à jour',
         icon: 'success',
-        confirmButtonColor: '#272d63'
+        confirmButtonColor: '#004B5E'
       });
       
       // Recharger les données du profil pour s'assurer de la synchronisation
@@ -683,7 +683,7 @@ const handleLogoUpload = async (event) => {
       title: 'Erreur',
       text: 'Impossible de télécharger le logo',
       icon: 'error',
-      confirmButtonColor: '#272d63'
+      confirmButtonColor: '#004B5E'
     });
   } finally {
     uploadingLogo.value = false;
@@ -749,7 +749,7 @@ const loadProfileData = async () => {
         title: 'Erreur',
         text: 'Impossible de charger le profil',
         icon: 'error',
-        confirmButtonColor: '#272d63'
+        confirmButtonColor: '#004B5E'
       });
     }
   } catch (error) {
@@ -758,7 +758,7 @@ const loadProfileData = async () => {
       title: 'Erreur',
       text: 'Impossible de charger le profil',
       icon: 'error',
-      confirmButtonColor: '#272d63'
+      confirmButtonColor: '#004B5E'
     });
   } finally {
     loading.value = false;
@@ -778,31 +778,31 @@ onMounted(() => {
 
 /* Couleurs MyTicketO */
 .text-primea-blue {
-  color: #272d63;
+  color: #004B5E;
 }
 
 .text-primea-yellow {
-  color: #fab511;
+  color: #F5C070;
 }
 
 .bg-primea-blue {
-  background-color: #272d63;
+  background-color: #004B5E;
 }
 
 .bg-primea-yellow {
-  background-color: #fab511;
+  background-color: #F5C070;
 }
 
 .hover\:text-primea-yellow:hover {
-  color: #fab511;
+  color: #F5C070;
 }
 
 .hover\:bg-primea-yellow:hover {
-  background-color: #fab511;
+  background-color: #F5C070;
 }
 
 .hover\:text-primea-blue:hover {
-  color: #272d63;
+  color: #004B5E;
 }
 
 /* Coins arrondis MyTicketO */
@@ -812,7 +812,7 @@ onMounted(() => {
 
 /* Ombres MyTicketO */
 .shadow-primea {
-  box-shadow: 0 2px 15px rgba(39, 45, 99, 0.08);
+  box-shadow: 0 2px 15px rgba(0, 75, 94, 0.08);
 }
 
 /* PhoneInput disabled state */

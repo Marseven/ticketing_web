@@ -9,8 +9,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        'primea-blue': '#272d63',
-        'primea-yellow': '#fab511',
+        // Palette MyTicketO (couleurs du logo uniquement)
+        'primea-blue': '#004B5E',    // teal foncé (primaire, texte blanc lisible)
+        'primea-yellow': '#F5C070',  // ambre (accent)
+        'primea-teal': '#1F9E9A',    // teal vif (identité)
         'primea-white': '#ffffff',
       },
       fontFamily: {
@@ -39,13 +41,13 @@ export default {
         'primea-xl': '20px',
       },
       boxShadow: {
-        'primea': '0 4px 20px rgba(39, 45, 99, 0.1)',
-        'primea-lg': '0 8px 30px rgba(39, 45, 99, 0.15)',
-        'primea-yellow': '0 4px 20px rgba(250, 181, 17, 0.2)',
+        'primea': '0 4px 20px rgba(0, 75, 94, 0.1)',
+        'primea-lg': '0 8px 30px rgba(0, 75, 94, 0.15)',
+        'primea-yellow': '0 4px 20px rgba(245, 192, 112, 0.25)',
       },
       backgroundImage: {
-        'primea-gradient': 'linear-gradient(135deg, #272d63 0%, #1a1f4a 100%)',
-        'primea-yellow-gradient': 'linear-gradient(135deg, #fab511 0%, #e09a0a 100%)',
+        'primea-gradient': 'linear-gradient(135deg, #004B5E 0%, #1F9E9A 100%)',
+        'primea-yellow-gradient': 'linear-gradient(135deg, #F5C070 0%, #1F9E9A 100%)',
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',

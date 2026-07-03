@@ -175,13 +175,13 @@ const generate = async () => {
     const data = await res.json()
     if (data.success) {
       await loadBatches()
-      Swal.fire({ icon: 'success', title: 'Lot généré', text: data.message, confirmButtonColor: '#272d63' })
+      Swal.fire({ icon: 'success', title: 'Lot généré', text: data.message, confirmButtonColor: '#004B5E' })
       printBatch(data.data.batch_reference)
     } else {
-      Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Échec', confirmButtonColor: '#272d63' })
+      Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Échec', confirmButtonColor: '#004B5E' })
     }
   } catch (e) {
-    Swal.fire({ icon: 'error', title: 'Erreur technique', text: 'Réessayez.', confirmButtonColor: '#272d63' })
+    Swal.fire({ icon: 'error', title: 'Erreur technique', text: 'Réessayez.', confirmButtonColor: '#004B5E' })
   } finally {
     generating.value = false
   }
@@ -198,7 +198,7 @@ const printBatch = async (batchRef) => {
     window.open(url, '_blank')
     setTimeout(() => URL.revokeObjectURL(url), 60000)
   } catch (e) {
-    Swal.fire({ icon: 'error', title: 'Impression', text: 'Impossible de générer le PDF.', confirmButtonColor: '#272d63' })
+    Swal.fire({ icon: 'error', title: 'Impression', text: 'Impossible de générer le PDF.', confirmButtonColor: '#004B5E' })
   }
 }
 

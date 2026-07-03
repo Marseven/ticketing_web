@@ -599,7 +599,7 @@ export default {
 
         if (!response.ok) {
           console.error('Erreur API order details:', response.status)
-          Swal.fire({ icon: 'error', title: 'Erreur', text: 'Impossible de charger les détails de la commande', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'error', title: 'Erreur', text: 'Impossible de charger les détails de la commande', confirmButtonColor: '#004B5E' })
           return
         }
 
@@ -608,11 +608,11 @@ export default {
           selectedOrder.value = data.data.order
           showDetailsModal.value = true
         } else {
-          Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors du chargement des détails', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors du chargement des détails', confirmButtonColor: '#004B5E' })
         }
       } catch (error) {
         console.error('Erreur chargement détails commande:', error)
-        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur technique lors du chargement des détails', confirmButtonColor: '#272d63' })
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur technique lors du chargement des détails', confirmButtonColor: '#004B5E' })
       }
     }
 
@@ -622,7 +622,7 @@ export default {
         title: 'Confirmation',
         text: `Êtes-vous sûr de vouloir ${newStatus === 'confirmed' ? 'confirmer' : 'annuler'} cette commande ?`,
         showCancelButton: true,
-        confirmButtonColor: '#272d63',
+        confirmButtonColor: '#004B5E',
         cancelButtonColor: '#d33',
         confirmButtonText: 'Oui',
         cancelButtonText: 'Annuler'
@@ -642,23 +642,23 @@ export default {
 
         if (!response.ok) {
           console.error('Erreur API update status:', response.status)
-          Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors de la mise à jour du statut', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors de la mise à jour du statut', confirmButtonColor: '#004B5E' })
           return
         }
 
         const data = await response.json()
         if (data.success) {
-          Swal.fire({ icon: 'success', title: 'Succès', text: `Commande ${newStatus === 'confirmed' ? 'confirmée' : 'annulée'} avec succès`, confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'success', title: 'Succès', text: `Commande ${newStatus === 'confirmed' ? 'confirmée' : 'annulée'} avec succès`, confirmButtonColor: '#004B5E' })
           loadOrders()
           if (showDetailsModal.value) {
             selectedOrder.value.status = newStatus
           }
         } else {
-          Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Erreur lors de la mise à jour', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Erreur lors de la mise à jour', confirmButtonColor: '#004B5E' })
         }
       } catch (error) {
         console.error('Erreur mise à jour statut commande:', error)
-        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur technique', confirmButtonColor: '#272d63' })
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur technique', confirmButtonColor: '#004B5E' })
       }
     }
 
@@ -691,7 +691,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur export:', error)
-        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors de l\'export des données', confirmButtonColor: '#272d63' })
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors de l\'export des données', confirmButtonColor: '#004B5E' })
       }
     }
 

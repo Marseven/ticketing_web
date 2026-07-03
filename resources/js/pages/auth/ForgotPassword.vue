@@ -70,9 +70,9 @@
               type="submit"
               :disabled="loading"
               class="w-full text-white py-4 px-6 rounded-primea-lg text-lg font-bold transition-all duration-200 shadow-primea-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none font-primea"
-              :style="{ backgroundColor: '#272d63', color: '#ffffff' }"
-              @mouseover="!loading && ($event.currentTarget.style.backgroundColor='#fab511', $event.currentTarget.style.color='#272d63')"
-              @mouseleave="!loading && ($event.currentTarget.style.backgroundColor='#272d63', $event.currentTarget.style.color='#ffffff')"
+              :style="{ backgroundColor: '#004B5E', color: '#ffffff' }"
+              @mouseover="!loading && ($event.currentTarget.style.backgroundColor='#F5C070', $event.currentTarget.style.color='#004B5E')"
+              @mouseleave="!loading && ($event.currentTarget.style.backgroundColor='#004B5E', $event.currentTarget.style.color='#ffffff')"
             >
               <span v-if="loading" class="flex items-center justify-center pointer-events-none">
                 <svg class="w-5 h-5 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -184,8 +184,8 @@ export default {
 <style scoped>
 /* Variables CSS MyTicketO */
 :root {
-  --primea-blue: #272d63;
-  --primea-yellow: #fab511;
+  --primea-blue: #004B5E;
+  --primea-yellow: #F5C070;
   --primea-white: #ffffff;
   --primea-blue-dark: #1a1e47;
   --primea-yellow-dark: #e09f0e;
@@ -235,7 +235,7 @@ export default {
 
 /* Ombres MyTicketO */
 .shadow-primea-lg {
-  box-shadow: 0 8px 30px rgba(39, 45, 99, 0.15);
+  box-shadow: 0 8px 30px rgba(0, 75, 94, 0.15);
 }
 
 /* Police MyTicketO */

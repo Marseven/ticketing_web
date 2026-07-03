@@ -145,8 +145,8 @@ export default {
 <style scoped>
 /* Variables CSS */
 :root {
-  --primea-blue: #272d63;
-  --primea-yellow: #fab511;
+  --primea-blue: #004B5E;
+  --primea-yellow: #F5C070;
   --primea-white: #ffffff;
 }
 
@@ -167,7 +167,7 @@ export default {
 }
 
 .bg-primea-gradient {
-  background: linear-gradient(135deg, var(--primea-blue) 0%, #1a1f4a 100%);
+  background: linear-gradient(135deg, var(--primea-blue) 0%, #1F9E9A 100%);
 }
 
 .rounded-primea {
@@ -179,7 +179,7 @@ export default {
 }
 
 .shadow-primea-lg {
-  box-shadow: 0 8px 30px rgba(39, 45, 99, 0.15);
+  box-shadow: 0 8px 30px rgba(0, 75, 94, 0.15);
 }
 
 .font-primea {
@@ -189,7 +189,7 @@ export default {
 /* Hover effects */
 .ticket-component:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(39, 45, 99, 0.2);
+  box-shadow: 0 12px 40px rgba(0, 75, 94, 0.2);
   transition: all 0.3s ease;
 }
 

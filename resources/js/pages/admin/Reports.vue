@@ -2,7 +2,7 @@
   <div class="reports-management p-6">
     <!-- Header -->
     <div class="mb-6">
-      <h1 class="text-2xl font-bold mb-2" style="color: #272d63;">Rapports et Analyses</h1>
+      <h1 class="text-2xl font-bold mb-2" style="color: #004B5E;">Rapports et Analyses</h1>
       <p class="text-gray-600">Générez et consultez les rapports de performance de la plateforme</p>
     </div>
 
@@ -13,19 +13,19 @@
           <label class="block text-sm font-medium text-gray-700 mb-2">Date de début</label>
           <input type="date" v-model="dateRange.start" 
                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                 style="--tw-ring-color: #272d63;">
+                 style="--tw-ring-color: #004B5E;">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Date de fin</label>
           <input type="date" v-model="dateRange.end" 
                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                 style="--tw-ring-color: #272d63;">
+                 style="--tw-ring-color: #004B5E;">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Période prédéfinie</label>
           <select v-model="selectedPeriod" @change="setPredefinedPeriod"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                  style="--tw-ring-color: #272d63;">
+                  style="--tw-ring-color: #004B5E;">
             <option value="">Personnalisée</option>
             <option value="today">Aujourd'hui</option>
             <option value="week">Cette semaine</option>
@@ -37,9 +37,9 @@
         <div class="flex items-end">
           <button @click="refreshReports" 
                   class="w-full text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
-                  style="background-color: #fab511;"
-                  @mouseover="$event.currentTarget.style.backgroundColor = '#272d63'"
-                  @mouseleave="$event.currentTarget.style.backgroundColor = '#fab511'">
+                  style="background-color: #F5C070;"
+                  @mouseover="$event.currentTarget.style.backgroundColor = '#004B5E'"
+                  @mouseleave="$event.currentTarget.style.backgroundColor = '#F5C070'">
             Actualiser
           </button>
         </div>
@@ -51,19 +51,19 @@
       <!-- Financial Report -->
       <div class="bg-white rounded-lg shadow p-6 text-center">
         <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
-             style="background-color: rgba(39, 45, 99, 0.1);">
-          <svg class="w-8 h-8" style="color: #272d63;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+             style="background-color: rgba(0, 75, 94, 0.1);">
+          <svg class="w-8 h-8" style="color: #004B5E;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
           </svg>
         </div>
-        <h3 class="text-lg font-semibold mb-2" style="color: #272d63;">Rapport Financier</h3>
+        <h3 class="text-lg font-semibold mb-2" style="color: #004B5E;">Rapport Financier</h3>
         <p class="text-gray-600 text-sm mb-4">Revenus, commissions, paiements et remboursements</p>
         <button @click="generateReport('financial')" 
                 :disabled="generating"
                 class="w-full text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
-                style="background-color: #272d63;"
-                @mouseover="$event.currentTarget.style.backgroundColor = '#fab511'"
-                @mouseleave="$event.currentTarget.style.backgroundColor = '#272d63'">
+                style="background-color: #004B5E;"
+                @mouseover="$event.currentTarget.style.backgroundColor = '#F5C070'"
+                @mouseleave="$event.currentTarget.style.backgroundColor = '#004B5E'">
           {{ generating ? 'Génération...' : 'Générer' }}
         </button>
       </div>
@@ -71,19 +71,19 @@
       <!-- Events Report -->
       <div class="bg-white rounded-lg shadow p-6 text-center">
         <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
-             style="background-color: rgba(250, 181, 17, 0.1);">
-          <svg class="w-8 h-8" style="color: #fab511;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+             style="background-color: rgba(245, 192, 112, 0.1);">
+          <svg class="w-8 h-8" style="color: #F5C070;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
           </svg>
         </div>
-        <h3 class="text-lg font-semibold mb-2" style="color: #272d63;">Rapport Événements</h3>
+        <h3 class="text-lg font-semibold mb-2" style="color: #004B5E;">Rapport Événements</h3>
         <p class="text-gray-600 text-sm mb-4">Performances, ventes de tickets et tendances</p>
         <button @click="generateReport('events')" 
                 :disabled="generating"
                 class="w-full text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
-                style="background-color: #fab511;"
-                @mouseover="$event.currentTarget.style.backgroundColor = '#272d63'"
-                @mouseleave="$event.currentTarget.style.backgroundColor = '#fab511'">
+                style="background-color: #F5C070;"
+                @mouseover="$event.currentTarget.style.backgroundColor = '#004B5E'"
+                @mouseleave="$event.currentTarget.style.backgroundColor = '#F5C070'">
           {{ generating ? 'Génération...' : 'Générer' }}
         </button>
       </div>
@@ -95,7 +95,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
           </svg>
         </div>
-        <h3 class="text-lg font-semibold mb-2" style="color: #272d63;">Rapport Utilisateurs</h3>
+        <h3 class="text-lg font-semibold mb-2" style="color: #004B5E;">Rapport Utilisateurs</h3>
         <p class="text-gray-600 text-sm mb-4">Croissance, activité et segments d'utilisateurs</p>
         <button @click="generateReport('users')" 
                 :disabled="generating"
@@ -111,7 +111,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
           </svg>
         </div>
-        <h3 class="text-lg font-semibold mb-2" style="color: #272d63;">Rapport Performance</h3>
+        <h3 class="text-lg font-semibold mb-2" style="color: #004B5E;">Rapport Performance</h3>
         <p class="text-gray-600 text-sm mb-4">Métriques de performance de la plateforme</p>
         <button @click="generateReport('performance')" 
                 :disabled="generating"
@@ -125,28 +125,28 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <div class="bg-white rounded-lg shadow p-4">
         <div class="flex items-center">
-          <div class="p-2 rounded-lg" style="background-color: rgba(39, 45, 99, 0.1);">
-            <svg class="w-6 h-6" style="color: #272d63;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="p-2 rounded-lg" style="background-color: rgba(0, 75, 94, 0.1);">
+            <svg class="w-6 h-6" style="color: #004B5E;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
             </svg>
           </div>
           <div class="ml-4">
             <p class="text-sm text-gray-600">Revenus Total</p>
-            <p class="text-xl font-bold" style="color: #272d63;">{{ formatAmount(stats.total_revenue) }} XAF</p>
+            <p class="text-xl font-bold" style="color: #004B5E;">{{ formatAmount(stats.total_revenue) }} XAF</p>
           </div>
         </div>
       </div>
 
       <div class="bg-white rounded-lg shadow p-4">
         <div class="flex items-center">
-          <div class="p-2 rounded-lg" style="background-color: rgba(250, 181, 17, 0.1);">
-            <svg class="w-6 h-6" style="color: #fab511;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="p-2 rounded-lg" style="background-color: rgba(245, 192, 112, 0.1);">
+            <svg class="w-6 h-6" style="color: #F5C070;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
             </svg>
           </div>
           <div class="ml-4">
             <p class="text-sm text-gray-600">Tickets Vendus</p>
-            <p class="text-xl font-bold" style="color: #fab511;">{{ stats.total_tickets }}</p>
+            <p class="text-xl font-bold" style="color: #F5C070;">{{ stats.total_tickets }}</p>
           </div>
         </div>
       </div>
@@ -183,7 +183,7 @@
     <!-- Reports History -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-        <h3 class="text-lg font-semibold" style="color: #272d63;">Historique des Rapports</h3>
+        <h3 class="text-lg font-semibold" style="color: #004B5E;">Historique des Rapports</h3>
         <button @click="clearHistory" 
                 class="text-sm text-red-600 hover:text-red-800 px-3 py-1 bg-red-100 hover:bg-red-200 rounded transition-colors duration-200">
           Vider l'historique
@@ -191,7 +191,7 @@
       </div>
       
       <div v-if="loading" class="p-8 text-center">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto" style="border-color: #272d63;"></div>
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto" style="border-color: #004B5E;"></div>
         <p class="mt-2 text-gray-600">Chargement...</p>
       </div>
       
@@ -244,9 +244,9 @@
                 <div class="flex space-x-2">
                   <button v-if="report.status === 'ready'" @click="downloadReport(report)" 
                           class="text-sm px-3 py-1 rounded transition-colors duration-200"
-                          style="color: #272d63; background-color: rgba(39, 45, 99, 0.1);"
-                          @mouseover="$event.currentTarget.style.backgroundColor = '#fab511'; $event.currentTarget.style.color = '#fff'"
-                          @mouseleave="$event.currentTarget.style.backgroundColor = 'rgba(39, 45, 99, 0.1)'; $event.currentTarget.style.color = '#272d63'">
+                          style="color: #004B5E; background-color: rgba(0, 75, 94, 0.1);"
+                          @mouseover="$event.currentTarget.style.backgroundColor = '#F5C070'; $event.currentTarget.style.color = '#fff'"
+                          @mouseleave="$event.currentTarget.style.backgroundColor = 'rgba(0, 75, 94, 0.1)'; $event.currentTarget.style.color = '#004B5E'">
                     Télécharger
                   </button>
                   <button @click="deleteReport(report)" 
@@ -443,10 +443,10 @@ export default {
           window.URL.revokeObjectURL(url)
           document.body.removeChild(a)
         } else {
-          Swal.fire({ icon: 'info', title: 'Information', text: 'Téléchargement simulé du rapport: ' + report.type, confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'info', title: 'Information', text: 'Téléchargement simulé du rapport: ' + report.type, confirmButtonColor: '#004B5E' })
         }
       } catch (error) {
-        Swal.fire({ icon: 'info', title: 'Information', text: 'Téléchargement simulé du rapport: ' + report.type, confirmButtonColor: '#272d63' })
+        Swal.fire({ icon: 'info', title: 'Information', text: 'Téléchargement simulé du rapport: ' + report.type, confirmButtonColor: '#004B5E' })
       }
     }
     
@@ -458,7 +458,7 @@ export default {
         showCancelButton: true,
         confirmButtonText: 'Oui',
         cancelButtonText: 'Annuler',
-        confirmButtonColor: '#272d63',
+        confirmButtonColor: '#004B5E',
         cancelButtonColor: '#d33'
       })
       if (!result.isConfirmed) return
@@ -492,7 +492,7 @@ export default {
         showCancelButton: true,
         confirmButtonText: 'Oui',
         cancelButtonText: 'Annuler',
-        confirmButtonColor: '#272d63',
+        confirmButtonColor: '#004B5E',
         cancelButtonColor: '#d33'
       })
       if (!result.isConfirmed) return

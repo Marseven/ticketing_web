@@ -283,14 +283,14 @@ export default {
 .country-code {
   font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-weight: 600;
-  color: #272d63;
+  color: #004B5E;
   font-size: 0.875rem;
 }
 
 .dropdown-arrow {
   margin-left: 0.25rem;
   transition: transform 0.2s;
-  color: #272d63;
+  color: #004B5E;
 }
 
 .dropdown-arrow.rotate {
@@ -313,8 +313,8 @@ export default {
 
 .phone-input:focus {
   outline: none;
-  border-color: #272d63;
-  box-shadow: 0 0 0 3px rgba(250, 181, 17, 0.2);
+  border-color: #004B5E;
+  box-shadow: 0 0 0 3px rgba(245, 192, 112, 0.2);
 }
 
 .country-dropdown {
@@ -325,7 +325,7 @@ export default {
   background: white;
   border: 2px solid #e5e7eb;
   border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(39, 45, 99, 0.15);
+  box-shadow: 0 10px 40px rgba(0, 75, 94, 0.15);
   z-index: 1000;
   max-height: 400px;
   overflow: hidden;
@@ -352,7 +352,7 @@ export default {
 
 .search-input:focus {
   outline: none;
-  border-color: #272d63;
+  border-color: #004B5E;
 }
 
 .country-list {
@@ -375,13 +375,13 @@ export default {
 }
 
 .country-item.selected {
-  background: rgba(250, 181, 17, 0.1);
+  background: rgba(245, 192, 112, 0.1);
 }
 
 .country-name {
   flex: 1;
   font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #272d63;
+  color: #004B5E;
   font-size: 0.875rem;
 }
 
