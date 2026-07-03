@@ -346,6 +346,11 @@ export const organizerService = {
     return api.put(`/organizer/events/${id}`, eventData)
   },
 
+  // Configurer la tarification variable (prévente / paliers de prix)
+  manageVariablePricing(eventId, payload) {
+    return api.post(`/organizer/events/${eventId}/variable-pricing`, payload)
+  },
+
   // Mettre à jour un événement avec fichier
   updateEventWithFile(id, formData) {
     // Ajouter _method pour Laravel method spoofing avec PUT et FormData
