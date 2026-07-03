@@ -20,6 +20,8 @@ class Ticket extends Model
         'buyer_id',
         'code',
         'status',
+        'ticket_source',
+        'batch_reference',
         'issued_at',
         'used_at',
         'buyer_name',
