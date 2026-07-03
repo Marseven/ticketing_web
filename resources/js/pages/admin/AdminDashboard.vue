@@ -3,7 +3,7 @@
     <!-- Welcome Section -->
     <div class="mb-8">
       <div class="text-white rounded-lg p-6" style="background: linear-gradient(135deg, #272d63 0%, #1a1e47 100%);">
-        <h2 class="text-2xl font-bold mb-2">Tableau de Bord Primea</h2>
+        <h2 class="text-2xl font-bold mb-2">Tableau de Bord MyTicketO</h2>
         <p class="text-white opacity-80">Supervision des paiements et transactions de la plateforme</p>
       </div>
     </div>

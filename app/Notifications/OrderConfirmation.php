@@ -41,7 +41,7 @@ class OrderConfirmation extends Notification
         $eventTitle = $order->tickets->first()?->event->title ?? 'Événement';
 
         return (new MailMessage)
-            ->subject('Confirmation de commande - Primea Ticketing')
+            ->subject('Confirmation de commande - MyTicketO')
             ->greeting('Bonjour ' . ($notifiable->name ?? 'Client') . ' !')
             ->line('Votre commande a été créée avec succès.')
             ->line('**Référence de commande** : ' . $order->reference)
@@ -50,7 +50,7 @@ class OrderConfirmation extends Notification
             ->line('**Montant total** : ' . number_format($order->total_amount, 0, ',', ' ') . ' XAF')
             ->line('**Statut** : ' . ($order->status === 'paid' ? 'Payée' : 'En attente de paiement'))
             ->action('Voir ma commande', url('/account/orders/' . $order->reference))
-            ->line('Merci d\'avoir choisi Primea Ticketing !');
+            ->line('Merci d\'avoir choisi MyTicketO !');
     }
 
     /**

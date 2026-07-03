@@ -6,7 +6,7 @@
       
       <div class="flex items-center justify-between p-4 border-b border-primea-blue-dark">
         <div class="flex items-center space-x-3">
-          <img src="/images/logo_white.png" alt="Primea" class="h-8" />
+          <img src="/images/logo_white.png" alt="MyTicketO" class="h-8" />
           <span class="font-bold text-lg font-primea">Administration</span>
         </div>
       </div>

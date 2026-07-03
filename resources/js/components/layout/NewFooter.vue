@@ -13,7 +13,7 @@
           <router-link to="/privacy" class="text-gray-600 hover:text-primea-yellow transition-colors">Confidentialité</router-link>
         </div>
 
-        <p class="text-sm text-gray-500">&copy; {{ new Date().getFullYear() }} Primea. Tous droits réservés.</p>
+        <p class="text-sm text-gray-500">&copy; {{ new Date().getFullYear() }} MyTicketO. Tous droits réservés.</p>
       </div>
 
       <!-- Desktop Footer -->
@@ -88,7 +88,7 @@
         <div class="pt-6 border-t border-gray-300">
           <div class="flex flex-col md:flex-row justify-between items-center">
             <p class="text-gray-500 text-sm">
-              &copy; {{ new Date().getFullYear() }} Primea. Tous droits réservés.
+              &copy; {{ new Date().getFullYear() }} MyTicketO. Tous droits réservés.
             </p>
             <p class="text-gray-500 text-sm mt-4 md:mt-0">
               Plateforme d'événements de référence

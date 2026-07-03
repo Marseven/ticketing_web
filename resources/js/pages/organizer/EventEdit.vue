@@ -946,7 +946,7 @@ onMounted(async () => {
   font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Couleurs Primea */
+/* Couleurs MyTicketO */
 .text-primea-blue {
   color: #272d63;
 }
@@ -983,17 +983,17 @@ onMounted(async () => {
   color: #fab511;
 }
 
-/* Coins arrondis Primea */
+/* Coins arrondis MyTicketO */
 .rounded-primea {
   border-radius: 12px;
 }
 
-/* Ombres Primea */
+/* Ombres MyTicketO */
 .shadow-primea {
   box-shadow: 0 2px 15px rgba(39, 45, 99, 0.08);
 }
 
-/* Police Primea */
+/* Police MyTicketO */
 .font-primea {
   font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }

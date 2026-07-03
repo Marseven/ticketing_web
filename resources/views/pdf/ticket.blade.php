@@ -194,7 +194,7 @@
             font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
         }
 
-        /* Logo Primea */
+        /* Logo MyTicketO */
         .primea-logo {
             margin-top: 14px;
         }
@@ -338,7 +338,7 @@
         @else
             <div class="event-header-no-image">
                 @if($logoBase64)
-                    <img src="{{ $logoBase64 }}" alt="Primea" class="logo">
+                    <img src="{{ $logoBase64 }}" alt="MyTicketO" class="logo">
                 @endif
                 <h1>{{ $event->title }}</h1>
                 <p>{{ $venue?->name ?? 'Lieu à définir' }}</p>
@@ -391,7 +391,7 @@
 
                     <div class="primea-logo">
                         @if($logoBase64)
-                            <img src="{{ $logoBase64 }}" alt="Primea">
+                            <img src="{{ $logoBase64 }}" alt="MyTicketO">
                         @else
                             <div class="primea-logo-text">Prim<span>e</span>a</div>
                         @endif

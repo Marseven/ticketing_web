@@ -40,7 +40,7 @@ class PayoutSuccessful extends Notification
         $processedDate = $payout->processed_at ? $payout->processed_at->format('d/m/Y à H:i') : 'Date inconnue';
 
         return (new MailMessage)
-            ->subject('Retrait effectué avec succès - Primea Ticketing')
+            ->subject('Retrait effectué avec succès - MyTicketO')
             ->greeting('Excellente nouvelle ' . ($notifiable->name ?? 'Organisateur') . ' !')
             ->line('Votre retrait a été effectué avec succès.')
             ->line('**Référence** : ' . $payout->reference)

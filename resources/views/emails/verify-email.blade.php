@@ -3,7 +3,7 @@
 
 Bonjour **{{ $user->name }}**,
 
-Merci de vous être inscrit sur **Primea** ! Pour commencer à profiter de nos événements exclusifs, nous devons vérifier votre adresse email.
+Merci de vous être inscrit sur **MyTicketO** ! Pour commencer à profiter de nos événements exclusifs, nous devons vérifier votre adresse email.
 
 @component('mail::button', ['url' => $verificationUrl, 'color' => 'blue'])
 Vérifier mon email
@@ -11,7 +11,7 @@ Vérifier mon email
 
 Ce lien de vérification expirera dans **60 minutes**.
 
-Si vous n'avez pas créé de compte sur Primea, aucune action n'est requise de votre part.
+Si vous n'avez pas créé de compte sur MyTicketO, aucune action n'est requise de votre part.
 
 ---
 

@@ -21,8 +21,8 @@ export default defineConfig({
             registerType: 'autoUpdate',
             includeAssets: ['images/logo.png', 'images/ico.png', 'images/logo_white.png'],
             manifest: {
-                name: 'Primea - Billetterie en ligne',
-                short_name: 'Primea',
+                name: 'MyTicketO - Billetterie en ligne',
+                short_name: 'MyTicketO',
                 description: 'Plateforme de billetterie en ligne pour événements au Gabon',
                 theme_color: '#272d63',
                 background_color: '#ffffff',

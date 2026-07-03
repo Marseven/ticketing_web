@@ -210,7 +210,7 @@
         <div class="invoice-header">
             <div class="logo-section">
                 @if($logoBase64)
-                    <img src="{{ $logoBase64 }}" alt="Primea" class="logo">
+                    <img src="{{ $logoBase64 }}" alt="MyTicketO" class="logo">
                 @endif
                 <p style="font-size: 12px; opacity: 0.8;">Système de billetterie</p>
             </div>
@@ -357,7 +357,7 @@
         </div>
 
         <div class="footer">
-            <p><strong>Primea - Système de billetterie</strong></p>
+            <p><strong>MyTicketO - Système de billetterie</strong></p>
             <p>{{ config('app.url') }}</p>
             <p>Cette facture a été générée électroniquement et ne nécessite pas de signature.</p>
         </div>

@@ -26,7 +26,7 @@ class SetupTestData extends Command
      */
     public function handle()
     {
-        $this->info('🚀 Configuration des données de test pour Primea Ticketing');
+        $this->info('🚀 Configuration des données de test pour MyTicketO');
         $this->info('==========================================================');
 
         // Optionnel : migrations fraîches

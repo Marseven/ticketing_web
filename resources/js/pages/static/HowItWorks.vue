@@ -8,7 +8,7 @@
         </h1>
         <p class="text-lg text-gray-600 max-w-2xl mx-auto">
           Achetez vos billets en toute simplicite en seulement 3 etapes.
-          Primea vous accompagne de la decouverte de l'evenement jusqu'a votre entree.
+          MyTicketO vous accompagne de la decouverte de l'evenement jusqu'a votre entree.
         </p>
       </div>
 
@@ -77,7 +77,7 @@
           Pret a decouvrir les evenements ?
         </h3>
         <p class="text-gray-600 mb-6">
-          Rejoignez des milliers d'utilisateurs qui font confiance a Primea pour leurs sorties.
+          Rejoignez des milliers d'utilisateurs qui font confiance a MyTicketO pour leurs sorties.
         </p>
         <router-link
           to="/events"

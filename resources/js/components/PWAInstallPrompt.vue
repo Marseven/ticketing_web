@@ -10,14 +10,14 @@
           <div class="flex-shrink-0">
             <img
               src="/images/ico.png"
-              alt="Primea"
+              alt="MyTicketO"
               class="w-14 h-14 rounded-xl shadow-md"
             />
           </div>
 
           <!-- Content -->
           <div class="flex-1 min-w-0">
-            <h3 class="text-base font-bold text-gray-900">Installer Primea</h3>
+            <h3 class="text-base font-bold text-gray-900">Installer MyTicketO</h3>
             <p class="text-sm text-gray-600 mt-0.5">
               Installez l'application pour un accès rapide
             </p>

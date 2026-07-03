@@ -41,7 +41,7 @@ class TicketsReady extends Notification
         $event = $tickets->first()?->event;
 
         return (new MailMessage)
-            ->subject('Vos billets sont disponibles - Primea Ticketing')
+            ->subject('Vos billets sont disponibles - MyTicketO')
             ->greeting('Bonjour ' . ($notifiable->name ?? 'Client') . ' !')
             ->line('Vos billets pour **' . ($event?->title ?? 'l\'événement') . '** sont maintenant disponibles !')
             ->line('**Commande** : ' . $order->reference)

@@ -5,7 +5,7 @@ return [
     'documentations' => [
         'default' => [
             'api' => [
-                'title' => 'Primea Ticketing API Documentation',
+                'title' => 'MyTicketO API Documentation',
             ],
 
             'routes' => [

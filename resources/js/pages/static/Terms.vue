@@ -20,9 +20,9 @@
           </h2>
           <p>
             Les presentes Conditions Generales d'Utilisation (ci-apres "CGU") ont pour objet
-            de definir les modalites et conditions d'utilisation de la plateforme Primea
+            de definir les modalites et conditions d'utilisation de la plateforme MyTicketO
             (accessible a l'adresse https://primea.ga), ainsi que les droits et obligations
-            des parties dans ce cadre. Primea est une plateforme de billetterie en ligne
+            des parties dans ce cadre. MyTicketO est une plateforme de billetterie en ligne
             permettant l'achat de billets pour des evenements au Gabon et dans la sous-region.
           </p>
         </section>
@@ -33,7 +33,7 @@
             Article 2 - Mentions legales
           </h2>
           <p>
-            La plateforme Primea est editee et exploitee au Gabon. Pour toute question
+            La plateforme MyTicketO est editee et exploitee au Gabon. Pour toute question
             ou reclamation, vous pouvez nous contacter a l'adresse email suivante :
             <a href="mailto:contact@primea.ga" class="text-primea-blue font-medium hover:text-primea-yellow">
               contact@primea.ga
@@ -60,7 +60,7 @@
           <h2 class="text-xl font-bold text-primea-blue mb-3">
             Article 4 - Services proposes
           </h2>
-          <p class="mb-3">Primea propose les services suivants :</p>
+          <p class="mb-3">MyTicketO propose les services suivants :</p>
           <ul class="list-disc list-inside space-y-2 ml-4">
             <li>Consultation du catalogue d'evenements disponibles</li>
             <li>Achat de billets electroniques (e-tickets) avec QR code securise</li>
@@ -77,8 +77,8 @@
             Article 5 - Processus d'achat
           </h2>
           <p>
-            L'achat d'un billet sur Primea constitue un contrat entre l'acheteur et l'organisateur
-            de l'evenement. Primea agit en tant qu'intermediaire technique facilitant la transaction.
+            L'achat d'un billet sur MyTicketO constitue un contrat entre l'acheteur et l'organisateur
+            de l'evenement. MyTicketO agit en tant qu'intermediaire technique facilitant la transaction.
             Le prix du billet est fixe par l'organisateur et affiche en Francs CFA (XAF).
             Des frais de service peuvent s'appliquer et sont clairement indiques avant la validation
             de la commande. L'achat est definitif une fois le paiement confirme.
@@ -93,7 +93,7 @@
           <p>
             Les paiements sont effectues via les moyens de paiement proposes sur la plateforme :
             Airtel Money, Moov Money, carte bancaire ou E-Billing. Tous les paiements sont traites
-            de maniere securisee par nos partenaires de paiement. Primea ne stocke aucune donnee
+            de maniere securisee par nos partenaires de paiement. MyTicketO ne stocke aucune donnee
             bancaire ou de paiement mobile sur ses serveurs. La confirmation de la commande et
             l'emission des billets sont conditionnees a la reception effective du paiement.
           </p>
@@ -145,11 +145,11 @@
             Article 9 - Responsabilites
           </h2>
           <p>
-            Primea agit en qualite d'intermediaire technique entre les organisateurs et les
+            MyTicketO agit en qualite d'intermediaire technique entre les organisateurs et les
             acheteurs. La responsabilite de l'organisation, du deroulement et du contenu de
-            l'evenement incombe exclusivement a l'organisateur. Primea ne saurait etre tenue
+            l'evenement incombe exclusivement a l'organisateur. MyTicketO ne saurait etre tenue
             responsable de l'annulation, du report ou de la modification d'un evenement, ni
-            des dommages directs ou indirects pouvant en resulter. Primea s'engage a assurer
+            des dommages directs ou indirects pouvant en resulter. MyTicketO s'engage a assurer
             le bon fonctionnement technique de la plateforme dans la mesure du possible.
           </p>
         </section>
@@ -160,7 +160,7 @@
             Article 10 - Propriete intellectuelle
           </h2>
           <p>
-            L'ensemble des elements de la plateforme Primea (logos, textes, graphismes, logiciels,
+            L'ensemble des elements de la plateforme MyTicketO (logos, textes, graphismes, logiciels,
             base de donnees) sont proteges par les droits de propriete intellectuelle. Toute
             reproduction, representation ou exploitation non autorisee de ces elements est
             strictement interdite.
@@ -188,7 +188,7 @@
             Article 12 - Modification des CGU
           </h2>
           <p>
-            Primea se reserve le droit de modifier les presentes CGU a tout moment. Les
+            MyTicketO se reserve le droit de modifier les presentes CGU a tout moment. Les
             utilisateurs seront informes de toute modification substantielle. La poursuite
             de l'utilisation de la plateforme apres modification vaut acceptation des
             nouvelles conditions.
