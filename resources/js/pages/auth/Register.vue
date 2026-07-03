@@ -70,7 +70,7 @@
               <PhoneInput
                 id="phone"
                 v-model="form.phone"
-                placeholder="XX XX XX XX"
+                placeholder="074 01 02 03"
                 :required="true"
                 default-country="GA"
               />

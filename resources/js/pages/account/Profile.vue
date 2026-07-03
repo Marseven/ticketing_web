@@ -185,7 +185,7 @@
                   <PhoneInput
                     id="phone"
                     v-model="profileForm.phone"
-                    placeholder="XX XX XX XX"
+                    placeholder="074 01 02 03"
                     default-country="GA"
                   />
                 </div>
