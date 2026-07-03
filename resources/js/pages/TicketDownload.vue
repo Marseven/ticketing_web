@@ -11,7 +11,7 @@
       <div class="container mx-auto px-4 py-8 md:py-12">
         <div class="max-w-6xl mx-auto">
           <div class="text-center">
-            <img src="/images/logo.png" alt="Logo" class="h-16 mx-auto mb-6" />
+            <img src="/images/logo.png?v=2" alt="Logo" class="h-16 mx-auto mb-6" />
             <h1 class="text-3xl md:text-4xl font-bold text-primea-blue mb-4">Votre ticket électronique</h1>
             <p class="text-lg text-gray-600">Téléchargez ou capturez votre ticket pour l'événement</p>
           </div>

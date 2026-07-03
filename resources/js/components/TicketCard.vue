@@ -46,7 +46,7 @@
 
           <!-- Logo MyTicketO -->
           <div class="flex justify-start">
-            <img src="/images/logo.png" alt="MyTicketO" class="h-6" />
+            <img src="/images/logo.png?v=2" alt="MyTicketO" class="h-6" />
           </div>
         </div>
 

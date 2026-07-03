@@ -16,7 +16,7 @@
 
         <!-- Desktop Logo -->
         <div class="hidden md:block text-center mb-8 animate-fade-in">
-          <img src="/images/logo_white.png" alt="Logo" class="h-16 mx-auto mb-6" />
+          <img src="/images/logo_white.png?v=2" alt="Logo" class="h-16 mx-auto mb-6" />
         </div>
 
         <!-- Header -->

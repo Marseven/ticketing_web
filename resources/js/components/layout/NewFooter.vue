@@ -3,7 +3,7 @@
     <div class="max-w-7xl mx-auto px-4">
       <!-- Mobile Footer -->
       <div class="md:hidden text-center">
-        <img src="/images/logo.png" alt="MyTicketO" class="h-8 mx-auto mb-4" />
+        <img src="/images/logo.png?v=2" alt="MyTicketO" class="h-8 mx-auto mb-4" />
 
         <div class="flex flex-wrap justify-center gap-x-4 gap-y-1 mb-4 text-sm">
           <router-link to="/how-it-works" class="text-gray-600 hover:text-primea-yellow transition-colors">Comment ça marche</router-link>
@@ -22,7 +22,7 @@
           <!-- Company Info -->
           <div>
             <div class="flex items-center mb-4">
-              <img src="/images/logo.png" alt="MyTicketO" class="h-12 w-auto" />
+              <img src="/images/logo.png?v=2" alt="MyTicketO" class="h-12 w-auto" />
             </div>
             <p class="text-gray-600 mb-4">
               La plateforme de référence pour vos événements.

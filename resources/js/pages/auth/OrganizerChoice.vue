@@ -3,7 +3,7 @@
     <div class="max-w-md w-full">
       <!-- Logo et titre -->
       <div class="text-center mb-8 animate-fade-in">
-        <img src="/images/logo_white.png" alt="Logo" class="h-20 mx-auto mb-6" />
+        <img src="/images/logo_white.png?v=2" alt="Logo" class="h-20 mx-auto mb-6" />
         <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-3">
           Espace Créateur d'événements
         </h1>

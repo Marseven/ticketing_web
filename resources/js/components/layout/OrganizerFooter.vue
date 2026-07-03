@@ -6,7 +6,7 @@
         <div>
           <div class="flex items-center mb-4">
             <img
-              src="/images/logo.png"
+              src="/images/logo.png?v=2"
               alt="MyTicketO"
               class="h-8 w-auto"
             />

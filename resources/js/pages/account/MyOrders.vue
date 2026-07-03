@@ -189,7 +189,7 @@
                 <!-- Image de l'événement -->
                 <div class="w-full md:w-24 h-16 rounded overflow-hidden flex-shrink-0">
                   <img
-                    :src="ticket.event.image || '/images/logo.png'"
+                    :src="ticket.event.image || '/images/logo.png?v=2'"
                     :alt="ticket.event.title"
                     class="w-full h-full object-cover"
                   />
@@ -362,7 +362,7 @@ export default {
               title: order.event?.title || 'Événement sans titre',
               date: order.schedule?.starts_at ? new Date(order.schedule.starts_at.replace(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})/, '$3-$2-$1T$4:$5:$6')) : new Date(),
               venue: [order.event?.venue_name, order.event?.venue_city].filter(v => v && v !== 'null').join(', ') || 'Lieu à définir',
-              image: order.event?.image || '/images/logo.png'
+              image: order.event?.image || '/images/logo.png?v=2'
             },
             type: ticket.ticket_type?.name || 'Standard',
             price: parseFloat(ticket.ticket_type?.price) || 0,
@@ -374,7 +374,7 @@ export default {
               title: order.event?.title || 'Événement sans titre',
               date: order.schedule?.starts_at ? new Date(order.schedule.starts_at.replace(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})/, '$3-$2-$1T$4:$5:$6')) : new Date(),
               venue: [order.event?.venue_name, order.event?.venue_city].filter(v => v && v !== 'null').join(', ') || 'Lieu à définir',
-              image: order.event?.image || '/images/logo.png'
+              image: order.event?.image || '/images/logo.png?v=2'
             },
             type: 'Standard',
             price: order.total_amount / (order.tickets_count || 1),

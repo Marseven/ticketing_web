@@ -30,7 +30,7 @@
         <div class="flex items-center justify-between">
           <!-- Logo -->
           <router-link :to="{ name: 'home' }" class="group">
-            <img src="/images/logo.png" alt="Logo" class="h-14 w-auto transition-transform duration-200 group-hover:scale-105" />
+            <img src="/images/logo.png?v=2" alt="Logo" class="h-14 w-auto transition-transform duration-200 group-hover:scale-105" />
           </router-link>
 
           <!-- Texte -->
@@ -45,7 +45,7 @@
       <div class="hidden md:flex items-center justify-between px-6 py-4">
         <!-- Logo and Title -->
         <router-link :to="{ name: 'home' }" class="flex items-center group">
-          <img src="/images/logo.png" alt="Logo" class="h-20 w-auto transition-transform duration-200 group-hover:scale-105" />
+          <img src="/images/logo.png?v=2" alt="Logo" class="h-20 w-auto transition-transform duration-200 group-hover:scale-105" />
           <div class="ml-4 text-left">
             <h1 class="text-primea-blue text-3xl font-black leading-tight">La Billetterie</h1>
             <p class="text-primea-blue text-sm font-medium leading-tight">Simple, Rapide et Sécurisée</p>
@@ -246,7 +246,7 @@
           <div class="flex-shrink-0 px-4 py-3 bg-white border-b">
             <div class="flex items-start justify-between">
               <!-- Logo à gauche -->
-              <img src="/images/logo.png" alt="Logo" class="h-12 flex-shrink-0" />
+              <img src="/images/logo.png?v=2" alt="Logo" class="h-12 flex-shrink-0" />
 
               <!-- Texte et bouton fermer à droite -->
               <div class="flex flex-col items-end flex-1 ml-4">
@@ -359,7 +359,7 @@
 
             <!-- Menu Footer (à l'intérieur du scroll) -->
             <div class="p-6 flex flex-col items-center gap-3 bg-gray-700/90 border-t border-white/10">
-            <img src="/images/logo_white.png" alt="MyTicketO Logo" class="h-12 opacity-90" />
+            <img src="/images/logo_white.png?v=2" alt="MyTicketO Logo" class="h-12 opacity-90" />
             <p class="text-white/50 text-xs">contact@primea.ga</p>
           </div>
           </nav>

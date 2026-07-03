@@ -285,7 +285,7 @@ export default {
                 slug: order.event.slug,
                 date: order.schedule?.starts_at ? new Date(order.schedule.starts_at.replace(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})/, '$3-$2-$1T$4:$5:$6')) : new Date(),
                 venue: [order.event.venue_name, order.event.venue_city].filter(v => v && v !== 'null').join(', ') || 'Lieu à définir',
-                image: order.event.image || '/images/logo.png'
+                image: order.event.image || '/images/logo.png?v=2'
               },
               type: ticket.ticket_type?.name || 'Standard',
               price: ticket.ticket_type?.price || (order.total_amount / order.tickets_count),

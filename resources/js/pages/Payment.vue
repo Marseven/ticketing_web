@@ -12,7 +12,7 @@
             </button>
 
             <router-link to="/" class="flex-1 flex justify-center">
-              <img src="/images/logo.png" alt="MyTicketO" class="h-16 hover:opacity-80 transition-opacity cursor-pointer" />
+              <img src="/images/logo.png?v=2" alt="MyTicketO" class="h-16 hover:opacity-80 transition-opacity cursor-pointer" />
             </router-link>
 
             <div class="w-24"></div>

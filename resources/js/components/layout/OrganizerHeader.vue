@@ -6,7 +6,7 @@
         <div class="flex items-center gap-3">
           <router-link to="/" class="group">
             <img
-              src="/images/logo.png"
+              src="/images/logo.png?v=2"
               alt="MyTicketO"
               class="h-10 w-auto transition-transform duration-200 group-hover:scale-105"
             />

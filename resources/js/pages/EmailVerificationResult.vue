@@ -4,7 +4,7 @@
     <div class="max-w-md w-full">
       <!-- Logo MyTicketO -->
       <div class="text-center mb-8 animate-fade-in">
-        <img src="/images/logo_white.png" alt="MyTicketO" class="h-16 mx-auto mb-6" />
+        <img src="/images/logo_white.png?v=2" alt="MyTicketO" class="h-16 mx-auto mb-6" />
       </div>
 
       <!-- Carte de résultat -->

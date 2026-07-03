@@ -103,7 +103,7 @@
           <!-- Logo MyTicketO -->
           <div class="mt-3">
             <img
-              src="/images/logo.png"
+              src="/images/logo.png?v=2"
               alt="MyTicketO"
               :class="size === 'small' ? 'h-5' : 'h-7'"
             />

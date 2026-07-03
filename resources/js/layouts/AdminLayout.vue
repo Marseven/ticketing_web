@@ -7,7 +7,7 @@
       
       <!-- Logo -->
       <div class="flex items-center justify-center h-16 px-4" style="background-color: #004B5E;">
-        <img src="/images/logo_white.png" alt="MyTicketO" class="h-10" />
+        <img src="/images/logo_white.png?v=2" alt="MyTicketO" class="h-10" />
       </div>
 
       <!-- Navigation Menu -->
