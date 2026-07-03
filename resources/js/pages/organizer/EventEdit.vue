@@ -358,6 +358,36 @@
                 </div>
               </div>
 
+              <!-- Mode de versement -->
+              <div class="bg-white rounded-primea shadow-primea p-6">
+                <h3 class="text-lg font-semibold text-primea-blue font-primea mb-4">Versement des recettes</h3>
+                <div class="space-y-3">
+                  <label class="flex items-start gap-3 p-3 border rounded-primea cursor-pointer"
+                         :class="form.payout_mode === 'deferred' ? 'border-primea-blue bg-blue-50' : 'border-gray-200'">
+                    <input type="radio" value="deferred" v-model="form.payout_mode" class="mt-1" />
+                    <span>
+                      <span class="block text-sm font-semibold text-gray-800 font-primea">En fin d'événement</span>
+                      <span class="block text-xs text-gray-500 font-primea">Recettes accumulées puis reversées à la fin.</span>
+                    </span>
+                  </label>
+                  <label class="flex items-start gap-3 p-3 border rounded-primea cursor-pointer"
+                         :class="form.payout_mode === 'instant' ? 'border-primea-blue bg-blue-50' : 'border-gray-200'">
+                    <input type="radio" value="instant" v-model="form.payout_mode" class="mt-1" />
+                    <span>
+                      <span class="block text-sm font-semibold text-gray-800 font-primea">Instantané (à chaque vente)</span>
+                      <span class="block text-xs text-gray-500 font-primea">Reversé immédiatement sur le numéro indiqué.</span>
+                    </span>
+                  </label>
+                  <div v-if="form.payout_mode === 'instant'">
+                    <label class="block text-sm font-medium text-gray-700 font-primea mb-2">Numéro qui reçoit les paiements *</label>
+                    <input v-model="form.instant_payout_phone" type="tel" maxlength="9" pattern="[0-9]{9}"
+                           placeholder="074123456"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea" />
+                    <p class="text-xs text-gray-500 mt-1 font-primea">Numéro Mobile Money (9 chiffres).</p>
+                  </div>
+                </div>
+              </div>
+
               <!-- Actions -->
               <div class="bg-white rounded-primea shadow-primea p-6">
                 <h3 class="text-lg font-semibold text-primea-blue font-primea mb-4">Actions</h3>
@@ -469,6 +499,8 @@ const form = reactive({
   image_preview: '',
   image_file: null,
   is_active: false,
+  payout_mode: 'deferred',
+  instant_payout_phone: '',
   schedules: [{ starts_at: '', ends_at: '', door_time: '' }],
   ticket_types: []
 });
@@ -544,7 +576,9 @@ const loadEvent = async () => {
       image_url: event.value.image_url || '',
       image_preview: event.value.image || event.value.image_url || '',
       is_active: event.value.is_active ?? false,
-      schedules: (event.value.schedules && event.value.schedules.length > 0) 
+      payout_mode: event.value.payout_mode || 'deferred',
+      instant_payout_phone: event.value.instant_payout_phone || '',
+      schedules: (event.value.schedules && event.value.schedules.length > 0)
         ? event.value.schedules.map(s => ({
             starts_at: s.starts_at ? new Date(s.starts_at).toISOString().slice(0, 16) : '',
             ends_at: s.ends_at ? new Date(s.ends_at).toISOString().slice(0, 16) : '',
@@ -592,6 +626,8 @@ const updateEvent = async () => {
       new_venue_city: form.venue_id === 'new' ? form.new_venue_city : null,
       new_venue_address: form.venue_id === 'new' ? form.new_venue_address : null,
       is_active: form.is_active,
+      payout_mode: form.payout_mode,
+      instant_payout_phone: form.payout_mode === 'instant' ? form.instant_payout_phone : '',
       schedules: form.schedules,
       ticket_types: form.ticket_types.map(tt => ({
         id: tt.id || null,

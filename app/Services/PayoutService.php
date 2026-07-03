@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\Event;
 use App\Models\Organizer;
 use App\Models\OrganizerBalance;
 use App\Models\Payout;
@@ -50,24 +51,41 @@ class PayoutService
                 'new_balance' => $organizerBalance->fresh()->balance
             ]);
 
-            // 2. Vérifier si un payout automatique doit être déclenché
-            // Cette étape est indépendante - si elle échoue, le solde reste crédité
-            if ($organizerBalance->shouldTriggerAutoPayout()) {
-                Log::info('🔔 Payout automatique déclenché - seuil atteint', [
+            // 2. Mode de versement PAR ÉVÉNEMENT (décidé à la création).
+            //    - instant  : on reverse immédiatement le net de CETTE vente
+            //                 vers le numéro dédié de l'événement.
+            //    - deferred : on n'envoie rien maintenant, le net s'accumule
+            //                 et sera réglé en fin d'événement (commande
+            //                 payout:settle-ended-events).
+            $event = $order->event;
+
+            if ($event && $event->isInstantPayout()) {
+                $saleGateway = $organizerBalance->gateway;
+                $netAmount = (float) $order->subtotal_amount;
+
+                Log::info('⚡ Versement instantané déclenché (mode événement)', [
                     'organizer_id' => $organizer->id,
-                    'balance' => $organizerBalance->fresh()->balance,
-                    'threshold' => $organizerBalance->auto_payout_threshold,
-                    'gateway' => $payment->gateway
+                    'event_id' => $event->id,
+                    'gateway' => $saleGateway,
+                    'net_amount' => $netAmount,
+                    'payee' => $event->instant_payout_phone,
                 ]);
 
-                $this->triggerAutomaticPayout($organizerBalance);
+                // Même mécanique que l'auto-payout global, mais ciblée sur le
+                // numéro de l'événement et déclenchée par vente (montant exact
+                // du net que l'on vient de créditer sur ce gateway).
+                $this->createPayout(
+                    $organizer,
+                    $saleGateway,
+                    $netAmount,
+                    $event->instant_payout_phone,
+                    true // is_automatic
+                );
             } else {
-                Log::info('ℹ️ Payout automatique non déclenché', [
+                Log::info('🏦 Mode différé : net accumulé sur le solde (règlement en fin d\'événement)', [
                     'organizer_id' => $organizer->id,
+                    'event_id' => $event?->id,
                     'balance' => $organizerBalance->fresh()->balance,
-                    'threshold' => $organizerBalance->auto_payout_threshold,
-                    'auto_payout_enabled' => $organizerBalance->auto_payout_enabled,
-                    'reason' => !$organizerBalance->auto_payout_enabled ? 'Auto-payout désactivé' : 'Seuil non atteint'
                 ]);
             }
 
@@ -757,6 +775,127 @@ class PayoutService
         ]);
 
         return $results;
+    }
+
+    /**
+     * Régler un événement en mode différé (versement en fin d'événement).
+     *
+     * Logique TOUT-OU-RIEN pour garantir l'idempotence : on ne marque
+     * l'événement comme réglé (payout_settled_at) que si TOUTES les parts
+     * par gateway ont pu être versées en une seule passe. Sinon on ne verse
+     * rien et on laisse l'événement pour la passe suivante / l'admin — évitant
+     * tout double-paiement sur une exécution partielle.
+     *
+     * @return array Détail du règlement (settled, payouts, reason).
+     */
+    public function settleDeferredEvent(Event $event): array
+    {
+        // Net accumulé par gateway, à partir des commandes payées de l'événement.
+        $orders = Order::where('organizer_id', $event->organizer_id)
+            ->whereHas('tickets', fn ($q) => $q->where('event_id', $event->id))
+            ->where('status', 'paid')
+            ->with('payments')
+            ->get();
+
+        $netByGateway = [];
+        foreach ($orders as $order) {
+            $payment = $order->payments->firstWhere('status', 'success');
+            if (!$payment) {
+                continue;
+            }
+            $gw = $this->deduceGateway($payment);
+            $netByGateway[$gw] = ($netByGateway[$gw] ?? 0) + (float) $order->subtotal_amount;
+        }
+
+        // Aucun revenu à régler : on marque réglé pour ne plus le repasser.
+        if (empty($netByGateway)) {
+            $event->payout_settled_at = now();
+            $event->save();
+            return ['settled' => true, 'payouts' => [], 'reason' => 'no_revenue'];
+        }
+
+        // 1) Pré-vérification : chaque part doit être intégralement payable.
+        $plan = [];
+        foreach ($netByGateway as $gw => $net) {
+            $net = round($net, 2);
+            if ($net <= 0) {
+                continue;
+            }
+            $balance = OrganizerBalance::where('organizer_id', $event->organizer_id)
+                ->where('gateway', $gw)
+                ->first();
+
+            if (!$balance || empty($balance->phone_number) || (float) $balance->balance < $net) {
+                $reason = !$balance || empty($balance->phone_number)
+                    ? 'missing_payout_number'
+                    : 'insufficient_balance';
+
+                Log::warning('Règlement différé impossible (part non payable) — laissé pour l\'admin', [
+                    'event_id' => $event->id,
+                    'gateway' => $gw,
+                    'net' => $net,
+                    'reason' => $reason,
+                ]);
+
+                return ['settled' => false, 'payouts' => [], 'reason' => $reason, 'gateway' => $gw];
+            }
+
+            $plan[] = ['gateway' => $gw, 'net' => $net, 'phone' => $balance->phone_number];
+        }
+
+        // 2) Exécution : toutes les parts sont payables.
+        $payouts = [];
+        foreach ($plan as $p) {
+            $payout = $this->createPayout(
+                $event->organizer,
+                $p['gateway'],
+                $p['net'],
+                $p['phone'],
+                true // is_automatic
+            );
+
+            if ($payout) {
+                $payouts[] = ['gateway' => $p['gateway'], 'amount' => $p['net'], 'payout_id' => $payout->id];
+            } else {
+                // Un échec en cours d'exécution : on log mais on ne re-verse pas
+                // les parts déjà envoyées (le solde a été déduit atomiquement).
+                Log::error('Échec createPayout pendant règlement différé', [
+                    'event_id' => $event->id,
+                    'gateway' => $p['gateway'],
+                    'net' => $p['net'],
+                ]);
+            }
+        }
+
+        $event->payout_settled_at = now();
+        $event->save();
+
+        Log::info('✅ Événement différé réglé', [
+            'event_id' => $event->id,
+            'payouts' => $payouts,
+        ]);
+
+        return ['settled' => true, 'payouts' => $payouts, 'reason' => 'ok'];
+    }
+
+    /**
+     * Régler tous les événements différés terminés et non encore réglés.
+     */
+    public function settleEndedDeferredEvents(): array
+    {
+        $events = Event::where('payout_mode', 'deferred')
+            ->whereNull('payout_settled_at')
+            ->whereHas('schedules')
+            ->with('organizer')
+            ->get()
+            ->filter(fn (Event $e) => $e->hasEnded());
+
+        $summary = [];
+        foreach ($events as $event) {
+            $summary[] = array_merge(['event_id' => $event->id], $this->settleDeferredEvent($event));
+        }
+
+        return $summary;
     }
 
     /**

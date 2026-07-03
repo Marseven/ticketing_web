@@ -1057,6 +1057,8 @@ class OrganizerController extends Controller
             'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
             'is_active' => 'sometimes|boolean',
             'published_at' => 'nullable|date',
+            'payout_mode' => 'nullable|in:deferred,instant',
+            'instant_payout_phone' => 'required_if:payout_mode,instant|nullable|string|size:9|regex:/^[0-9]+$/',
             'schedules' => 'required|array|min:1',
             'schedules.*.starts_at' => 'required|date',
             'schedules.*.ends_at' => 'required|date|after_or_equal:schedules.*.starts_at',
@@ -1163,7 +1165,11 @@ class OrganizerController extends Controller
                 'image_file' => $imageFile,
                 'is_active' => $request->is_active ?? false,
                 'status' => $status,
-                'published_at' => $publishedAt
+                'published_at' => $publishedAt,
+                'payout_mode' => $request->input('payout_mode', 'deferred'),
+                'instant_payout_phone' => $request->input('payout_mode') === 'instant'
+                    ? $request->input('instant_payout_phone')
+                    : null,
             ]);
 
             // Créer les horaires
@@ -1274,6 +1280,8 @@ class OrganizerController extends Controller
             'is_active' => 'sometimes|boolean',
             'status' => 'sometimes|in:draft,published,cancelled',
             'published_at' => 'sometimes|nullable|date',
+            'payout_mode' => 'sometimes|in:deferred,instant',
+            'instant_payout_phone' => 'required_if:payout_mode,instant|nullable|string|size:9|regex:/^[0-9]+$/',
             'schedules' => 'sometimes|array',
             'schedules.*.starts_at' => 'required_with:schedules|date',
             'schedules.*.ends_at' => 'required_with:schedules|date|after_or_equal:schedules.*.starts_at',
@@ -1313,6 +1321,14 @@ class OrganizerController extends Controller
             $updateData = $request->only([
                 'title', 'description', 'category_id', 'venue_id', 'is_active', 'status'
             ]);
+
+            // Mode de versement (par événement)
+            if ($request->has('payout_mode')) {
+                $updateData['payout_mode'] = $request->input('payout_mode');
+                $updateData['instant_payout_phone'] = $request->input('payout_mode') === 'instant'
+                    ? $request->input('instant_payout_phone')
+                    : null;
+            }
 
             // Gérer published_at
             if ($request->has('published_at')) {
