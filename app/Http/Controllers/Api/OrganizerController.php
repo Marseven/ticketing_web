@@ -502,12 +502,88 @@ class OrganizerController extends Controller
     }
 
     /**
+     * Récapitulatif des ventes PAR DATE (schedule) pour un événement multi-dates.
+     */
+    public function salesBySchedule(Request $request, $eventId): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user->is_organizer) {
+            return response()->json([
+                'message' => 'Accès refusé.',
+            ], 403);
+        }
+
+        $organizerIds = $user->organizers->pluck('id');
+        $event = Event::whereIn('organizer_id', $organizerIds)
+            ->with(['schedules' => fn ($q) => $q->orderBy('starts_at')])
+            ->findOrFail($eventId);
+
+        // IDs des commandes payées de cet événement (pour le revenu net par date).
+        $paidOrderIds = \App\Models\Order::where('organizer_id', $event->organizer_id)
+            ->whereHas('tickets', fn ($q) => $q->where('event_id', $event->id))
+            ->where('status', 'paid')
+            ->pluck('id');
+
+        $rows = $event->schedules->map(function ($schedule) use ($event, $paidOrderIds) {
+            $ticketsQuery = \App\Models\Ticket::where('event_id', $event->id)
+                ->where('schedule_id', $schedule->id);
+
+            $sold = (clone $ticketsQuery)->whereIn('status', ['issued', 'used'])->count();
+            $used = (clone $ticketsQuery)->where('status', 'used')->count();
+            $pending = (clone $ticketsQuery)->where('status', 'pending')->count();
+
+            // Revenu net : net de la commande réparti au prorata des billets de
+            // cette date dans la commande.
+            $revenue = 0.0;
+            $paidTickets = (clone $ticketsQuery)
+                ->whereIn('status', ['issued', 'used'])
+                ->whereIn('order_id', $paidOrderIds)
+                ->with('order')
+                ->get()
+                ->groupBy('order_id');
+
+            foreach ($paidTickets as $orderId => $ticketsInOrder) {
+                $order = $ticketsInOrder->first()->order;
+                if (!$order) {
+                    continue;
+                }
+                $totalOrderTickets = max(1, \App\Models\Ticket::where('order_id', $orderId)->count());
+                $revenue += (float) $order->subtotal_amount * ($ticketsInOrder->count() / $totalOrderTickets);
+            }
+
+            return [
+                'schedule_id' => $schedule->id,
+                'starts_at' => $schedule->starts_at,
+                'ends_at' => $schedule->ends_at,
+                'sold' => $sold,
+                'used' => $used,
+                'pending' => $pending,
+                'revenue' => round($revenue),
+            ];
+        })->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'event' => ['id' => $event->id, 'title' => $event->title],
+                'schedules' => $rows,
+                'totals' => [
+                    'sold' => $rows->sum('sold'),
+                    'used' => $rows->sum('used'),
+                    'revenue' => $rows->sum('revenue'),
+                ],
+            ],
+        ]);
+    }
+
+    /**
      * Get organizer payments
      */
     public function payments(Request $request): JsonResponse
     {
         $user = $request->user();
-        
+
         if (!$user->is_organizer) {
             return response()->json([
                 'message' => 'Accès refusé. Seuls les organisateurs peuvent accéder aux paiements.',

@@ -134,7 +134,22 @@
               </div>
               
               <form v-if="!isEventPassed" @submit.prevent="processOrder" class="space-y-6">
-                
+
+                <!-- Sélection de la date (multi-dates) Desktop -->
+                <div v-if="hasMultipleDates">
+                  <label class="block text-sm font-semibold text-primea-blue mb-3">Date de l'événement</label>
+                  <select
+                    v-model="orderForm.scheduleId"
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-primea-lg focus:border-primea-blue focus:outline-none transition-colors appearance-none bg-white"
+                    required
+                  >
+                    <option value="">Choisissez une date</option>
+                    <option v-for="s in eventSchedules" :key="s.id" :value="s.id">
+                      {{ formatScheduleLabel(s) }}
+                    </option>
+                  </select>
+                </div>
+
                 <!-- Sélection tickets Desktop -->
                 <div>
                   <label class="block text-sm font-semibold text-primea-blue mb-3">Nombre de tickets</label>
@@ -597,6 +612,16 @@
               </select>
             </div>
 
+            <!-- Date (multi-dates) Mobile -->
+            <div v-if="hasMultipleDates">
+              <label class="block text-sm font-semibold text-primea-blue mb-2">Date de l'événement</label>
+              <select v-model="orderForm.scheduleId" required
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primea-blue focus:outline-none text-base bg-white">
+                <option value="">Choisissez une date</option>
+                <option v-for="s in eventSchedules" :key="s.id" :value="s.id">{{ formatScheduleLabel(s) }}</option>
+              </select>
+            </div>
+
             <!-- Quantity -->
             <div>
               <label class="block text-sm font-semibold text-primea-blue mb-2">Nombre de tickets</label>
@@ -889,6 +914,7 @@ export default {
     const orderForm = ref({
       quantity: 1,
       ticketTypeId: '',
+      scheduleId: '',
       paymentMethod: '',
       phoneNumber: '',
       cardNumber: '',
@@ -897,6 +923,17 @@ export default {
       guestName: '',
       guestPhone: ''
     })
+
+    // Dates (schedules) disponibles pour cet événement
+    const eventSchedules = computed(() => event.value?.schedules || [])
+    const hasMultipleDates = computed(() => eventSchedules.value.length > 1)
+    const formatScheduleLabel = (schedule) => {
+      if (!schedule?.starts_at) return 'Date'
+      return new Date(schedule.starts_at).toLocaleString('fr-FR', {
+        weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      })
+    }
 
     // État pour les erreurs d'image
     const imageError = ref(false)
@@ -1069,6 +1106,11 @@ export default {
         return false
       }
 
+      // Multi-dates : une date doit être choisie
+      if (hasMultipleDates.value && !orderForm.value.scheduleId) {
+        return false
+      }
+
       // Vérifier les informations de l'invité (seulement si non connecté)
       if (!isAuthenticated.value && !orderForm.value.guestName) {
         return false
@@ -1167,6 +1209,12 @@ export default {
               orderForm.value.ticketTypeId = cheapest.id
             }
           }
+        }
+
+        // Date par défaut : si une seule date, la pré-sélectionner.
+        const schedules = event.value?.schedules || []
+        if (schedules.length === 1) {
+          orderForm.value.scheduleId = schedules[0].id
         }
 
         // Démarrer le compte à rebours après avoir chargé l'événement
@@ -1371,6 +1419,7 @@ export default {
         const orderData = {
           event_slug: event.value.slug,
           ticket_type_id: orderForm.value.ticketTypeId,
+          schedule_id: orderForm.value.scheduleId || null,
           quantity: orderForm.value.quantity,
           guest_name: isAuthenticated.value ? currentUser.value.name : orderForm.value.guestName,
           guest_phone: isAuthenticated.value ? currentUser.value.phone : (orderForm.value.guestPhone || null),
@@ -1404,6 +1453,7 @@ export default {
           const orderData = {
             event_slug: event.value.slug,
             ticket_type_id: orderForm.value.ticketTypeId,
+            schedule_id: orderForm.value.scheduleId || null,
             quantity: orderForm.value.quantity,
             guest_name: isAuthenticated.value ? currentUser.value.name : orderForm.value.guestName,
             guest_phone: isAuthenticated.value ? currentUser.value.phone : (orderForm.value.guestPhone || null),
@@ -1519,6 +1569,7 @@ export default {
           const orderData = {
             event_slug: event.value.slug,
             ticket_type_id: orderForm.value.ticketTypeId,
+            schedule_id: orderForm.value.scheduleId || null,
             quantity: orderForm.value.quantity,
             guest_name: isAuthenticated.value ? currentUser.value.name : orderForm.value.guestName,
             guest_phone: isAuthenticated.value ? currentUser.value.phone : (orderForm.value.guestPhone || null),
@@ -1796,6 +1847,9 @@ export default {
       isFreeOrder,
       isFormValid,
       formatEventDate,
+      eventSchedules,
+      hasMultipleDates,
+      formatScheduleLabel,
       eventTime,
       eventDate,
       isEventPassed,

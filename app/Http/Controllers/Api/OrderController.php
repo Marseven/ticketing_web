@@ -141,6 +141,7 @@ class OrderController extends Controller
         $validated = $request->validate([
             'event_slug' => 'required|string|exists:events,slug',
             'ticket_type_id' => 'required|integer|exists:ticket_types,id',
+            'schedule_id' => 'nullable|integer|exists:event_schedules,id',
             'quantity' => 'required|integer|min:1|max:10',
         ]);
 
@@ -180,6 +181,17 @@ class OrderController extends Controller
                     'success' => false,
                     'message' => 'Type de billet non trouvé ou non disponible'
                 ], 404);
+            }
+
+            // Résoudre la date (schedule) choisie — indispensable pour le récap
+            // des ventes par date sur les événements multi-dates.
+            $scheduleId = $this->resolveScheduleId($event, $validated['schedule_id'] ?? null);
+            if ($scheduleId === false) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Veuillez choisir une date pour cet événement',
+                    'error_code' => 'SCHEDULE_REQUIRED',
+                ], 422);
             }
 
             // Vérifier la disponibilité des billets
@@ -271,7 +283,7 @@ class OrderController extends Controller
                     'order_id' => $order->id,
                     'event_id' => $event->id,
                     'ticket_type_id' => $ticketType->id,
-                    'schedule_id' => $event->schedules->where('status', 'active')->first()?->id,
+                    'schedule_id' => $scheduleId,
                     'buyer_id' => $user->id,
                     'code' => $this->generateTicketCode(),
                     'status' => $ticketStatus,
@@ -333,6 +345,36 @@ class OrderController extends Controller
                 'error' => config('app.debug') ? $e->getMessage() : 'Erreur interne'
             ], 500);
         }
+    }
+
+    /**
+     * Résoudre la date (schedule) de la commande.
+     *
+     * @return int|null|false  ID du schedule, null si l'événement n'a aucune
+     *                         date, ou false si un choix est requis mais absent.
+     */
+    private function resolveScheduleId(\App\Models\Event $event, $requestedScheduleId)
+    {
+        $schedules = $event->schedules()->where('status', 'active')->get();
+
+        // Un choix explicite : il doit appartenir à l'événement.
+        if ($requestedScheduleId) {
+            $match = $schedules->firstWhere('id', (int) $requestedScheduleId);
+            return $match ? $match->id : false;
+        }
+
+        // Pas de date active du tout.
+        if ($schedules->isEmpty()) {
+            return null;
+        }
+
+        // Une seule date : on la prend par défaut.
+        if ($schedules->count() === 1) {
+            return $schedules->first()->id;
+        }
+
+        // Plusieurs dates et aucun choix : le client doit choisir.
+        return false;
     }
 
     /**
