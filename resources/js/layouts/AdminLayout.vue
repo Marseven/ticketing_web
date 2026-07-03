@@ -65,6 +65,19 @@
             Validation événements
           </router-link>
 
+          <!-- Billets physiques -->
+          <router-link to="/admin/physical-tickets"
+                       class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-colors duration-200"
+                       :class="getMenuItemClass('/admin/physical-tickets')"
+                       :style="getMenuItemStyle('/admin/physical-tickets')"
+                       @mouseover="handleMenuHover($event, '/admin/physical-tickets')"
+                       @mouseleave="handleMenuLeave($event, '/admin/physical-tickets')">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+            </svg>
+            Billets physiques
+          </router-link>
+
           <!-- Suivi des Achats -->
           <router-link to="/admin/orders"
                        class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-colors duration-200"
@@ -518,6 +531,7 @@ export default {
         '/admin/organizers': 'Gestion des Organisateurs',
         '/admin/events': 'Gestion des Événements',
         '/admin/events-approval': 'Validation des Événements',
+        '/admin/physical-tickets': 'Billets Physiques',
         '/admin/orders': 'Suivi des Achats',
         '/admin/payments': 'Suivi des Paiements',
         '/admin/payouts': 'Gestion des Payouts',

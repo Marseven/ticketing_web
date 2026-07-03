@@ -271,7 +271,13 @@ Route::prefix('v1')->group(function () {
             Route::post('preview-recurrence', [App\Http\Controllers\Api\OrganizerController::class, 'previewRecurrence']);
             Route::post('{eventId}/recurrence', [App\Http\Controllers\Api\OrganizerController::class, 'manageRecurrence']);
             Route::post('{eventId}/variable-pricing', [App\Http\Controllers\Api\OrganizerController::class, 'manageVariablePricing']);
+            // Billets physiques (QR imprimés)
+            Route::post('{eventId}/physical-tickets', [App\Http\Controllers\Admin\PhysicalTicketController::class, 'generate']);
+            Route::get('{eventId}/physical-tickets/batches', [App\Http\Controllers\Admin\PhysicalTicketController::class, 'batches']);
         });
+
+        // Impression d'un lot de billets physiques
+        Route::get('physical-tickets/batches/{batchReference}/print', [App\Http\Controllers\Admin\PhysicalTicketController::class, 'printBatch']);
         
         // Gestion des payouts
         Route::prefix('payouts')->group(function () {
