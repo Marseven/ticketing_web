@@ -52,6 +52,19 @@
             Événements
           </router-link>
 
+          <!-- Validation des Événements -->
+          <router-link to="/admin/events-approval"
+                       class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-colors duration-200"
+                       :class="getMenuItemClass('/admin/events-approval')"
+                       :style="getMenuItemStyle('/admin/events-approval')"
+                       @mouseover="handleMenuHover($event, '/admin/events-approval')"
+                       @mouseleave="handleMenuLeave($event, '/admin/events-approval')">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Validation événements
+          </router-link>
+
           <!-- Suivi des Achats -->
           <router-link to="/admin/orders"
                        class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-colors duration-200"
@@ -504,6 +517,7 @@ export default {
         '/admin/roles': 'Rôles',
         '/admin/organizers': 'Gestion des Organisateurs',
         '/admin/events': 'Gestion des Événements',
+        '/admin/events-approval': 'Validation des Événements',
         '/admin/orders': 'Suivi des Achats',
         '/admin/payments': 'Suivi des Paiements',
         '/admin/payouts': 'Gestion des Payouts',

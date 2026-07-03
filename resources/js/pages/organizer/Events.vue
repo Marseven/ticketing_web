@@ -119,12 +119,20 @@
               >
                 <CalendarIcon class="w-16 h-16 text-gray-400" />
               </div>
-              <div class="absolute top-4 left-4">
-                <span 
+              <div class="absolute top-4 left-4 flex flex-col gap-1 items-start">
+                <span
                   class="px-3 py-1 rounded-full text-xs font-semibold"
                   :class="getStatusClass(event)"
                 >
                   {{ getStatusText(event) }}
+                </span>
+                <span
+                  v-if="event.approval_status && event.approval_status !== 'approved'"
+                  class="px-3 py-1 rounded-full text-xs font-semibold"
+                  :class="getApprovalClass(event.approval_status)"
+                  :title="event.approval_status === 'rejected' ? (event.rejection_reason || '') : ''"
+                >
+                  {{ getApprovalText(event.approval_status) }}
                 </span>
               </div>
               <div class="absolute top-4 right-4">
@@ -547,6 +555,16 @@ export default {
       return 'Actif'
     }
 
+    const getApprovalText = (status) => ({
+      pending: 'En attente de validation',
+      rejected: 'Rejeté',
+    }[status] || '')
+
+    const getApprovalClass = (status) => ({
+      pending: 'bg-yellow-100 text-yellow-800',
+      rejected: 'bg-red-100 text-red-800',
+    }[status] || 'bg-gray-100 text-gray-800')
+
     const toggleFavorite = (event) => {
       event.isFavorite = !event.isFavorite
       // TODO: Sauvegarder en base
@@ -726,6 +744,8 @@ export default {
       formatEventDate,
       getStatusClass,
       getStatusText,
+      getApprovalText,
+      getApprovalClass,
       toggleFavorite,
       duplicateEvent,
       editEvent,

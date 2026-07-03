@@ -47,6 +47,7 @@ const AdminDashboard = () => import(/* webpackChunkName: "admin-core" */ './page
 const UserManagement = () => import(/* webpackChunkName: "admin-users" */ './pages/admin/UserManagement.vue');
 const OrganizerManagement = () => import(/* webpackChunkName: "admin-organizers" */ './pages/admin/OrganizerManagement.vue');
 const EventManagement = () => import(/* webpackChunkName: "admin-events" */ './pages/admin/EventManagement.vue');
+const EventApproval = () => import(/* webpackChunkName: "admin-events" */ './pages/admin/EventApproval.vue');
 const OrderManagement = () => import(/* webpackChunkName: "admin-orders" */ './pages/admin/OrderManagement.vue');
 const PaymentTracking = () => import(/* webpackChunkName: "admin-payments" */ './pages/admin/PaymentTracking.vue');
 const PayoutDashboard = () => import(/* webpackChunkName: "admin-payouts" */ './pages/admin/PayoutDashboard.vue');
@@ -155,6 +156,7 @@ const routes = [
             { path: 'trashed-users', component: TrashedUsers, name: 'admin-trashed-users' },
             { path: 'organizers', component: OrganizerManagement, name: 'admin-organizers' },
             { path: 'events', component: EventManagement, name: 'admin-events' },
+            { path: 'events-approval', component: EventApproval, name: 'admin-events-approval' },
             { path: 'orders', component: OrderManagement, name: 'admin-orders' },
             { path: 'payments', component: PaymentTracking, name: 'admin-payments' },
             { path: 'payouts', component: PayoutDashboard, name: 'admin-payouts' },

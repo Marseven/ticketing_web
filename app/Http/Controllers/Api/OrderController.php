@@ -161,8 +161,8 @@ class OrderController extends Controller
                 ], 404);
             }
 
-            // Vérifier que l'événement est publié et actif
-            if ($event->status !== 'published') {
+            // Vérifier que l'événement est publié ET approuvé par l'admin
+            if (!$event->canSellTickets()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Cet événement n\'est pas disponible pour la réservation'
@@ -226,20 +226,21 @@ class OrderController extends Controller
                 }
             }
 
-            // Calculer les montants - Modèle: Frais ajoutés au checkout
-            // Prix de base = ce que définit l'organisateur
+            // Calculer les montants - Modèle DÉDUIT : la commission est retenue
+            // sur le prix de base. Le client paie exactement le prix affiché ;
+            // l'organisateur reçoit le prix moins la commission.
             $unitPrice = $ticketType->price ?? 0;
-            $baseAmount = $unitPrice * $validated['quantity']; // Prix base total
+            $baseAmount = $unitPrice * $validated['quantity']; // Prix payé par le client
 
-            // Frais de service (10% du prix de base, ajoutés au total)
-            $feesAmount = $this->calculateFees($baseAmount);
+            $commissionPct = $event->effectiveCommission();
+            $commissionAmount = round($baseAmount * $commissionPct / 100, 2); // Retenu par la plateforme
             $taxAmount = 0;
 
-            // Montant total payé par le client
-            $totalAmount = $baseAmount + $feesAmount;
+            // Le client paie le prix de base (pas de frais ajoutés)
+            $totalAmount = $baseAmount;
 
-            // Montant net reversé à l'organisateur (100% du prix de base)
-            $subtotalAmount = $baseAmount;
+            // Net reversé à l'organisateur = base - commission
+            $subtotalAmount = round($baseAmount - $commissionAmount, 2);
 
             // Créer la commande pour l'utilisateur authentifié
             $order = \App\Models\Order::create([
@@ -247,7 +248,8 @@ class OrderController extends Controller
                 'buyer_id' => $user->id,
                 'currency' => 'XAF',
                 'subtotal_amount' => $subtotalAmount, // Net pour l'organisateur
-                'fees_amount' => $feesAmount, // Frais plateforme
+                'fees_amount' => $commissionAmount, // Commission retenue par la plateforme
+                'commission_percentage' => $commissionPct, // Taux figé
                 'tax_amount' => $taxAmount, // Taxes
                 'total_amount' => $totalAmount, // Total payé par le client
                 'status' => 'pending',
@@ -327,15 +329,6 @@ class OrderController extends Controller
                 'error' => config('app.debug') ? $e->getMessage() : 'Erreur interne'
             ], 500);
         }
-    }
-
-    /**
-     * Calculate fees for the order
-     */
-    private function calculateFees(float $subtotal): float
-    {
-        // Frais de service de 10%
-        return $subtotal * 0.10;
     }
 
     /**

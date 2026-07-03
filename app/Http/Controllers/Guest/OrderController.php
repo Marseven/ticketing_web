@@ -112,8 +112,8 @@ class OrderController extends Controller
                 ], 404);
             }
 
-            // Vérifier que l'événement est publié et actif
-            if ($event->status !== 'published') {
+            // Vérifier que l'événement est publié ET approuvé par l'admin
+            if (!$event->canSellTickets()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Cet événement n\'est pas disponible pour la réservation'
@@ -182,26 +182,26 @@ class OrderController extends Controller
             // Les informations seront stockées directement dans la table orders
 
             // ============================================
-            // MODÈLE DE CALCUL DES REVENUS
+            // MODÈLE DE CALCUL DES REVENUS — DÉDUIT
             // ============================================
-            // L'organisateur reçoit 100% du prix qu'il définit
-            // Les frais de service (10%) sont AJOUTÉS au total payé par le client
+            // Le client paie exactement le prix affiché. La commission
+            // (variable par organisateur/événement) est RETENUE sur ce prix ;
+            // l'organisateur reçoit le reste.
             //
-            // Exemple: Billet à 1000 XAF, quantité 4
-            // - baseAmount (organisateur reçoit) = 4 × 1000 = 4000 XAF
-            // - feesAmount (frais plateforme) = 10% de 4000 = 400 XAF
-            // - totalAmount (client paie) = 4000 + 400 = 4400 XAF
+            // Exemple: Billet à 1000 XAF, quantité 4, commission 10%
+            // - baseAmount (client paie) = 4 × 1000 = 4000 XAF
+            // - commissionAmount (plateforme retient) = 10% de 4000 = 400 XAF
+            // - subtotalAmount (organisateur reçoit) = 4000 − 400 = 3600 XAF
             // ============================================
 
             $unitPrice = $ticketType->price ?? 0;
             $baseAmount = $unitPrice * $validated['quantity'];
 
-            $feesAmount = $this->calculateFees($baseAmount);
+            $commissionPct = $event->effectiveCommission();
+            $commissionAmount = round($baseAmount * $commissionPct / 100, 2);
             $taxAmount = 0;
-            $totalAmount = $baseAmount + $feesAmount;
-
-            // IMPORTANT: subtotal_amount = 100% du prix de base pour l'organisateur
-            $subtotalAmount = $baseAmount;
+            $totalAmount = $baseAmount; // Le client paie le prix affiché
+            $subtotalAmount = round($baseAmount - $commissionAmount, 2); // Net organisateur
 
             // Créer la commande
             $order = Order::create([
@@ -209,7 +209,8 @@ class OrderController extends Controller
                 'buyer_id' => null, // NULL pour les guests - les infos sont dans guest_name, guest_email, guest_phone
                 'currency' => 'XAF', // Franc CFA d'Afrique Centrale (CEMAC)
                 'subtotal_amount' => $subtotalAmount, // Net pour l'organisateur
-                'fees_amount' => $feesAmount, // Frais plateforme
+                'fees_amount' => $commissionAmount, // Commission retenue par la plateforme
+                'commission_percentage' => $commissionPct, // Taux figé
                 'tax_amount' => $taxAmount, // Taxes
                 'total_amount' => $totalAmount, // Total payé par le client
                 'status' => 'pending',
@@ -398,15 +399,6 @@ class OrderController extends Controller
             'success' => true,
             'data' => ['order' => $orderData]
         ]);
-    }
-
-    /**
-     * Calculate fees for the order
-     */
-    private function calculateFees(float $subtotal): float
-    {
-        // Frais de service de 10%
-        return $subtotal * 0.10;
     }
 
     /**
