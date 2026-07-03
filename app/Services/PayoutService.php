@@ -99,12 +99,12 @@ class PayoutService
             'auto_payout_threshold' => 0,
         ]);
 
-        // IMPORTANT: subtotal_amount = montant BRUT que l'organisateur reçoit
-        // C'est 100% du prix de base (prix × quantité) défini par l'organisateur.
-        // Les frais de service plateforme (10% du subtotal, cf. OrderController::calculateFees)
-        // sont ajoutés au total payé par le client mais non déduits ici.
-        // Exemple: 4 billets × 1000 XAF = 4000 XAF pour l'organisateur
-        //         Client paie: 4000 + 400 (10% frais) = 4400 XAF
+        // IMPORTANT: modèle DÉDUIT — subtotal_amount contient déjà le NET
+        // reversé à l'organisateur (prix de base − commission retenue par la
+        // plateforme). La commission (taux variable par événement) est stockée
+        // dans order.fees_amount + order.commission_percentage.
+        // Exemple: 4 billets × 1000 XAF, commission 10%
+        //   Client paie 4000 XAF ; commission 400 ; organisateur reçoit 3600.
         $order = $payment->order;
         $netAmount = floatval($order->subtotal_amount);
 

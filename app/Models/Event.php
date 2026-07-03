@@ -24,6 +24,11 @@ class Event extends Model
         'image_file',
         'status',
         'use_variable_pricing',
+        'commission_percentage',
+        'approval_status',
+        'approved_by',
+        'approved_at',
+        'rejection_reason',
         'published_at',
         'created_by',
         'updated_by',
@@ -32,6 +37,8 @@ class Event extends Model
     protected $casts = [
         'published_at' => 'datetime',
         'use_variable_pricing' => 'boolean',
+        'commission_percentage' => 'decimal:2',
+        'approved_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -139,6 +146,49 @@ class Event extends Model
                      ->whereHas('schedules', function ($q) {
                          $q->where('ends_at', '>=', now());
                      });
+    }
+
+    /**
+     * Scope: événements en attente de validation admin.
+     */
+    public function scopePendingApproval($query)
+    {
+        return $query->where('approval_status', 'pending');
+    }
+
+    /**
+     * Taux de commission effectif (%) appliqué à cet événement.
+     *
+     * Override par événement si défini, sinon défaut de l'organisateur,
+     * sinon 10% de sécurité. Modèle DÉDUIT : ce % est retenu sur le prix
+     * de base, l'organisateur reçoit le reste.
+     */
+    public function effectiveCommission(): float
+    {
+        if ($this->commission_percentage !== null) {
+            return (float) $this->commission_percentage;
+        }
+
+        $organizerDefault = $this->organizer?->default_commission_percentage;
+
+        return (float) ($organizerDefault ?? 10.00);
+    }
+
+    /**
+     * L'événement est-il approuvé par l'admin (condition de vente) ?
+     */
+    public function isApproved(): bool
+    {
+        return $this->approval_status === 'approved';
+    }
+
+    /**
+     * L'événement peut-il vendre des billets ?
+     * (publié ET approuvé par l'admin)
+     */
+    public function canSellTickets(): bool
+    {
+        return $this->status === 'published' && $this->isApproved();
     }
 
     /**

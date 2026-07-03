@@ -23,10 +23,12 @@ class Organizer extends Model
         'contact_phone',
         'status',
         'is_active',
+        'default_commission_percentage',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'default_commission_percentage' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

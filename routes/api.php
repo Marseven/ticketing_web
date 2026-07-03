@@ -261,6 +261,11 @@ Route::prefix('v1')->group(function () {
             Route::get('{event}', [App\Http\Controllers\Admin\AdminController::class, 'showEvent']);
             Route::put('{event}', [App\Http\Controllers\Admin\AdminController::class, 'updateEvent']);
             Route::post('{event}/toggle-status', [App\Http\Controllers\Admin\AdminController::class, 'toggleEventStatus']);
+            // Validation manuelle des événements + commission variable
+            Route::get('approval/queue', [App\Http\Controllers\Admin\EventApprovalController::class, 'index']);
+            Route::post('{event}/approve', [App\Http\Controllers\Admin\EventApprovalController::class, 'approve']);
+            Route::post('{event}/reject', [App\Http\Controllers\Admin\EventApprovalController::class, 'reject']);
+            Route::post('{event}/commission', [App\Http\Controllers\Admin\EventApprovalController::class, 'setCommission']);
             // Récurrence et prix variables (admin)
             Route::post('preview-recurrence', [App\Http\Controllers\Api\OrganizerController::class, 'previewRecurrence']);
             Route::post('{eventId}/recurrence', [App\Http\Controllers\Api\OrganizerController::class, 'manageRecurrence']);

@@ -14,6 +14,7 @@ class EventController extends Controller
     public function index(Request $request)
     {
         $query = Event::where('status', 'published')
+            ->where('approval_status', 'approved')
             ->where('is_active', true)
             ->with([
                 'organizer:id,name,slug',
@@ -221,8 +222,8 @@ class EventController extends Controller
      */
     public function show(Request $request, Event $event)
     {
-        // Vérifier que l'événement est publié
-        if ($event->status !== 'published' || !$event->is_active) {
+        // Vérifier que l'événement est publié, approuvé et actif
+        if (!$event->canSellTickets() || !$event->is_active) {
             if ($request->wantsJson() || $request->is('api/*')) {
                 return response()->json([
                     'success' => false,
@@ -244,6 +245,7 @@ class EventController extends Controller
 
         // Événements similaires basés sur la ville, catégorie ou l'organisateur
         $relatedEvents = Event::where('status', 'published')
+            ->where('approval_status', 'approved')
             ->where('id', '!=', $event->id)
             ->where(function ($query) use ($event) {
                 $query->where('category_id', $event->category_id)
