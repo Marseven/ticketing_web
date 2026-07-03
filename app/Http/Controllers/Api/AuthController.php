@@ -239,7 +239,20 @@ class AuthController extends Controller
         
         $user = User::where($loginField, $request->login)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        $passwordOk = $user && Hash::check($request->password, $user->password);
+
+        // Fallback comptes migrés depuis le legacy MyTicketO (mot de passe MD5) :
+        // si le bcrypt échoue mais que le MD5 legacy correspond, on rehash en
+        // bcrypt de façon transparente et on efface le MD5 (migration au vol).
+        if ($user && !$passwordOk && !empty($user->legacy_md5)
+            && hash_equals((string) $user->legacy_md5, md5($request->password))) {
+            $user->password = Hash::make($request->password);
+            $user->legacy_md5 = null;
+            $user->save();
+            $passwordOk = true;
+        }
+
+        if (!$passwordOk) {
             throw ValidationException::withMessages([
                 'login' => ['Les informations de connexion sont incorrectes.'],
             ]);

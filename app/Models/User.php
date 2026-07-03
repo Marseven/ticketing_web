@@ -36,6 +36,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'avatar_file',
         'metadata',
         'password_changed_at',
+        'legacy_id',
+        'legacy_md5',
     ];
 
     /**
