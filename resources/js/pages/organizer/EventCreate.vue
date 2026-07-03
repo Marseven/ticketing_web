@@ -291,6 +291,56 @@
                 </div>
               </div>
             </div>
+
+            <!-- Tarification variable / Prévente -->
+            <div class="bg-white rounded-primea shadow-primea p-4 md:p-6">
+              <div class="flex items-center justify-between mb-3 md:mb-4">
+                <h2 class="text-lg md:text-xl font-semibold text-primea-blue font-primea">Prévente / Tarification dynamique</h2>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" v-model="form.use_variable_pricing" class="rounded border-gray-300 text-primea-blue focus:ring-primea-blue" />
+                  <span class="text-sm text-gray-700 font-primea">Activer</span>
+                </label>
+              </div>
+
+              <div v-if="form.use_variable_pricing">
+                <p class="text-xs text-gray-500 font-primea mb-3">
+                  Définissez des paliers de prix par période. Le prix appliqué à l'achat est celui dont la période contient la date/heure courante (ex : prévente à 2000 jusqu'au 1er juillet, puis 3000).
+                </p>
+
+                <div v-for="(tier, index) in form.price_tiers" :key="index"
+                     class="grid grid-cols-1 md:grid-cols-6 gap-2 mb-2 items-end border border-gray-100 rounded-primea p-2">
+                  <div class="md:col-span-2">
+                    <label class="block text-xs text-gray-600 font-primea mb-1">Billet</label>
+                    <select v-model.number="tier.ticket_index" class="w-full px-2 py-2 border border-gray-300 rounded-primea text-sm font-primea">
+                      <option v-for="(tt, i) in form.ticket_types" :key="i" :value="i">{{ tt.name || ('Billet ' + (i + 1)) }}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-600 font-primea mb-1">Prix</label>
+                    <input v-model.number="tier.price" type="number" min="0" class="w-full px-2 py-2 border border-gray-300 rounded-primea text-sm font-primea" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-600 font-primea mb-1">À partir de</label>
+                    <input v-model="tier.valid_from" type="datetime-local" class="w-full px-2 py-2 border border-gray-300 rounded-primea text-sm font-primea" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-600 font-primea mb-1">Jusqu'à</label>
+                    <input v-model="tier.valid_until" type="datetime-local" class="w-full px-2 py-2 border border-gray-300 rounded-primea text-sm font-primea" />
+                  </div>
+                  <div class="flex items-end">
+                    <button type="button" @click="removePriceTier(index)" class="bg-red-600 text-white px-3 py-2 rounded-primea hover:bg-red-700 text-sm w-full">
+                      <TrashIcon class="w-4 h-4 inline" />
+                    </button>
+                  </div>
+                </div>
+
+                <button type="button" @click="addPriceTier"
+                        class="mt-2 text-sm text-primea-blue hover:text-primea-yellow font-primea font-semibold">
+                  <PlusIcon class="w-4 h-4 inline mr-1" /> Ajouter un palier
+                </button>
+                <p class="text-xs text-gray-400 font-primea mt-2">Laisser « À partir de » vide = actif immédiatement. Laisser « Jusqu'à » vide = sans fin.</p>
+              </div>
+            </div>
           </div>
 
           <!-- Sidebar -->
@@ -478,6 +528,9 @@ const form = reactive({
   // Mode de versement
   payout_mode: 'deferred',
   instant_payout_phone: '',
+  // Tarification variable / prévente
+  use_variable_pricing: false,
+  price_tiers: [], // { ticket_index, price, valid_from, valid_until, description }
   // Nouveaux champs pour lieu
   new_venue_name: '',
   new_venue_city: '',
@@ -517,6 +570,15 @@ const addTicketType = () => {
 
 const addSchedule = () => {
   form.schedules.push({ starts_at: '', ends_at: '' });
+};
+
+// --- Tarification variable / prévente ---
+const addPriceTier = () => {
+  form.price_tiers.push({ ticket_index: 0, price: '', valid_from: '', valid_until: '', description: '' });
+};
+
+const removePriceTier = (index) => {
+  form.price_tiers.splice(index, 1);
 };
 
 const removeSchedule = (index) => {
@@ -728,13 +790,45 @@ const createEvent = async () => {
     }
     
     if (response.data.success) {
+      const createdEvent = response.data.data;
+
+      // Configurer la tarification variable si activée (2e appel : les
+      // ticket types existent désormais avec leurs IDs).
+      if (form.use_variable_pricing && form.price_tiers.length > 0) {
+        try {
+          const createdTicketTypes = createdEvent.ticket_types || createdEvent.ticketTypes || [];
+          const prices = form.price_tiers
+            .filter(t => createdTicketTypes[t.ticket_index])
+            .map(t => ({
+              ticket_type_id: createdTicketTypes[t.ticket_index].id,
+              price: t.price,
+              valid_from: t.valid_from || null,
+              valid_until: t.valid_until || null,
+              description: t.description || null,
+            }));
+
+          if (prices.length > 0) {
+            await organizerService.manageVariablePricing(createdEvent.id, { enabled: true, prices });
+          }
+        } catch (pricingErr) {
+          console.error('Erreur configuration tarification variable:', pricingErr);
+          Swal.fire({
+            title: 'Événement créé',
+            text: 'L\'événement est créé mais la tarification dynamique n\'a pas pu être enregistrée. Vous pourrez la configurer depuis l\'édition.',
+            icon: 'warning',
+            confirmButtonColor: '#272d63'
+          }).then(() => router.push(`/organizer/events/${createdEvent.id}`));
+          return;
+        }
+      }
+
       Swal.fire({
         title: 'Succès !',
         text: 'Événement créé avec succès !',
         icon: 'success',
         confirmButtonColor: '#272d63'
       }).then(() => {
-        router.push(`/organizer/events/${response.data.data.id}`);
+        router.push(`/organizer/events/${createdEvent.id}`);
       });
     } else {
       throw new Error(response.data.message || 'Erreur lors de la création');

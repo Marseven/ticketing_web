@@ -122,19 +122,49 @@ class EventController extends Controller
                     ->orderBy('price')
                     ->get();
 
+                // Tarification dynamique : calculer le prix EFFECTIF courant et le
+                // prochain palier via le moteur Eloquent (prévente).
+                $currentPriceMap = [];
+                $nextTierMap = [];
+                if ($event->use_variable_pricing) {
+                    foreach ($event->ticketTypes as $tt) {
+                        $tt->setRelation('event', $event);
+                        $currentPriceMap[$tt->id] = $tt->getPriceFor(null, null, now()->toDateTimeString());
+
+                        $next = $tt->ticketPrices()
+                            ->where('status', 'active')
+                            ->whereNotNull('valid_from')
+                            ->where('valid_from', '>', now())
+                            ->orderBy('valid_from')
+                            ->first();
+                        if ($next) {
+                            $nextTierMap[$tt->id] = [
+                                'price' => (float) $next->price,
+                                'starts_at' => $next->valid_from->toIso8601String(),
+                            ];
+                        }
+                    }
+                }
+
                 if ($ticketTypesQuery->count() > 0) {
-                    $ticketTypes = $ticketTypesQuery->map(function($ticketType) use ($soldQuantities) {
+                    $ticketTypes = $ticketTypesQuery->map(function($ticketType) use ($soldQuantities, $currentPriceMap, $nextTierMap, $event) {
                         // Utiliser les quantités pré-chargées
                         $soldQuantity = $soldQuantities[$ticketType->id] ?? 0;
 
                         $remainingQuantity = $ticketType->available_quantity ?
                             max(0, $ticketType->available_quantity - $soldQuantity) : null;
 
+                        $basePrice = (float) $ticketType->price;
+                        $currentPrice = $currentPriceMap[$ticketType->id] ?? $basePrice;
+
                         return [
                             'id' => $ticketType->id,
                             'name' => $ticketType->name,
                             'description' => $ticketType->description,
-                            'price' => (float) $ticketType->price,
+                            'price' => $currentPrice, // Prix effectif à afficher/acheter
+                            'base_price' => $basePrice,
+                            'is_variable_pricing' => (bool) $event->use_variable_pricing,
+                            'next_tier' => $nextTierMap[$ticketType->id] ?? null,
                             'currency' => $ticketType->currency ?? 'XAF',
                             'available_quantity' => $ticketType->available_quantity,
                             'sold_quantity' => $soldQuantity,

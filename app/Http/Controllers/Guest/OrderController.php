@@ -194,7 +194,10 @@ class OrderController extends Controller
             // - subtotalAmount (organisateur reçoit) = 4000 − 400 = 3600 XAF
             // ============================================
 
-            $unitPrice = $ticketType->price ?? 0;
+            // Prix unitaire EFFECTIF à l'instant présent (prévente / tarification
+            // dynamique). Retombe sur le prix statique hors tarification variable.
+            $ticketType->setRelation('event', $event);
+            $unitPrice = $ticketType->getPriceFor(null, null, now()->toDateTimeString());
             $baseAmount = $unitPrice * $validated['quantity'];
 
             $commissionPct = $event->effectiveCommission();

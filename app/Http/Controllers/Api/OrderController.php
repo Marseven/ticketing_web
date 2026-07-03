@@ -229,7 +229,11 @@ class OrderController extends Controller
             // Calculer les montants - Modèle DÉDUIT : la commission est retenue
             // sur le prix de base. Le client paie exactement le prix affiché ;
             // l'organisateur reçoit le prix moins la commission.
-            $unitPrice = $ticketType->price ?? 0;
+            // Prix unitaire = prix EFFECTIF à l'instant présent (gère la prévente
+            // et la tarification dynamique via ticket_prices). Retombe sur le
+            // prix statique si l'événement n'utilise pas la tarification variable.
+            $ticketType->setRelation('event', $event);
+            $unitPrice = $ticketType->getPriceFor(null, null, now()->toDateTimeString());
             $baseAmount = $unitPrice * $validated['quantity']; // Prix payé par le client
 
             $commissionPct = $event->effectiveCommission();
