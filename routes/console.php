@@ -19,3 +19,9 @@ Schedule::job(new CancelPendingOrders)->hourly();
 Schedule::command('payout:check-status')
     ->everyFiveMinutes()
     ->withoutOverlapping();
+
+// Régler les événements en mode différé dont toutes les dates sont passées
+// (versement en fin d'événement). Toutes les heures.
+Schedule::command('payout:settle-ended-events')
+    ->hourly()
+    ->withoutOverlapping();

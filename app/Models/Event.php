@@ -29,6 +29,9 @@ class Event extends Model
         'approved_by',
         'approved_at',
         'rejection_reason',
+        'payout_mode',
+        'instant_payout_phone',
+        'payout_settled_at',
         'published_at',
         'created_by',
         'updated_by',
@@ -39,6 +42,7 @@ class Event extends Model
         'use_variable_pricing' => 'boolean',
         'commission_percentage' => 'decimal:2',
         'approved_at' => 'datetime',
+        'payout_settled_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -189,6 +193,24 @@ class Event extends Model
     public function canSellTickets(): bool
     {
         return $this->status === 'published' && $this->isApproved();
+    }
+
+    /**
+     * Versement instantané (à chaque vente) vers un numéro dédié ?
+     */
+    public function isInstantPayout(): bool
+    {
+        return $this->payout_mode === 'instant' && !empty($this->instant_payout_phone);
+    }
+
+    /**
+     * L'événement est-il terminé (toutes ses dates sont passées) ?
+     */
+    public function hasEnded(): bool
+    {
+        $lastEnd = $this->schedules()->max('ends_at');
+
+        return $lastEnd !== null && \Illuminate\Support\Carbon::parse($lastEnd)->isPast();
     }
 
     /**
