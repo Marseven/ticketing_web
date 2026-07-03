@@ -359,7 +359,7 @@
 
             <!-- Menu Footer (à l'intérieur du scroll) -->
             <div class="p-6 flex flex-col items-center gap-3 bg-gray-700/90 border-t border-white/10">
-            <img src="/images/logo.png" alt="MyTicketO Logo" class="h-12" style="filter: brightness(0) invert(1) opacity(0.9);" />
+            <img src="/images/logo_white.png" alt="MyTicketO Logo" class="h-12 opacity-90" />
             <p class="text-white/50 text-xs">contact@primea.ga</p>
           </div>
           </nav>
