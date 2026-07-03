@@ -19,7 +19,7 @@ export default defineConfig({
         }),
         VitePWA({
             registerType: 'autoUpdate',
-            includeAssets: ['images/logo.png', 'images/ico.png', 'images/logo_white.png'],
+            includeAssets: ['images/logo.png', 'images/ico.png', 'images/icon-192.png', 'images/icon-512.png', 'images/logo_white.png'],
             manifest: {
                 name: 'MyTicketO - Billetterie en ligne',
                 short_name: 'MyTicketO',
@@ -32,16 +32,22 @@ export default defineConfig({
                 start_url: '/',
                 icons: [
                     {
-                        src: '/images/ico.png',
+                        src: '/images/icon-192.png',
                         sizes: '192x192',
                         type: 'image/png',
-                        purpose: 'any maskable'
+                        purpose: 'any'
                     },
                     {
-                        src: '/images/logo.png',
+                        src: '/images/icon-512.png',
                         sizes: '512x512',
                         type: 'image/png',
-                        purpose: 'any maskable'
+                        purpose: 'any'
+                    },
+                    {
+                        src: '/images/icon-512.png',
+                        sizes: '512x512',
+                        type: 'image/png',
+                        purpose: 'maskable'
                     }
                 ],
                 categories: ['entertainment', 'lifestyle', 'shopping'],

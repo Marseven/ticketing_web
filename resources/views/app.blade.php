@@ -5,8 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>MyTicketO - Plateforme d'événements</title>
+    <title>MyTicketO - Se procurer un ticket n'a jamais été aussi simple</title>
     <meta name="description" content="MyTicketO - Plateforme de billetterie en ligne pour événements au Gabon. Achetez vos billets en ligne facilement.">
+    <link rel="canonical" href="{{ url()->current() }}">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="MyTicketO">
+    <meta property="og:title" content="MyTicketO - La billetterie en ligne">
+    <meta property="og:description" content="Se procurer un ticket n'a jamais été aussi simple ! Achetez vos billets d'événements en ligne au Gabon.">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ url('/images/ico.png?v=2') }}">
+    <meta property="og:locale" content="fr_FR">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="MyTicketO - La billetterie en ligne">
+    <meta name="twitter:description" content="Se procurer un ticket n'a jamais été aussi simple !">
+    <meta name="twitter:image" content="{{ url('/images/ico.png?v=2') }}">
 
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#004B5E">
@@ -20,16 +36,16 @@
     <meta name="format-detection" content="telephone=no">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="/images/ico.png">
-    <link rel="shortcut icon" type="image/png" href="/images/ico.png">
-    <link rel="apple-touch-icon" href="/images/ico.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="/images/ico.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/images/ico.png">
-    <link rel="apple-touch-icon" sizes="167x167" href="/images/ico.png">
+    <link rel="icon" type="image/png" href="/images/ico.png?v=2">
+    <link rel="shortcut icon" type="image/png" href="/images/ico.png?v=2">
+    <link rel="apple-touch-icon" href="/images/ico.png?v=2">
+    <link rel="apple-touch-icon" sizes="152x152" href="/images/ico.png?v=2">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/ico.png?v=2">
+    <link rel="apple-touch-icon" sizes="167x167" href="/images/ico.png?v=2">
 
     <!-- Splash Screen for iOS -->
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-startup-image" href="/images/logo.png">
+    <link rel="apple-touch-startup-image" href="/images/logo.png?v=2">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
