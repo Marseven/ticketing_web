@@ -166,6 +166,7 @@ Route::prefix('v1')->group(function () {
         Route::delete('events/{id}', [App\Http\Controllers\Api\OrganizerController::class, 'deleteEvent']);
         Route::get('events/{id}/stats', [App\Http\Controllers\Api\OrganizerController::class, 'getEventStats']);
         Route::get('events/{eventId}/sales', [App\Http\Controllers\Api\OrganizerController::class, 'eventSales']);
+        Route::get('events/{eventId}/sales-by-schedule', [App\Http\Controllers\Api\OrganizerController::class, 'salesBySchedule']);
         // Récurrence et prix variables
         Route::post('events/preview-recurrence', [App\Http\Controllers\Api\OrganizerController::class, 'previewRecurrence']);
         Route::post('events/{eventId}/recurrence', [App\Http\Controllers\Api\OrganizerController::class, 'manageRecurrence']);

@@ -190,12 +190,39 @@
               <div class="text-right">
                 <p class="font-bold text-gray-900">{{ formatAmount(day.revenue) }} XAF</p>
                 <div class="w-16 bg-gray-200 rounded-full h-1 mt-1">
-                  <div class="bg-blue-600 h-1 rounded-full" 
+                  <div class="bg-blue-600 h-1 rounded-full"
                        :style="`width: ${(day.revenue / maxDailyRevenue) * 100}%`"></div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Ventes par Date (schedule) — événements multi-dates -->
+      <div v-if="salesBySchedule.length > 1" class="bg-white rounded-lg shadow p-6 mb-8">
+        <h2 class="text-xl font-bold mb-4">Ventes par Date</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Vendus</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Scannés</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">En attente</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Revenus</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr v-for="row in salesBySchedule" :key="row.schedule_id">
+                <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ formatScheduleDate(row.starts_at) }}</td>
+                <td class="px-4 py-3 text-sm text-right">{{ row.sold }}</td>
+                <td class="px-4 py-3 text-sm text-right">{{ row.used }}</td>
+                <td class="px-4 py-3 text-sm text-right">{{ row.pending }}</td>
+                <td class="px-4 py-3 text-sm text-right font-bold text-gray-900">{{ formatAmount(row.revenue) }} XAF</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -322,6 +349,7 @@ export default {
     
     const salesByType = ref([])
     const salesByDay = ref([])
+    const salesBySchedule = ref([])
     
     const filters = reactive({
       status: '',
@@ -363,6 +391,31 @@ export default {
       } finally {
         loading.value = false
       }
+    }
+
+    const loadSalesBySchedule = async () => {
+      try {
+        const response = await fetch(`/api/v1/organizer/events/${eventId}/sales-by-schedule`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Accept': 'application/json'
+          }
+        })
+        const data = await response.json()
+        if (data.success) {
+          salesBySchedule.value = data.data.schedules || []
+        }
+      } catch (error) {
+        console.error('Erreur chargement ventes par date:', error)
+      }
+    }
+
+    const formatScheduleDate = (dateStr) => {
+      if (!dateStr) return '—'
+      return new Date(dateStr).toLocaleString('fr-FR', {
+        weekday: 'short', day: '2-digit', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      })
     }
 
     const loadTickets = async () => {
@@ -489,6 +542,7 @@ export default {
     // Lifecycle
     onMounted(() => {
       loadEventSales()
+      loadSalesBySchedule()
       loadTickets()
     })
 
@@ -502,20 +556,23 @@ export default {
       stats,
       salesByType,
       salesByDay,
+      salesBySchedule,
       filters,
       eventId,
       nextSchedule,
       maxDailyRevenue,
-      
+
       // Méthodes
       loadEventSales,
+      loadSalesBySchedule,
       loadTickets,
       changePage,
       exportSalesData,
-      
+
       // Utilitaires
       formatAmount,
       formatDate,
+      formatScheduleDate,
       formatDateTime,
       getStatusName,
       getStatusBadgeClass,
