@@ -13,9 +13,9 @@
     <!-- Contenu principal -->
     <div class="relative z-10 min-h-screen flex items-center justify-center px-4 py-12">
       <div class="max-w-md w-full">
-        <!-- Logo Primea -->
+        <!-- Logo MyTicketO -->
         <div class="text-center mb-8 animate-fade-in">
-          <img src="/images/logo_white.png" alt="Primea" class="h-16 mx-auto mb-6" />
+          <img src="/images/logo_white.png" alt="MyTicketO" class="h-16 mx-auto mb-6" />
         </div>
 
         <!-- Carte de mot de passe oublié -->
@@ -182,7 +182,7 @@ export default {
 </script>
 
 <style scoped>
-/* Variables CSS Primea */
+/* Variables CSS MyTicketO */
 :root {
   --primea-blue: #272d63;
   --primea-yellow: #fab511;
@@ -192,7 +192,7 @@ export default {
   --font-primary: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Couleurs de texte Primea */
+/* Couleurs de texte MyTicketO */
 .text-primea-blue {
   color: var(--primea-blue);
 }
@@ -201,7 +201,7 @@ export default {
   color: var(--primea-yellow);
 }
 
-/* Couleurs de fond Primea */
+/* Couleurs de fond MyTicketO */
 .bg-primea-blue {
   background-color: var(--primea-blue);
 }
@@ -210,7 +210,7 @@ export default {
   background-color: var(--primea-yellow);
 }
 
-/* States hover Primea */
+/* States hover MyTicketO */
 .hover\:text-primea-yellow:hover {
   color: var(--primea-yellow);
 }
@@ -224,7 +224,7 @@ export default {
   border-color: var(--primea-blue);
 }
 
-/* Coins arrondis Primea */
+/* Coins arrondis MyTicketO */
 .rounded-primea-lg {
   border-radius: 16px;
 }
@@ -233,12 +233,12 @@ export default {
   border-radius: 20px;
 }
 
-/* Ombres Primea */
+/* Ombres MyTicketO */
 .shadow-primea-lg {
   box-shadow: 0 8px 30px rgba(39, 45, 99, 0.15);
 }
 
-/* Police Primea */
+/* Police MyTicketO */
 .font-primea {
   font-family: var(--font-primary);
 }

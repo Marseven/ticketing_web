@@ -350,7 +350,7 @@ export default {
     const loadMockData = () => {
       const userData = {
         id: 1,
-        name: localStorage.getItem('userName') || 'Admin Primea',
+        name: localStorage.getItem('userName') || 'Admin MyTicketO',
         email: localStorage.getItem('userEmail') || 'admin@primea.ga',
         phone: '+241 01 23 45 67',
         position: 'Super Administrateur',

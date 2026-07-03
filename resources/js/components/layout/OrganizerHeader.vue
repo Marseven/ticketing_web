@@ -2,12 +2,12 @@
   <header class="bg-white shadow-primea sticky top-0 z-50 border-b border-gray-100">
     <nav class="max-w-7xl mx-auto px-4 py-3">
       <div class="flex items-center justify-between">
-        <!-- Logo Primea avec badge organisateur -->
+        <!-- Logo MyTicketO avec badge organisateur -->
         <div class="flex items-center gap-3">
           <router-link to="/" class="group">
             <img
               src="/images/logo.png"
-              alt="Primea"
+              alt="MyTicketO"
               class="h-10 w-auto transition-transform duration-200 group-hover:scale-105"
             />
           </router-link>
@@ -307,7 +307,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* Ombre Primea pour le header */
+/* Ombre MyTicketO pour le header */
 .shadow-primea {
   box-shadow: 0 2px 15px rgba(39, 45, 99, 0.08);
 }
@@ -335,12 +335,12 @@ onUnmounted(() => {
   transform: translateY(-10px);
 }
 
-/* Police Primea */
+/* Police MyTicketO */
 .font-primea {
   font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Couleurs Primea */
+/* Couleurs MyTicketO */
 .text-primea-blue {
   color: #272d63;
 }
@@ -369,7 +369,7 @@ onUnmounted(() => {
   color: #272d63;
 }
 
-/* Coins arrondis Primea */
+/* Coins arrondis MyTicketO */
 .rounded-primea {
   border-radius: 12px;
 }

@@ -39,7 +39,7 @@ class VerifyEmailNotification extends Notification // implements ShouldQueue - D
         $verificationUrl = $this->verificationUrl($notifiable);
 
         return (new MailMessage)
-            ->subject('Vérifiez votre adresse email - Primea')
+            ->subject('Vérifiez votre adresse email - MyTicketO')
             ->markdown('emails.verify-email', [
                 'user' => $notifiable,
                 'verificationUrl' => $verificationUrl,

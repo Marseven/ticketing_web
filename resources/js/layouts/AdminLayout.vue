@@ -7,7 +7,7 @@
       
       <!-- Logo -->
       <div class="flex items-center justify-center h-16 px-4" style="background-color: #272d63;">
-        <img src="/images/logo_white.png" alt="Primea" class="h-10" />
+        <img src="/images/logo_white.png" alt="MyTicketO" class="h-10" />
       </div>
 
       <!-- Navigation Menu -->
@@ -443,7 +443,7 @@
       <footer class="bg-white border-t border-gray-200 py-4 px-6">
         <div class="flex items-center justify-between">
           <div class="text-sm text-gray-600">
-            © {{ new Date().getFullYear() }} Primea. Tous droits réservés.
+            © {{ new Date().getFullYear() }} MyTicketO. Tous droits réservés.
           </div>
           <div class="text-sm text-gray-500">
             Plateforme d'événements de référence

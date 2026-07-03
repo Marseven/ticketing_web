@@ -1891,7 +1891,7 @@ export default {
 </script>
 
 <style scoped>
-/* Variables CSS Primea */
+/* Variables CSS MyTicketO */
 :root {
   --primea-blue: #272d63;
   --primea-yellow: #fab511;
@@ -1905,7 +1905,7 @@ export default {
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }
 
-/* Classes Primea */
+/* Classes MyTicketO */
 .font-primea {
   font-family: var(--font-primary);
 }

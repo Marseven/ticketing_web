@@ -16,7 +16,7 @@
         <!-- Introduction -->
         <section>
           <p>
-            La presente Politique de confidentialite decrit la maniere dont Primea
+            La presente Politique de confidentialite decrit la maniere dont MyTicketO
             (accessible a l'adresse https://primea.ga) collecte, utilise, stocke et protege
             vos donnees personnelles. En utilisant notre plateforme, vous acceptez les
             pratiques decrites dans cette politique. Nous nous engageons a proteger la vie

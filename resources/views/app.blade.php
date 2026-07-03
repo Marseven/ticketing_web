@@ -5,16 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Primea - Plateforme d'événements</title>
-    <meta name="description" content="Primea - Plateforme de billetterie en ligne pour événements au Gabon. Achetez vos billets en ligne facilement.">
+    <title>MyTicketO - Plateforme d'événements</title>
+    <meta name="description" content="MyTicketO - Plateforme de billetterie en ligne pour événements au Gabon. Achetez vos billets en ligne facilement.">
 
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#272d63">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Primea">
-    <meta name="application-name" content="Primea">
+    <meta name="apple-mobile-web-app-title" content="MyTicketO">
+    <meta name="application-name" content="MyTicketO">
     <meta name="msapplication-TileColor" content="#272d63">
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="format-detection" content="telephone=no">

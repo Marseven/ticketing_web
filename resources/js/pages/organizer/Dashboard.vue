@@ -4,7 +4,7 @@
     <header class="bg-blue-600 text-white py-3 md:py-4 px-4 shadow-lg">
       <div class="max-w-6xl mx-auto flex items-center justify-between">
         <div class="flex items-center space-x-3 md:space-x-4">
-          <img src="/images/logo_white.png" alt="Primea" class="h-6 md:h-8" />
+          <img src="/images/logo_white.png" alt="MyTicketO" class="h-6 md:h-8" />
           <div>
             <h1 class="text-base md:text-xl font-bold">Espace Organisateur</h1>
             <p class="text-blue-200 text-xs md:text-sm hidden sm:block">Tableau de bord</p>

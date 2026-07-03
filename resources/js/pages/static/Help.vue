@@ -8,7 +8,7 @@
         </h1>
         <p class="text-lg text-gray-600 max-w-2xl mx-auto">
           Retrouvez les reponses aux questions les plus frequentes concernant
-          l'utilisation de la plateforme Primea.
+          l'utilisation de la plateforme MyTicketO.
         </p>
       </div>
 
@@ -172,7 +172,7 @@ export default {
       openItems: {},
       purchaseFaqs: [
         {
-          question: 'Comment acheter un billet sur Primea ?',
+          question: 'Comment acheter un billet sur MyTicketO ?',
           answer:
             'Rendez-vous sur la page de l\'evenement qui vous interesse, selectionnez le type de billet et la quantite souhaitee, puis procedez au paiement. Vous pouvez acheter en tant qu\'invite ou en vous connectant a votre compte.',
         },
@@ -196,7 +196,7 @@ export default {
         {
           question: 'Quels moyens de paiement sont acceptes ?',
           answer:
-            'Primea accepte plusieurs moyens de paiement : Airtel Money, Moov Money, carte bancaire (Visa/Mastercard) et E-Billing (paiement USSD). Les moyens disponibles peuvent varier selon l\'evenement.',
+            'MyTicketO accepte plusieurs moyens de paiement : Airtel Money, Moov Money, carte bancaire (Visa/Mastercard) et E-Billing (paiement USSD). Les moyens disponibles peuvent varier selon l\'evenement.',
         },
         {
           question: 'Le paiement est-il securise ?',

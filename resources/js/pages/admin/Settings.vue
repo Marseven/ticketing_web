@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="mb-6">
       <h1 class="text-2xl font-bold mb-2" style="color: #272d63;">Paramètres Système</h1>
-      <p class="text-gray-600">Configurez les paramètres généraux de la plateforme Primea</p>
+      <p class="text-gray-600">Configurez les paramètres généraux de la plateforme MyTicketO</p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -364,7 +364,7 @@ export default {
     
     const loadMockData = () => {
       Object.assign(generalForm, {
-        platform_name: 'Primea Ticketing',
+        platform_name: 'MyTicketO',
         site_url: 'https://primea.ga',
         contact_email: 'contact@primea.ga',
         timezone: 'Africa/Libreville',
