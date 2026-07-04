@@ -5,18 +5,29 @@
       <p class="text-gray-600 mt-1">Importer les données de l'ancienne plateforme MyTicketO (base legacy) vers cette plateforme.</p>
     </div>
 
-    <!-- Connexion legacy -->
-    <div class="mb-6 rounded-lg p-4" :class="legacy.connected ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'">
-      <div class="flex items-center gap-2">
-        <span class="w-2.5 h-2.5 rounded-full" :class="legacy.connected ? 'bg-green-500' : 'bg-red-500'"></span>
-        <span class="font-medium" :class="legacy.connected ? 'text-green-800' : 'text-red-800'">
-          {{ legacy.connected ? 'Base legacy connectée' : 'Base legacy non connectée' }}
+    <!-- Étape 1 : charger le dump -->
+    <div class="mb-6 bg-white rounded-lg shadow p-5">
+      <h2 class="text-lg font-bold text-primea-blue mb-1">1. Charger le dump MyTicketO</h2>
+      <p class="text-sm text-gray-500 mb-3">Sélectionnez le fichier <code>.sql</code> exporté de l'ancienne base MyTicketO.</p>
+
+      <div class="flex items-center gap-3 mb-3">
+        <span class="w-2.5 h-2.5 rounded-full" :class="legacy.loaded ? 'bg-green-500' : 'bg-gray-300'"></span>
+        <span class="text-sm font-medium" :class="legacy.loaded ? 'text-green-800' : 'text-gray-500'">
+          {{ legacy.loaded ? 'Dump chargé ✓' : 'Aucun dump chargé' }}
         </span>
       </div>
-      <p v-if="!legacy.connected" class="text-sm text-red-700 mt-1">
-        Chargez le dump dans une base MySQL et renseignez <code>LEGACY_DB_*</code> dans le <code>.env</code>.
-        <span v-if="legacy.error" class="block text-xs mt-1 opacity-75">{{ legacy.error }}</span>
-      </p>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <input ref="fileInput" type="file" accept=".sql" @change="onFile" class="text-sm" />
+        <button @click="upload" :disabled="!file || busy"
+                class="px-4 py-2 rounded-lg bg-primea-blue text-white text-sm font-medium hover:bg-primea-yellow hover:text-primea-blue transition-colors disabled:opacity-50">
+          {{ busy === 'upload' ? 'Chargement…' : 'Charger le dump' }}
+        </button>
+        <button v-if="legacy.loaded" @click="cleanup" :disabled="busy"
+                class="px-3 py-2 rounded-lg text-sm text-gray-600 border border-gray-200 hover:bg-gray-50 disabled:opacity-50">
+          Supprimer le dump chargé
+        </button>
+      </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -69,11 +80,11 @@
 
     <!-- Actions -->
     <div class="flex flex-wrap gap-3 mb-6">
-      <button @click="preview" :disabled="busy || !legacy.connected"
+      <button @click="preview" :disabled="busy || !legacy.loaded"
               class="px-4 py-2 rounded-lg border border-primea-blue text-primea-blue font-medium hover:bg-primea-blue/5 disabled:opacity-50">
         {{ busy === 'preview' ? 'Simulation…' : 'Prévisualiser (simulation)' }}
       </button>
-      <button @click="confirmRun" :disabled="busy || !legacy.connected"
+      <button @click="confirmRun" :disabled="busy || !legacy.loaded"
               class="px-4 py-2 rounded-lg bg-primea-blue text-white font-semibold hover:bg-primea-yellow hover:text-primea-blue transition-colors disabled:opacity-50">
         {{ busy === 'run' ? 'Import en cours…' : 'Lancer l\'import' }}
       </button>
@@ -96,10 +107,51 @@ const labels = {
 
 const current = ref({})
 const imported = ref({ events: 0, tickets: 0, orders: 0 })
-const legacy = reactive({ connected: false })
+const legacy = reactive({ connected: false, loaded: false })
 const opts = reactive({ all: false, fresh: true })
 const busy = ref(null)
 const output = ref('')
+const file = ref(null)
+const fileInput = ref(null)
+
+const onFile = (e) => { file.value = e.target.files[0] || null }
+
+const upload = async () => {
+  if (!file.value) return
+  busy.value = 'upload'
+  try {
+    const fd = new FormData()
+    fd.append('dump', file.value)
+    const res = await fetch('/api/v1/admin/legacy-import/upload', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Accept': 'application/json' },
+      body: fd,
+    })
+    const data = await res.json()
+    if (data.success) {
+      Swal.fire({ icon: 'success', title: 'Dump chargé', confirmButtonColor: '#004B5E' })
+      file.value = null
+      if (fileInput.value) fileInput.value.value = ''
+      loadStatus()
+    } else {
+      Swal.fire({ icon: 'error', title: 'Erreur', text: data.message, confirmButtonColor: '#004B5E' })
+    }
+  } catch (e) {
+    Swal.fire({ icon: 'error', title: 'Erreur', text: e.message, confirmButtonColor: '#004B5E' })
+  } finally {
+    busy.value = null
+  }
+}
+
+const cleanup = async () => {
+  busy.value = 'cleanup'
+  try {
+    await fetch('/api/v1/admin/legacy-import/cleanup', {
+      method: 'POST', headers: authHeaders(),
+    })
+    loadStatus()
+  } catch (e) { console.error(e) } finally { busy.value = null }
+}
 
 const authHeaders = () => ({
   'Authorization': `Bearer ${localStorage.getItem('token')}`,

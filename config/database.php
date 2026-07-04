@@ -63,17 +63,19 @@ return [
             ]) : [],
         ],
 
-        // Connexion vers l'ancienne base MyTicketO (leweb_*) pour l'import.
-        // Charger le dump `myticketo/bdd/c2095360c_leweb.sql` dans une base
-        // MySQL locale (ex: myticketo_legacy) et renseigner LEGACY_DB_* dans .env.
+        // Connexion vers les tables legacy MyTicketO (leweb_*).
+        // Par défaut = la MÊME base que l'application : le dump `.sql` est
+        // chargé via l'interface admin (les tables leweb_* n'entrent pas en
+        // collision avec les tables de l'app). On peut aussi pointer une base
+        // séparée en renseignant LEGACY_DB_* dans .env.
         'legacy' => [
             'driver' => 'mysql',
-            'host' => env('LEGACY_DB_HOST', '127.0.0.1'),
-            'port' => env('LEGACY_DB_PORT', '3306'),
-            'database' => env('LEGACY_DB_DATABASE', 'myticketo_legacy'),
-            'username' => env('LEGACY_DB_USERNAME', 'root'),
-            'password' => env('LEGACY_DB_PASSWORD', ''),
-            'unix_socket' => env('LEGACY_DB_SOCKET', ''),
+            'host' => env('LEGACY_DB_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('LEGACY_DB_PORT', env('DB_PORT', '3306')),
+            'database' => env('LEGACY_DB_DATABASE', env('DB_DATABASE')),
+            'username' => env('LEGACY_DB_USERNAME', env('DB_USERNAME', 'root')),
+            'password' => env('LEGACY_DB_PASSWORD', env('DB_PASSWORD', '')),
+            'unix_socket' => env('LEGACY_DB_SOCKET', env('DB_SOCKET', '')),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
             'prefix' => '',

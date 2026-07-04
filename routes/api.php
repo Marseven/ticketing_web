@@ -282,8 +282,10 @@ Route::prefix('v1')->group(function () {
         // Import des données legacy MyTicketO
         Route::prefix('legacy-import')->group(function () {
             Route::get('status', [App\Http\Controllers\Admin\LegacyImportController::class, 'status']);
+            Route::post('upload', [App\Http\Controllers\Admin\LegacyImportController::class, 'uploadDump']);
             Route::post('preview', [App\Http\Controllers\Admin\LegacyImportController::class, 'preview']);
             Route::post('run', [App\Http\Controllers\Admin\LegacyImportController::class, 'run']);
+            Route::post('cleanup', [App\Http\Controllers\Admin\LegacyImportController::class, 'cleanup']);
         });
         
         // Gestion des payouts

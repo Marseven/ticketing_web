@@ -63,23 +63,30 @@ class LegacyImport extends Command
             return self::SUCCESS;
         }
 
-        DB::transaction(function () use ($eventIds) {
-            if ($this->option('fresh') && !$this->dry) {
-                $this->purgeExisting();
-            }
-            $this->importUsers();          // clients
-            $this->importOwners($eventIds); // organisateurs (+ users)
-            $this->importEvents($eventIds); // events (+ venues, catégories)
-            $this->importSchedules($eventIds);
-            $this->importTicketTypes($eventIds);
-            $this->importOrdersAndPayments($eventIds);
-            $this->importTickets($eventIds);
-            $this->importCheckins($eventIds);
+        try {
+            DB::transaction(function () use ($eventIds) {
+                if ($this->option('fresh') && !$this->dry) {
+                    $this->purgeExisting();
+                }
+                $this->importUsers();          // clients
+                $this->importOwners($eventIds); // organisateurs (+ users)
+                $this->importEvents($eventIds); // events (+ venues, catégories)
+                $this->importSchedules($eventIds);
+                $this->importTicketTypes($eventIds);
+                $this->importOrdersAndPayments($eventIds);
+                $this->importTickets($eventIds);
+                $this->importCheckins($eventIds);
 
-            if ($this->dry) {
-                throw new \RuntimeException('__DRY_RUN_ROLLBACK__');
-            }
-        });
+                if ($this->dry) {
+                    // Rollback volontaire : on annule tout ce qui a été écrit
+                    // pendant la simulation.
+                    throw new DryRunRollback();
+                }
+            });
+        } catch (DryRunRollback $e) {
+            $this->info('[DRY-RUN] Simulation terminée (aucune donnée écrite).');
+            return self::SUCCESS;
+        }
 
         $this->info('Import terminé.');
         return self::SUCCESS;
@@ -116,7 +123,7 @@ class LegacyImport extends Command
         $clientType = DB::table('user_types')->where('name', 'client')->value('id') ?? 2;
 
         foreach ($rows as $u) {
-            $user = $this->dry ? new User() : User::firstOrNew(['legacy_id' => $u->id]);
+            $user = User::firstOrNew(['legacy_id' => $u->id]);
             $user->name = $this->clean($u->nom) ?: ('Client ' . $u->id);
             $user->phone = $this->clean($u->tel);
             $user->email = $user->email ?: $this->syntheticEmail($u->tel, 'client', $u->id);
@@ -128,7 +135,7 @@ class LegacyImport extends Command
                 $user->password = Hash::make(Str::random(24));
             }
             $user->legacy_id = $u->id;
-            if (!$this->dry) {
+            if (true) {
                 $user->save();
                 $this->map['user'][$u->id] = $user->id;
             }
@@ -146,11 +153,13 @@ class LegacyImport extends Command
         $orgType = DB::table('user_types')->where('name', 'organizer')->value('id') ?? 3;
 
         foreach ($owners as $o) {
-            // 1) compte user de login pour l'organisateur
-            $user = $this->dry ? new User() : User::firstOrNew(['legacy_id' => 'owner-' . $o->id]);
+            // 1) compte user de login pour l'organisateur.
+            // Idempotence par email synthétique (unique) : legacy_id est un
+            // entier réservé au mapping des clients, on ne le réutilise pas ici.
+            $orgEmail = $this->syntheticEmail($o->tel, 'org', $o->id);
+            $user = User::firstOrNew(['email' => $orgEmail]);
             $user->name = $this->clean($o->nom) ?: ('Organisateur ' . $o->id);
             $user->phone = $this->clean($o->tel);
-            $user->email = $user->email ?: $this->syntheticEmail($o->tel, 'org', $o->id);
             $user->user_type_id = $orgType;
             $user->is_organizer = true;
             $user->status = ($o->statut ?? 0) ? 'active' : 'inactive';
@@ -158,10 +167,9 @@ class LegacyImport extends Command
             if (!$user->exists) {
                 $user->password = Hash::make(Str::random(24));
             }
-            $user->legacy_id = 'owner-' . $o->id;
 
             // 2) profil organizer
-            $org = $this->dry ? new Organizer() : Organizer::firstOrNew(['legacy_id' => $o->id]);
+            $org = Organizer::firstOrNew(['legacy_id' => $o->id]);
             $org->name = $this->clean($o->nom) ?: ('Organisateur ' . $o->id);
             $org->contact_phone = $this->clean($o->tel);
             $org->status = ($o->statut ?? 0) ? 'active' : 'inactive';
@@ -169,7 +177,7 @@ class LegacyImport extends Command
             $org->default_commission_percentage = 10.00; // legacy = 10% flat
             $org->legacy_id = $o->id;
 
-            if (!$this->dry) {
+            if (true) {
                 $user->save();
                 if (empty($org->slug)) {
                     $org->slug = $this->uniqueSlug(Organizer::class, $org->name);
@@ -192,7 +200,7 @@ class LegacyImport extends Command
 
         foreach ($events as $ev) {
             $organizerId = $this->map['owner_org'][$ev->owner] ?? null;
-            if (!$organizerId && !$this->dry) {
+            if (!$organizerId) {
                 $this->warn("  event {$ev->id} sans organizer mappé — ignoré");
                 continue;
             }
@@ -200,7 +208,7 @@ class LegacyImport extends Command
             $venueId = $this->resolveVenue($this->clean($ev->lieu), $organizerId);
             $categoryId = $this->resolveCategory($this->clean($ev->cat));
 
-            $event = $this->dry ? new Event() : Event::firstOrNew(['legacy_id' => $ev->id]);
+            $event = Event::firstOrNew(['legacy_id' => $ev->id]);
             $event->organizer_id = $organizerId;
             $event->category_id = $categoryId;
             $event->venue_id = $venueId;
@@ -216,7 +224,7 @@ class LegacyImport extends Command
             $event->payout_settled_at = now(); // historique déjà réglé côté legacy
             $event->legacy_id = $ev->id;
 
-            if (!$this->dry) {
+            if (true) {
                 if (empty($event->slug)) {
                     $event->slug = $this->uniqueSlug(Event::class, $event->title);
                 }
@@ -239,13 +247,13 @@ class LegacyImport extends Command
             $starts = $this->parseLegacyDate($d->date_format);
             if (!$starts) continue;
 
-            $sch = $this->dry ? new EventSchedule() : EventSchedule::firstOrNew(['legacy_id' => $d->id]);
+            $sch = EventSchedule::firstOrNew(['legacy_id' => $d->id]);
             $sch->event_id = $eventId;
             $sch->starts_at = $starts;
             $sch->ends_at = (clone $starts)->addHours(3); // legacy n'a pas de fin
             $sch->status = 'active';
             $sch->legacy_id = $d->id;
-            if (!$this->dry) { $sch->save(); $this->map['date'][$d->id] = $sch->id; }
+            if (true) { $sch->save(); $this->map['date'][$d->id] = $sch->id; }
             $n++;
         }
         $this->line('  schedules: ' . $n);
@@ -261,7 +269,7 @@ class LegacyImport extends Command
             $eventId = $this->map['event'][$c->id_event] ?? null;
             if (!$eventId) continue;
 
-            $tt = $this->dry ? new TicketType() : TicketType::firstOrNew(['legacy_id' => $c->id]);
+            $tt = TicketType::firstOrNew(['legacy_id' => $c->id]);
             $tt->event_id = $eventId;
             $tt->name = $this->clean($c->titre) ?: 'Standard';
             $tt->price = (int) $c->prix;
@@ -269,7 +277,7 @@ class LegacyImport extends Command
             $tt->available_quantity = is_numeric($c->place) ? (int) $c->place : null;
             $tt->status = 'active';
             $tt->legacy_id = $c->id;
-            if (!$this->dry) { $tt->save(); $this->map['cat'][$c->id] = $tt->id; }
+            if (true) { $tt->save(); $this->map['cat'][$c->id] = $tt->id; }
             $n++;
         }
         $this->line('  ticket_types: ' . $n);
@@ -293,7 +301,7 @@ class LegacyImport extends Command
             $commission = round($montant * 0.10, 2);
             $net = round($montant - $commission, 2);
 
-            $order = $this->dry ? new Order() : Order::firstOrNew(['legacy_id' => $p->id]);
+            $order = Order::firstOrNew(['legacy_id' => $p->id]);
             $order->organizer_id = $organizerId;
             $order->buyer_id = $buyerId;
             $order->currency = 'XAF';
@@ -308,7 +316,7 @@ class LegacyImport extends Command
             $order->is_guest_order = $buyerId ? false : true;
             $order->legacy_id = $p->id;
 
-            if (!$this->dry) {
+            if (true) {
                 $order->save();
 
                 // Paiement associé
@@ -328,55 +336,73 @@ class LegacyImport extends Command
 
     private function importTickets(array $eventIds): void
     {
-        $tickets = DB::connection('legacy')->table('leweb_ticket')
-            ->whereIn('id_event', $eventIds)->get();
-
+        // Insertion GROUPÉE par chunks (23k+ billets) pour rester rapide même
+        // via une requête web. Idempotence assurée par la purge (--fresh) du
+        // flux de remplacement.
+        $now = now();
         $n = 0;
-        foreach ($tickets as $t) {
-            $eventId = $this->map['event'][$t->id_event] ?? null;
-            if (!$eventId) continue;
-            $ticketTypeId = $this->map['cat'][$t->id_cat] ?? null;
-
-            $ticket = $this->dry ? new Ticket() : Ticket::firstOrNew(['legacy_id' => $t->id]);
-            $ticket->event_id = $eventId;
-            $ticket->ticket_type_id = $ticketTypeId;
-            // CODE PRÉSERVÉ (le QR imprimé/envoyé) — non négociable.
-            $ticket->code = $this->clean($t->ref);
-            $ticket->status = ((int) ($t->statut ?? 0) === 1) ? 'used' : 'issued';
-            $ticket->ticket_source = 'online';
-            $ticket->issued_at = $this->parseTs($t->date_crea ?? null) ?? now();
-            $ticket->legacy_id = $t->id;
-            if (!$this->dry) { $ticket->save(); }
-            $n++;
-        }
+        DB::connection('legacy')->table('leweb_ticket')
+            ->whereIn('id_event', $eventIds)
+            ->orderBy('id')
+            ->chunk(1000, function ($chunk) use (&$n, $now) {
+                $rows = [];
+                foreach ($chunk as $t) {
+                    $eventId = $this->map['event'][$t->id_event] ?? null;
+                    if (!$eventId) {
+                        continue;
+                    }
+                    $rows[] = [
+                        'legacy_id' => $t->id,
+                        'event_id' => $eventId,
+                        'ticket_type_id' => $this->map['cat'][$t->id_cat] ?? null,
+                        // CODE PRÉSERVÉ (le QR imprimé/envoyé) — non négociable.
+                        'code' => $this->clean($t->ref),
+                        'status' => ((int) ($t->statut ?? 0) === 1) ? 'used' : 'issued',
+                        'ticket_source' => 'online',
+                        'issued_at' => $this->parseTs($t->date_crea ?? null) ?? $now,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+                if ($rows) {
+                    Ticket::insert($rows);
+                    $n += count($rows);
+                }
+            });
         $this->line('  tickets (codes préservés): ' . $n);
     }
 
     private function importCheckins(array $eventIds): void
     {
-        $scans = DB::connection('legacy')->table('leweb_scan')
-            ->whereIn('id_event', $eventIds)->get();
+        // Map code -> ticket_id (une seule requête) pour éviter un lookup par scan.
+        $codeToId = Ticket::whereIn('event_id', array_values($this->map['event']))
+            ->pluck('id', 'code');
 
+        $now = now();
         $n = 0;
-        foreach ($scans as $s) {
-            $ticket = Ticket::where('code', $this->clean($s->ref))->first();
-            if (!$ticket) continue;
-            if ($this->dry) { $n++; continue; }
-
-            // idempotence : un checkin valide par ticket
-            $exists = DB::table('checkins')->where('ticket_id', $ticket->id)
-                ->where('result', 'valid')->exists();
-            if (!$exists) {
-                DB::table('checkins')->insert([
-                    'ticket_id' => $ticket->id,
-                    'result' => ((int) ($s->statut ?? 0) === 1) ? 'valid' : 'invalid',
-                    'scanned_at' => $this->parseTs($s->date_crea ?? null) ?? now(),
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
-            $n++;
-        }
+        DB::connection('legacy')->table('leweb_scan')
+            ->whereIn('id_event', $eventIds)
+            ->orderBy('id')
+            ->chunk(2000, function ($chunk) use (&$n, $codeToId, $now) {
+                $rows = [];
+                foreach ($chunk as $s) {
+                    $ticketId = $codeToId[$this->clean($s->ref)] ?? null;
+                    if (!$ticketId) {
+                        continue;
+                    }
+                    $rows[] = [
+                        'ticket_id' => $ticketId,
+                        'result' => ((int) ($s->statut ?? 0) === 1) ? 'valid' : 'invalid',
+                        'scanned_at' => $this->parseTs($s->date_crea ?? null) ?? $now,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+                if ($rows) {
+                    DB::table('checkins')->insert($rows);
+                    $n += count($rows);
+                }
+            });
         $this->line('  checkins: ' . $n);
     }
 
@@ -423,10 +449,17 @@ class LegacyImport extends Command
     private function resolveVenue(?string $name, ?int $organizerId): ?int
     {
         if (!$name) return null;
-        if ($this->dry) return null;
+
+        // Le legacy n'a qu'un nom de lieu (pas de ville/adresse séparées).
         $venue = Venue::firstOrCreate(
             ['name' => $name],
-            ['organizer_id' => $organizerId, 'status' => 'active', 'country' => 'Gabon']
+            [
+                'organizer_id' => $organizerId,
+                'city' => 'Libreville', // défaut Gabon, éditable ensuite
+                'address' => $name,
+                'country' => 'Gabon',
+                'status' => 'active',
+            ]
         );
         return $venue->id;
     }
@@ -457,9 +490,9 @@ class LegacyImport extends Command
 
     private function syntheticEmail(?string $tel, string $prefix, $id): string
     {
-        $tel = preg_replace('/\D/', '', (string) $tel);
-        $local = $tel !== '' ? $tel : ($prefix . $id);
-        return "{$prefix}-{$local}@legacy.myticket-o.net";
+        // Basé sur l'id legacy (unique par table) pour garantir l'unicité de
+        // l'email même quand plusieurs comptes partagent le même téléphone.
+        return "{$prefix}-{$id}@legacy.myticket-o.net";
     }
 
     private function clean($v): ?string
@@ -478,4 +511,11 @@ class LegacyImport extends Command
         }
         return $slug;
     }
+}
+
+/**
+ * Exception marqueur pour annuler la transaction en mode dry-run.
+ */
+class DryRunRollback extends \RuntimeException
+{
 }
