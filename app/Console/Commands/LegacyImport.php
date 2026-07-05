@@ -417,8 +417,9 @@ class LegacyImport extends Command
 
         $adminTypeId = DB::table('user_types')->where('name', 'admin')->value('id');
 
-        // Ordre FK-safe (checks désactivés par sécurité).
-        $truncate = [
+        // On utilise DELETE (et non TRUNCATE) : TRUNCATE provoque un COMMIT
+        // implicite qui casserait la transaction de l'import.
+        $tables = [
             'notifications', 'checkins', 'tickets', 'payments', 'order_items', 'orders',
             'ticket_prices', 'ticket_types', 'event_schedules', 'event_recurrence_rules',
             'events', 'organizer_balances', 'payouts', 'organizer_user', 'venues', 'organizers',
@@ -426,9 +427,9 @@ class LegacyImport extends Command
 
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
         try {
-            foreach ($truncate as $table) {
+            foreach ($tables as $table) {
                 if (Schema::hasTable($table)) {
-                    DB::table($table)->truncate();
+                    DB::table($table)->delete();
                 }
             }
             // Utilisateurs : supprimer clients + organisateurs, garder les admins.

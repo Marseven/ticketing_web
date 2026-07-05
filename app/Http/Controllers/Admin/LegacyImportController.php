@@ -54,9 +54,11 @@ class LegacyImportController extends Controller
             $legacy['error'] = $e->getMessage();
         }
 
+        $import = \Illuminate\Support\Facades\Cache::get(\App\Jobs\RunLegacyImport::CACHE_KEY);
+
         return response()->json([
             'success' => true,
-            'data' => ['current' => $current, 'imported' => $imported, 'legacy' => $legacy],
+            'data' => ['current' => $current, 'imported' => $imported, 'legacy' => $legacy, 'import' => $import],
         ]);
     }
 
@@ -201,16 +203,58 @@ class LegacyImportController extends Controller
     }
 
     /**
-     * Aperçu (dry-run) : exécute l'import en simulation et renvoie le journal.
+     * Aperçu : COMPTE ce qui serait importé, sans rien écrire (instantané).
+     * On ne simule plus l'insert/rollback (trop lent sur gros volumes).
      */
     public function preview(Request $request): JsonResponse
     {
-        $params = ['--dry-run' => true];
-        if ($request->boolean('all')) {
-            $params['--all'] = true;
+        try {
+            $eventIds = $this->activeLegacyEventIds($request->boolean('all'));
+
+            if (empty($eventIds)) {
+                return response()->json(['success' => true, 'data' => ['projected' => [], 'message' => 'Aucun événement dans le périmètre.']]);
+            }
+
+            $lc = fn () => DB::connection('legacy');
+            $ownerIds = $lc()->table('leweb_event')->whereIn('id', $eventIds)->pluck('owner')->unique()->filter();
+
+            $projected = [
+                'events' => count($eventIds),
+                'organizers' => $ownerIds->count(),
+                'clients' => $lc()->table('leweb_users')->count(),
+                'schedules' => $lc()->table('leweb_date')->whereIn('id_event', $eventIds)->where('sup', 0)->count(),
+                'ticket_types' => $lc()->table('leweb_cat')->whereIn('id_event', $eventIds)->where('sup', 0)->count(),
+                'orders' => $lc()->table('leweb_pay')->whereIn('id_event', $eventIds)->where('statut', 'PAID')->count(),
+                'tickets' => $lc()->table('leweb_ticket')->whereIn('id_event', $eventIds)->count(),
+            ];
+
+            return response()->json(['success' => true, 'data' => ['projected' => $projected]]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * IDs des événements legacy dans le périmètre (mêmes règles que la commande).
+     */
+    private function activeLegacyEventIds(bool $all): array
+    {
+        $events = DB::connection('legacy')->table('leweb_event')->where('sup', 0)->get();
+        if ($all) {
+            return $events->pluck('id')->all();
         }
 
-        return $this->runArtisan($params, false);
+        $dates = DB::connection('legacy')->table('leweb_date')->where('sup', 0)->get()->groupBy('id_event');
+        $ids = [];
+        foreach ($events as $ev) {
+            foreach (($dates->get($ev->id) ?? collect()) as $d) {
+                if ($d->date_format && strtotime($d->date_format) > time()) {
+                    $ids[] = $ev->id;
+                    break;
+                }
+            }
+        }
+        return $ids;
     }
 
     /**
@@ -245,41 +289,27 @@ class LegacyImportController extends Controller
             ], 400);
         }
 
-        $params = [];
-        if ($request->boolean('fresh')) {
-            $params['--fresh'] = true;
-        }
-        if ($request->boolean('all')) {
-            $params['--all'] = true;
+        // Ne pas relancer si un import est déjà en cours.
+        $existing = \Illuminate\Support\Facades\Cache::get(\App\Jobs\RunLegacyImport::CACHE_KEY);
+        if (($existing['state'] ?? null) === 'running' || ($existing['state'] ?? null) === 'queued') {
+            return response()->json(['success' => false, 'message' => 'Un import est déjà en cours.'], 409);
         }
 
-        return $this->runArtisan($params, true);
-    }
+        // Lancer en ARRIÈRE-PLAN (queue database) : la requête web répond tout
+        // de suite, l'import tourne dans le worker (traité par le cron), sans
+        // timeout. La page suit la progression via /status.
+        \Illuminate\Support\Facades\Cache::put(\App\Jobs\RunLegacyImport::CACHE_KEY, [
+            'state' => 'queued',
+            'queued_at' => now()->toDateTimeString(),
+        ], 3600);
 
-    private function runArtisan(array $params, bool $withNewCounts): JsonResponse
-    {
-        @set_time_limit(0);
-        @ini_set('memory_limit', '512M');
+        \App\Jobs\RunLegacyImport::dispatch($request->boolean('fresh'), $request->boolean('all'))
+            ->onConnection('database');
 
-        try {
-            Artisan::call('legacy:import', $params);
-            $output = Artisan::output();
-        } catch (\Throwable $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Échec de l\'import : ' . $e->getMessage(),
-            ], 500);
-        }
-
-        $data = ['output' => $output];
-        if ($withNewCounts) {
-            $counts = [];
-            foreach ($this->countedTables as $t) {
-                $counts[$t] = DB::table($t)->count();
-            }
-            $data['counts'] = $counts;
-        }
-
-        return response()->json(['success' => true, 'data' => $data]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Import lancé en arrière-plan.',
+            'data' => ['state' => 'queued'],
+        ]);
     }
 }

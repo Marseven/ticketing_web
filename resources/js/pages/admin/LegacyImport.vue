@@ -90,6 +90,15 @@
       </button>
     </div>
 
+    <!-- État de l'import en arrière-plan -->
+    <div v-if="importState && ['queued','running'].includes(importState.state)"
+         class="mb-4 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-primea-blue"></div>
+      <span class="text-sm text-primea-blue font-medium">
+        {{ importState.state === 'queued' ? 'Import en file d\'attente (démarrage dans la minute)…' : 'Import en cours…' }}
+      </span>
+    </div>
+
     <!-- Journal -->
     <div v-if="output" class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs font-mono overflow-x-auto whitespace-pre-wrap">{{ output }}</div>
   </div>
@@ -108,6 +117,7 @@ const labels = {
 const current = ref({})
 const imported = ref({ events: 0, tickets: 0, orders: 0 })
 const legacy = reactive({ connected: false, loaded: false })
+const importState = ref(null)
 const opts = reactive({ all: false, fresh: true })
 const busy = ref(null)
 const output = ref('')
@@ -167,6 +177,7 @@ const loadStatus = async () => {
       current.value = data.data.current
       imported.value = data.data.imported
       Object.assign(legacy, data.data.legacy)
+      importState.value = data.data.import || null
     }
   } catch (e) { console.error(e) }
 }
@@ -179,7 +190,15 @@ const preview = async () => {
       method: 'POST', headers: authHeaders(), body: JSON.stringify({ all: opts.all }),
     })
     const data = await res.json()
-    output.value = data.data?.output || data.message || 'Aucune sortie.'
+    if (data.success && data.data.projected) {
+      const p = data.data.projected
+      const rows = Object.keys(p).length
+        ? Object.entries(p).map(([k, v]) => `  ${labels[k] || k} : ${v}`).join('\n')
+        : (data.data.message || 'Aucun événement dans le périmètre.')
+      output.value = 'Seront importés (aperçu, aucune écriture) :\n' + rows
+    } else {
+      output.value = data.message || 'Aucune sortie.'
+    }
   } catch (e) {
     output.value = 'Erreur : ' + e.message
   } finally {
@@ -213,19 +232,45 @@ const confirmRun = async () => {
     })
     const data = await res.json()
     if (data.success) {
-      output.value = data.data.output
-      Swal.fire({ icon: 'success', title: 'Import terminé', confirmButtonColor: '#004B5E' })
-      loadStatus()
+      output.value = 'Import lancé en arrière-plan. Traitement automatique dans la minute qui suit…'
+      pollImport()
     } else {
-      output.value = data.message || 'Échec.'
       Swal.fire({ icon: 'error', title: 'Erreur', text: data.message, confirmButtonColor: '#004B5E' })
+      busy.value = null
     }
   } catch (e) {
     output.value = 'Erreur : ' + e.message
-  } finally {
     busy.value = null
   }
 }
 
-onMounted(loadStatus)
+let pollTimer = null
+const pollImport = () => {
+  if (pollTimer) clearInterval(pollTimer)
+  pollTimer = setInterval(async () => {
+    await loadStatus()
+    const imp = importState.value
+    if (!imp) return
+    if (imp.state === 'running') {
+      output.value = 'Import en cours…'
+    } else if (imp.state === 'done') {
+      clearInterval(pollTimer); pollTimer = null; busy.value = null
+      output.value = imp.output || 'Import terminé.'
+      Swal.fire({ icon: 'success', title: 'Import terminé', confirmButtonColor: '#004B5E' })
+    } else if (imp.state === 'error') {
+      clearInterval(pollTimer); pollTimer = null; busy.value = null
+      output.value = 'Erreur : ' + (imp.message || '')
+      Swal.fire({ icon: 'error', title: 'Erreur d\'import', text: imp.message, confirmButtonColor: '#004B5E' })
+    }
+  }, 4000)
+}
+
+onMounted(async () => {
+  await loadStatus()
+  // Reprendre le suivi si un import est déjà en cours.
+  if (importState.value && ['queued', 'running'].includes(importState.value.state)) {
+    busy.value = 'run'
+    pollImport()
+  }
+})
 </script>

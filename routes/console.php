@@ -25,3 +25,9 @@ Schedule::command('payout:check-status')
 Schedule::command('payout:settle-ended-events')
     ->hourly()
     ->withoutOverlapping();
+
+// Traiter les jobs de la queue "database" (ex : import legacy en arrière-plan)
+// sans worker permanent : à chaque minute, on vide la queue puis on s'arrête.
+Schedule::command('queue:work database --stop-when-empty --max-time=1500 --tries=1')
+    ->everyMinute()
+    ->withoutOverlapping();
