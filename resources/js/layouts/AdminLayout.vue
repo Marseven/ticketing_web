@@ -1,17 +1,17 @@
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Sidebar -->
-    <div class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0" 
+    <div class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 flex flex-col"
          :class="{ '-translate-x-full': !sidebarOpen, 'translate-x-0': sidebarOpen }"
          @click.stop>
-      
-      <!-- Logo -->
-      <div class="flex items-center justify-center h-16 px-4" style="background-color: #004B5E;">
+
+      <!-- Logo (fixe) -->
+      <div class="flex items-center justify-center h-16 px-4 flex-shrink-0" style="background-color: #004B5E;">
         <img src="/images/logo_white.png?v=2" alt="MyTicketO" class="h-10" />
       </div>
 
-      <!-- Navigation Menu -->
-      <nav class="mt-8 px-4">
+      <!-- Navigation Menu (scrollable) -->
+      <nav class="flex-1 overflow-y-auto mt-6 px-4 pb-6">
         <div class="space-y-2">
           <!-- Dashboard -->
           <router-link to="/admin/dashboard"
@@ -309,7 +309,7 @@
     </div>
 
     <!-- Main Content -->
-    <div class="lg:ml-64">
+    <div class="lg:ml-64 min-h-screen flex flex-col">
       <!-- Header -->
       <header class="bg-white shadow-sm border-b border-gray-200">
         <div class="px-6 py-4">
