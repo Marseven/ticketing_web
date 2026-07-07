@@ -32,10 +32,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \App\Http\Middleware\PermissionMiddleware::class,
         ]);
 
-        // Utiliser notre middleware CSRF personnalisé pour exempter certaines routes
+        // Les routes API s'authentifient par token Bearer (Sanctum), pas par
+        // cookie de session : elles n'ont pas besoin de protection CSRF. On les
+        // exempte toutes (sinon les requêtes du SPA en fetch sans X-XSRF-TOKEN
+        // échouent en "CSRF token mismatch" sur les domaines stateful).
         $middleware->validateCsrfTokens(except: [
-            'api/register',
-            'api/login',
+            'api/*',
         ]);
 
         $middleware->api(prepend: [
