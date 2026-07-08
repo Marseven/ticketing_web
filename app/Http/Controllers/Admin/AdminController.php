@@ -728,7 +728,13 @@ class AdminController extends Controller
     public function events(Request $request): JsonResponse
     {
         try {
-            $query = Event::with(['organizer', 'category', 'venue', 'ticketTypes']);
+            // schedules chargé (ordonné par date) : la liste affiche la date de
+            // chaque événement via event.schedules[0].starts_at — sans ça, tout
+            // s'affiche « Non programmé ».
+            $query = Event::with([
+                'organizer', 'category', 'venue', 'ticketTypes',
+                'schedules' => fn ($q) => $q->orderBy('starts_at'),
+            ]);
 
             // Filtres
             if ($request->filled('search')) {
