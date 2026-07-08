@@ -30,12 +30,31 @@ class RunLegacyImport implements ShouldQueue
     {
     }
 
+    /**
+     * L'état d'import est stocké dans le cache FICHIER (pas le cache base de
+     * données) : la commande écrit sa progression PENDANT une grosse
+     * transaction DB — un état en base ne serait visible qu'après le commit.
+     * Le store fichier est hors transaction, donc lisible en direct par le
+     * polling web.
+     */
+    public static function setStatus(array $data, int $ttl = 3600): void
+    {
+        Cache::store('file')->put(self::CACHE_KEY, $data, $ttl);
+    }
+
+    public static function getStatus(): ?array
+    {
+        return Cache::store('file')->get(self::CACHE_KEY);
+    }
+
     public function handle(): void
     {
-        Cache::put(self::CACHE_KEY, [
+        self::setStatus([
             'state' => 'running',
+            'step' => 'Démarrage…',
             'started_at' => now()->toDateTimeString(),
-        ], 3600);
+            'updated_at' => now()->toDateTimeString(),
+        ]);
 
         try {
             $params = [];
@@ -48,26 +67,29 @@ class RunLegacyImport implements ShouldQueue
 
             Artisan::call('legacy:import', $params);
 
-            Cache::put(self::CACHE_KEY, [
+            // La commande a déjà publié un état 'done' détaillé (compteurs) ;
+            // on le conserve en y ajoutant le journal texte.
+            $status = self::getStatus() ?? [];
+            self::setStatus(array_merge($status, [
                 'state' => 'done',
                 'output' => Artisan::output(),
                 'finished_at' => now()->toDateTimeString(),
-            ], 3600);
+            ]));
         } catch (\Throwable $e) {
-            Cache::put(self::CACHE_KEY, [
+            self::setStatus([
                 'state' => 'error',
                 'message' => $e->getMessage(),
                 'finished_at' => now()->toDateTimeString(),
-            ], 3600);
+            ]);
         }
     }
 
     public function failed(\Throwable $e): void
     {
-        Cache::put(self::CACHE_KEY, [
+        self::setStatus([
             'state' => 'error',
             'message' => $e->getMessage(),
             'finished_at' => now()->toDateTimeString(),
-        ], 3600);
+        ]);
     }
 }

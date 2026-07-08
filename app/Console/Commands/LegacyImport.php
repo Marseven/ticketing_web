@@ -41,6 +41,38 @@ class LegacyImport extends Command
         'event' => [], 'date' => [], 'cat' => [],
     ];
 
+    /** Suivi de progression (publié dans le cache fichier, lu par l'UI admin). */
+    private ?Carbon $startedAt = null;
+    private array $counts = [
+        'clients' => 0, 'organisateurs' => 0, 'events' => 0, 'schedules' => 0,
+        'ticket_types' => 0, 'orders' => 0, 'tickets' => 0, 'checkins' => 0,
+    ];
+    private array $totals = [];
+
+    private const STEP_TOTAL = 9;
+
+    /**
+     * Publier l'état de progression (store fichier : reste lisible pendant la
+     * transaction DB de l'import). Ignoré en dry-run.
+     */
+    private function report(string $label, int $stepIndex, ?int $done = null, ?int $total = null): void
+    {
+        if ($this->dry) {
+            return;
+        }
+        \App\Jobs\RunLegacyImport::setStatus([
+            'state' => 'running',
+            'step' => $label,
+            'step_index' => $stepIndex,
+            'step_total' => self::STEP_TOTAL,
+            'item_done' => $done,
+            'item_total' => $total,
+            'counts' => $this->counts,
+            'started_at' => optional($this->startedAt)->toDateTimeString(),
+            'updated_at' => now()->toDateTimeString(),
+        ]);
+    }
+
     public function handle(): int
     {
         $this->dry = (bool) $this->option('dry-run');
@@ -60,12 +92,29 @@ class LegacyImport extends Command
         $this->line('Événements à importer : ' . count($eventIds));
         if (empty($eventIds)) {
             $this->warn('Aucun événement dans le périmètre.');
+            \App\Jobs\RunLegacyImport::setStatus([
+                'state' => 'done', 'step' => 'Aucun événement dans le périmètre.',
+                'counts' => $this->counts, 'finished_at' => now()->toDateTimeString(),
+            ]);
             return self::SUCCESS;
         }
+
+        // Totaux (dénominateurs des barres de progression) — requêtes COUNT rapides.
+        $this->startedAt = now();
+        $lc = fn () => DB::connection('legacy');
+        $this->totals = [
+            'clients' => (int) $lc()->table('leweb_users')->count(),
+            'organisateurs' => (int) $lc()->table('leweb_event')->whereIn('id', $eventIds)->distinct()->count('owner'),
+            'events' => count($eventIds),
+            'orders' => (int) $lc()->table('leweb_pay')->whereIn('id_event', $eventIds)->where('statut', 'PAID')->count(),
+            'tickets' => (int) $lc()->table('leweb_ticket')->whereIn('id_event', $eventIds)->count(),
+        ];
+        $this->report('Préparation…', 0);
 
         try {
             DB::transaction(function () use ($eventIds) {
                 if ($this->option('fresh') && !$this->dry) {
+                    $this->report('Purge des données existantes…', 1);
                     $this->purgeExisting();
                 }
                 $this->importUsers();          // clients
@@ -88,6 +137,13 @@ class LegacyImport extends Command
             return self::SUCCESS;
         }
 
+        \App\Jobs\RunLegacyImport::setStatus([
+            'state' => 'done',
+            'step' => 'Import terminé.',
+            'counts' => $this->counts,
+            'started_at' => optional($this->startedAt)->toDateTimeString(),
+            'finished_at' => now()->toDateTimeString(),
+        ]);
         $this->info('Import terminé.');
         return self::SUCCESS;
     }
@@ -122,6 +178,9 @@ class LegacyImport extends Command
         $rows = DB::connection('legacy')->table('leweb_users')->get();
         $clientType = DB::table('user_types')->where('name', 'client')->value('id') ?? 2;
 
+        $total = count($rows);
+        $this->report('Clients', 2, 0, $total);
+        $i = 0;
         foreach ($rows as $u) {
             $user = User::firstOrNew(['legacy_id' => $u->id]);
             $user->name = $this->clean($u->nom) ?: ('Client ' . $u->id);
@@ -139,7 +198,13 @@ class LegacyImport extends Command
                 $user->save();
                 $this->map['user'][$u->id] = $user->id;
             }
+            if (++$i % 100 === 0) {
+                $this->counts['clients'] = $i;
+                $this->report('Clients', 2, $i, $total);
+            }
         }
+        $this->counts['clients'] = $total;
+        $this->report('Clients', 2, $total, $total);
         $this->line('  users clients: ' . count($rows));
     }
 
@@ -152,6 +217,9 @@ class LegacyImport extends Command
         $owners = DB::connection('legacy')->table('leweb_owner')->whereIn('id', $ownerIds)->get();
         $orgType = DB::table('user_types')->where('name', 'organizer')->value('id') ?? 3;
 
+        $total = count($owners);
+        $this->report('Organisateurs', 3, 0, $total);
+        $i = 0;
         foreach ($owners as $o) {
             // 1) compte user de login pour l'organisateur.
             // Idempotence par email synthétique (unique) : legacy_id est un
@@ -190,7 +258,13 @@ class LegacyImport extends Command
                 $this->map['owner_org'][$o->id] = $org->id;
                 $this->map['owner_user'][$o->id] = $user->id;
             }
+            if (++$i % 20 === 0) {
+                $this->counts['organisateurs'] = $i;
+                $this->report('Organisateurs', 3, $i, $total);
+            }
         }
+        $this->counts['organisateurs'] = $total;
+        $this->report('Organisateurs', 3, $total, $total);
         $this->line('  organisateurs: ' . count($owners));
     }
 
@@ -198,6 +272,9 @@ class LegacyImport extends Command
     {
         $events = DB::connection('legacy')->table('leweb_event')->whereIn('id', $eventIds)->get();
 
+        $total = count($events);
+        $this->report('Événements', 4, 0, $total);
+        $i = 0;
         foreach ($events as $ev) {
             $organizerId = $this->map['owner_org'][$ev->owner] ?? null;
             if (!$organizerId) {
@@ -231,7 +308,13 @@ class LegacyImport extends Command
                 $event->save();
                 $this->map['event'][$ev->id] = $event->id;
             }
+            $this->counts['events'] = ++$i;
+            if ($i % 10 === 0) {
+                $this->report('Événements', 4, $i, $total);
+            }
         }
+        $this->counts['events'] = $total;
+        $this->report('Événements', 4, $total, $total);
         $this->line('  events: ' . count($events));
     }
 
@@ -240,6 +323,7 @@ class LegacyImport extends Command
         $dates = DB::connection('legacy')->table('leweb_date')
             ->whereIn('id_event', $eventIds)->where('sup', 0)->get();
 
+        $this->report('Dates', 5, 0, count($dates));
         $n = 0;
         foreach ($dates as $d) {
             $eventId = $this->map['event'][$d->id_event] ?? null;
@@ -256,6 +340,8 @@ class LegacyImport extends Command
             if (true) { $sch->save(); $this->map['date'][$d->id] = $sch->id; }
             $n++;
         }
+        $this->counts['schedules'] = $n;
+        $this->report('Dates', 5, $n, count($dates));
         $this->line('  schedules: ' . $n);
     }
 
@@ -264,6 +350,7 @@ class LegacyImport extends Command
         $cats = DB::connection('legacy')->table('leweb_cat')
             ->whereIn('id_event', $eventIds)->where('sup', 0)->get();
 
+        $this->report('Types de billets', 6, 0, count($cats));
         $n = 0;
         foreach ($cats as $c) {
             $eventId = $this->map['event'][$c->id_event] ?? null;
@@ -280,6 +367,8 @@ class LegacyImport extends Command
             if (true) { $tt->save(); $this->map['cat'][$c->id] = $tt->id; }
             $n++;
         }
+        $this->counts['ticket_types'] = $n;
+        $this->report('Types de billets', 6, $n, count($cats));
         $this->line('  ticket_types: ' . $n);
     }
 
@@ -290,6 +379,8 @@ class LegacyImport extends Command
             ->where('statut', 'PAID')
             ->get();
 
+        $total = count($pays);
+        $this->report('Commandes + paiements', 7, 0, $total);
         $n = 0;
         foreach ($pays as $p) {
             $eventId = $this->map['event'][$p->id_event] ?? null;
@@ -330,7 +421,13 @@ class LegacyImport extends Command
                 $pay->save();
             }
             $n++;
+            if ($n % 200 === 0) {
+                $this->counts['orders'] = $n;
+                $this->report('Commandes + paiements', 7, $n, $total);
+            }
         }
+        $this->counts['orders'] = $n;
+        $this->report('Commandes + paiements', 7, $n, $total);
         $this->line('  orders + payments: ' . $n);
     }
 
@@ -341,10 +438,12 @@ class LegacyImport extends Command
         // flux de remplacement.
         $now = now();
         $n = 0;
+        $total = $this->totals['tickets'] ?? 0;
+        $this->report('Billets', 8, 0, $total);
         DB::connection('legacy')->table('leweb_ticket')
             ->whereIn('id_event', $eventIds)
             ->orderBy('id')
-            ->chunk(1000, function ($chunk) use (&$n, $now) {
+            ->chunk(1000, function ($chunk) use (&$n, $now, $total) {
                 $rows = [];
                 foreach ($chunk as $t) {
                     $eventId = $this->map['event'][$t->id_event] ?? null;
@@ -368,7 +467,11 @@ class LegacyImport extends Command
                     Ticket::insert($rows);
                     $n += count($rows);
                 }
+                $this->counts['tickets'] = $n;
+                $this->report('Billets', 8, $n, $total);
             });
+        $this->counts['tickets'] = $n;
+        $this->report('Billets', 8, $n, $total);
         $this->line('  tickets (codes préservés): ' . $n);
     }
 
@@ -380,6 +483,7 @@ class LegacyImport extends Command
 
         $now = now();
         $n = 0;
+        $this->report('Scans', 9, 0, null);
         DB::connection('legacy')->table('leweb_scan')
             ->whereIn('id_event', $eventIds)
             ->orderBy('id')
@@ -402,7 +506,11 @@ class LegacyImport extends Command
                     DB::table('checkins')->insert($rows);
                     $n += count($rows);
                 }
+                $this->counts['checkins'] = $n;
+                $this->report('Scans', 9, $n, null);
             });
+        $this->counts['checkins'] = $n;
+        $this->report('Scans', 9, $n, null);
         $this->line('  checkins: ' . $n);
     }
 

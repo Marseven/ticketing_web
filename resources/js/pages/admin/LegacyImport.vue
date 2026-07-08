@@ -92,11 +92,67 @@
 
     <!-- État de l'import en arrière-plan -->
     <div v-if="importState && ['queued','running'].includes(importState.state)"
-         class="mb-4 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-lg p-4">
-      <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-primea-blue"></div>
-      <span class="text-sm text-primea-blue font-medium">
-        {{ importState.state === 'queued' ? 'Import en file d\'attente (démarrage dans la minute)…' : 'Import en cours…' }}
-      </span>
+         class="mb-4 bg-white border border-primea-blue/20 rounded-lg shadow-sm p-5">
+      <div class="flex items-center gap-3 mb-1">
+        <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-primea-blue"></div>
+        <span class="text-sm text-primea-blue font-semibold">
+          {{ importState.state === 'queued' ? 'Import en file d\'attente…' : (importState.step || 'Import en cours…') }}
+        </span>
+        <span v-if="importState.state === 'running' && importState.step_index"
+              class="text-xs text-gray-500">Étape {{ importState.step_index }}/{{ importState.step_total }}</span>
+        <span class="ml-auto text-xs text-gray-400">{{ elapsedLabel }}</span>
+      </div>
+
+      <!-- Barre de progression de la phase courante -->
+      <div v-if="importState.state === 'running'" class="mt-3">
+        <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+          <div class="h-full bg-primea-blue transition-all duration-500" :style="{ width: barWidth }"></div>
+        </div>
+        <p class="text-xs text-gray-500 mt-1">
+          <template v-if="importState.item_total">{{ importState.item_done ?? 0 }} / {{ importState.item_total }}</template>
+          <template v-else-if="importState.item_done">{{ importState.item_done }} traités</template>
+        </p>
+      </div>
+
+      <!-- Compteurs importés en direct -->
+      <div v-if="importState.counts" class="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-1 mt-4 text-xs">
+        <div v-for="(v, k) in importState.counts" :key="k" class="flex justify-between border-b border-gray-50 py-0.5">
+          <span class="text-gray-500">{{ countLabels[k] || k }}</span>
+          <span class="font-semibold text-gray-800">{{ v }}</span>
+        </div>
+      </div>
+
+      <!-- Alerte : job en file mais worker non démarré (cron) -->
+      <div v-if="importState.state === 'queued' && queuedStuck"
+           class="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800">
+        ⚠ Le job attend depuis plus d'une minute sans démarrer. Le traitement dépend du <strong>cron</strong> :
+        vérifiez que la tâche planifiée tourne <strong>chaque minute</strong>
+        (<code>* * * * * … artisan schedule:run</code>) dans hPanel → Cron Jobs.
+      </div>
+      <p v-else-if="importState.state === 'queued'" class="mt-3 text-xs text-gray-500">
+        Le worker démarre le traitement dans la minute qui suit (cron). Cette page se met à jour toute seule.
+      </p>
+    </div>
+
+    <!-- Dernier import terminé -->
+    <div v-else-if="importState && importState.state === 'done'"
+         class="mb-4 bg-green-50 border border-green-200 rounded-lg p-5">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-green-700 font-semibold text-sm">✓ Import terminé</span>
+        <span v-if="importState.finished_at" class="text-xs text-gray-500">le {{ importState.finished_at }}</span>
+      </div>
+      <div v-if="importState.counts" class="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-1 text-xs">
+        <div v-for="(v, k) in importState.counts" :key="k" class="flex justify-between border-b border-green-100/60 py-0.5">
+          <span class="text-gray-500">{{ countLabels[k] || k }}</span>
+          <span class="font-semibold text-gray-800">{{ v }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Erreur -->
+    <div v-else-if="importState && importState.state === 'error'"
+         class="mb-4 bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-800">
+      ✗ Échec de l'import : {{ importState.message || 'erreur inconnue' }}
     </div>
 
     <!-- Journal -->
@@ -105,13 +161,19 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import Swal from 'sweetalert2'
 
 const labels = {
   events: 'Événements', event_schedules: 'Dates', ticket_types: 'Types de billets',
   orders: 'Commandes', payments: 'Paiements', tickets: 'Billets', checkins: 'Scans',
   venues: 'Lieux', organizers: 'Organisateurs', users: 'Utilisateurs',
+}
+
+const countLabels = {
+  clients: 'Clients', organisateurs: 'Organisateurs', events: 'Événements',
+  schedules: 'Dates', ticket_types: 'Types billets', orders: 'Commandes',
+  tickets: 'Billets', checkins: 'Scans',
 }
 
 const current = ref({})
@@ -123,6 +185,30 @@ const busy = ref(null)
 const output = ref('')
 const file = ref(null)
 const fileInput = ref(null)
+const queuedTicks = ref(0)   // nb de sondages consécutifs à l'état "queued"
+
+// Le job traîne en file (worker/cron pas démarré) après ~75 s.
+const queuedStuck = computed(() => queuedTicks.value * 4 > 75)
+
+const barWidth = computed(() => {
+  const s = importState.value
+  if (!s || s.state !== 'running') return '0%'
+  if (s.item_total > 0) {
+    const pct = Math.min(100, Math.round((s.item_done ?? 0) / s.item_total * 100))
+    return pct + '%'
+  }
+  // Pas de dénominateur (ex : scans) : barre indéterminée basée sur l'étape.
+  return Math.round((s.step_index || 0) / (s.step_total || 9) * 100) + '%'
+})
+
+const elapsedLabel = computed(() => {
+  const s = importState.value
+  if (!s?.started_at) return ''
+  const start = new Date(s.started_at.replace(' ', 'T')).getTime()
+  const end = s.finished_at ? new Date(s.finished_at.replace(' ', 'T')).getTime() : Date.now()
+  const sec = Math.max(0, Math.round((end - start) / 1000))
+  return sec < 60 ? `${sec} s` : `${Math.floor(sec / 60)} min ${sec % 60} s`
+})
 
 const onFile = (e) => { file.value = e.target.files[0] || null }
 
@@ -245,20 +331,24 @@ const confirmRun = async () => {
 }
 
 let pollTimer = null
+const stopPoll = () => { if (pollTimer) { clearInterval(pollTimer); pollTimer = null } }
+
 const pollImport = () => {
-  if (pollTimer) clearInterval(pollTimer)
+  stopPoll()
+  queuedTicks.value = 0
   pollTimer = setInterval(async () => {
     await loadStatus()
     const imp = importState.value
     if (!imp) return
-    if (imp.state === 'running') {
-      output.value = 'Import en cours…'
-    } else if (imp.state === 'done') {
-      clearInterval(pollTimer); pollTimer = null; busy.value = null
+
+    queuedTicks.value = imp.state === 'queued' ? queuedTicks.value + 1 : 0
+
+    if (imp.state === 'done') {
+      stopPoll(); busy.value = null
       output.value = imp.output || 'Import terminé.'
       Swal.fire({ icon: 'success', title: 'Import terminé', confirmButtonColor: '#004B5E' })
     } else if (imp.state === 'error') {
-      clearInterval(pollTimer); pollTimer = null; busy.value = null
+      stopPoll(); busy.value = null
       output.value = 'Erreur : ' + (imp.message || '')
       Swal.fire({ icon: 'error', title: 'Erreur d\'import', text: imp.message, confirmButtonColor: '#004B5E' })
     }
@@ -273,4 +363,6 @@ onMounted(async () => {
     pollImport()
   }
 })
+
+onUnmounted(stopPoll)
 </script>

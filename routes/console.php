@@ -28,6 +28,9 @@ Schedule::command('payout:settle-ended-events')
 
 // Traiter les jobs de la queue "database" (ex : import legacy en arrière-plan)
 // sans worker permanent : à chaque minute, on vide la queue puis on s'arrête.
+// withoutOverlapping(30) : verrou de 30 min (> --max-time=25 min) au lieu du
+// défaut 24 h — si un worker est tué (hébergement mutualisé), le verrou expire
+// vite et l'import suivant peut démarrer, au lieu de rester bloqué une journée.
 Schedule::command('queue:work database --stop-when-empty --max-time=1500 --tries=1')
     ->everyMinute()
-    ->withoutOverlapping();
+    ->withoutOverlapping(30);

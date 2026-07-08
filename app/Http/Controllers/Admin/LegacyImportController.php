@@ -54,7 +54,7 @@ class LegacyImportController extends Controller
             $legacy['error'] = $e->getMessage();
         }
 
-        $import = \Illuminate\Support\Facades\Cache::get(\App\Jobs\RunLegacyImport::CACHE_KEY);
+        $import = \App\Jobs\RunLegacyImport::getStatus();
 
         return response()->json([
             'success' => true,
@@ -290,7 +290,7 @@ class LegacyImportController extends Controller
         }
 
         // Ne pas relancer si un import est déjà en cours.
-        $existing = \Illuminate\Support\Facades\Cache::get(\App\Jobs\RunLegacyImport::CACHE_KEY);
+        $existing = \App\Jobs\RunLegacyImport::getStatus();
         if (($existing['state'] ?? null) === 'running' || ($existing['state'] ?? null) === 'queued') {
             return response()->json(['success' => false, 'message' => 'Un import est déjà en cours.'], 409);
         }
@@ -298,10 +298,10 @@ class LegacyImportController extends Controller
         // Lancer en ARRIÈRE-PLAN (queue database) : la requête web répond tout
         // de suite, l'import tourne dans le worker (traité par le cron), sans
         // timeout. La page suit la progression via /status.
-        \Illuminate\Support\Facades\Cache::put(\App\Jobs\RunLegacyImport::CACHE_KEY, [
+        \App\Jobs\RunLegacyImport::setStatus([
             'state' => 'queued',
             'queued_at' => now()->toDateTimeString(),
-        ], 3600);
+        ]);
 
         \App\Jobs\RunLegacyImport::dispatch($request->boolean('fresh'), $request->boolean('all'))
             ->onConnection('database');
