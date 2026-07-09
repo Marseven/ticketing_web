@@ -285,6 +285,7 @@ Route::prefix('v1')->group(function () {
             Route::post('upload', [App\Http\Controllers\Admin\LegacyImportController::class, 'uploadDump']);
             Route::post('preview', [App\Http\Controllers\Admin\LegacyImportController::class, 'preview']);
             Route::post('run', [App\Http\Controllers\Admin\LegacyImportController::class, 'run']);
+            Route::post('images', [App\Http\Controllers\Admin\LegacyImportController::class, 'importImages']);
             Route::post('cleanup', [App\Http\Controllers\Admin\LegacyImportController::class, 'cleanup']);
         });
         

@@ -55,10 +55,27 @@ class LegacyImportController extends Controller
         }
 
         $import = \App\Jobs\RunLegacyImport::getStatus();
+        $imageImport = \App\Jobs\RunLegacyImageImport::getStatus();
+
+        // Combien d'images sont déjà présentes dans le stockage vs attendues.
+        $withImage = DB::table('events')->whereNotNull('image_file')->where('image_file', '<>', '')->count();
+        $imagesPresent = 0;
+        $dir = storage_path('app/public/images/events');
+        if (is_dir($dir)) {
+            foreach (DB::table('events')->whereNotNull('image_file')->where('image_file', '<>', '')->pluck('image_file') as $f) {
+                if (is_file($dir . '/' . basename((string) $f))) {
+                    $imagesPresent++;
+                }
+            }
+        }
 
         return response()->json([
             'success' => true,
-            'data' => ['current' => $current, 'imported' => $imported, 'legacy' => $legacy, 'import' => $import],
+            'data' => [
+                'current' => $current, 'imported' => $imported, 'legacy' => $legacy,
+                'import' => $import, 'image_import' => $imageImport,
+                'images' => ['expected' => $withImage, 'present' => $imagesPresent],
+            ],
         ]);
     }
 
@@ -309,6 +326,35 @@ class LegacyImportController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Import lancé en arrière-plan.',
+            'data' => ['state' => 'queued'],
+        ]);
+    }
+
+    /**
+     * Copier/télécharger les images des événements importés dans le stockage
+     * Primea. Async (queue) : ~100 fichiers, pas de timeout web. Télécharge
+     * depuis MyTicketO en ligne par défaut (source locale optionnelle).
+     */
+    public function importImages(Request $request): JsonResponse
+    {
+        $existing = \App\Jobs\RunLegacyImageImport::getStatus();
+        if (in_array($existing['state'] ?? null, ['running', 'queued'], true)) {
+            return response()->json(['success' => false, 'message' => 'Un import d\'images est déjà en cours.'], 409);
+        }
+
+        \App\Jobs\RunLegacyImageImport::setStatus([
+            'state' => 'queued',
+            'queued_at' => now()->toDateTimeString(),
+        ]);
+
+        \App\Jobs\RunLegacyImageImport::dispatch(
+            $request->filled('source') ? (string) $request->input('source') : null,
+            $request->boolean('force'),
+        )->onConnection('database');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Import des images lancé en arrière-plan.',
             'data' => ['state' => 'queued'],
         ]);
     }

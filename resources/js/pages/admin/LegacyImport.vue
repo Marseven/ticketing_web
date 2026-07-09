@@ -155,6 +155,58 @@
       ✗ Échec de l'import : {{ importState.message || 'erreur inconnue' }}
     </div>
 
+    <!-- Étape 3 : importer les images -->
+    <div class="bg-white rounded-lg shadow p-5 mb-6">
+      <h2 class="text-lg font-bold text-primea-blue mb-1">3. Importer les images des événements</h2>
+      <p class="text-sm text-gray-500 mb-3">
+        Récupère les affiches depuis MyTicketO en ligne et les copie dans le stockage de la plateforme.
+      </p>
+
+      <div class="flex flex-wrap items-center gap-4 mb-4 text-sm">
+        <span class="inline-flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full"
+                :class="imagesInfo.present >= imagesInfo.expected && imagesInfo.expected > 0 ? 'bg-green-500' : 'bg-gray-300'"></span>
+          <span class="text-gray-700"><strong>{{ imagesInfo.present }}</strong> / {{ imagesInfo.expected }} images présentes</span>
+        </span>
+      </div>
+
+      <button @click="runImages" :disabled="busy || imagesInfo.expected === 0"
+              class="px-4 py-2 rounded-lg bg-primea-blue text-white font-medium hover:bg-primea-yellow hover:text-primea-blue transition-colors disabled:opacity-50">
+        {{ busy === 'images' ? 'Import des images…' : 'Importer les images' }}
+      </button>
+
+      <!-- Progression images -->
+      <div v-if="imageState && ['queued','running'].includes(imageState.state)"
+           class="mt-4 border border-primea-blue/20 rounded-lg p-4">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-primea-blue"></div>
+          <span class="text-sm text-primea-blue font-medium">
+            {{ imageState.state === 'queued' ? 'En file d\'attente…' : 'Téléchargement des images…' }}
+          </span>
+          <span v-if="imageState.item_total" class="ml-auto text-xs text-gray-500">
+            {{ imageState.item_done ?? 0 }} / {{ imageState.item_total }}
+          </span>
+        </div>
+        <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+          <div class="h-full bg-primea-blue transition-all duration-500"
+               :style="{ width: imageState.item_total ? Math.round((imageState.item_done||0)/imageState.item_total*100)+'%' : '0%' }"></div>
+        </div>
+        <p v-if="imageState.counts" class="text-xs text-gray-500 mt-2">
+          {{ imageState.counts.copied || 0 }} copiées · {{ imageState.counts.downloaded || 0 }} téléchargées ·
+          {{ imageState.counts.skipped || 0 }} déjà là · {{ imageState.counts.missing || 0 }} introuvables
+        </p>
+      </div>
+
+      <div v-else-if="imageState && imageState.state === 'done' && imageState.counts"
+           class="mt-4 bg-green-50 border border-green-200 rounded-lg p-3 text-xs text-gray-700">
+        ✓ {{ imageState.counts.copied || 0 }} copiées · {{ imageState.counts.downloaded || 0 }} téléchargées ·
+        {{ imageState.counts.missing || 0 }} introuvables
+        <span v-if="imageState.missing && imageState.missing.length" class="block text-gray-400 mt-1">
+          Manquantes : {{ imageState.missing.join(', ') }}
+        </span>
+      </div>
+    </div>
+
     <!-- Journal -->
     <div v-if="output" class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs font-mono overflow-x-auto whitespace-pre-wrap">{{ output }}</div>
   </div>
@@ -180,6 +232,8 @@ const current = ref({})
 const imported = ref({ events: 0, tickets: 0, orders: 0 })
 const legacy = reactive({ connected: false, loaded: false })
 const importState = ref(null)
+const imageState = ref(null)
+const imagesInfo = ref({ expected: 0, present: 0 })
 const opts = reactive({ all: false, fresh: true })
 const busy = ref(null)
 const output = ref('')
@@ -264,6 +318,8 @@ const loadStatus = async () => {
       imported.value = data.data.imported
       Object.assign(legacy, data.data.legacy)
       importState.value = data.data.import || null
+      imageState.value = data.data.image_import || null
+      if (data.data.images) imagesInfo.value = data.data.images
     }
   } catch (e) { console.error(e) }
 }
@@ -355,6 +411,49 @@ const pollImport = () => {
   }, 4000)
 }
 
+// --- Import des images ---
+let imgTimer = null
+const stopImgPoll = () => { if (imgTimer) { clearInterval(imgTimer); imgTimer = null } }
+
+const runImages = async () => {
+  busy.value = 'images'
+  try {
+    const res = await fetch('/api/v1/admin/legacy-import/images', {
+      method: 'POST', headers: authHeaders(), body: JSON.stringify({}),
+    })
+    const data = await res.json()
+    if (data.success) {
+      pollImages()
+    } else {
+      Swal.fire({ icon: 'error', title: 'Erreur', text: data.message, confirmButtonColor: '#004B5E' })
+      busy.value = null
+    }
+  } catch (e) {
+    Swal.fire({ icon: 'error', title: 'Erreur', text: e.message, confirmButtonColor: '#004B5E' })
+    busy.value = null
+  }
+}
+
+const pollImages = () => {
+  stopImgPoll()
+  imgTimer = setInterval(async () => {
+    await loadStatus()
+    const imp = imageState.value
+    if (!imp) return
+    if (imp.state === 'done') {
+      stopImgPoll(); busy.value = null
+      const c = imp.counts || {}
+      Swal.fire({
+        icon: 'success', title: 'Images importées', confirmButtonColor: '#004B5E',
+        text: `${c.copied || 0} copiées, ${c.downloaded || 0} téléchargées, ${c.missing || 0} introuvables.`,
+      })
+    } else if (imp.state === 'error') {
+      stopImgPoll(); busy.value = null
+      Swal.fire({ icon: 'error', title: 'Erreur images', text: imp.message, confirmButtonColor: '#004B5E' })
+    }
+  }, 4000)
+}
+
 onMounted(async () => {
   await loadStatus()
   // Reprendre le suivi si un import est déjà en cours.
@@ -362,7 +461,11 @@ onMounted(async () => {
     busy.value = 'run'
     pollImport()
   }
+  if (imageState.value && ['queued', 'running'].includes(imageState.value.state)) {
+    busy.value = 'images'
+    pollImages()
+  }
 })
 
-onUnmounted(stopPoll)
+onUnmounted(() => { stopPoll(); stopImgPoll() })
 </script>
