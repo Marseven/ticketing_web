@@ -31,6 +31,7 @@ class LegacyImport extends Command
     protected $signature = 'legacy:import
         {--all : Importer aussi les événements passés (par défaut: à venir seulement)}
         {--fresh : Purger les données existantes (events, ventes, organisateurs, clients) avant import — conserve admins et données de référence}
+        {--physical-events= : IDs d\'événements legacy (séparés par des virgules) dont les billets sont physiques imprimés — ex : 156}
         {--dry-run : Simuler sans écrire}';
 
     protected $description = 'Importer les données legacy MyTicketO vers le schéma actuel';
@@ -439,11 +440,16 @@ class LegacyImport extends Command
         $now = now();
         $n = 0;
         $total = $this->totals['tickets'] ?? 0;
+        // Événements legacy dont les billets sont des QR physiques imprimés
+        // (ex : stock pré-généré de l'event 156) — taggés 'physical' au lieu de
+        // 'online' pour un reporting correct (n'affecte pas la scannabilité).
+        $physicalEvents = collect(explode(',', (string) $this->option('physical-events')))
+            ->map(fn ($id) => (int) trim($id))->filter()->all();
         $this->report('Billets', 8, 0, $total);
         DB::connection('legacy')->table('leweb_ticket')
             ->whereIn('id_event', $eventIds)
             ->orderBy('id')
-            ->chunk(1000, function ($chunk) use (&$n, $now, $total) {
+            ->chunk(1000, function ($chunk) use (&$n, $now, $total, $physicalEvents) {
                 $rows = [];
                 foreach ($chunk as $t) {
                     $eventId = $this->map['event'][$t->id_event] ?? null;
@@ -457,7 +463,7 @@ class LegacyImport extends Command
                         // CODE PRÉSERVÉ (le QR imprimé/envoyé) — non négociable.
                         'code' => $this->clean($t->ref),
                         'status' => ((int) ($t->statut ?? 0) === 1) ? 'used' : 'issued',
-                        'ticket_source' => 'online',
+                        'ticket_source' => in_array((int) $t->id_event, $physicalEvents, true) ? 'physical' : 'online',
                         'issued_at' => $this->parseTs($t->date_crea ?? null) ?? $now,
                         'created_at' => $now,
                         'updated_at' => $now,

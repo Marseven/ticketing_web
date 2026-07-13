@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Checkin;
-use App\Models\Ticket;
+use App\Services\TicketValidationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -160,7 +159,7 @@ class ScanController extends Controller
      *     )
      * )
      */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request, TicketValidationService $validator): JsonResponse
     {
         $request->validate([
             'qr_code' => 'required|string',
@@ -169,103 +168,46 @@ class ScanController extends Controller
         ]);
 
         $user = $request->user();
-        
+
         if (!$user->is_organizer) {
             return response()->json([
                 'message' => 'Seuls les organisateurs peuvent enregistrer des scans.',
             ], 403);
         }
 
-        // Trouver le ticket
-        $ticket = Ticket::where('code', $request->qr_code)->first();
-        
-        if (!$ticket) {
-            // Enregistrer le scan invalide
-            $checkin = Checkin::create([
-                'ticket_id' => null,
-                'scanned_by' => $user->id,
-                'device_id' => $request->device_id,
-                'result' => 'invalid',
-                'scanned_at' => $request->scanned_at,
-                'notes' => 'QR code non trouvé dans la base de données',
-                'metadata' => [
-                    'qr_code' => $request->qr_code,
-                    'user_agent' => $request->header('User-Agent'),
-                ],
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'QR code invalide',
-                'result' => 'invalid',
-                'scan_id' => $checkin->id,
-            ], 400);
-        }
-
-        // Vérifier que l'organisateur a accès à cet événement
-        $organizerIds = $user->organizers->pluck('id');
-        if (!$organizerIds->contains($ticket->event->organizer_id)) {
-            return response()->json([
-                'message' => 'Vous n\'avez pas accès à cet événement.',
-            ], 403);
-        }
-
-        // Vérifier si c'est un duplicate
-        $existingCheckin = Checkin::where('ticket_id', $ticket->id)
-                                 ->where('result', 'valid')
-                                 ->first();
-
-        $result = $existingCheckin ? 'duplicate' : 'valid';
-        $message = $existingCheckin 
-            ? 'Ce billet a déjà été scanné le ' . $existingCheckin->scanned_at->format('d/m/Y à H:i:s')
-            : 'Billet validé avec succès';
-
-        // Marquer le ticket comme utilisé si c'est un scan valide
-        if ($result === 'valid') {
-            $ticket->update([
-                'status' => 'used',
-                'used_at' => $request->scanned_at,
-            ]);
-        }
-
-        // Enregistrer le checkin
-        $checkin = Checkin::create([
-            'ticket_id' => $ticket->id,
+        // Validation unifiée (numérique + physique) via le service commun.
+        $r = $validator->validate($request->qr_code, [
             'scanned_by' => $user->id,
             'device_id' => $request->device_id,
-            'result' => $result,
             'scanned_at' => $request->scanned_at,
             'location_hint' => $request->location_hint,
             'notes' => $request->notes,
             'metadata' => [
                 'user_agent' => $request->header('User-Agent'),
                 'ip_address' => $request->ip(),
-                'existing_checkin_id' => $existingCheckin?->id,
             ],
+            'enforce_organizer' => true,
+            'organizer_ids' => $user->organizers->pluck('id'),
         ]);
 
+        // Accès refusé : ne pas exposer le détail du billet.
+        if ($r['result'] === 'forbidden') {
+            return response()->json(['message' => $r['message']], 403);
+        }
+
+        $httpStatus = match ($r['result']) {
+            'valid' => 200,
+            'duplicate' => 409,
+            default => 400, // invalid, not_found, error
+        };
+
         return response()->json([
-            'success' => $result === 'valid',
-            'message' => $message,
-            'result' => $result,
-            'scan_id' => $checkin->id,
-            'ticket' => [
-                'id' => $ticket->id,
-                'code' => $ticket->code,
-                'status' => $ticket->status,
-                'event' => [
-                    'title' => $ticket->event->title,
-                    'venue_name' => $ticket->event->venue_name,
-                ],
-                'ticket_type' => [
-                    'name' => $ticket->ticketType->name,
-                ],
-                'holder' => [
-                    'name' => $ticket->buyer_name,
-                    'email' => $ticket->buyer_email,
-                ],
-                'used_at' => $ticket->used_at?->format('d/m/Y H:i:s'),
-            ],
-        ], $result === 'valid' ? 200 : 409);
+            'success' => $r['valid'],
+            'message' => $r['message'],
+            'result' => $r['result'] === 'not_found' ? 'invalid' : $r['result'],
+            'scan_id' => $r['checkin']?->id,
+            'source' => $r['source'],
+            'ticket' => $r['ticket'],
+        ], $httpStatus);
     }
 }

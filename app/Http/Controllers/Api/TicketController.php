@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Ticket;
 use App\Models\Checkin;
+use App\Services\TicketValidationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -141,126 +142,32 @@ class TicketController extends Controller
      * )
      * Valider un ticket via QR code
      */
-    public function validateTicket(Request $request): JsonResponse
+    public function validateTicket(Request $request, TicketValidationService $validator): JsonResponse
     {
         $request->validate([
             'qr_code' => 'required|string',
             'action' => 'nullable|string|in:validate,info'
         ]);
 
-        $qrCode = $request->qr_code;
-        $action = $request->action ?? 'validate';
+        // Validation unifiée (numérique + physique) via le service commun.
+        $r = $validator->validate($request->qr_code, [
+            'scanned_by' => auth()->id(),
+            'device_id' => $request->header('X-Device-ID'),
+            'location_hint' => $request->ip(),
+            'metadata' => ['user_agent' => $request->header('User-Agent')],
+        ]);
 
-        try {
-            DB::beginTransaction();
+        $httpStatus = $r['result'] === 'valid' ? 200 : ($r['result'] === 'error' ? 500 : 400);
 
-            // Utiliser le service QR Code sécurisé pour la validation
-            $qrService = new \App\Services\QRCodeService();
-            
-            // Tenter d'abord la validation sécurisée EMVCO/AMA
-            $secureValidation = $qrService->validateTicketFromQRCode($qrCode);
-            
-            if ($secureValidation['valid']) {
-                $ticket = $secureValidation['ticket'];
-                $ticket->load(['event', 'ticketType', 'buyer', 'schedule', 'order']);
-                
-                Log::info('QR Code sécurisé validé avec succès', [
-                    'ticket_id' => $ticket->id,
-                    'security_check' => 'PASSED'
-                ]);
-            } else {
-                // Fallback vers l'ancienne méthode (code simple)
-                $ticket = Ticket::with(['event', 'ticketType', 'buyer', 'schedule', 'order'])
-                               ->byCode($qrCode)
-                               ->first();
-                
-                if (!$ticket) {
-                    $this->logCheckin(null, $request, 'invalid', 'QR code non trouvé: ' . ($secureValidation['message'] ?? 'Code simple invalide'));
-                    
-                    return response()->json([
-                        'valid' => false,
-                        'message' => 'QR code invalide: ' . ($secureValidation['message'] ?? 'Non trouvé'),
-                        'result' => 'invalid',
-                        'security_check' => $secureValidation['error'] ?? 'NOT_FOUND'
-                    ], 400);
-                }
-                
-                Log::warning('QR Code simple utilisé (fallback)', [
-                    'ticket_id' => $ticket->id,
-                    'security_check' => 'FALLBACK',
-                    'reason' => $secureValidation['message'] ?? 'Décodage sécurisé échoué'
-                ]);
-            }
-
-            // Vérifier si le ticket a déjà été scanné
-            $existingCheckin = $ticket->checkins()
-                                    ->where('result', 'valid')
-                                    ->first();
-
-            if ($existingCheckin) {
-                $this->logCheckin($ticket, $request, 'duplicate', 'Ticket déjà utilisé');
-                
-                return response()->json([
-                    'valid' => false,
-                    'message' => 'Ticket déjà utilisé',
-                    'result' => 'duplicate',
-                    'first_scan' => $existingCheckin->scanned_at->format('d/m/Y H:i:s'),
-                    'ticket' => $this->formatTicketInfo($ticket)
-                ], 400);
-            }
-
-            // Vérifier le statut du ticket
-            if (!$ticket->canBeScanned()) {
-                $this->logCheckin($ticket, $request, 'invalid', 'Ticket non valide (statut: ' . $ticket->status . ')');
-                
-                return response()->json([
-                    'valid' => false,
-                    'message' => 'Ticket non valide',
-                    'result' => 'invalid',
-                    'status' => $ticket->status
-                ], 400);
-            }
-
-            // Vérifier si l'événement est dans la bonne période
-            if ($ticket->schedule && $ticket->schedule->starts_at > now()) {
-                $this->logCheckin($ticket, $request, 'invalid', 'Événement pas encore commencé');
-                
-                return response()->json([
-                    'valid' => false,
-                    'message' => 'L\'événement n\'a pas encore commencé',
-                    'result' => 'invalid',
-                    'event_start' => $ticket->schedule->starts_at->format('d/m/Y H:i:s')
-                ], 400);
-            }
-
-            // Ticket valide - marquer comme utilisé
-            $ticket->markAsUsed();
-            
-            // Enregistrer le scan
-            $this->logCheckin($ticket, $request, 'valid', 'Ticket validé avec succès');
-
-            DB::commit();
-
-            return response()->json([
-                'valid' => true,
-                'message' => 'Ticket validé avec succès',
-                'result' => 'valid',
-                'ticket' => $this->formatTicketInfo($ticket)
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            Log::error('Erreur validation ticket', [
-                'qr_code' => $request->qr_code,
-                'error' => $e->getMessage()
-            ]);
-
-            return response()->json([
-                'valid' => false,
-                'message' => 'Erreur système lors de la validation',
-                'result' => 'error'
-            ], 500);
-        }
+        return response()->json([
+            'valid' => $r['valid'],
+            'message' => $r['message'],
+            'result' => $r['result'] === 'not_found' ? 'invalid' : $r['result'],
+            'source' => $r['source'],
+            'security_check' => $r['security_check'],
+            'first_scan' => $r['first_scan'],
+            'ticket' => $r['ticket'],
+        ], $httpStatus);
     }
 
     /**
