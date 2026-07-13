@@ -1,7 +1,5 @@
 <template>
   <div class="app-container">
-    <!-- Bandeau publicitaire en haut (scrolle avec la page, non sticky) -->
-    <TopAdBanner v-if="showHeader" />
     <!-- Header global: gère automatiquement mobile (avec burger) et desktop (menu normal) -->
     <NewHeader v-if="showHeader" />
     <main :class="{ 'pb-20 md:pb-0': showBottomNav }">
@@ -23,7 +21,6 @@ import NewHeader from './components/layout/NewHeader.vue'
 import NewFooter from './components/layout/NewFooter.vue'
 import MobileBottomNav from './components/MobileBottomNav.vue'
 import PWAInstallPrompt from './components/PWAInstallPrompt.vue'
-import TopAdBanner from './components/TopAdBanner.vue'
 
 export default {
   name: 'App',
@@ -31,8 +28,7 @@ export default {
     NewHeader,
     NewFooter,
     MobileBottomNav,
-    PWAInstallPrompt,
-    TopAdBanner
+    PWAInstallPrompt
   },
   setup() {
     const route = useRoute()
