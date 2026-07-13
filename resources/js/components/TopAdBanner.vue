@@ -1,5 +1,6 @@
 <template>
-  <div v-if="hasBanners" class="top-ad-banner bg-gray-50 border-b border-gray-200">
+  <!-- Masqué sur mobile (UX) : seule la bannière pub du bas y est conservée -->
+  <div v-if="hasBanners" class="top-ad-banner hidden md:block bg-gray-50 border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-2">
       <div class="w-full aspect-[16/3] sm:aspect-[20/3] md:aspect-[24/3] lg:aspect-[28/3] xl:aspect-[32/3]">
         <div class="relative w-full h-full overflow-hidden rounded-md bg-white">

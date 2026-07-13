@@ -497,6 +497,14 @@
                   </span>
                   <span v-else>{{ isFreeOrder ? 'Finaliser l\'achat' : 'Finaliser le paiement' }}</span>
                 </button>
+                <!-- Message d'aide : pourquoi le bouton est désactivé -->
+                <p v-if="!loading && !isFormValid && disabledReason"
+                   class="mt-2 flex items-center justify-center gap-1.5 text-sm text-amber-600">
+                  <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  {{ disabledReason }}
+                </p>
 
                 <!-- Lien récupérer ticket Desktop -->
                 <div class="text-center pt-4">
@@ -796,6 +804,14 @@
               </span>
               <span v-else>{{ isFreeOrder ? 'Finaliser l\'achat' : 'Finaliser le paiement' }}</span>
             </button>
+            <!-- Message d'aide : pourquoi le bouton est désactivé -->
+            <p v-if="!loading && !isFormValid && disabledReason"
+               class="mt-2 flex items-center justify-center gap-1.5 text-sm text-amber-600">
+              <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              {{ disabledReason }}
+            </p>
 
             <!-- Retrieve Ticket Link -->
             <div class="text-center pt-4">
@@ -1134,6 +1150,22 @@ export default {
       }
 
       return true
+    })
+
+    // Raison explicite du blocage du bouton (1er champ requis manquant).
+    // Sert à afficher un message d'aide sous le bouton désactivé.
+    const disabledReason = computed(() => {
+      if (!orderForm.value.ticketTypeId) return 'Sélectionnez un type de billet'
+      if (!orderForm.value.quantity) return 'Choisissez la quantité de billets'
+      if (hasMultipleDates.value && !orderForm.value.scheduleId) return 'Choisissez une date'
+      if (!isAuthenticated.value && !orderForm.value.guestName) return 'Renseignez votre nom'
+      if (isFreeOrder.value) return ''
+      if (!orderForm.value.paymentMethod) return 'Choisissez un moyen de paiement'
+      if (orderForm.value.paymentMethod === 'airtel' || orderForm.value.paymentMethod === 'moov') {
+        if (!orderForm.value.phoneNumber) return 'Entrez votre numéro de téléphone'
+        if (phoneError.value) return phoneError.value
+      }
+      return ''
     })
 
     // Méthodes
@@ -1846,6 +1878,7 @@ export default {
       totalWithFees,
       isFreeOrder,
       isFormValid,
+      disabledReason,
       formatEventDate,
       eventSchedules,
       hasMultipleDates,

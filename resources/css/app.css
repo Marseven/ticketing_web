@@ -90,6 +90,44 @@ body {
     line-height: 0.8;
 }
 
+/* ==========================================================================
+   Bouton CTA billet — style UNIQUE et lisible (référence : bouton ambre).
+   À utiliser sur tous les « Prendre un ticket » (cards Home/Events/EventCard)
+   pour éviter les écarts visuels et le CSS dupliqué.
+   ========================================================================== */
+.btn-ticket {
+    @apply inline-flex items-center justify-center gap-1.5 whitespace-nowrap flex-shrink-0
+           bg-primea-yellow text-primea-blue font-bold text-sm leading-none
+           px-4 py-2.5 rounded-lg shadow-lg transition-shadow duration-200;
+}
+.btn-ticket:hover {
+    @apply shadow-xl;
+    filter: brightness(0.97);
+}
+.btn-ticket:active {
+    filter: brightness(0.92);
+}
+.btn-ticket:disabled,
+.btn-ticket[disabled] {
+    @apply opacity-50 cursor-not-allowed shadow-none;
+    filter: none;
+}
+.btn-ticket svg {
+    @apply w-4 h-4 flex-shrink-0;
+}
+/* Variante pulsation (remplace les .ticket-btn-animate dupliqués par page) */
+.btn-ticket--pulse {
+    animation: pulse-scale-animation 2s ease-in-out infinite;
+    transform-origin: center;
+}
+.btn-ticket--pulse:hover {
+    animation-play-state: paused;
+}
+@keyframes pulse-scale-animation {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+}
+
 /* Animations globales pour les boutons "Prendre un ticket" */
 @keyframes bounce-gentle {
     0%, 100% {

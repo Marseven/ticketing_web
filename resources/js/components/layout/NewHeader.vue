@@ -30,7 +30,7 @@
         <div class="flex items-center justify-between">
           <!-- Logo -->
           <router-link :to="{ name: 'home' }" class="group">
-            <img src="/images/logo.png?v=2" alt="Logo" class="h-14 w-auto transition-transform duration-200 group-hover:scale-105" />
+            <img src="/images/logo.png?v=2" alt="Logo" class="h-11 w-auto transition-transform duration-200 group-hover:scale-105" />
           </router-link>
 
           <!-- Texte -->
@@ -45,7 +45,7 @@
       <div class="hidden md:flex items-center justify-between px-6 py-4">
         <!-- Logo and Title -->
         <router-link :to="{ name: 'home' }" class="flex items-center group">
-          <img src="/images/logo.png?v=2" alt="Logo" class="h-20 w-auto transition-transform duration-200 group-hover:scale-105" />
+          <img src="/images/logo.png?v=2" alt="Logo" class="h-16 w-auto transition-transform duration-200 group-hover:scale-105" />
           <div class="ml-4 text-left">
             <h1 class="text-primea-blue text-3xl font-black leading-tight">La Billetterie</h1>
             <p class="text-primea-blue text-sm font-medium leading-tight">Simple, Rapide et Sécurisée</p>

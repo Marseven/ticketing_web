@@ -2,26 +2,34 @@
   <div class="home bg-white min-h-screen">
     <!-- Hero Section -->
     <section class="relative min-h-[360px] md:min-h-[600px] flex flex-col justify-between">
-      <!-- Background Media (Image or Video) -->
+      <!-- Background Media : vidéo dynamique par défaut, image en fallback -->
       <div class="absolute inset-0">
-        <!-- Video -->
+        <!-- Vidéo de fond (remplaçable : hero admin de type vidéo, sinon
+             /videos/hero.mp4). muted + playsinline = autoplay iOS/Android.
+             Le poster sert d'image immédiate et de secours au chargement. -->
         <video
-          v-if="heroBanner && heroBanner.type === 'video'"
-          :src="heroBanner.media_url"
+          v-if="!heroVideoFailed"
+          :src="heroVideoSrc"
+          :poster="heroFallbackImage"
           autoplay
           loop
           muted
+          playsinline
+          preload="auto"
+          disablepictureinpicture
           class="w-full h-full object-cover"
+          @error="heroVideoFailed = true"
         ></video>
-        <!-- Image -->
+        <!-- Image de secours (vidéo absente/en échec ou mouvement réduit) -->
         <img
           v-else
-          :src="heroBanner?.media_url || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87'"
+          :src="heroFallbackImage"
           :alt="heroBanner?.title || 'Événements'"
           class="w-full h-full object-cover hero-image"
           loading="eager"
           fetchpriority="high"
         />
+        <!-- Overlay sombre léger : lisibilité du texte par-dessus -->
         <div class="absolute inset-0 bg-black bg-opacity-60"></div>
       </div>
 
@@ -59,8 +67,11 @@
           <div>
             <router-link
               to="/organizer-choice"
-              class="inline-block bg-primea-blue text-white px-6 py-2 rounded-lg text-xs font-semibold hover:bg-opacity-90 transition-colors shadow-lg"
+              class="inline-flex items-center gap-2 bg-primea-yellow text-primea-blue px-6 py-2.5 rounded-lg text-sm font-bold shadow-lg ring-1 ring-white/20 hover:shadow-xl transition-shadow"
             >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
               Créateur d'événements
             </router-link>
           </div>
@@ -187,7 +198,7 @@
                           </div>
                           <router-link
                             :to="`/checkout/${event.slug}`"
-                            class="ticket-btn-animate bg-primea-yellow text-primea-blue px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-lg"
+                            class="btn-ticket btn-ticket--pulse"
                             @click.stop
                           >
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -393,6 +404,24 @@ export default {
     const loading = ref(true)
     const heroBanner = ref(null)
 
+    // --- Hero : fond vidéo dynamique + fallback image ---
+    // Vidéo par défaut : déposer le fichier dans public/videos/hero.mp4 pour
+    // le remplacer facilement (ou configurer un hero admin de type vidéo).
+    const DEFAULT_HERO_VIDEO = '/videos/hero.mp4'
+    const DEFAULT_HERO_IMAGE = 'https://images.unsplash.com/photo-1540575467063-178a50c2df87'
+    const heroVideoFailed = ref(false)
+
+    const heroVideoSrc = computed(() =>
+      heroBanner.value?.type === 'video' && heroBanner.value?.media_url
+        ? heroBanner.value.media_url
+        : DEFAULT_HERO_VIDEO
+    )
+    const heroFallbackImage = computed(() =>
+      heroBanner.value && heroBanner.value.type !== 'video' && heroBanner.value.media_url
+        ? heroBanner.value.media_url
+        : DEFAULT_HERO_IMAGE
+    )
+
     // Filtered events
     const filteredEvents = computed(() => {
       if (selectedCategory.value === 'all') {
@@ -562,6 +591,12 @@ export default {
       loadEvents()
       loadCategories()
       loadHeroBanner()
+      // Mouvement réduit : ne pas autoplay la vidéo, afficher l'image.
+      try {
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          heroVideoFailed.value = true
+        }
+      } catch (e) { /* no-op */ }
     })
 
     return {
@@ -571,6 +606,9 @@ export default {
       categories,
       loading,
       heroBanner,
+      heroVideoSrc,
+      heroFallbackImage,
+      heroVideoFailed,
       filteredEvents,
       upcomingEvents,
       pastEvents,
@@ -667,21 +705,7 @@ export default {
   pointer-events: none;
 }
 
-/* Animation directe pour bouton "Prendre un ticket" */
-@keyframes pulse-scale-animation {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.08);
-  }
-}
-
-.ticket-btn-animate {
-  animation: pulse-scale-animation 2s ease-in-out infinite;
-  transform-origin: center;
-  display: inline-flex !important;
-}
+/* (Bouton « Prendre un ticket » factorisé : .btn-ticket dans app.css) */
 
 /* Horizontal scroll carousel */
 .scroll-snap-x {
