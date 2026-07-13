@@ -223,15 +223,19 @@ class TicketValidationService
                 'id' => $ticket->event->id,
                 'title' => $ticket->event->title,
                 'slug' => $ticket->event->slug,
+                'image_url' => $ticket->event->image,
                 'venue_name' => $ticket->event->venue?->name ?? 'À définir',
             ] : null,
             'ticket_type' => $ticket->ticketType ? [
                 'id' => $ticket->ticketType->id,
                 'name' => $ticket->ticketType->name,
             ] : null,
-            'holder' => $ticket->buyer
+            // 'holder' = nouvelle clé standardisée ; 'buyer' = alias rétro-compat
+            // (l'app mobile et l'ancien /tickets/validate lisent 'buyer').
+            'holder' => $holder = $ticket->buyer
                 ? ['name' => $ticket->buyer->name, 'email' => $ticket->buyer->email]
                 : ['name' => $ticket->order?->guest_name ?? '—', 'email' => $ticket->order?->guest_email ?? '—'],
+            'buyer' => $holder,
             'schedule' => $ticket->schedule ? [
                 'starts_at' => $ticket->schedule->starts_at?->format('d/m/Y H:i:s'),
                 'ends_at' => $ticket->schedule->ends_at?->format('d/m/Y H:i:s'),

@@ -246,7 +246,7 @@
           <div class="flex-shrink-0 px-4 py-3 bg-white border-b">
             <div class="flex items-start justify-between">
               <!-- Logo à gauche -->
-              <img src="/images/logo.png?v=2" alt="Logo" class="h-12 flex-shrink-0" />
+              <img src="/images/logo.png?v=2" alt="Logo" class="h-11 flex-shrink-0" />
 
               <!-- Texte et bouton fermer à droite -->
               <div class="flex flex-col items-end flex-1 ml-4">
@@ -266,7 +266,7 @@
           </div>
 
           <!-- Menu Items -->
-          <nav class="flex-1 overflow-y-auto">
+          <nav class="flex-1 overflow-y-auto flex flex-col">
             <div class="p-6">
               <div class="w-4/5 mx-auto space-y-4">
                 <router-link to="/" @click="closeMenu" class="block text-white text-lg py-3 hover:text-primea-yellow transition-colors">
@@ -357,9 +357,10 @@
               </div>
             </div>
 
-            <!-- Menu Footer (à l'intérieur du scroll) -->
-            <div class="p-6 flex flex-col items-center gap-3 bg-gray-700/90 border-t border-white/10">
-            <img src="/images/logo_white.png?v=2" alt="MyTicketO Logo" class="h-12 opacity-90" />
+            <!-- Menu Footer : toujours poussé en bas (mt-auto) -->
+            <div class="mt-auto p-6 flex flex-col items-center gap-3 bg-gray-700/90 border-t border-white/10">
+            <img src="/images/logo_white.png?v=2" alt="MyTicketO" class="h-10 opacity-90"
+                 @error="$event.target.src='/images/logo.png?v=2'" />
             <p class="text-white/50 text-xs">contact@primea.ga</p>
           </div>
           </nav>
