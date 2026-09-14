@@ -91,6 +91,19 @@
             Import MyTicketO
           </router-link>
 
+          <!-- Identité de marque -->
+          <router-link to="/admin/branding"
+                       class="flex items-center px-6 py-3 rounded-lg text-gray-700 transition-all duration-200"
+                       :class="getMenuItemClass('/admin/branding')"
+                       :style="getMenuItemStyle('/admin/branding')"
+                       @mouseover="handleMenuHover($event, '/admin/branding')"
+                       @mouseleave="handleMenuLeave($event, '/admin/branding')">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
+            </svg>
+            Identité de marque
+          </router-link>
+
           <!-- Suivi des Achats -->
           <router-link to="/admin/orders"
                        class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-colors duration-200"
@@ -546,6 +559,7 @@ export default {
         '/admin/events-approval': 'Validation des Événements',
         '/admin/physical-tickets': 'Billets Physiques',
         '/admin/legacy-import': 'Import MyTicketO',
+        '/admin/branding': 'Identité de marque',
         '/admin/orders': 'Suivi des Achats',
         '/admin/payments': 'Suivi des Paiements',
         '/admin/payouts': 'Gestion des Payouts',

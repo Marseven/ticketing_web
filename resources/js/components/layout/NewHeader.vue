@@ -30,13 +30,13 @@
         <div class="flex items-center justify-between">
           <!-- Logo -->
           <router-link :to="{ name: 'home' }" class="group">
-            <img src="/images/logo.png?v=2" alt="Logo" class="h-11 w-auto transition-transform duration-200 group-hover:scale-105" />
+            <img :src="branding.logo_url" :alt="branding.app_name" class="h-11 w-auto transition-transform duration-200 group-hover:scale-105" />
           </router-link>
 
           <!-- Texte -->
           <div class="text-right">
-            <h1 class="text-primea-blue font-black leading-tight" style="font-size: 1.54rem;">La Billetterie</h1>
-            <p class="text-primea-blue text-xs font-medium leading-tight">Simple, Rapide et Sécurisée</p>
+            <h1 class="text-primea-blue font-black leading-tight" style="font-size: 1.54rem;">{{ branding.header_title }}</h1>
+            <p class="text-primea-blue text-xs font-medium leading-tight">{{ branding.header_subtitle }}</p>
           </div>
         </div>
       </div>
@@ -45,10 +45,10 @@
       <div class="hidden md:flex items-center justify-between px-6 py-4">
         <!-- Logo and Title -->
         <router-link :to="{ name: 'home' }" class="flex items-center group">
-          <img src="/images/logo.png?v=2" alt="Logo" class="h-16 w-auto transition-transform duration-200 group-hover:scale-105" />
+          <img :src="branding.logo_url" :alt="branding.app_name" class="h-16 w-auto transition-transform duration-200 group-hover:scale-105" />
           <div class="ml-4 text-left">
-            <h1 class="text-primea-blue text-3xl font-black leading-tight">La Billetterie</h1>
-            <p class="text-primea-blue text-sm font-medium leading-tight">Simple, Rapide et Sécurisée</p>
+            <h1 class="text-primea-blue text-3xl font-black leading-tight">{{ branding.header_title }}</h1>
+            <p class="text-primea-blue text-sm font-medium leading-tight">{{ branding.header_subtitle }}</p>
           </div>
         </router-link>
 
@@ -246,7 +246,7 @@
           <div class="flex-shrink-0 px-4 py-3 bg-white border-b">
             <div class="flex items-start justify-between">
               <!-- Logo à gauche -->
-              <img src="/images/logo.png?v=2" alt="Logo" class="h-11 flex-shrink-0" />
+              <img :src="branding.logo_url" :alt="branding.app_name" class="h-11 flex-shrink-0" />
 
               <!-- Texte et bouton fermer à droite -->
               <div class="flex flex-col items-end flex-1 ml-4">
@@ -258,8 +258,8 @@
                 </button>
                 <!-- Texte Billetterie -->
                 <div class="text-right">
-                  <h1 class="text-primea-blue font-black leading-tight" style="font-size: 1.54rem;">La Billetterie</h1>
-                  <p class="text-primea-blue text-xs font-medium leading-tight">Simple, Rapide et Sécurisée</p>
+                  <h1 class="text-primea-blue font-black leading-tight" style="font-size: 1.54rem;">{{ branding.header_title }}</h1>
+                  <p class="text-primea-blue text-xs font-medium leading-tight">{{ branding.header_subtitle }}</p>
                 </div>
               </div>
             </div>
@@ -359,9 +359,9 @@
 
             <!-- Menu Footer : toujours poussé en bas (mt-auto) -->
             <div class="mt-auto p-6 flex flex-col items-center gap-3 bg-gray-700/90 border-t border-white/10">
-            <img src="/images/logo_white.png?v=2" alt="MyTicketO" class="h-10 opacity-90"
-                 @error="$event.target.src='/images/logo.png?v=2'" />
-            <p class="text-white/50 text-xs">contact@primea.ga</p>
+            <img :src="branding.logo_white_url" :alt="branding.app_name" class="h-10 opacity-90"
+                 @error="$event.target.src = branding.logo_url" />
+            <p class="text-white/50 text-xs">{{ branding.contact_email }}</p>
           </div>
           </nav>
         </div>
@@ -374,9 +374,11 @@
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
+import { useBrandingStore } from '../../stores/branding'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const branding = useBrandingStore()
 
 const dropdownOpen = ref(false)
 const mobileMenuOpen = ref(false)

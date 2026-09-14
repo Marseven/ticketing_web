@@ -288,6 +288,10 @@ Route::prefix('v1')->group(function () {
             Route::post('images', [App\Http\Controllers\Admin\LegacyImportController::class, 'importImages']);
             Route::post('cleanup', [App\Http\Controllers\Admin\LegacyImportController::class, 'cleanup']);
         });
+
+        // Identité de marque (édition admin)
+        Route::put('branding', [App\Http\Controllers\Admin\BrandingController::class, 'update']);
+        Route::post('branding/asset', [App\Http\Controllers\Admin\BrandingController::class, 'uploadAsset']);
         
         // Gestion des payouts
         Route::prefix('payouts')->group(function () {
@@ -403,4 +407,7 @@ Route::prefix('v1')->group(function () {
     // Routes publiques pour les bannieres
     Route::get('banners/active', [App\Http\Controllers\Api\BannerController::class, 'getActive']);
     Route::get('hero-banners/active', [App\Http\Controllers\Api\Admin\HeroBannerController::class, 'getActive']);
+
+    // Identité de marque (lecture publique — le SPA en a besoin au boot)
+    Route::get('branding', [App\Http\Controllers\Admin\BrandingController::class, 'show']);
 });
