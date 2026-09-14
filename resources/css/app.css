@@ -60,29 +60,45 @@ body {
     min-height: 100vh;
 }
 
-/* Classes utilitaires Primea */
+/* Variables de marque (canaux RGB) — défauts MyTicketO.
+   Surchargées à chaud par app.blade.php (:root injecté depuis la config). */
+:root {
+    --brand-primary-rgb: 0 75 94;      /* #004B5E teal foncé */
+    --brand-accent-rgb: 245 192 112;   /* #F5C070 ambre */
+    --brand-secondary-rgb: 31 158 154; /* #1F9E9A teal */
+}
+
+/* Classes utilitaires Primea (pilotées par les variables ci-dessus) */
 .text-primea-blue {
-    color: #004B5E;
+    color: rgb(var(--brand-primary-rgb));
 }
 
 .text-primea-yellow {
-    color: #F5C070;
+    color: rgb(var(--brand-accent-rgb));
+}
+
+.text-primea-teal {
+    color: rgb(var(--brand-secondary-rgb));
 }
 
 .bg-primea-blue {
-    background-color: #004B5E;
+    background-color: rgb(var(--brand-primary-rgb));
 }
 
 .bg-primea-yellow {
-    background-color: #F5C070;
+    background-color: rgb(var(--brand-accent-rgb));
+}
+
+.bg-primea-teal {
+    background-color: rgb(var(--brand-secondary-rgb));
 }
 
 .border-primea-blue {
-    border-color: #004B5E;
+    border-color: rgb(var(--brand-primary-rgb));
 }
 
 .border-primea-yellow {
-    border-color: #F5C070;
+    border-color: rgb(var(--brand-accent-rgb));
 }
 
 /* Custom line-height override */
@@ -162,7 +178,7 @@ body {
     content: '';
     position: absolute;
     inset: -5px;
-    border: 2px solid rgba(245, 192, 112, 0.8);
+    border: 2px solid rgb(var(--brand-accent-rgb) / 0.8);
     border-radius: 0.5rem;
     opacity: 0;
     transform: scale(0.7);

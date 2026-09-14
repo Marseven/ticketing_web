@@ -33,6 +33,10 @@ class Setting extends Model
         'meta_title' => "MyTicketO - Se procurer un ticket n'a jamais été aussi simple",
         'meta_description' => "Se procurer un ticket n'a jamais été aussi simple ! Achetez vos billets d'événements en ligne au Gabon.",
         'og_image' => '/images/ico.png?v=2',
+        // Couleurs de marque (hex) — pilotent les variables CSS --brand-*.
+        'color_primary' => '#004B5E',   // teal foncé
+        'color_accent' => '#F5C070',    // ambre
+        'color_secondary' => '#1F9E9A', // teal
     ];
 
     protected static function booted(): void
@@ -64,6 +68,33 @@ class Setting extends Model
 
             return array_merge(self::BRANDING_DEFAULTS, $stored);
         });
+    }
+
+    /**
+     * Variables CSS de couleur (canaux RGB) pour injection dans :root.
+     * Ex: ['--brand-primary-rgb' => '0 75 94', ...].
+     */
+    public static function brandColorVars(): array
+    {
+        $b = self::branding();
+        return [
+            '--brand-primary-rgb' => self::hexToRgbChannels($b['color_primary'] ?? '#004B5E', '0 75 94'),
+            '--brand-accent-rgb' => self::hexToRgbChannels($b['color_accent'] ?? '#F5C070', '245 192 112'),
+            '--brand-secondary-rgb' => self::hexToRgbChannels($b['color_secondary'] ?? '#1F9E9A', '31 158 154'),
+        ];
+    }
+
+    /** Convertit "#RRGGBB" (ou "#RGB") en canaux "R G B" ; fallback si invalide. */
+    public static function hexToRgbChannels(string $hex, string $fallback = '0 75 94'): string
+    {
+        $hex = ltrim(trim($hex), '#');
+        if (strlen($hex) === 3) {
+            $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+        }
+        if (strlen($hex) !== 6 || !ctype_xdigit($hex)) {
+            return $fallback;
+        }
+        return hexdec(substr($hex, 0, 2)) . ' ' . hexdec(substr($hex, 2, 2)) . ' ' . hexdec(substr($hex, 4, 2));
     }
 
     /** Écrire une surcharge de branding (clé connue uniquement). */

@@ -9,10 +9,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Palette MyTicketO (couleurs du logo uniquement)
-        'primea-blue': '#004B5E',    // teal foncé (primaire, texte blanc lisible)
-        'primea-yellow': '#F5C070',  // ambre (accent)
-        'primea-teal': '#1F9E9A',    // teal vif (identité)
+        // Palette pilotée par variables CSS (canaux RGB → opacité utilitaire
+        // conservée, ex: bg-primea-blue/50). Défauts MyTicketO en fallback.
+        // Les variables sont posées par app.css (:root) et surchargées à chaud
+        // par app.blade.php depuis la config branding.
+        'primea-blue': 'rgb(var(--brand-primary-rgb, 0 75 94) / <alpha-value>)',
+        'primea-yellow': 'rgb(var(--brand-accent-rgb, 245 192 112) / <alpha-value>)',
+        'primea-teal': 'rgb(var(--brand-secondary-rgb, 31 158 154) / <alpha-value>)',
         'primea-white': '#ffffff',
       },
       fontFamily: {
@@ -41,13 +44,13 @@ export default {
         'primea-xl': '20px',
       },
       boxShadow: {
-        'primea': '0 4px 20px rgba(0, 75, 94, 0.1)',
-        'primea-lg': '0 8px 30px rgba(0, 75, 94, 0.15)',
-        'primea-yellow': '0 4px 20px rgba(245, 192, 112, 0.25)',
+        'primea': '0 4px 20px rgb(var(--brand-primary-rgb, 0 75 94) / 0.1)',
+        'primea-lg': '0 8px 30px rgb(var(--brand-primary-rgb, 0 75 94) / 0.15)',
+        'primea-yellow': '0 4px 20px rgb(var(--brand-accent-rgb, 245 192 112) / 0.25)',
       },
       backgroundImage: {
-        'primea-gradient': 'linear-gradient(135deg, #004B5E 0%, #1F9E9A 100%)',
-        'primea-yellow-gradient': 'linear-gradient(135deg, #F5C070 0%, #1F9E9A 100%)',
+        'primea-gradient': 'linear-gradient(135deg, rgb(var(--brand-primary-rgb, 0 75 94)) 0%, rgb(var(--brand-secondary-rgb, 31 158 154)) 100%)',
+        'primea-yellow-gradient': 'linear-gradient(135deg, rgb(var(--brand-accent-rgb, 245 192 112)) 0%, rgb(var(--brand-secondary-rgb, 31 158 154)) 100%)',
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',

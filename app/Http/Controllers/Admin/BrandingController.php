@@ -18,6 +18,7 @@ class BrandingController extends Controller
     private const TEXT_FIELDS = [
         'app_name', 'header_title', 'header_subtitle', 'contact_email',
         'meta_title', 'meta_description',
+        'color_primary', 'color_accent', 'color_secondary',
     ];
 
     /** Assets image (clé de branding => nom de fichier stocké). */
@@ -32,6 +33,7 @@ class BrandingController extends Controller
     /** Mettre à jour les champs texte (admin). */
     public function update(Request $request): JsonResponse
     {
+        $hex = 'nullable|regex:/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/';
         $data = $request->validate([
             'app_name' => 'nullable|string|max:100',
             'header_title' => 'nullable|string|max:100',
@@ -39,6 +41,9 @@ class BrandingController extends Controller
             'contact_email' => 'nullable|email|max:150',
             'meta_title' => 'nullable|string|max:200',
             'meta_description' => 'nullable|string|max:300',
+            'color_primary' => $hex,
+            'color_accent' => $hex,
+            'color_secondary' => $hex,
         ]);
 
         foreach (self::TEXT_FIELDS as $field) {

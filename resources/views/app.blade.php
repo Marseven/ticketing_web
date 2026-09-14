@@ -26,13 +26,13 @@
     <meta name="twitter:image" content="{{ url($b['og_image']) }}">
 
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#004B5E">
+    <meta name="theme-color" content="{{ $b['color_primary'] }}">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="{{ $b['app_name'] }}">
     <meta name="application-name" content="{{ $b['app_name'] }}">
-    <meta name="msapplication-TileColor" content="#004B5E">
+    <meta name="msapplication-TileColor" content="{{ $b['color_primary'] }}">
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="format-detection" content="telephone=no">
 
@@ -57,6 +57,15 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Couleurs de marque (surchargent les défauts d'app.css :root) -->
+    <style>
+        :root {
+        @foreach(\App\Models\Setting::brandColorVars() as $var => $val)
+            {{ $var }}: {{ $val }};
+        @endforeach
+        }
+    </style>
 </head>
 <body class="font-sans antialiased">
     <div id="app"></div>

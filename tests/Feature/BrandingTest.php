@@ -43,4 +43,24 @@ class BrandingTest extends TestCase
 
         $this->assertArrayNotHasKey('not_a_field', Setting::branding());
     }
+
+    public function test_color_vars_convert_hex_to_rgb_channels(): void
+    {
+        // Défauts
+        $vars = Setting::brandColorVars();
+        $this->assertSame('0 75 94', $vars['--brand-primary-rgb']);      // #004B5E
+        $this->assertSame('245 192 112', $vars['--brand-accent-rgb']);   // #F5C070
+        $this->assertSame('31 158 154', $vars['--brand-secondary-rgb']); // #1F9E9A
+
+        // Surcharge d'une couleur
+        Setting::setBranding('color_primary', '#FF0000');
+        Cache::forget('branding');
+        $this->assertSame('255 0 0', Setting::brandColorVars()['--brand-primary-rgb']);
+    }
+
+    public function test_invalid_hex_falls_back(): void
+    {
+        $this->assertSame('0 75 94', Setting::hexToRgbChannels('not-a-hex'));
+        $this->assertSame('255 255 255', Setting::hexToRgbChannels('#fff'));
+    }
 }

@@ -35,10 +35,26 @@
           <textarea v-model="form.meta_description" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg"></textarea>
         </div>
       </div>
-      <div class="mt-4">
+
+      <!-- Couleurs -->
+      <div class="mt-6">
+        <h3 class="text-sm font-semibold text-gray-700 mb-3">Couleurs de la palette</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div v-for="c in colorFields" :key="c.key">
+            <label class="block text-xs text-gray-600 mb-1">{{ c.label }}</label>
+            <div class="flex items-center gap-2">
+              <input type="color" v-model="form[c.key]" class="h-9 w-12 rounded border border-gray-300 p-0.5 cursor-pointer" />
+              <input type="text" v-model="form[c.key]" class="flex-1 px-2 py-1.5 border border-gray-300 rounded-lg text-sm font-mono uppercase" />
+            </div>
+          </div>
+        </div>
+        <p class="text-xs text-gray-400 mt-2">Appliquées à toute l'interface (boutons, en-têtes, accents). Rechargez les pages publiques pour voir le rendu.</p>
+      </div>
+
+      <div class="mt-6">
         <button @click="saveText" :disabled="busy"
                 class="px-4 py-2 rounded-lg bg-primea-blue text-white font-semibold hover:bg-primea-yellow hover:text-primea-blue transition-colors disabled:opacity-50">
-          {{ busy === 'text' ? 'Enregistrement…' : 'Enregistrer les textes' }}
+          {{ busy === 'text' ? 'Enregistrement…' : 'Enregistrer' }}
         </button>
       </div>
     </div>
@@ -74,6 +90,9 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import Swal from 'sweetalert2'
+import { useBrandingStore } from '../../stores/branding'
+
+const brandingStore = useBrandingStore()
 
 const assets = [
   { field: 'logo_url', label: 'Logo (couleur)', dark: false },
@@ -86,7 +105,14 @@ const current = ref({})
 const form = reactive({
   app_name: '', header_title: '', header_subtitle: '',
   contact_email: '', meta_title: '', meta_description: '',
+  color_primary: '#004B5E', color_accent: '#F5C070', color_secondary: '#1F9E9A',
 })
+
+const colorFields = [
+  { key: 'color_primary', label: 'Primaire (teal foncé)' },
+  { key: 'color_accent', label: 'Accent (ambre)' },
+  { key: 'color_secondary', label: 'Secondaire (teal)' },
+]
 const files = reactive({})
 const busy = ref(null)
 
@@ -116,6 +142,9 @@ const saveText = async () => {
     const data = await res.json()
     if (data.success) {
       current.value = data.data
+      // Appliquer les couleurs en direct (met à jour l'UI sans reload).
+      Object.assign(brandingStore, data.data)
+      brandingStore.applyColors()
       Swal.fire({ icon: 'success', title: 'Identité mise à jour', confirmButtonColor: '#004B5E' })
     } else {
       Swal.fire({ icon: 'error', title: 'Erreur', text: data.message, confirmButtonColor: '#004B5E' })
