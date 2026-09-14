@@ -1,0 +1,3 @@
+# Autoriser les scripts de build natifs (pnpm v10+ les bloque par défaut).
+onlyBuiltDependencies:
+  - esbuild
