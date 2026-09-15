@@ -22,6 +22,17 @@ class Category extends Model
         'is_active' => 'boolean',
     ];
 
+    // Expose un statut chaîne dérivé de is_active pour le front (Actif/Inactif).
+    protected $appends = ['status'];
+
+    /**
+     * Statut lisible dérivé de is_active ('active' | 'inactive').
+     */
+    public function getStatusAttribute(): string
+    {
+        return $this->is_active ? 'active' : 'inactive';
+    }
+
     /**
      * Get the events for the category.
      */

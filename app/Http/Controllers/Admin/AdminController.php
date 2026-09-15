@@ -1131,6 +1131,7 @@ class AdminController extends Controller
             'description' => 'nullable|string',
             'color' => 'nullable|string|max:7',
             'is_active' => 'boolean',
+            'status' => 'sometimes|in:active,inactive',
         ]);
 
         if ($validator->fails()) {
@@ -1142,12 +1143,18 @@ class AdminController extends Controller
         }
 
         try {
+            // Le front envoie un statut chaîne ('active'/'inactive') ; on le
+            // normalise vers le booléen is_active (défaut actif).
+            $isActive = $request->has('status')
+                ? $request->status === 'active'
+                : $request->boolean('is_active', true);
+
             $category = Category::create([
                 'name' => $request->name,
                 'slug' => Str::slug($request->name),
                 'description' => $request->description,
                 'color' => $request->color ?? '#272d63',
-                'is_active' => $request->boolean('is_active', true),
+                'is_active' => $isActive,
             ]);
 
             return response()->json([
@@ -1186,6 +1193,7 @@ class AdminController extends Controller
             'description' => 'nullable|string',
             'color' => 'nullable|string|max:7',
             'is_active' => 'sometimes|boolean',
+            'status' => 'sometimes|in:active,inactive',
         ]);
 
         if ($validator->fails()) {
@@ -1203,7 +1211,11 @@ class AdminController extends Controller
                 $updateData['slug'] = Str::slug($request->name);
             }
             
-            if ($request->has('is_active')) {
+            // Normaliser le statut : le front envoie 'status' (chaîne),
+            // sinon on accepte is_active (booléen).
+            if ($request->has('status')) {
+                $updateData['is_active'] = $request->status === 'active';
+            } elseif ($request->has('is_active')) {
                 $updateData['is_active'] = $request->boolean('is_active');
             }
 
