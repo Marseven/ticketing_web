@@ -819,7 +819,7 @@ export default {
   transition: box-shadow 0.2s ease-in-out;
 }
 
-/* Ajout des styles MyTicketO */
+/* Ajout des styles Primea */
 .text-primea-blue {
   color: #004B5E;
 }

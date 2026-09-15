@@ -13,9 +13,9 @@
     <!-- Contenu principal -->
     <div class="relative z-10 min-h-screen flex items-center justify-center px-4 py-12">
       <div class="max-w-md w-full">
-        <!-- Logo MyTicketO -->
+        <!-- Logo Primea -->
         <div class="text-center mb-8 animate-fade-in">
-          <img src="/images/logo_white.png?v=2" alt="MyTicketO" class="h-16 mx-auto mb-6" />
+          <img src="/images/logo_white.png?v=3" alt="Primea" class="h-16 mx-auto mb-6" />
         </div>
 
         <!-- Carte de vérification -->
@@ -30,7 +30,7 @@
               Email vérifié !
             </h1>
             <p class="text-gray-600 mb-6">
-              Votre adresse email a été vérifiée avec succès. Vous pouvez maintenant accéder à toutes les fonctionnalités de MyTicketO.
+              Votre adresse email a été vérifiée avec succès. Vous pouvez maintenant accéder à toutes les fonctionnalités de Primea.
             </p>
             <router-link 
               to="/login"
@@ -263,7 +263,7 @@ export default {
 </script>
 
 <style scoped>
-/* Variables CSS MyTicketO */
+/* Variables CSS Primea */
 :root {
   --primea-blue: #004B5E;
   --primea-yellow: #F5C070;
@@ -273,7 +273,7 @@ export default {
   --font-primary: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Couleurs de texte MyTicketO */
+/* Couleurs de texte Primea */
 .text-primea-blue {
   color: var(--primea-blue);
 }
@@ -282,7 +282,7 @@ export default {
   color: var(--primea-yellow);
 }
 
-/* Couleurs de fond MyTicketO */
+/* Couleurs de fond Primea */
 .bg-primea-blue {
   background-color: var(--primea-blue);
 }
@@ -291,7 +291,7 @@ export default {
   background-color: var(--primea-yellow);
 }
 
-/* States hover MyTicketO */
+/* States hover Primea */
 .hover\:bg-primea-yellow:hover {
   background-color: var(--primea-yellow) !important;
 }
@@ -312,7 +312,7 @@ export default {
   color: var(--primea-yellow);
 }
 
-/* Coins arrondis MyTicketO */
+/* Coins arrondis Primea */
 .rounded-primea {
   border-radius: 12px;
 }
@@ -321,12 +321,12 @@ export default {
   border-radius: 20px;
 }
 
-/* Ombres MyTicketO */
+/* Ombres Primea */
 .shadow-primea-lg {
   box-shadow: 0 8px 30px rgba(0, 75, 94, 0.15);
 }
 
-/* Police MyTicketO */
+/* Police Primea */
 .font-primea {
   font-family: var(--font-primary);
 }

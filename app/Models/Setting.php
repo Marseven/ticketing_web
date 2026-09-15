@@ -21,22 +21,22 @@ class Setting extends Model
 
     private const BRANDING_PREFIX = 'branding.';
 
-    /** Valeurs de marque par défaut (MyTicketO). */
+    /** Valeurs de marque par défaut (Primea). */
     public const BRANDING_DEFAULTS = [
-        'app_name' => 'MyTicketO',
+        'app_name' => 'Primea',
         'header_title' => 'La Billetterie',
         'header_subtitle' => 'Simple, Rapide et Sécurisée',
         'contact_email' => 'contact@primea.ga',
-        'logo_url' => '/images/logo.png?v=2',
-        'logo_white_url' => '/images/logo_white.png?v=2',
-        'favicon_url' => '/images/ico.png?v=2',
-        'meta_title' => "MyTicketO - Se procurer un ticket n'a jamais été aussi simple",
+        'logo_url' => '/images/logo.png?v=3',
+        'logo_white_url' => '/images/logo_white.png?v=3',
+        'favicon_url' => '/images/ico.png?v=3',
+        'meta_title' => "Primea - Se procurer un ticket n'a jamais été aussi simple",
         'meta_description' => "Se procurer un ticket n'a jamais été aussi simple ! Achetez vos billets d'événements en ligne au Gabon.",
-        'og_image' => '/images/ico.png?v=2',
-        // Couleurs de marque (hex) — pilotent les variables CSS --brand-*.
-        'color_primary' => '#004B5E',   // teal foncé
-        'color_accent' => '#F5C070',    // ambre
-        'color_secondary' => '#1F9E9A', // teal
+        'og_image' => '/images/ico.png?v=3',
+        // Couleurs de marque Primea (hex) — pilotent les variables CSS --brand-*.
+        'color_primary' => '#272d63',   // bleu marine
+        'color_accent' => '#fab511',    // jaune
+        'color_secondary' => '#1a1f4a', // bleu marine foncé
     ];
 
     protected static function booted(): void
@@ -78,14 +78,14 @@ class Setting extends Model
     {
         $b = self::branding();
         return [
-            '--brand-primary-rgb' => self::hexToRgbChannels($b['color_primary'] ?? '#004B5E', '0 75 94'),
-            '--brand-accent-rgb' => self::hexToRgbChannels($b['color_accent'] ?? '#F5C070', '245 192 112'),
-            '--brand-secondary-rgb' => self::hexToRgbChannels($b['color_secondary'] ?? '#1F9E9A', '31 158 154'),
+            '--brand-primary-rgb' => self::hexToRgbChannels($b['color_primary'] ?? '#272d63', '39 45 99'),
+            '--brand-accent-rgb' => self::hexToRgbChannels($b['color_accent'] ?? '#fab511', '250 181 17'),
+            '--brand-secondary-rgb' => self::hexToRgbChannels($b['color_secondary'] ?? '#1a1f4a', '26 31 74'),
         ];
     }
 
     /** Convertit "#RRGGBB" (ou "#RGB") en canaux "R G B" ; fallback si invalide. */
-    public static function hexToRgbChannels(string $hex, string $fallback = '0 75 94'): string
+    public static function hexToRgbChannels(string $hex, string $fallback = '39 45 99'): string
     {
         $hex = ltrim(trim($hex), '#');
         if (strlen($hex) === 3) {

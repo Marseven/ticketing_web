@@ -37,7 +37,7 @@
                 </div>
                 <img src="{{ $item['qr'] }}" alt="QR">
                 <div class="code">{{ $item['code'] }}</div>
-                <div class="ad">MyTicketO</div>
+                <div class="ad">Primea</div>
             </div>
         @endforeach
     </div>

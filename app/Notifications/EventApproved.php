@@ -28,13 +28,13 @@ class EventApproved extends Notification
         $event = $this->event;
 
         return (new MailMessage)
-            ->subject('Votre événement a été approuvé - MyTicketO')
+            ->subject('Votre événement a été approuvé - Primea')
             ->greeting('Bonjour ' . ($notifiable->name ?? 'Organisateur') . ' !')
             ->line('Bonne nouvelle : votre événement **' . $event->title . '** a été approuvé.')
             ->line('**Commission appliquée** : ' . number_format($event->effectiveCommission(), 2, ',', ' ') . ' %')
             ->line('Vous pouvez désormais mettre vos billets en vente.')
             ->action('Voir mon événement', url('/organizer/events'))
-            ->line('Merci d\'utiliser MyTicketO !');
+            ->line('Merci d\'utiliser Primea !');
     }
 
     public function toDatabase(object $notifiable): array

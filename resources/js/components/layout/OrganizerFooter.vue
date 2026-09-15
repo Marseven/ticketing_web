@@ -6,8 +6,8 @@
         <div>
           <div class="flex items-center mb-4">
             <img
-              src="/images/logo.png?v=2"
-              alt="MyTicketO"
+              src="/images/logo.png?v=3"
+              alt="Primea"
               class="h-8 w-auto"
             />
             <span class="ml-3 text-sm bg-primea-blue/10 text-primea-blue px-2 py-1 rounded-full font-semibold font-primea">
@@ -15,7 +15,7 @@
             </span>
           </div>
           <p class="text-gray-600 mb-4 font-primea text-sm">
-            Gérez vos événements, suivez vos ventes et optimisez votre activité avec MyTicketO.
+            Gérez vos événements, suivez vos ventes et optimisez votre activité avec Primea.
           </p>
           <div class="flex items-center space-x-2 text-green-600">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,7 +140,7 @@
         <div class="flex flex-col md:flex-row justify-between items-center">
           <div class="flex items-center space-x-4">
             <p class="text-gray-600 text-sm font-primea">
-              © {{ new Date().getFullYear() }} MyTicketO - Espace Organisateur
+              © {{ new Date().getFullYear() }} Primea - Espace Organisateur
             </p>
             <div class="flex items-center space-x-1 text-green-600">
               <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -211,12 +211,12 @@ const lastUpdate = computed(() => {
 </script>
 
 <style scoped>
-/* Police MyTicketO */
+/* Police Primea */
 .font-primea {
   font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Couleurs MyTicketO */
+/* Couleurs Primea */
 .text-primea-blue {
   color: #004B5E;
 }
@@ -245,7 +245,7 @@ const lastUpdate = computed(() => {
   color: #004B5E;
 }
 
-/* Coins arrondis MyTicketO */
+/* Coins arrondis Primea */
 .rounded-primea {
   border-radius: 12px;
 }

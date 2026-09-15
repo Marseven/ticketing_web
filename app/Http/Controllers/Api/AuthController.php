@@ -241,7 +241,7 @@ class AuthController extends Controller
 
         $passwordOk = $user && Hash::check($request->password, $user->password);
 
-        // Fallback comptes migrés depuis le legacy MyTicketO (mot de passe MD5) :
+        // Fallback comptes migrés depuis le legacy Primea (mot de passe MD5) :
         // si le bcrypt échoue mais que le MD5 legacy correspond, on rehash en
         // bcrypt de façon transparente et on efface le MD5 (migration au vol).
         if ($user && !$passwordOk && !empty($user->legacy_md5)

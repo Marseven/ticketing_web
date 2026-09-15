@@ -10,12 +10,12 @@ export default {
     extend: {
       colors: {
         // Palette pilotée par variables CSS (canaux RGB → opacité utilitaire
-        // conservée, ex: bg-primea-blue/50). Défauts MyTicketO en fallback.
+        // conservée, ex: bg-primea-blue/50). Défauts Primea en fallback.
         // Les variables sont posées par app.css (:root) et surchargées à chaud
         // par app.blade.php depuis la config branding.
-        'primea-blue': 'rgb(var(--brand-primary-rgb, 0 75 94) / <alpha-value>)',
-        'primea-yellow': 'rgb(var(--brand-accent-rgb, 245 192 112) / <alpha-value>)',
-        'primea-teal': 'rgb(var(--brand-secondary-rgb, 31 158 154) / <alpha-value>)',
+        'primea-blue': 'rgb(var(--brand-primary-rgb, 39 45 99) / <alpha-value>)',
+        'primea-yellow': 'rgb(var(--brand-accent-rgb, 250 181 17) / <alpha-value>)',
+        'primea-teal': 'rgb(var(--brand-secondary-rgb, 26 31 74) / <alpha-value>)',
         'primea-white': '#ffffff',
       },
       fontFamily: {
@@ -44,13 +44,13 @@ export default {
         'primea-xl': '20px',
       },
       boxShadow: {
-        'primea': '0 4px 20px rgb(var(--brand-primary-rgb, 0 75 94) / 0.1)',
-        'primea-lg': '0 8px 30px rgb(var(--brand-primary-rgb, 0 75 94) / 0.15)',
-        'primea-yellow': '0 4px 20px rgb(var(--brand-accent-rgb, 245 192 112) / 0.25)',
+        'primea': '0 4px 20px rgb(var(--brand-primary-rgb, 39 45 99) / 0.1)',
+        'primea-lg': '0 8px 30px rgb(var(--brand-primary-rgb, 39 45 99) / 0.15)',
+        'primea-yellow': '0 4px 20px rgb(var(--brand-accent-rgb, 250 181 17) / 0.25)',
       },
       backgroundImage: {
-        'primea-gradient': 'linear-gradient(135deg, rgb(var(--brand-primary-rgb, 0 75 94)) 0%, rgb(var(--brand-secondary-rgb, 31 158 154)) 100%)',
-        'primea-yellow-gradient': 'linear-gradient(135deg, rgb(var(--brand-accent-rgb, 245 192 112)) 0%, rgb(var(--brand-secondary-rgb, 31 158 154)) 100%)',
+        'primea-gradient': 'linear-gradient(135deg, rgb(var(--brand-primary-rgb, 39 45 99)) 0%, rgb(var(--brand-secondary-rgb, 26 31 74)) 100%)',
+        'primea-yellow-gradient': 'linear-gradient(135deg, rgb(var(--brand-accent-rgb, 250 181 17)) 0%, rgb(var(--brand-secondary-rgb, 26 31 74)) 100%)',
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',

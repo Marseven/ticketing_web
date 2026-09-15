@@ -28,7 +28,7 @@ class EventRejected extends Notification
         $event = $this->event;
 
         return (new MailMessage)
-            ->subject('Votre événement nécessite des modifications - MyTicketO')
+            ->subject('Votre événement nécessite des modifications - Primea')
             ->greeting('Bonjour ' . ($notifiable->name ?? 'Organisateur') . ' !')
             ->line('Votre événement **' . $event->title . '** n\'a pas été approuvé en l\'état.')
             ->line('**Motif** : ' . ($event->rejection_reason ?: 'Non précisé'))

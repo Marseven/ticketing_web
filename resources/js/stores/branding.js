@@ -3,19 +3,19 @@ import { defineStore } from 'pinia'
 // Défauts alignés sur Setting::BRANDING_DEFAULTS (fallback si l'injection blade
 // window.__BRANDING__ est absente, ex : page servie hors app.blade.php).
 const DEFAULTS = {
-  app_name: 'MyTicketO',
+  app_name: 'Primea',
   header_title: 'La Billetterie',
   header_subtitle: 'Simple, Rapide et Sécurisée',
   contact_email: 'contact@primea.ga',
-  logo_url: '/images/logo.png?v=2',
-  logo_white_url: '/images/logo_white.png?v=2',
-  favicon_url: '/images/ico.png?v=2',
-  meta_title: "MyTicketO - Se procurer un ticket n'a jamais été aussi simple",
+  logo_url: '/images/logo.png?v=3',
+  logo_white_url: '/images/logo_white.png?v=3',
+  favicon_url: '/images/ico.png?v=3',
+  meta_title: "Primea - Se procurer un ticket n'a jamais été aussi simple",
   meta_description: '',
-  og_image: '/images/ico.png?v=2',
-  color_primary: '#004B5E',
-  color_accent: '#F5C070',
-  color_secondary: '#1F9E9A',
+  og_image: '/images/ico.png?v=3',
+  color_primary: '#272d63',
+  color_accent: '#fab511',
+  color_secondary: '#1a1f4a',
 }
 
 // "#RRGGBB" | "#RGB" -> "R G B" (canaux) ; null si invalide.

@@ -44,9 +44,9 @@
             CE TICKET EST STRICTEMENT PERSONNEL ET À USAGE UNIQUE. IL NE PEUT ÊTRE NI VENDU NI DONNÉ À AUTRUI SOUS PEINE D'ÊTRE REFUSÉ À L'ENTRÉE.
           </div>
 
-          <!-- Logo MyTicketO -->
+          <!-- Logo Primea -->
           <div class="flex justify-start">
-            <img src="/images/logo.png?v=2" alt="MyTicketO" class="h-6" />
+            <img src="/images/logo.png?v=3" alt="Primea" class="h-6" />
           </div>
         </div>
 

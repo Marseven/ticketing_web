@@ -39,7 +39,7 @@ class PayoutCreated extends Notification
         $payout = $this->payout;
 
         return (new MailMessage)
-            ->subject('Demande de retrait créée - MyTicketO')
+            ->subject('Demande de retrait créée - Primea')
             ->greeting('Bonjour ' . ($notifiable->name ?? 'Organisateur') . ' !')
             ->line('Votre demande de retrait a été créée avec succès.')
             ->line('**Référence** : ' . $payout->reference)

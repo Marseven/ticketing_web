@@ -46,7 +46,7 @@
 
     <!-- Splash Screen for iOS -->
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-startup-image" href="/images/logo.png?v=2">
+    <link rel="apple-touch-startup-image" href="/images/logo.png?v=3">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">

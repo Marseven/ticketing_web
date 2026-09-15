@@ -60,12 +60,12 @@ body {
     min-height: 100vh;
 }
 
-/* Variables de marque (canaux RGB) — défauts MyTicketO.
+/* Variables de marque (canaux RGB) — défauts Primea.
    Surchargées à chaud par app.blade.php (:root injecté depuis la config). */
 :root {
-    --brand-primary-rgb: 0 75 94;      /* #004B5E teal foncé */
-    --brand-accent-rgb: 245 192 112;   /* #F5C070 ambre */
-    --brand-secondary-rgb: 31 158 154; /* #1F9E9A teal */
+    --brand-primary-rgb: 39 45 99;    /* #272d63 bleu marine */
+    --brand-accent-rgb: 250 181 17;   /* #fab511 jaune */
+    --brand-secondary-rgb: 26 31 74;  /* #1a1f4a marine foncé */
 }
 
 /* Classes utilitaires Primea (pilotées par les variables ci-dessus) */

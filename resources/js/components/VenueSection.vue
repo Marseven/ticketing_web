@@ -166,7 +166,7 @@ export default {
           `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`,
           {
             headers: {
-              'User-Agent': 'MyTicketO Platform'
+              'User-Agent': 'Primea Platform'
             }
           }
         )
@@ -234,7 +234,7 @@ export default {
 </script>
 
 <style scoped>
-/* Variables CSS MyTicketO */
+/* Variables CSS Primea */
 :root {
   --primea-blue: #004B5E;
   --primea-yellow: #F5C070;

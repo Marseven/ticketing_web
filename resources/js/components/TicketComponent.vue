@@ -100,11 +100,11 @@
             </p>
           </div>
 
-          <!-- Logo MyTicketO -->
+          <!-- Logo Primea -->
           <div class="mt-3">
             <img
-              src="/images/logo.png?v=2"
-              alt="MyTicketO"
+              src="/images/logo.png?v=3"
+              alt="Primea"
               :class="size === 'small' ? 'h-5' : 'h-7'"
             />
             <p :class="['text-gray-400 mt-0.5', size === 'small' ? 'text-[8px]' : 'text-[10px]']">
@@ -242,7 +242,7 @@ export default {
 </script>
 
 <style scoped>
-/* Variables CSS MyTicketO */
+/* Variables CSS Primea */
 :root {
   --primea-blue: #004B5E;
   --primea-yellow: #F5C070;
@@ -250,7 +250,7 @@ export default {
   --font-primary: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Classes MyTicketO */
+/* Classes Primea */
 .font-primea {
   font-family: var(--font-primary);
 }

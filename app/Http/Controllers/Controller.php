@@ -8,9 +8,9 @@ use Illuminate\Routing\Controller as BaseController;
 
 /**
  * @OA\Info(
- *     title="MyTicketO API",
+ *     title="Primea API",
  *     version="1.0.0",
- *     description="API documentation for MyTicketO System - A comprehensive event ticketing platform",
+ *     description="API documentation for Primea System - A comprehensive event ticketing platform",
  *     @OA\Contact(
  *         email="support@primea.com"
  *     ),
