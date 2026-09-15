@@ -41,14 +41,25 @@ class Setting extends Model
 
     protected static function booted(): void
     {
-        static::saved(fn () => Cache::forget('branding'));
-        static::deleted(fn () => Cache::forget('branding'));
+        static::saved(fn () => Cache::forget('branding_overrides'));
+        static::deleted(fn () => Cache::forget('branding_overrides'));
     }
 
-    /** Branding effectif : défauts fusionnés avec les surcharges en base. */
+    /**
+     * Branding effectif : les DÉFAUTS (code) fusionnés avec les surcharges (base).
+     * On ne met en cache QUE les surcharges — les défauts sont fusionnés à chaque
+     * lecture, donc toute nouvelle clé de défaut (ex: color_primary ajoutée par un
+     * déploiement) apparaît immédiatement, sans dépendre d'un vidage de cache.
+     */
     public static function branding(): array
     {
-        return Cache::rememberForever('branding', function () {
+        return array_merge(self::BRANDING_DEFAULTS, self::storedOverrides());
+    }
+
+    /** Surcharges de branding en base (clés connues, non vides), en cache. */
+    private static function storedOverrides(): array
+    {
+        return Cache::rememberForever('branding_overrides', function () {
             $stored = [];
             try {
                 if (Schema::hasTable('settings')) {
@@ -63,10 +74,10 @@ class Setting extends Model
                     }
                 }
             } catch (\Throwable $e) {
-                // base indisponible → défauts
+                // base indisponible → aucune surcharge (on garde les défauts)
             }
 
-            return array_merge(self::BRANDING_DEFAULTS, $stored);
+            return $stored;
         });
     }
 

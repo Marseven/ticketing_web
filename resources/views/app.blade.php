@@ -26,13 +26,13 @@
     <meta name="twitter:image" content="{{ url($b['og_image']) }}">
 
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="{{ $b['color_primary'] }}">
+    <meta name="theme-color" content="{{ $b['color_primary'] ?? '#272d63' }}">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="{{ $b['app_name'] }}">
     <meta name="application-name" content="{{ $b['app_name'] }}">
-    <meta name="msapplication-TileColor" content="{{ $b['color_primary'] }}">
+    <meta name="msapplication-TileColor" content="{{ $b['color_primary'] ?? '#272d63' }}">
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="format-detection" content="telephone=no">
 
