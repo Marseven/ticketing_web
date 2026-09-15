@@ -108,23 +108,23 @@ export default {
 }
 
 .text-primea-blue {
-  color: #004B5E;
+  color: #272d63;
 }
 
 .bg-primea-blue {
-  background-color: #004B5E;
+  background-color: #272d63;
 }
 
 .hover\:text-primea-blue:hover {
-  color: #004B5E;
+  color: #272d63;
 }
 
 .hover\:border-primea-blue:hover {
-  border-color: #004B5E;
+  border-color: #272d63;
 }
 
 .border-primea-blue {
-  border-color: #004B5E;
+  border-color: #272d63;
 }
 
 .rounded-primea {
@@ -132,6 +132,6 @@ export default {
 }
 
 .bg-primea-blue\/5 {
-  background-color: rgba(0, 75, 94, 0.05);
+  background-color: rgba(39, 45, 99, 0.05);
 }
 </style>

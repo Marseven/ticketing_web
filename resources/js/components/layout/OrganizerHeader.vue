@@ -309,7 +309,7 @@ onUnmounted(() => {
 <style scoped>
 /* Ombre Primea pour le header */
 .shadow-primea {
-  box-shadow: 0 2px 15px rgba(0, 75, 94, 0.08);
+  box-shadow: 0 2px 15px rgba(39, 45, 99, 0.08);
 }
 
 /* Transitions pour les dropdowns */
@@ -342,31 +342,31 @@ onUnmounted(() => {
 
 /* Couleurs Primea */
 .text-primea-blue {
-  color: #004B5E;
+  color: #272d63;
 }
 
 .text-primea-yellow {
-  color: #F5C070;
+  color: #fab511;
 }
 
 .bg-primea-blue {
-  background-color: #004B5E;
+  background-color: #272d63;
 }
 
 .bg-primea-yellow {
-  background-color: #F5C070;
+  background-color: #fab511;
 }
 
 .hover\:text-primea-yellow:hover {
-  color: #F5C070;
+  color: #fab511;
 }
 
 .hover\:bg-primea-yellow:hover {
-  background-color: #F5C070;
+  background-color: #fab511;
 }
 
 .hover\:text-primea-blue:hover {
-  color: #004B5E;
+  color: #272d63;
 }
 
 /* Coins arrondis Primea */
@@ -380,6 +380,6 @@ onUnmounted(() => {
 
 /* Ombres supplémentaires */
 .shadow-primea-lg {
-  box-shadow: 0 8px 30px rgba(0, 75, 94, 0.15);
+  box-shadow: 0 8px 30px rgba(39, 45, 99, 0.15);
 }
 </style>

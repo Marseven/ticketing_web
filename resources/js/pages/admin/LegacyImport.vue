@@ -279,15 +279,15 @@ const upload = async () => {
     })
     const data = await res.json()
     if (data.success) {
-      Swal.fire({ icon: 'success', title: 'Dump chargé', confirmButtonColor: '#004B5E' })
+      Swal.fire({ icon: 'success', title: 'Dump chargé', confirmButtonColor: '#272d63' })
       file.value = null
       if (fileInput.value) fileInput.value.value = ''
       loadStatus()
     } else {
-      Swal.fire({ icon: 'error', title: 'Erreur', text: data.message, confirmButtonColor: '#004B5E' })
+      Swal.fire({ icon: 'error', title: 'Erreur', text: data.message, confirmButtonColor: '#272d63' })
     }
   } catch (e) {
-    Swal.fire({ icon: 'error', title: 'Erreur', text: e.message, confirmButtonColor: '#004B5E' })
+    Swal.fire({ icon: 'error', title: 'Erreur', text: e.message, confirmButtonColor: '#272d63' })
   } finally {
     busy.value = null
   }
@@ -360,7 +360,7 @@ const confirmRun = async () => {
     inputPlaceholder: 'REMPLACER',
     showCancelButton: true,
     confirmButtonText: 'Lancer',
-    confirmButtonColor: '#004B5E',
+    confirmButtonColor: '#272d63',
     cancelButtonText: 'Annuler',
   })
   if (!value) return
@@ -377,7 +377,7 @@ const confirmRun = async () => {
       output.value = 'Import lancé en arrière-plan. Traitement automatique dans la minute qui suit…'
       pollImport()
     } else {
-      Swal.fire({ icon: 'error', title: 'Erreur', text: data.message, confirmButtonColor: '#004B5E' })
+      Swal.fire({ icon: 'error', title: 'Erreur', text: data.message, confirmButtonColor: '#272d63' })
       busy.value = null
     }
   } catch (e) {
@@ -402,11 +402,11 @@ const pollImport = () => {
     if (imp.state === 'done') {
       stopPoll(); busy.value = null
       output.value = imp.output || 'Import terminé.'
-      Swal.fire({ icon: 'success', title: 'Import terminé', confirmButtonColor: '#004B5E' })
+      Swal.fire({ icon: 'success', title: 'Import terminé', confirmButtonColor: '#272d63' })
     } else if (imp.state === 'error') {
       stopPoll(); busy.value = null
       output.value = 'Erreur : ' + (imp.message || '')
-      Swal.fire({ icon: 'error', title: 'Erreur d\'import', text: imp.message, confirmButtonColor: '#004B5E' })
+      Swal.fire({ icon: 'error', title: 'Erreur d\'import', text: imp.message, confirmButtonColor: '#272d63' })
     }
   }, 4000)
 }
@@ -425,11 +425,11 @@ const runImages = async () => {
     if (data.success) {
       pollImages()
     } else {
-      Swal.fire({ icon: 'error', title: 'Erreur', text: data.message, confirmButtonColor: '#004B5E' })
+      Swal.fire({ icon: 'error', title: 'Erreur', text: data.message, confirmButtonColor: '#272d63' })
       busy.value = null
     }
   } catch (e) {
-    Swal.fire({ icon: 'error', title: 'Erreur', text: e.message, confirmButtonColor: '#004B5E' })
+    Swal.fire({ icon: 'error', title: 'Erreur', text: e.message, confirmButtonColor: '#272d63' })
     busy.value = null
   }
 }
@@ -444,12 +444,12 @@ const pollImages = () => {
       stopImgPoll(); busy.value = null
       const c = imp.counts || {}
       Swal.fire({
-        icon: 'success', title: 'Images importées', confirmButtonColor: '#004B5E',
+        icon: 'success', title: 'Images importées', confirmButtonColor: '#272d63',
         text: `${c.copied || 0} copiées, ${c.downloaded || 0} téléchargées, ${c.missing || 0} introuvables.`,
       })
     } else if (imp.state === 'error') {
       stopImgPoll(); busy.value = null
-      Swal.fire({ icon: 'error', title: 'Erreur images', text: imp.message, confirmButtonColor: '#004B5E' })
+      Swal.fire({ icon: 'error', title: 'Erreur images', text: imp.message, confirmButtonColor: '#272d63' })
     }
   }, 4000)
 }

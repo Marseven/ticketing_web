@@ -105,7 +105,7 @@ const current = ref({})
 const form = reactive({
   app_name: '', header_title: '', header_subtitle: '',
   contact_email: '', meta_title: '', meta_description: '',
-  color_primary: '#004B5E', color_accent: '#F5C070', color_secondary: '#1F9E9A',
+  color_primary: '#272d63', color_accent: '#fab511', color_secondary: '#1a1f4a',
 })
 
 const colorFields = [
@@ -145,12 +145,12 @@ const saveText = async () => {
       // Appliquer les couleurs en direct (met à jour l'UI sans reload).
       Object.assign(brandingStore, data.data)
       brandingStore.applyColors()
-      Swal.fire({ icon: 'success', title: 'Identité mise à jour', confirmButtonColor: '#004B5E' })
+      Swal.fire({ icon: 'success', title: 'Identité mise à jour', confirmButtonColor: '#272d63' })
     } else {
-      Swal.fire({ icon: 'error', title: 'Erreur', text: data.message, confirmButtonColor: '#004B5E' })
+      Swal.fire({ icon: 'error', title: 'Erreur', text: data.message, confirmButtonColor: '#272d63' })
     }
   } catch (e) {
-    Swal.fire({ icon: 'error', title: 'Erreur', text: e.message, confirmButtonColor: '#004B5E' })
+    Swal.fire({ icon: 'error', title: 'Erreur', text: e.message, confirmButtonColor: '#272d63' })
   } finally { busy.value = null }
 }
 
@@ -172,12 +172,12 @@ const uploadAsset = async (field) => {
     if (data.success) {
       current.value = data.data.branding
       files[field] = null
-      Swal.fire({ icon: 'success', title: 'Fichier mis à jour', confirmButtonColor: '#004B5E' })
+      Swal.fire({ icon: 'success', title: 'Fichier mis à jour', confirmButtonColor: '#272d63' })
     } else {
-      Swal.fire({ icon: 'error', title: 'Erreur', text: data.message, confirmButtonColor: '#004B5E' })
+      Swal.fire({ icon: 'error', title: 'Erreur', text: data.message, confirmButtonColor: '#272d63' })
     }
   } catch (e) {
-    Swal.fire({ icon: 'error', title: 'Erreur', text: e.message, confirmButtonColor: '#004B5E' })
+    Swal.fire({ icon: 'error', title: 'Erreur', text: e.message, confirmButtonColor: '#272d63' })
   } finally { busy.value = null }
 }
 

@@ -350,7 +350,7 @@ const loadBalances = async () => {
       title: 'Erreur',
       text: 'Impossible de charger les soldes. Affichage des valeurs par défaut.',
       icon: 'warning',
-      confirmButtonColor: '#004B5E'
+      confirmButtonColor: '#272d63'
     })
   } finally {
     loading.value = false
@@ -399,7 +399,7 @@ const submitPayoutRequest = async () => {
         title: 'Succès !',
         text: 'Demande de versement envoyée avec succès',
         icon: 'success',
-        confirmButtonColor: '#004B5E'
+        confirmButtonColor: '#272d63'
       })
       showPayoutModal.value = false
       loadBalances()
@@ -409,7 +409,7 @@ const submitPayoutRequest = async () => {
         title: 'Erreur',
         text: response.data.message || 'Erreur lors de la demande',
         icon: 'error',
-        confirmButtonColor: '#004B5E'
+        confirmButtonColor: '#272d63'
       })
     }
   } catch (error) {
@@ -418,7 +418,7 @@ const submitPayoutRequest = async () => {
       title: 'Erreur technique',
       text: 'Une erreur est survenue lors de la demande',
       icon: 'error',
-      confirmButtonColor: '#004B5E'
+      confirmButtonColor: '#272d63'
     })
   } finally {
     requestingPayout.value = false
@@ -446,7 +446,7 @@ const viewPayoutDetails = (payout) => {
       </div>
     `,
     icon: 'info',
-    confirmButtonColor: '#004B5E'
+    confirmButtonColor: '#272d63'
   })
 }
 
@@ -521,35 +521,35 @@ onMounted(() => {
 
 /* Couleurs Primea */
 .text-primea-blue {
-  color: #004B5E;
+  color: #272d63;
 }
 
 .text-primea-yellow {
-  color: #F5C070;
+  color: #fab511;
 }
 
 .bg-primea-blue {
-  background-color: #004B5E;
+  background-color: #272d63;
 }
 
 .bg-primea-yellow {
-  background-color: #F5C070;
+  background-color: #fab511;
 }
 
 .hover\:bg-primea-blue:hover {
-  background-color: #004B5E;
+  background-color: #272d63;
 }
 
 .hover\:bg-primea-yellow:hover {
-  background-color: #F5C070;
+  background-color: #fab511;
 }
 
 .hover\:text-primea-blue:hover {
-  color: #004B5E;
+  color: #272d63;
 }
 
 .hover\:text-primea-yellow:hover {
-  color: #F5C070;
+  color: #fab511;
 }
 
 /* Coins arrondis Primea */

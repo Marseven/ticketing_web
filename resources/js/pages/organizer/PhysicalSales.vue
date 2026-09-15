@@ -448,7 +448,7 @@ export default {
 
     const openAddSaleModal = () => {
       if (!selectedEvent.value) {
-        Swal.fire({ icon: 'warning', title: 'Attention', text: 'Veuillez d\'abord sélectionner un événement', confirmButtonColor: '#004B5E' })
+        Swal.fire({ icon: 'warning', title: 'Attention', text: 'Veuillez d\'abord sélectionner un événement', confirmButtonColor: '#272d63' })
         return
       }
       
@@ -511,16 +511,16 @@ export default {
         
         const data = await response.json()
         if (data.success) {
-          await Swal.fire({ icon: 'success', title: 'Succès', text: editingSale.value ? 'Vente mise à jour avec succès' : 'Vente ajoutée avec succès', confirmButtonColor: '#004B5E' })
+          await Swal.fire({ icon: 'success', title: 'Succès', text: editingSale.value ? 'Vente mise à jour avec succès' : 'Vente ajoutée avec succès', confirmButtonColor: '#272d63' })
           showSaleModal.value = false
           loadPhysicalSales()
           loadEventDetails() // Recharger pour mettre à jour les stats
         } else {
-          await Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Erreur lors de l\'enregistrement', confirmButtonColor: '#004B5E' })
+          await Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Erreur lors de l\'enregistrement', confirmButtonColor: '#272d63' })
         }
       } catch (error) {
         console.error('Erreur sauvegarde vente:', error)
-        await Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur technique', confirmButtonColor: '#004B5E' })
+        await Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur technique', confirmButtonColor: '#272d63' })
       } finally {
         saving.value = false
       }
@@ -532,7 +532,7 @@ export default {
         title: 'Attention',
         text: 'Êtes-vous sûr de vouloir supprimer cette vente physique ?',
         showCancelButton: true,
-        confirmButtonColor: '#004B5E',
+        confirmButtonColor: '#272d63',
         cancelButtonText: 'Annuler',
         confirmButtonText: 'Confirmer'
       })
@@ -549,15 +549,15 @@ export default {
 
         const data = await response.json()
         if (data.success) {
-          await Swal.fire({ icon: 'success', title: 'Succès', text: 'Vente supprimée avec succès', confirmButtonColor: '#004B5E' })
+          await Swal.fire({ icon: 'success', title: 'Succès', text: 'Vente supprimée avec succès', confirmButtonColor: '#272d63' })
           loadPhysicalSales()
           loadEventDetails()
         } else {
-          await Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Erreur lors de la suppression', confirmButtonColor: '#004B5E' })
+          await Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Erreur lors de la suppression', confirmButtonColor: '#272d63' })
         }
       } catch (error) {
         console.error('Erreur suppression vente:', error)
-        await Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur technique', confirmButtonColor: '#004B5E' })
+        await Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur technique', confirmButtonColor: '#272d63' })
       }
     }
 
@@ -586,7 +586,7 @@ export default {
         }
       } catch (error) {
         console.error('Erreur export:', error)
-        await Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors de l\'export des données', confirmButtonColor: '#004B5E' })
+        await Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors de l\'export des données', confirmButtonColor: '#272d63' })
       }
     }
 

@@ -198,7 +198,7 @@ export default {
         title: 'Message envoye !',
         text: 'Nous avons bien recu votre message et vous repondrons dans les plus brefs delais.',
         confirmButtonText: 'Fermer',
-        confirmButtonColor: '#004B5E',
+        confirmButtonColor: '#272d63',
       });
 
       // Reset form

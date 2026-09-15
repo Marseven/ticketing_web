@@ -300,7 +300,7 @@ export default {
             icon: 'success',
             title: 'Lien copié !',
             text: 'Le lien du ticket a été copié dans le presse-papiers',
-            confirmButtonColor: '#004B5E',
+            confirmButtonColor: '#272d63',
             timer: 2000,
             showConfirmButton: false
           })
@@ -309,7 +309,7 @@ export default {
             icon: 'info',
             title: 'Lien du ticket',
             text: ticketUrl,
-            confirmButtonColor: '#004B5E'
+            confirmButtonColor: '#272d63'
           })
         }
       }
@@ -356,27 +356,27 @@ export default {
 }
 
 .text-primea-blue {
-  color: #004B5E;
+  color: #272d63;
 }
 
 .bg-primea-blue {
-  background-color: #004B5E;
+  background-color: #272d63;
 }
 
 .bg-primea-yellow {
-  background-color: #F5C070;
+  background-color: #fab511;
 }
 
 .hover\:bg-primea-yellow:hover {
-  background-color: #F5C070 !important;
+  background-color: #fab511 !important;
 }
 
 .hover\:text-primea-blue:hover {
-  color: #004B5E !important;
+  color: #272d63 !important;
 }
 
 .border-primea-blue {
-  border-color: #004B5E;
+  border-color: #272d63;
 }
 
 .rounded-primea {
@@ -392,11 +392,11 @@ export default {
 }
 
 .shadow-primea {
-  box-shadow: 0 4px 20px rgba(0, 75, 94, 0.1);
+  box-shadow: 0 4px 20px rgba(39, 45, 99, 0.1);
 }
 
 .shadow-primea-lg {
-  box-shadow: 0 8px 30px rgba(0, 75, 94, 0.15);
+  box-shadow: 0 8px 30px rgba(39, 45, 99, 0.15);
 }
 
 .transition-all {

@@ -218,31 +218,31 @@ const lastUpdate = computed(() => {
 
 /* Couleurs Primea */
 .text-primea-blue {
-  color: #004B5E;
+  color: #272d63;
 }
 
 .text-primea-yellow {
-  color: #F5C070;
+  color: #fab511;
 }
 
 .bg-primea-blue {
-  background-color: #004B5E;
+  background-color: #272d63;
 }
 
 .bg-primea-yellow {
-  background-color: #F5C070;
+  background-color: #fab511;
 }
 
 .hover\:text-primea-yellow:hover {
-  color: #F5C070;
+  color: #fab511;
 }
 
 .hover\:bg-primea-yellow:hover {
-  background-color: #F5C070;
+  background-color: #fab511;
 }
 
 .hover\:text-primea-blue:hover {
-  color: #004B5E;
+  color: #272d63;
 }
 
 /* Coins arrondis Primea */

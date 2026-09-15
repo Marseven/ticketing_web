@@ -122,27 +122,27 @@ export default {
 }
 
 .shadow-primea-lg {
-  box-shadow: 0 8px 30px rgba(0, 75, 94, 0.15);
+  box-shadow: 0 8px 30px rgba(39, 45, 99, 0.15);
 }
 
 .text-primea-blue {
-  color: #004B5E;
+  color: #272d63;
 }
 
 .bg-primea-blue {
-  background-color: #004B5E;
+  background-color: #272d63;
 }
 
 .bg-primea-yellow {
-  background-color: #F5C070;
+  background-color: #fab511;
 }
 
 .hover\:bg-primea-yellow:hover {
-  background-color: #F5C070;
+  background-color: #fab511;
 }
 
 .hover\:text-primea-blue:hover {
-  color: #004B5E;
+  color: #272d63;
 }
 
 .animate-spin {

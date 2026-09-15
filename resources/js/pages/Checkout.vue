@@ -1373,7 +1373,7 @@ export default {
       // window.location.href = paymentUrl
       
       // Pour la démonstration, on simule juste
-      Swal.fire({ icon: 'info', title: 'Information', text: `Redirection vers le paiement Visa sécurisé... Montant: ${formatPrice(totalAmount.value)} FCFA - Événement: ${event.value?.title}`, confirmButtonColor: '#004B5E' })
+      Swal.fire({ icon: 'info', title: 'Information', text: `Redirection vers le paiement Visa sécurisé... Montant: ${formatPrice(totalAmount.value)} FCFA - Événement: ${event.value?.title}`, confirmButtonColor: '#272d63' })
     }
 
 
@@ -1926,8 +1926,8 @@ export default {
 <style scoped>
 /* Variables CSS Primea */
 :root {
-  --primea-blue: #004B5E;
-  --primea-yellow: #F5C070;
+  --primea-blue: #272d63;
+  --primea-yellow: #fab511;
   --primea-white: #ffffff;
   --primea-blue-dark: #1a1e47;
   --primea-yellow-dark: #e09f0e;
@@ -1992,25 +1992,25 @@ export default {
 }
 
 .shadow-primea {
-  box-shadow: 0 4px 20px rgba(0, 75, 94, 0.1);
+  box-shadow: 0 4px 20px rgba(39, 45, 99, 0.1);
 }
 
 .shadow-primea-lg {
-  box-shadow: 0 8px 30px rgba(0, 75, 94, 0.15);
+  box-shadow: 0 8px 30px rgba(39, 45, 99, 0.15);
 }
 
 /* Bouton paiement — contraste garanti */
 .checkout-submit-btn {
-  background-color: #004B5E !important;
+  background-color: #272d63 !important;
   color: #fff !important;
 }
 .checkout-submit-btn:hover:not(:disabled) {
-  background-color: #F5C070 !important;
-  color: #004B5E !important;
+  background-color: #fab511 !important;
+  color: #272d63 !important;
   transform: scale(1.05);
 }
 .checkout-submit-btn:disabled {
-  background-color: #004B5E !important;
+  background-color: #272d63 !important;
   color: rgba(255, 255, 255, 0.6) !important;
   opacity: 0.7;
 }

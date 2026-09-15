@@ -604,35 +604,35 @@ export default {
 }
 
 .text-primea-blue {
-  color: #004B5E;
+  color: #272d63;
 }
 
 .bg-primea-blue {
-  background-color: #004B5E;
+  background-color: #272d63;
 }
 
 .text-primea-yellow {
-  color: #F5C070;
+  color: #fab511;
 }
 
 .bg-primea-yellow {
-  background-color: #F5C070;
+  background-color: #fab511;
 }
 
 .hover\:bg-primea-yellow:hover {
-  background-color: #F5C070;
+  background-color: #fab511;
 }
 
 .hover\:text-primea-blue:hover {
-  color: #004B5E;
+  color: #272d63;
 }
 
 .hover\:bg-primea-blue:hover {
-  background-color: #004B5E;
+  background-color: #272d63;
 }
 
 .border-primea-blue {
-  border-color: #004B5E;
+  border-color: #272d63;
 }
 
 .rounded-primea {
@@ -644,7 +644,7 @@ export default {
 }
 
 .retry-payment-btn:hover {
-  background-color: #004B5E;
+  background-color: #272d63;
   color: white !important;
 }
 </style>

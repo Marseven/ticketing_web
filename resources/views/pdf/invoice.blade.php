@@ -27,7 +27,7 @@
         }
 
         .invoice-header {
-            background: linear-gradient(135deg, #004B5E 0%, #1a1e47 100%);
+            background: linear-gradient(135deg, #272d63 0%, #1a1e47 100%);
             color: white;
             padding: 30px;
             display: flex;
@@ -71,9 +71,9 @@
         .section-title {
             font-size: 18px;
             font-weight: bold;
-            color: #004B5E;
+            color: #272d63;
             margin-bottom: 15px;
-            border-bottom: 2px solid #F5C070;
+            border-bottom: 2px solid #fab511;
             padding-bottom: 5px;
         }
 
@@ -100,7 +100,7 @@
 
         .items-table th {
             background: #f8f9fa;
-            color: #004B5E;
+            color: #272d63;
             font-weight: bold;
             text-align: left;
             padding: 12px;
@@ -141,14 +141,14 @@
         .total-row.grand-total {
             font-size: 18px;
             font-weight: bold;
-            color: #004B5E;
-            border-top: 2px solid #004B5E;
+            color: #272d63;
+            border-top: 2px solid #272d63;
             margin-top: 10px;
             padding-top: 15px;
         }
 
         .grand-total .amount {
-            color: #F5C070;
+            color: #fab511;
             font-size: 24px;
         }
 

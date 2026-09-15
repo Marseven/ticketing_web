@@ -905,13 +905,13 @@ export default {
 
       // Vérifier le type de fichier
       if (!file.type.startsWith('image/')) {
-        Swal.fire({ icon: 'warning', title: 'Attention', text: 'Veuillez sélectionner un fichier image', confirmButtonColor: '#004B5E' })
+        Swal.fire({ icon: 'warning', title: 'Attention', text: 'Veuillez sélectionner un fichier image', confirmButtonColor: '#272d63' })
         return
       }
 
       // Vérifier la taille (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        Swal.fire({ icon: 'warning', title: 'Attention', text: 'La taille du fichier ne doit pas dépasser 5MB', confirmButtonColor: '#004B5E' })
+        Swal.fire({ icon: 'warning', title: 'Attention', text: 'La taille du fichier ne doit pas dépasser 5MB', confirmButtonColor: '#272d63' })
         return
       }
 
@@ -1076,35 +1076,35 @@ export default {
 }
 
 .text-primea-blue {
-  color: #004B5E;
+  color: #272d63;
 }
 
 .bg-primea-blue {
-  background-color: #004B5E;
+  background-color: #272d63;
 }
 
 .text-primea-yellow {
-  color: #F5C070;
+  color: #fab511;
 }
 
 .bg-primea-yellow {
-  background-color: #F5C070;
+  background-color: #fab511;
 }
 
 .hover\:bg-primea-yellow:hover {
-  background-color: #F5C070;
+  background-color: #fab511;
 }
 
 .hover\:text-primea-blue:hover {
-  color: #004B5E;
+  color: #272d63;
 }
 
 .hover\:bg-primea-blue:hover {
-  background-color: #004B5E;
+  background-color: #272d63;
 }
 
 .border-primea-blue {
-  border-color: #004B5E;
+  border-color: #272d63;
 }
 
 .rounded-primea {

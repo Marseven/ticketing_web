@@ -678,7 +678,7 @@ const createEvent = async () => {
       title: 'Erreur',
       text: 'Veuillez ajouter au moins un type de billet',
       icon: 'error',
-      confirmButtonColor: '#004B5E'
+      confirmButtonColor: '#272d63'
     });
     return;
   }
@@ -688,7 +688,7 @@ const createEvent = async () => {
       title: 'Erreur',
       text: 'Veuillez remplir le titre de l\'événement',
       icon: 'error',
-      confirmButtonColor: '#004B5E'
+      confirmButtonColor: '#272d63'
     });
     return;
   }
@@ -701,7 +701,7 @@ const createEvent = async () => {
         title: 'Erreur',
         text: 'Veuillez sélectionner une catégorie',
         icon: 'error',
-        confirmButtonColor: '#004B5E'
+        confirmButtonColor: '#272d63'
       });
       return;
     }
@@ -711,7 +711,7 @@ const createEvent = async () => {
         title: 'Erreur',
         text: 'Veuillez sélectionner un lieu ou créer un nouveau lieu',
         icon: 'error',
-        confirmButtonColor: '#004B5E'
+        confirmButtonColor: '#272d63'
       });
       return;
     }
@@ -721,7 +721,7 @@ const createEvent = async () => {
         title: 'Erreur',
         text: 'Veuillez remplir toutes les dates et heures de programmation',
         icon: 'error',
-        confirmButtonColor: '#004B5E'
+        confirmButtonColor: '#272d63'
       });
       return;
     }
@@ -732,7 +732,7 @@ const createEvent = async () => {
         title: 'Erreur',
         text: 'La date de fin doit être égale ou postérieure à la date de début',
         icon: 'error',
-        confirmButtonColor: '#004B5E'
+        confirmButtonColor: '#272d63'
       });
       return;
     }
@@ -816,7 +816,7 @@ const createEvent = async () => {
             title: 'Événement créé',
             text: 'L\'événement est créé mais la tarification dynamique n\'a pas pu être enregistrée. Vous pourrez la configurer depuis l\'édition.',
             icon: 'warning',
-            confirmButtonColor: '#004B5E'
+            confirmButtonColor: '#272d63'
           }).then(() => router.push(`/organizer/events/${createdEvent.id}`));
           return;
         }
@@ -826,7 +826,7 @@ const createEvent = async () => {
         title: 'Succès !',
         text: 'Événement créé avec succès !',
         icon: 'success',
-        confirmButtonColor: '#004B5E'
+        confirmButtonColor: '#272d63'
       }).then(() => {
         router.push(`/organizer/events/${createdEvent.id}`);
       });
@@ -853,7 +853,7 @@ const createEvent = async () => {
       title: 'Erreur de validation',
       text: errorMessage,
       icon: 'error',
-      confirmButtonColor: '#004B5E'
+      confirmButtonColor: '#272d63'
     });
   } finally {
     creating.value = false;
@@ -901,39 +901,39 @@ onMounted(() => {
 
 /* Couleurs Primea */
 .text-primea-blue {
-  color: #004B5E;
+  color: #272d63;
 }
 
 .text-primea-yellow {
-  color: #F5C070;
+  color: #fab511;
 }
 
 .bg-primea-blue {
-  background-color: #004B5E;
+  background-color: #272d63;
 }
 
 .bg-primea-yellow {
-  background-color: #F5C070;
+  background-color: #fab511;
 }
 
 .border-primea-blue {
-  border-color: #004B5E;
+  border-color: #272d63;
 }
 
 .hover\:bg-primea-blue:hover {
-  background-color: #004B5E;
+  background-color: #272d63;
 }
 
 .hover\:bg-primea-yellow:hover {
-  background-color: #F5C070;
+  background-color: #fab511;
 }
 
 .hover\:text-primea-blue:hover {
-  color: #004B5E;
+  color: #272d63;
 }
 
 .hover\:text-primea-yellow:hover {
-  color: #F5C070;
+  color: #fab511;
 }
 
 /* Coins arrondis Primea */
@@ -943,7 +943,7 @@ onMounted(() => {
 
 /* Ombres Primea */
 .shadow-primea {
-  box-shadow: 0 2px 15px rgba(0, 75, 94, 0.08);
+  box-shadow: 0 2px 15px rgba(39, 45, 99, 0.08);
 }
 
 /* Police Primea */
