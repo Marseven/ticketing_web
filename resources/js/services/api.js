@@ -334,11 +334,7 @@ export const organizerService = {
 
   // Créer un nouvel événement avec fichier
   createEventWithFile(formData) {
-    return api.post('/organizer/events', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
+    return api.post('/organizer/events', formData)
   },
 
   // Mettre à jour un événement
@@ -355,11 +351,7 @@ export const organizerService = {
   updateEventWithFile(id, formData) {
     // Ajouter _method pour Laravel method spoofing avec PUT et FormData
     formData.append('_method', 'PUT');
-    return api.post(`/organizer/events/${id}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
+    return api.post(`/organizer/events/${id}`, formData)
   },
 
   // Supprimer un événement (brouillon sans ventes uniquement)
@@ -404,11 +396,7 @@ export const organizerService = {
 
   // Uploader un logo/avatar
   uploadAvatar(formData) {
-    return api.post('/organizer/profile/avatar', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
+    return api.post('/organizer/profile/avatar', formData)
   },
 
   // Récupérer les catégories
@@ -435,11 +423,7 @@ export const clientService = {
 
   // Uploader un avatar
   uploadAvatar(formData) {
-    return api.post('/profile/avatar', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
+    return api.post('/profile/avatar', formData)
   },
   // Récupérer les activités récentes
   getRecentActivities() {

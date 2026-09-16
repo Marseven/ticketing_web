@@ -98,6 +98,8 @@ export default {
     mimeType: { type: String, default: 'image/jpeg' },
     /** Qualité JPEG (0–1). */
     quality: { type: Number, default: 0.9 },
+    /** Largeur max de sortie en px (redimensionne pour limiter le poids). */
+    maxWidth: { type: Number, default: 1600 },
     /** Titre affiché en haut du modal. */
     title: { type: String, default: 'Recadrer l\'image' },
   },
@@ -152,8 +154,20 @@ export default {
           return
         }
 
+        // Redimensionner si l'image dépasse la largeur max, pour éviter des
+        // fichiers trop lourds (limites upload PHP : le serveur droppe sinon
+        // le fichier tout en gardant les autres champs → image non enregistrée).
+        let outputCanvas = canvas
+        if (props.maxWidth && canvas.width > props.maxWidth) {
+          const scale = props.maxWidth / canvas.width
+          outputCanvas = document.createElement('canvas')
+          outputCanvas.width = Math.round(canvas.width * scale)
+          outputCanvas.height = Math.round(canvas.height * scale)
+          outputCanvas.getContext('2d').drawImage(canvas, 0, 0, outputCanvas.width, outputCanvas.height)
+        }
+
         const blob = await new Promise(resolve => {
-          canvas.toBlob(resolve, props.mimeType, props.quality)
+          outputCanvas.toBlob(resolve, props.mimeType, props.quality)
         })
 
         if (!blob) {
