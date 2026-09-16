@@ -350,6 +350,16 @@ class PaymentController extends Controller
     {
         $eBillingService = new EBillingService();
         
+        // URL de notification (webhook). Si un secret est configuré, on le
+        // transmet en query "token" : e-billing rappelle cette URL telle quelle,
+        // ce qui permet au webhook de valider le secret (impossible via en-tête
+        // custom côté e-billing). Sans secret, l'URL reste inchangée.
+        $notificationUrl = route('webhook.ebilling');
+        $webhookSecret = config('services.ebilling.webhook_secret');
+        if (!empty($webhookSecret)) {
+            $notificationUrl .= (str_contains($notificationUrl, '?') ? '&' : '?') . 'token=' . urlencode($webhookSecret);
+        }
+
         // Préparer les données pour E-Billing
         $eBillingData = [
             'payer_email' => $payment->order->guest_email ?? 'customer@example.com',
@@ -359,7 +369,7 @@ class PaymentController extends Controller
             'external_reference' => $payment->provider_txn_ref,
             'payer_name' => $payment->order->guest_name ?? 'Client',
             'expiry_period' => 60, // 60 minutes
-            'notification_url' => route('webhook.ebilling')
+            'notification_url' => $notificationUrl
         ];
 
         // Logs avant l'appel API E-Billing
