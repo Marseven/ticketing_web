@@ -1,7 +1,7 @@
 <template>
   <div v-if="banners.length > 0" class="banner-carousel mb-8">
-    <div class="w-full aspect-[16/3] sm:aspect-[20/3] md:aspect-[24/3] lg:aspect-[28/3] xl:aspect-[32/3]">
-      <div class="relative w-full h-full overflow-hidden rounded-lg shadow-lg bg-white">
+    <div class="w-full">
+      <div class="relative w-full overflow-hidden rounded-lg">
         <!-- Badge Ad -->
         <div class="absolute top-1 right-1 sm:top-2 sm:right-2 z-20">
           <span class="bg-gray-800/80 text-white text-[8px] sm:text-[10px] font-semibold px-1 sm:px-2 py-0.5 rounded backdrop-blur-sm">
@@ -64,7 +64,7 @@
           class="block w-full h-full"
           :aria-label="activeBanner.title"
         >
-          <div class="w-full h-full flex items-center justify-center">
+          <div class="w-full">
             <img
               :src="activeBanner.image_url"
               :alt="activeBanner.title"
@@ -200,6 +200,15 @@ export default {
   position: relative;
   max-width: 100%;
   animation: fadeIn 0.4s ease-in-out;
+}
+
+/* La bannière s'adapte à l'image : pleine largeur, hauteur naturelle,
+   sans letterbox ni ombre. Surcharge les classes utilitaires de l'<img>. */
+.banner-carousel img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
 }
 
 @keyframes fadeIn {
