@@ -25,6 +25,7 @@ class Event extends Model
         'status',
         'use_variable_pricing',
         'commission_percentage',
+        'service_fee_bearer',
         'approval_status',
         'approved_by',
         'approved_at',
@@ -48,7 +49,8 @@ class Event extends Model
     ];
 
     protected $appends = [
-        'image'
+        'image',
+        'service_fee_percent',
     ];
 
     /**
@@ -176,6 +178,32 @@ class Event extends Model
         $organizerDefault = $this->organizer?->default_commission_percentage;
 
         return (float) ($organizerDefault ?? 10.00);
+    }
+
+    /**
+     * Taux (%) des frais de service (e-billing) configuré pour la plateforme.
+     */
+    public function serviceFeePercent(): float
+    {
+        return (float) config('payment.service_fee_percent', 2.5);
+    }
+
+    /**
+     * Le client supporte-t-il les frais de service (ajoutés au prix) ?
+     * Sinon la plateforme les absorbe et le client paie le prix affiché.
+     */
+    public function customerBearsServiceFee(): bool
+    {
+        return $this->service_fee_bearer === 'customer';
+    }
+
+    /**
+     * Exposé au frontend : taux des frais de service applicable à cet événement.
+     * 0 quand la plateforme supporte les frais (rien à afficher au client).
+     */
+    public function getServiceFeePercentAttribute(): float
+    {
+        return $this->customerBearsServiceFee() ? $this->serviceFeePercent() : 0.0;
     }
 
     /**

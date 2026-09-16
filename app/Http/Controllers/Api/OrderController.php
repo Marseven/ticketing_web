@@ -252,10 +252,19 @@ class OrderController extends Controller
             $commissionAmount = round($baseAmount * $commissionPct / 100, 2); // Retenu par la plateforme
             $taxAmount = 0;
 
-            // Le client paie le prix de base (pas de frais ajoutés)
-            $totalAmount = $baseAmount;
+            // Frais de service (e-billing) : AJOUTÉS au client uniquement si
+            // l'événement est configuré service_fee_bearer = 'customer'. Sinon la
+            // plateforme les absorbe et le client paie exactement le prix affiché.
+            $customerBearsFee = $event->customerBearsServiceFee();
+            $serviceFeeAmount = $customerBearsFee
+                ? round($baseAmount * $event->serviceFeePercent() / 100, 2)
+                : 0;
 
-            // Net reversé à l'organisateur = base - commission
+            // Le client paie le prix de base (+ frais de service si à sa charge)
+            $totalAmount = round($baseAmount + $serviceFeeAmount, 2);
+
+            // Net reversé à l'organisateur = base - commission (les frais de
+            // service n'impactent PAS la part organisateur)
             $subtotalAmount = round($baseAmount - $commissionAmount, 2);
 
             // Créer la commande pour l'utilisateur authentifié
@@ -267,6 +276,8 @@ class OrderController extends Controller
                 'fees_amount' => $commissionAmount, // Commission retenue par la plateforme
                 'commission_percentage' => $commissionPct, // Taux figé
                 'tax_amount' => $taxAmount, // Taxes
+                'service_fee_amount' => $serviceFeeAmount, // Frais de service ajoutés au client (0 si plateforme)
+                'service_fee_bearer' => $event->service_fee_bearer ?? 'platform', // Qui supporte les frais (figé)
                 'total_amount' => $totalAmount, // Total payé par le client
                 'status' => 'pending',
                 'reference' => $this->generateOrderReference(),
@@ -761,6 +772,8 @@ class OrderController extends Controller
             'subtotal_amount' => $order->subtotal_amount,
             'fees_amount' => $order->fees_amount,
             'tax_amount' => $order->tax_amount,
+            'service_fee_amount' => $order->service_fee_amount,
+            'service_fee_bearer' => $order->service_fee_bearer,
             'currency' => $order->currency ?? 'XAF',
             'status' => $order->status,
             'quantity' => $order->tickets->count(),

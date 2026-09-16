@@ -226,8 +226,8 @@
                       <span>Sous-total</span>
                       <span>{{ formatPrice(totalAmount) }} FCFA</span>
                     </div>
-                    <div class="flex justify-between items-center text-sm text-gray-500 mb-2">
-                      <span>Frais de service</span>
+                    <div v-if="feesAmount > 0" class="flex justify-between items-center text-sm text-gray-500 mb-2">
+                      <span>Frais de service ({{ SERVICE_FEE_PERCENT }}%)</span>
                       <span>{{ formatPrice(Math.round(feesAmount)) }} FCFA</span>
                     </div>
                     <div class="border-t border-primea-blue/10 pt-2 flex justify-between items-center">
@@ -664,8 +664,8 @@
                   <span>Sous-total</span>
                   <span>{{ formatPrice(totalAmount) }} XAF</span>
                 </div>
-                <div class="flex justify-between items-center text-sm text-gray-500 mb-2">
-                  <span>Frais de service</span>
+                <div v-if="feesAmount > 0" class="flex justify-between items-center text-sm text-gray-500 mb-2">
+                  <span>Frais de service ({{ SERVICE_FEE_PERCENT }}%)</span>
                   <span>{{ formatPrice(Math.round(feesAmount)) }} XAF</span>
                 </div>
                 <div class="border-t border-primea-blue/10 pt-2 flex justify-between items-center">
@@ -1103,10 +1103,20 @@ export default {
       return selectedTicketType.price * orderForm.value.quantity
     })
 
-    // Frais de service (10%, même calcul que le backend)
+    // Frais de service (e-billing) : facturés au client UNIQUEMENT si
+    // l'événement est configuré service_fee_bearer = 'customer'. Le backend
+    // expose event.service_fee_percent (= 0 quand la plateforme absorbe).
+    const SERVICE_FEE_PERCENT = 2.5
     const feesAmount = computed(() => {
       if (totalAmount.value === 0) return 0
-      return totalAmount.value * 0.10
+      const pct = Number(event.value?.service_fee_percent)
+      if (Number.isFinite(pct)) {
+        return totalAmount.value * pct / 100
+      }
+      // Fallback si l'API n'expose pas encore le taux
+      return event.value?.service_fee_bearer === 'customer'
+        ? totalAmount.value * SERVICE_FEE_PERCENT / 100
+        : 0
     })
 
     const totalWithFees = computed(() => {
@@ -1353,7 +1363,7 @@ export default {
         eventTitle: event.value?.title,
         quantity: orderForm.value.quantity,
         ticketTypeId: orderForm.value.ticketTypeId,
-        amount: totalAmount.value,
+        amount: totalWithFees.value,
         currency: 'XAF', // Franc CFA Central
         returnUrl: `${window.location.origin}/checkout/success`,
         cancelUrl: `${window.location.origin}/checkout/cancel`
@@ -1515,7 +1525,7 @@ export default {
           order_id: order.id,
           gateway: orderForm.value.paymentMethod === 'airtel' ? 'airtelmoney' : 'moovmoney',
           phone: orderForm.value.phoneNumber,
-          amount: totalAmount.value
+          amount: totalWithFees.value
         }
 
         const paymentResponse = await fetch('/api/v1/payments/initiate', {
@@ -1560,7 +1570,7 @@ export default {
               reference: order.reference,
               phone: orderForm.value.phoneNumber,
               gateway: orderForm.value.paymentMethod === 'airtel' ? 'airtelmoney' : 'moovmoney',
-              amount: totalAmount.value,
+              amount: totalWithFees.value,
               bill_id: paymentResult.data.bill_id,
               payment_url: paymentResult.data.payment_url
             })
@@ -1630,7 +1640,7 @@ export default {
         const paymentData = {
           order_id: order.id,
           gateway: 'ORABANK_NG',
-          amount: totalAmount.value
+          amount: totalWithFees.value
         }
 
         const paymentResponse = await fetch('/api/v1/payments/initiate', {
@@ -1876,6 +1886,7 @@ export default {
       totalAmount,
       feesAmount,
       totalWithFees,
+      SERVICE_FEE_PERCENT,
       isFreeOrder,
       isFormValid,
       disabledReason,

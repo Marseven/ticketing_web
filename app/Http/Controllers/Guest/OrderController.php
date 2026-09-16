@@ -214,8 +214,17 @@ class OrderController extends Controller
             $commissionPct = $event->effectiveCommission();
             $commissionAmount = round($baseAmount * $commissionPct / 100, 2);
             $taxAmount = 0;
-            $totalAmount = $baseAmount; // Le client paie le prix affiché
-            $subtotalAmount = round($baseAmount - $commissionAmount, 2); // Net organisateur
+
+            // Frais de service (e-billing) : AJOUTÉS au client uniquement si
+            // l'événement est configuré service_fee_bearer = 'customer'. Sinon la
+            // plateforme les absorbe et le client paie exactement le prix affiché.
+            $customerBearsFee = $event->customerBearsServiceFee();
+            $serviceFeeAmount = $customerBearsFee
+                ? round($baseAmount * $event->serviceFeePercent() / 100, 2)
+                : 0;
+
+            $totalAmount = round($baseAmount + $serviceFeeAmount, 2); // Base (+ frais si à charge client)
+            $subtotalAmount = round($baseAmount - $commissionAmount, 2); // Net organisateur (inchangé)
 
             // Créer la commande
             $order = Order::create([
@@ -226,6 +235,8 @@ class OrderController extends Controller
                 'fees_amount' => $commissionAmount, // Commission retenue par la plateforme
                 'commission_percentage' => $commissionPct, // Taux figé
                 'tax_amount' => $taxAmount, // Taxes
+                'service_fee_amount' => $serviceFeeAmount, // Frais de service ajoutés au client (0 si plateforme)
+                'service_fee_bearer' => $event->service_fee_bearer ?? 'platform', // Qui supporte les frais (figé)
                 'total_amount' => $totalAmount, // Total payé par le client
                 'status' => 'pending',
                 'reference' => $this->generateOrderReference(),

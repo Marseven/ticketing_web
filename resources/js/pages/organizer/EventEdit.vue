@@ -388,6 +388,31 @@
                 </div>
               </div>
 
+              <!-- Frais de service -->
+              <div class="bg-white rounded-primea shadow-primea p-6">
+                <h3 class="text-base md:text-lg font-semibold text-primea-blue font-primea mb-3 md:mb-4">Frais de service</h3>
+                <p class="text-xs text-gray-500 font-primea mb-3">Qui prend en charge les frais de service ({{ SERVICE_FEE_PERCENT }}%) sur cet événement ?</p>
+                <div class="space-y-3">
+                  <label class="flex items-start gap-3 p-3 border rounded-primea cursor-pointer"
+                         :class="form.service_fee_bearer === 'platform' ? 'border-primea-blue bg-blue-50' : 'border-gray-200'">
+                    <input type="radio" value="platform" v-model="form.service_fee_bearer" class="mt-1" />
+                    <span>
+                      <span class="block text-sm font-semibold text-gray-800 font-primea">À la charge de la plateforme</span>
+                      <span class="block text-xs text-gray-500 font-primea">Le client paie exactement le prix affiché ; les frais de service sont pris en charge par la plateforme.</span>
+                    </span>
+                  </label>
+
+                  <label class="flex items-start gap-3 p-3 border rounded-primea cursor-pointer"
+                         :class="form.service_fee_bearer === 'customer' ? 'border-primea-blue bg-blue-50' : 'border-gray-200'">
+                    <input type="radio" value="customer" v-model="form.service_fee_bearer" class="mt-1" />
+                    <span>
+                      <span class="block text-sm font-semibold text-gray-800 font-primea">À la charge du client</span>
+                      <span class="block text-xs text-gray-500 font-primea">Une ligne « Frais de service ({{ SERVICE_FEE_PERCENT }}%) » est ajoutée au montant payé par le client.</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+
               <!-- Actions -->
               <div class="bg-white rounded-primea shadow-primea p-6">
                 <h3 class="text-lg font-semibold text-primea-blue font-primea mb-4">Actions</h3>
@@ -486,6 +511,10 @@ const venues = ref([]);
 const showNewVenue = ref(false);
 const imageInput = ref(null);
 
+// Frais de service (e-billing) affichés dans le choix "qui supporte les frais".
+// La valeur autoritaire reste côté serveur (config payment.service_fee_percent).
+const SERVICE_FEE_PERCENT = 2.5;
+
 // Formulaire
 const form = reactive({
   title: '',
@@ -501,6 +530,7 @@ const form = reactive({
   is_active: false,
   payout_mode: 'deferred',
   instant_payout_phone: '',
+  service_fee_bearer: 'platform',
   schedules: [{ starts_at: '', ends_at: '', door_time: '' }],
   ticket_types: []
 });
@@ -578,6 +608,7 @@ const loadEvent = async () => {
       is_active: event.value.is_active ?? false,
       payout_mode: event.value.payout_mode || 'deferred',
       instant_payout_phone: event.value.instant_payout_phone || '',
+      service_fee_bearer: event.value.service_fee_bearer || 'platform',
       schedules: (event.value.schedules && event.value.schedules.length > 0)
         ? event.value.schedules.map(s => ({
             starts_at: s.starts_at ? new Date(s.starts_at).toISOString().slice(0, 16) : '',
@@ -628,6 +659,7 @@ const updateEvent = async () => {
       is_active: form.is_active,
       payout_mode: form.payout_mode,
       instant_payout_phone: form.payout_mode === 'instant' ? form.instant_payout_phone : '',
+      service_fee_bearer: form.service_fee_bearer,
       schedules: form.schedules,
       ticket_types: form.ticket_types.map(tt => ({
         id: tt.id || null,

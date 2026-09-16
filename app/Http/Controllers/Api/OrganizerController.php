@@ -1135,6 +1135,7 @@ class OrganizerController extends Controller
             'published_at' => 'nullable|date',
             'payout_mode' => 'nullable|in:deferred,instant',
             'instant_payout_phone' => 'required_if:payout_mode,instant|nullable|string|size:9|regex:/^[0-9]+$/',
+            'service_fee_bearer' => 'nullable|in:customer,platform',
             'schedules' => 'required|array|min:1',
             'schedules.*.starts_at' => 'required|date',
             'schedules.*.ends_at' => 'required|date|after_or_equal:schedules.*.starts_at',
@@ -1246,6 +1247,7 @@ class OrganizerController extends Controller
                 'instant_payout_phone' => $request->input('payout_mode') === 'instant'
                     ? $request->input('instant_payout_phone')
                     : null,
+                'service_fee_bearer' => $request->input('service_fee_bearer', 'platform'),
             ]);
 
             // Créer les horaires
@@ -1358,6 +1360,7 @@ class OrganizerController extends Controller
             'published_at' => 'sometimes|nullable|date',
             'payout_mode' => 'sometimes|in:deferred,instant',
             'instant_payout_phone' => 'required_if:payout_mode,instant|nullable|string|size:9|regex:/^[0-9]+$/',
+            'service_fee_bearer' => 'sometimes|in:customer,platform',
             'schedules' => 'sometimes|array',
             'schedules.*.starts_at' => 'required_with:schedules|date',
             'schedules.*.ends_at' => 'required_with:schedules|date|after_or_equal:schedules.*.starts_at',
@@ -1404,6 +1407,11 @@ class OrganizerController extends Controller
                 $updateData['instant_payout_phone'] = $request->input('payout_mode') === 'instant'
                     ? $request->input('instant_payout_phone')
                     : null;
+            }
+
+            // Qui supporte les frais de service (par événement)
+            if ($request->has('service_fee_bearer')) {
+                $updateData['service_fee_bearer'] = $request->input('service_fee_bearer');
             }
 
             // Gérer published_at

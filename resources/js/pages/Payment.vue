@@ -66,6 +66,11 @@
                 <span class="font-semibold">{{ order.quantity || order.tickets_count }}</span>
               </div>
 
+              <div v-if="Number(order.service_fee_amount) > 0" class="flex justify-between text-sm text-gray-500">
+                <span>Frais de service :</span>
+                <span>{{ formatPrice(order.service_fee_amount) }} XAF</span>
+              </div>
+
               <div class="flex justify-between items-center pt-4 border-t-2 border-gray-200">
                 <span class="text-lg font-bold text-primea-blue">Total à payer :</span>
                 <span class="text-3xl font-bold text-primea-blue">{{ formatPrice(order.total_amount) }} XAF</span>

@@ -303,6 +303,8 @@ class EventController extends Controller
                 'cover_image' => $event->image, // Alias pour compatibilité frontend
                 'status' => $event->status,
                 'is_active' => $event->is_active,
+                'service_fee_bearer' => $event->service_fee_bearer,
+                'service_fee_percent' => $event->service_fee_percent, // 0 si plateforme supporte les frais
                 'published_at' => $event->published_at,
                 'created_at' => $event->created_at,
                 'updated_at' => $event->updated_at,

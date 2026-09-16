@@ -798,6 +798,7 @@ class AdminController extends Controller
             'is_active' => 'boolean',
             'image_url' => 'nullable|url',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'service_fee_bearer' => 'nullable|in:customer,platform',
             'schedules' => 'nullable|array',
             'schedules.*.starts_at' => 'required|date',
             'schedules.*.ends_at' => 'required|date|after:schedules.*.starts_at',
@@ -852,6 +853,7 @@ class AdminController extends Controller
                 'is_active' => $request->boolean('is_active', true),
                 'image_url' => $request->image_url,
                 'image_file' => $imageFile,
+                'service_fee_bearer' => $request->input('service_fee_bearer', 'platform'),
             ]);
 
             // Créer les horaires
@@ -953,6 +955,7 @@ class AdminController extends Controller
             'is_active' => 'sometimes|boolean',
             'image_url' => 'nullable|url',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'service_fee_bearer' => 'nullable|in:customer,platform',
             'schedules' => 'nullable|array',
             'schedules.*.starts_at' => 'required|date',
             'schedules.*.ends_at' => 'required|date|after:schedules.*.starts_at',
@@ -1019,6 +1022,10 @@ class AdminController extends Controller
 
             if ($venueId) {
                 $updateData['venue_id'] = $venueId;
+            }
+
+            if ($request->has('service_fee_bearer')) {
+                $updateData['service_fee_bearer'] = $request->input('service_fee_bearer');
             }
 
             $event->update($updateData);
