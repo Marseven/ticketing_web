@@ -18,6 +18,7 @@
           v-if="ticket?.event?.image"
           :src="ticket.event.image"
           :alt="ticket.event?.title"
+          crossorigin="anonymous"
           class="w-full h-full object-cover"
         />
         <div v-else class="w-full h-full flex items-center justify-center">
@@ -36,7 +37,7 @@
       <!-- Code du ticket en haut à droite -->
       <div
         :class="[
-          'absolute top-4 right-4 font-bold text-red-600 font-mono',
+          'hidden',
           size === 'small' ? 'text-[10px]' : 'text-sm'
         ]"
       >
@@ -120,8 +121,10 @@
             size === 'small' ? 'w-28' : 'w-44'
           ]"
         >
-          <!-- Espace pour le numéro (déjà positionné en absolu) -->
-          <div :class="size === 'small' ? 'h-6' : 'h-8'"></div>
+          <!-- Référence centrée au-dessus du QR Code -->
+          <div :class="['font-bold text-red-600 font-mono text-center mb-2', size === 'small' ? 'text-xs' : 'text-sm']">
+            {{ ticket?.reference || 'TKT-XXXXXXXX' }}
+          </div>
 
           <!-- QR Code -->
           <div class="bg-white">

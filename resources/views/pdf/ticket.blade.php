@@ -221,6 +221,15 @@
         }
 
         /* ===== SECTION QR CODE ===== */
+        .qr-ref {
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #dc2626;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 6px;
+        }
+
         .qr-code-container {
             padding: 6px;
         }
@@ -347,9 +356,6 @@
 
         <!-- Section Informations Principales -->
         <div class="ticket-info-section">
-            <!-- Code du ticket -->
-            <div class="ticket-number">{{ $ticket->code }}</div>
-
             <div class="info-content">
                 <!-- Colonne Gauche : Détails -->
                 <div class="info-left">
@@ -401,6 +407,7 @@
 
                 <!-- Colonne Droite : QR Code -->
                 <div class="info-right">
+                    <div class="qr-ref">{{ $ticket->code }}</div>
                     <div class="qr-code-container">
                         <img src="{{ $qrCodeBase64 }}" alt="QR Code">
                     </div>

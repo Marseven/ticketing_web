@@ -468,10 +468,22 @@ export default {
           throw new Error('Élément ticket introuvable')
         }
 
+        // Attendre que toutes les images (affiche, QR, logo) soient chargées
+        // pour éviter une capture partielle/blanche de l'image de l'événement.
+        const imgs = Array.from(targetRef.querySelectorAll('img'))
+        await Promise.all(imgs.map((img) => {
+          if (img.complete && img.naturalWidth > 0) return Promise.resolve()
+          return new Promise((resolve) => {
+            img.addEventListener('load', resolve, { once: true })
+            img.addEventListener('error', resolve, { once: true })
+          })
+        }))
+
         const canvas = await html2canvas(targetRef, {
           scale: 2,
           useCORS: true,
           allowTaint: true,
+          imageTimeout: 15000,
           backgroundColor: '#ffffff'
         })
 
