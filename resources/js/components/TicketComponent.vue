@@ -10,7 +10,7 @@
     <div class="relative">
       <div
         :class="[
-          'relative overflow-hidden bg-primea-gradient',
+          'event-cover relative overflow-hidden bg-primea-gradient',
           size === 'small' ? 'h-44' : 'h-64'
         ]"
       >
@@ -280,6 +280,22 @@ export default {
 
 .shadow-primea-lg {
   box-shadow: 0 8px 30px rgba(39, 45, 99, 0.15);
+}
+
+/* Image de l'événement : contenue sans déformation.
+   Dimensionnement par layout (max-w/max-h + auto) car html2canvas ne gère
+   pas fiablement object-fit → l'image était étirée sur le JPG. */
+.event-cover {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.event-cover img {
+  width: auto !important;
+  height: auto !important;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 
 /* Animations et effets */
