@@ -1,7 +1,7 @@
 <template>
   <div v-if="banners.length > 0" class="banner-carousel mb-8">
-    <div class="w-full">
-      <div class="relative w-full overflow-hidden rounded-lg">
+    <div class="flex justify-center">
+      <div class="relative inline-block max-w-full overflow-hidden rounded-lg">
         <!-- Badge Ad -->
         <div class="absolute top-1 right-1 sm:top-2 sm:right-2 z-20">
           <span class="bg-gray-800/80 text-white text-[8px] sm:text-[10px] font-semibold px-1 sm:px-2 py-0.5 rounded backdrop-blur-sm">
@@ -202,13 +202,20 @@ export default {
   animation: fadeIn 0.4s ease-in-out;
 }
 
-/* La bannière s'adapte à l'image : pleine largeur, hauteur naturelle,
-   sans letterbox ni ombre. Surcharge les classes utilitaires de l'<img>. */
+/* Bannière : hauteur réduite, largeur proportionnelle (adaptée à l'image),
+   centrée, sans débordement. Surcharge les classes utilitaires de l'<img>. */
 .banner-carousel img {
   display: block;
-  width: 100%;
+  width: auto;
   height: auto;
-  object-fit: contain;
+  max-height: 110px;
+  max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .banner-carousel img {
+    max-height: 150px;
+  }
 }
 
 @keyframes fadeIn {
