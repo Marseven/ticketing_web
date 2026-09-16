@@ -484,7 +484,10 @@ export default {
           useCORS: true,
           allowTaint: true,
           imageTimeout: 15000,
-          backgroundColor: '#ffffff'
+          backgroundColor: '#ffffff',
+          // html2canvas ne sait pas flouter : on ignore le fond flou pour éviter
+          // un rendu "en triple". L'image principale (centrée sur le dégradé) suffit.
+          ignoreElements: (el) => el.classList?.contains('ticket-cover-bg')
         })
 
         // Convertir en JPG et télécharger
