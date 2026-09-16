@@ -8,19 +8,13 @@
   >
     <!-- Section Image Événement -->
     <div class="relative">
-      <div
-        :class="[
-          'event-cover relative overflow-hidden bg-primea-gradient',
-          size === 'small' ? 'h-44' : 'h-64'
-        ]"
-      >
-        <img
-          v-if="ticket?.event?.image"
-          :src="ticket.event.image"
-          :alt="ticket.event?.title"
-          crossorigin="anonymous"
-          class="w-full h-full object-cover"
-        />
+      <div :class="['ticket-cover relative overflow-hidden bg-primea-gradient', size === 'small' ? 'h-44' : 'h-64']">
+        <template v-if="ticket?.event?.image">
+          <!-- Fond flou : remplit le bandeau sans bord vide (comme la card event) -->
+          <img :src="ticket.event.image" alt="" aria-hidden="true" crossorigin="anonymous" class="ticket-cover-bg" />
+          <!-- Image principale : entière, ratio préservé (aucune déformation) -->
+          <img :src="ticket.event.image" :alt="ticket.event?.title" crossorigin="anonymous" class="ticket-cover-main" />
+        </template>
         <div v-else class="w-full h-full flex items-center justify-center">
           <span class="text-white/50 text-lg">Image de l'événement</span>
         </div>
@@ -282,20 +276,26 @@ export default {
   box-shadow: 0 8px 30px rgba(39, 45, 99, 0.15);
 }
 
-/* Image de l'événement : contenue sans déformation.
-   Dimensionnement par layout (max-w/max-h + auto) car html2canvas ne gère
-   pas fiablement object-fit → l'image était étirée sur le JPG. */
-.event-cover {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Image de l'événement : même rendu que la card (image entière + fond flou),
+   avec hauteur explicite + dimensionnement par layout → fidèle aussi dans
+   l'export html2canvas (qui ne gère ni aspect-ratio ni object-fit). */
+.ticket-cover-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(16px);
+  transform: scale(1.1);
 }
-.event-cover img {
-  width: auto !important;
-  height: auto !important;
+.ticket-cover-main {
+  position: absolute;
+  inset: 0;
+  margin: auto;
   max-width: 100%;
   max-height: 100%;
-  object-fit: contain;
+  width: auto;
+  height: auto;
 }
 
 /* Animations et effets */
