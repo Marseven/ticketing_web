@@ -97,7 +97,7 @@
                   ]"
                 >
                   <img
-                    src="/images/airtel-logo.png"
+                    src="/images/am.png"
                     alt="Airtel Money"
                     class="h-8 w-auto"
                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"
@@ -116,7 +116,7 @@
                   ]"
                 >
                   <img
-                    src="/images/moov-logo.png"
+                    src="/images/mm.png"
                     alt="Moov Money"
                     class="h-8 w-auto"
                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"
@@ -135,7 +135,7 @@
                   ]"
                 >
                   <img
-                    src="/images/visa-logo.png"
+                    src="/images/vm.png"
                     alt="Visa"
                     class="h-8 w-auto"
                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"

@@ -72,7 +72,7 @@
           <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
             <div class="flex items-center">
               <div class="w-12 h-8 rounded flex items-center justify-center mr-3 bg-white border border-gray-100">
-                <img src="/images/airtel-logo.png" alt="Airtel Money" class="max-h-6 max-w-full object-contain" />
+                <img src="/images/am.png" alt="Airtel Money" class="max-h-6 max-w-full object-contain" />
               </div>
               <div>
                 <h4 class="font-medium text-gray-900">Airtel Money</h4>
@@ -89,7 +89,7 @@
           <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
             <div class="flex items-center">
               <div class="w-12 h-8 rounded flex items-center justify-center mr-3 bg-white border border-gray-100">
-                <img src="/images/moov-logo.png" alt="Moov Money" class="max-h-6 max-w-full object-contain" />
+                <img src="/images/mm.png" alt="Moov Money" class="max-h-6 max-w-full object-contain" />
               </div>
               <div>
                 <h4 class="font-medium text-gray-900">Moov Money</h4>
@@ -106,7 +106,7 @@
           <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
             <div class="flex items-center">
               <div class="w-12 h-8 rounded flex items-center justify-center gap-0.5 mr-3 bg-white border border-gray-100">
-                <img src="/images/visa-logo.png" alt="Visa" class="max-h-3.5 max-w-full object-contain" />
+                <img src="/images/vm.png" alt="Visa" class="max-h-3.5 max-w-full object-contain" />
                 <img src="/images/mastercard-logo.png" alt="Mastercard" class="max-h-3.5 max-w-full object-contain" />
               </div>
               <div>
