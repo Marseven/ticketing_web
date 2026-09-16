@@ -200,7 +200,7 @@
               </button>
 
               <!-- Section USSD Push -->
-              <div v-if="ussdPushActive" class="bg-blue-50 border-2 border-blue-200 rounded-primea-xl p-6">
+              <div v-if="ussdPushActive" class="border-2 rounded-primea-xl p-6" :class="ussdStatusClass">
                 <div class="text-center">
                   <!-- En attente -->
                   <div v-if="paymentStatus === 'pending'" class="space-y-4">
@@ -361,6 +361,12 @@ export default {
     const ussdTimer = ref(null)
     const paymentPollingTimer = ref(null)
     const paymentStatus = ref('')
+    // Couleur du bloc statut USSD selon l'état (bleu=attente, vert=succès, rouge=échec)
+    const ussdStatusClass = computed(() => {
+      if (paymentStatus.value === 'successful') return 'bg-green-50 border-green-200'
+      if (['failed', 'cancelled', 'expired'].includes(paymentStatus.value)) return 'bg-red-50 border-red-200'
+      return 'bg-blue-50 border-blue-200'
+    })
     const currentPayment = ref(null)
 
     const isAuthenticated = computed(() => authStore.isAuthenticated)
@@ -758,6 +764,7 @@ export default {
       loading,
       error,
       order,
+      ussdStatusClass,
       paymentMethod,
       phoneNumber,
       phoneError,

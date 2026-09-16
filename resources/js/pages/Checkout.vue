@@ -366,7 +366,7 @@
                 </div>
 
                 <!-- USSD Push Section - Uniquement pour Mobile Money -->
-                <div v-if="ussdPushActive" class="bg-blue-50 border-2 border-blue-200 rounded-primea-xl p-6">
+                <div v-if="ussdPushActive" class="border-2 rounded-primea-xl p-6" :class="ussdStatusClass">
                   <div class="text-center">
                     <!-- En attente de validation -->
                     <div v-if="paymentStatus === 'pending'" class="space-y-4">
@@ -728,7 +728,7 @@
             </div>
 
             <!-- USSD Push Section -->
-            <div v-if="ussdPushActive" class="bg-blue-50 border-2 border-blue-200 rounded-xl p-6">
+            <div v-if="ussdPushActive" class="border-2 rounded-xl p-6" :class="ussdStatusClass">
               <div class="text-center space-y-4">
                 <div v-if="paymentStatus === 'pending'">
                   <div class="w-12 h-12 border-4 border-blue-300 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
@@ -901,6 +901,12 @@ export default {
     const ussdTimer = ref(null)
     const paymentPollingTimer = ref(null)
     const paymentStatus = ref('')
+    // Couleur du bloc statut USSD selon l'état (bleu=attente, vert=succès, rouge=échec)
+    const ussdStatusClass = computed(() => {
+      if (paymentStatus.value === 'successful') return 'bg-green-50 border-green-200'
+      if (['failed', 'cancelled', 'expired'].includes(paymentStatus.value)) return 'bg-red-50 border-red-200'
+      return 'bg-blue-50 border-blue-200'
+    })
     const currentPayment = ref(null)
     const createdOrder = ref(null) // Stocker la commande créée pour éviter les duplicatas
 
@@ -1909,6 +1915,7 @@ export default {
       processOrder,
       // Variables USSD Push
       ussdPushActive,
+      ussdStatusClass,
       ussdCountdown,
       paymentStatus,
       currentPayment,
