@@ -418,6 +418,15 @@
         </div>
         
         <div v-if="selectedEvent" class="space-y-6">
+          <!-- Image de l'événement -->
+          <div v-if="selectedEvent.image || selectedEvent.image_url">
+            <img
+              :src="selectedEvent.image || selectedEvent.image_url"
+              :alt="selectedEvent.title"
+              class="w-full max-h-72 object-contain rounded-lg border border-gray-200 bg-gray-50"
+            />
+          </div>
+
           <!-- Event Info -->
           <div class="grid grid-cols-2 gap-6">
             <div>
