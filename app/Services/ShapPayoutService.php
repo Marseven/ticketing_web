@@ -11,8 +11,9 @@ class ShapPayoutService
     private string $apiId;
     private string $apiSecret;
     private string $baseUrl;
-    private ?string $accessToken = null;
-    private ?Carbon $tokenExpiresAt = null;
+
+    /** Clé de cache du token OAuth SHAP (PA / payout). */
+    private const TOKEN_CACHE_KEY = 'shap_payout_oauth_token';
 
     public function __construct()
     {
@@ -31,69 +32,42 @@ class ShapPayoutService
     /**
      * Obtenir un token d'accès OAuth 2.0
      */
-    private function getAccessToken(): string
+    /**
+     * Token OAuth SHAP (PA / payout) : stocké en cache et régénéré avant
+     * expiration via OAuthTokenStore — partagé entre requêtes, pas seulement
+     * en mémoire. Passer $force = true pour forcer une régénération (ex : 401).
+     */
+    private function getAccessToken(bool $force = false): string
     {
-        // Vérifier si le token actuel est encore valide
-        if ($this->accessToken && $this->tokenExpiresAt && $this->tokenExpiresAt->isFuture()) {
-            return $this->accessToken;
+        if ($force) {
+            OAuthTokenStore::forget(self::TOKEN_CACHE_KEY);
         }
 
-        try {
-            Log::info('SHAP API Call - Get Access Token', [
-                'url' => $this->baseUrl . 'auth',
-                'api_id' => $this->apiId,
-                'has_api_secret' => !empty($this->apiSecret),
-            ]);
-
+        return OAuthTokenStore::token(self::TOKEN_CACHE_KEY, function () {
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-                'Accept' => 'application/json'
+                'Accept' => 'application/json',
             ])->post($this->baseUrl . 'auth', [
                 'api_id' => $this->apiId,
-                'api_secret' => $this->apiSecret
+                'api_secret' => $this->apiSecret,
             ]);
 
-            $status = $response->status();
-            $responseBody = $response->body();
-            $responseData = $response->json();
-
-            Log::info('SHAP API Response - Get Access Token', [
-                'status' => $status,
-                'response_raw' => $responseBody,
-                'response_json' => $responseData,
-                'response_headers' => $response->headers(),
-                'content_type' => $response->header('Content-Type'),
-            ]);
-
-            if ($response->successful()) {
-                $data = $response->json();
-
-                $this->accessToken = $data['access_token'];
-                $this->tokenExpiresAt = now()->addSeconds($data['expires_in'] - 60); // 60 secondes de marge
-
-                Log::info('Token SHAP obtenu avec succès', [
-                    'expires_in' => $data['expires_in'],
-                    'expires_at' => $this->tokenExpiresAt->toISOString()
+            if (!$response->successful()) {
+                $errorData = $response->json();
+                Log::error('Erreur obtention token SHAP', [
+                    'status' => $response->status(),
+                    'error' => $errorData,
                 ]);
-
-                return $this->accessToken;
+                throw new \Exception($errorData['error_description'] ?? 'Erreur lors de l\'obtention du token SHAP');
             }
 
-            $errorData = $response->json();
-            Log::error('Erreur obtention token SHAP', [
-                'status' => $response->status(),
-                'error' => $errorData
+            $data = $response->json();
+            Log::info('Token SHAP obtenu (mis en cache)', [
+                'expires_in' => $data['expires_in'] ?? null,
             ]);
 
-            throw new \Exception($errorData['error_description'] ?? 'Erreur lors de l\'obtention du token');
-
-        } catch (\Exception $e) {
-            Log::error('Exception obtention token SHAP', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            throw $e;
-        }
+            return $data; // ['access_token' => ..., 'expires_in' => ...]
+        });
     }
 
     /**

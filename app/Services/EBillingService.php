@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -12,12 +14,118 @@ class EBillingService
     private string $serverUrl;
     private string $postUrl;
 
+    // OAuth (AWS Cognito, flow client_credentials) — optionnel, activé via
+    // EBILLING_AUTH_MODE=oauth. Basic reste le fallback.
+    private string $authMode;
+    private string $oauthTokenUrl;
+    private string $oauthClientId;
+    private string $oauthClientSecret;
+    private string $oauthScope;
+
+    /** Clé de cache du token OAuth e-billing (dépôt). */
+    private const TOKEN_CACHE_KEY = 'ebilling_oauth_token';
+
     public function __construct()
     {
         $this->username = env('EBILLING_USERNAME') ?? throw new \Exception('EBILLING_USERNAME n\'est pas configuré dans .env');
         $this->sharedKey = env('EBILLING_SHARED_KEY') ?? throw new \Exception('EBILLING_SHARED_KEY n\'est pas configuré dans .env');
         $this->serverUrl = env('EBILLING_SERVER_URL') ?? throw new \Exception('EBILLING_SERVER_URL n\'est pas configuré dans .env');
         $this->postUrl = env('EBILLING_POST_URL') ?? throw new \Exception('EBILLING_POST_URL n\'est pas configuré dans .env');
+
+        // Mode d'authentification : 'oauth' (Cognito) ou 'basic' (défaut sûr).
+        $this->authMode = strtolower((string) env('EBILLING_AUTH_MODE', 'basic'));
+        $this->oauthTokenUrl = (string) env('EBILLING_OAUTH_TOKEN_URL', '');
+        $this->oauthClientId = (string) env('EBILLING_OAUTH_CLIENT_ID', '');
+        $this->oauthClientSecret = (string) env('EBILLING_OAUTH_CLIENT_SECRET', '');
+        $this->oauthScope = (string) env('EBILLING_OAUTH_SCOPE', '');
+    }
+
+    // ---------------------------------------------------------------------
+    //  Authentification (OAuth Cognito avec fallback Basic)
+    // ---------------------------------------------------------------------
+
+    private function usesOAuth(): bool
+    {
+        return $this->authMode === 'oauth';
+    }
+
+    /** Requête HTTP JSON pré-authentifiée selon le mode demandé. */
+    private function request(string $mode): PendingRequest
+    {
+        $req = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+        ]);
+
+        if ($mode === 'oauth') {
+            return $req->withToken($this->oauthToken());
+        }
+
+        return $req->withBasicAuth($this->username, $this->sharedKey);
+    }
+
+    /** Token OAuth e-billing, mis en cache et régénéré avant expiration. */
+    private function oauthToken(bool $force = false): string
+    {
+        if ($force) {
+            OAuthTokenStore::forget(self::TOKEN_CACHE_KEY);
+        }
+
+        return OAuthTokenStore::token(self::TOKEN_CACHE_KEY, fn () => $this->fetchCognitoToken());
+    }
+
+    /**
+     * Récupère un token via AWS Cognito (grant client_credentials).
+     * Identifiants client en en-tête Basic (client confidentiel).
+     * @return array{access_token:string, expires_in:int}
+     */
+    private function fetchCognitoToken(): array
+    {
+        if ($this->oauthTokenUrl === '' || $this->oauthClientId === '' || $this->oauthClientSecret === '') {
+            throw new \RuntimeException('OAuth e-billing non configuré (EBILLING_OAUTH_TOKEN_URL / CLIENT_ID / CLIENT_SECRET).');
+        }
+
+        $response = Http::asForm()
+            ->withBasicAuth($this->oauthClientId, $this->oauthClientSecret)
+            ->post($this->oauthTokenUrl, array_filter([
+                'grant_type' => 'client_credentials',
+                'scope' => $this->oauthScope !== '' ? $this->oauthScope : null,
+            ]));
+
+        if (!$response->successful()) {
+            Log::error('E-Billing OAuth (Cognito) - échec token', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+            throw new \RuntimeException('Échec obtention token OAuth e-billing (Cognito) : ' . $response->status());
+        }
+
+        return $response->json();
+    }
+
+    /**
+     * Exécute un appel avec l'auth du mode courant ; en mode OAuth, retombe
+     * automatiquement sur Basic si l'OAuth échoue (401/403 ou indisponible) —
+     * les paiements ne cassent jamais à cause de l'auth.
+     *
+     * @param  callable(PendingRequest):Response $call
+     */
+    private function sendWithFallback(callable $call): Response
+    {
+        if ($this->usesOAuth()) {
+            try {
+                $response = $call($this->request('oauth'));
+                if (!in_array($response->status(), [401, 403], true)) {
+                    return $response;
+                }
+                OAuthTokenStore::forget(self::TOKEN_CACHE_KEY);
+                Log::warning('E-Billing OAuth non autorisé — fallback Basic', ['status' => $response->status()]);
+            } catch (\Throwable $e) {
+                Log::warning('E-Billing OAuth indisponible — fallback Basic', ['error' => $e->getMessage()]);
+            }
+        }
+
+        return $call($this->request('basic'));
     }
 
     /**
@@ -35,12 +143,9 @@ class EBillingService
                 'data' => $data
             ]);
 
-            $response = Http::withBasicAuth($this->username, $this->sharedKey)
-                ->withHeaders([
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json',
-                ])
-                ->post($this->serverUrl, $data);
+            $response = $this->sendWithFallback(
+                fn (PendingRequest $req) => $req->post($this->serverUrl, $data)
+            );
 
             $status = $response->status();
             $responseBody = $response->body();
@@ -119,13 +224,9 @@ class EBillingService
 
             $startTime = microtime(true);
 
-            $response = Http::timeout(30) // Timeout de 30s pour le push USSD
-                ->withBasicAuth($this->username, $this->sharedKey)
-                ->withHeaders([
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json',
-                ])
-                ->post($url, $payload);
+            $response = $this->sendWithFallback(
+                fn (PendingRequest $req) => $req->timeout(30)->post($url, $payload)
+            );
 
             $duration = round((microtime(true) - $startTime) * 1000, 2);
 
@@ -202,14 +303,12 @@ class EBillingService
                 'msisdn' => $msisdn,
             ]);
 
-            $response = Http::withBasicAuth($this->username, $this->sharedKey)
-                ->withHeaders([
-                    'Accept' => 'application/json',
-                ])
-                ->get($url, [
+            $response = $this->sendWithFallback(
+                fn (PendingRequest $req) => $req->get($url, [
                     'payment_system_name' => $paymentSystem,
-                    'msisdn' => $msisdn
-                ]);
+                    'msisdn' => $msisdn,
+                ])
+            );
 
             $status = $response->status();
             $responseBody = $response->body();
@@ -264,11 +363,9 @@ class EBillingService
                 'bill_id' => $billId,
             ]);
 
-            $response = Http::withBasicAuth($this->username, $this->sharedKey)
-                ->withHeaders([
-                    'Accept' => 'application/json',
-                ])
-                ->get($url);
+            $response = $this->sendWithFallback(
+                fn (PendingRequest $req) => $req->get($url)
+            );
 
             $status = $response->status();
             $responseData = $response->json();
