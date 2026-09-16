@@ -519,6 +519,16 @@
         </div>
       </div>
     </div>
+
+    <ImageCropper
+      v-model:open="cropperOpen"
+      :src="cropperSrc"
+      aspect-ratio="1/1"
+      :file-name="cropperFileName"
+      title="Recadrer la photo de profil"
+      @cropped="onAvatarCropped"
+      @cancel="onAvatarCropCancel"
+    />
   </div>
 </template>
 
@@ -528,6 +538,7 @@ import Swal from 'sweetalert2'
 import { useAuthStore } from '../../stores/auth'
 import CalendarIcon from '../../components/icons/CalendarIcon.vue'
 import PhoneInput from '../../components/PhoneInput.vue'
+import ImageCropper from '../../components/ImageCropper.vue'
 import { clientService, ticketApiService, authService } from '../../services/api.js'
 import { 
   UserIcon,
@@ -548,6 +559,7 @@ export default {
   components: {
     CalendarIcon,
     PhoneInput,
+    ImageCropper,
     UserIcon,
     TicketIcon,
     StarIcon,
@@ -898,52 +910,73 @@ export default {
       loadProfile() // Recharger les données depuis l'API
     }
 
-    // Gérer l'upload d'avatar
-    const handleAvatarUpload = async (event) => {
+    // Recadrage de l'avatar
+    const cropperOpen = ref(false)
+    const cropperSrc = ref('')
+    const cropperFileName = ref('avatar.jpg')
+
+    // Envoi effectif du fichier (déjà recadré) vers l'API
+    const uploadAvatarFile = async (file) => {
+      try {
+        uploadingAvatar.value = true
+
+        const formData = new FormData()
+        formData.append('avatar', file)
+
+        const response = await clientService.uploadAvatar(formData)
+
+        // Mettre à jour l'avatar dans le formulaire avec cache busting
+        if (response.data.avatar_url) {
+          const timestamp = new Date().getTime()
+          profileForm.value.avatar = `${response.data.avatar_url}?t=${timestamp}`
+        }
+
+        successMessage.value = 'Avatar mis à jour avec succès'
+        setTimeout(() => {
+          successMessage.value = ''
+        }, 3000)
+      } catch (e) {
+        console.error('Erreur lors de l\'upload de l\'avatar:', e)
+        error.value = 'Erreur lors de l\'upload de l\'avatar'
+      } finally {
+        uploadingAvatar.value = false
+      }
+    }
+
+    // Sélection du fichier : ouvrir le recadrage (au lieu d'uploader direct)
+    const handleAvatarUpload = (event) => {
       const file = event.target.files[0]
       if (!file) return
 
-      // Vérifier le type de fichier
       if (!file.type.startsWith('image/')) {
         Swal.fire({ icon: 'warning', title: 'Attention', text: 'Veuillez sélectionner un fichier image', confirmButtonColor: '#272d63' })
         return
       }
 
-      // Vérifier la taille (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         Swal.fire({ icon: 'warning', title: 'Attention', text: 'La taille du fichier ne doit pas dépasser 5MB', confirmButtonColor: '#272d63' })
         return
       }
 
-      try {
-        uploadingAvatar.value = true
-        
-        // Créer FormData pour l'upload
-        const formData = new FormData()
-        formData.append('avatar', file)
-        
-        // Uploader via l'API
-        const response = await clientService.uploadAvatar(formData)
-        
-        // Mettre à jour l'avatar dans le formulaire avec cache busting
-        if (response.data.avatar_url) {
-          // Ajouter un timestamp pour forcer le rafraîchissement
-          const timestamp = new Date().getTime()
-          profileForm.value.avatar = `${response.data.avatar_url}?t=${timestamp}`
-        }
-        
-        successMessage.value = 'Avatar mis à jour avec succès'
-        setTimeout(() => {
-          successMessage.value = ''
-        }, 3000)
-      } catch (error) {
-        console.error('Erreur lors de l\'upload de l\'avatar:', error)
-        error.value = 'Erreur lors de l\'upload de l\'avatar'
-      } finally {
-        uploadingAvatar.value = false
-        // Réinitialiser l'input file
-        event.target.value = ''
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        cropperSrc.value = e.target.result
+        cropperFileName.value = (file.name?.replace(/\.[^.]+$/, '') || 'avatar') + '.jpg'
+        cropperOpen.value = true
       }
+      reader.readAsDataURL(file)
+
+      // Réinitialiser l'input pour permettre de re-sélectionner le même fichier
+      event.target.value = ''
+    }
+
+    const onAvatarCropped = (croppedFile) => {
+      cropperSrc.value = ''
+      uploadAvatarFile(croppedFile)
+    }
+
+    const onAvatarCropCancel = () => {
+      cropperSrc.value = ''
     }
 
     // Renvoyer l'email de vérification
@@ -1055,6 +1088,11 @@ export default {
       resetForm,
       loadProfile,
       handleAvatarUpload,
+      cropperOpen,
+      cropperSrc,
+      cropperFileName,
+      onAvatarCropped,
+      onAvatarCropCancel,
       hasPhoneField,
       hasBioField,
       hasCityField,

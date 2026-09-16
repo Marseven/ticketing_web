@@ -346,6 +346,16 @@
       </div>
     </div>
     </div>
+
+    <ImageCropper
+      v-model:open="cropperOpen"
+      :src="cropperSrc"
+      :aspect-ratio="cropperAspect"
+      :file-name="cropperFileName"
+      :title="cropperTarget === 'logo' ? 'Recadrer le logo' : 'Recadrer la photo'"
+      @cropped="onProfileCropped"
+      @cancel="onProfileCropCancel"
+    />
   </div>
 </template>
 
@@ -355,6 +365,7 @@ import { useAuthStore } from '../../stores/auth';
 import { organizerService } from '../../services/api';
 import Swal from 'sweetalert2';
 import PhoneInput from '../../components/PhoneInput.vue';
+import ImageCropper from '../../components/ImageCropper.vue';
 import { 
   PencilIcon, 
   CheckCircleIcon, 
@@ -374,6 +385,48 @@ const updatingOrganization = ref(false);
 const updatingPassword = ref(false);
 const uploadingAvatar = ref(false);
 const uploadingLogo = ref(false);
+
+// Recadrage d'image (avatar & logo)
+const cropperOpen = ref(false);
+const cropperSrc = ref('');
+const cropperFileName = ref('image.jpg');
+const cropperAspect = ref('1/1');
+const cropperTarget = ref('avatar');
+
+const validateImageFile = (file) => {
+  if (!file) return false;
+  if (!file.type.startsWith('image/')) {
+    Swal.fire({ title: 'Erreur', text: 'Veuillez sélectionner un fichier image', icon: 'error', confirmButtonColor: '#272d63' });
+    return false;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    Swal.fire({ title: 'Erreur', text: 'L\'image ne doit pas dépasser 5MB', icon: 'error', confirmButtonColor: '#272d63' });
+    return false;
+  }
+  return true;
+};
+
+const openCropper = (file, target) => {
+  cropperTarget.value = target;
+  cropperAspect.value = target === 'logo' ? '16/9' : '1/1';
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    cropperSrc.value = e.target.result;
+    cropperFileName.value = (file.name?.replace(/\.[^.]+$/, '') || target) + '.jpg';
+    cropperOpen.value = true;
+  };
+  reader.readAsDataURL(file);
+};
+
+const onProfileCropped = (croppedFile) => {
+  cropperSrc.value = '';
+  if (cropperTarget.value === 'logo') uploadLogoFile(croppedFile);
+  else uploadAvatarFile(croppedFile);
+};
+
+const onProfileCropCancel = () => {
+  cropperSrc.value = '';
+};
 
 // Données utilisateur et organisation
 const user = ref(null);
@@ -549,8 +602,13 @@ const updatePassword = async () => {
 };
 
 // Gestion des uploads d'images
-const handleAvatarUpload = async (event) => {
+const handleAvatarUpload = (event) => {
   const file = event.target.files[0];
+  event.target.value = '';
+  if (validateImageFile(file)) openCropper(file, 'avatar');
+};
+
+const uploadAvatarFile = async (file) => {
   if (!file) return;
   
   // Validation du fichier
@@ -617,13 +675,16 @@ const handleAvatarUpload = async (event) => {
     });
   } finally {
     uploadingAvatar.value = false;
-    // Réinitialiser l'input file
-    event.target.value = '';
   }
 };
 
-const handleLogoUpload = async (event) => {
+const handleLogoUpload = (event) => {
   const file = event.target.files[0];
+  event.target.value = '';
+  if (validateImageFile(file)) openCropper(file, 'logo');
+};
+
+const uploadLogoFile = async (file) => {
   if (!file) return;
   
   // Validation du fichier
@@ -687,8 +748,6 @@ const handleLogoUpload = async (event) => {
     });
   } finally {
     uploadingLogo.value = false;
-    // Réinitialiser l'input file
-    event.target.value = '';
   }
 };
 
