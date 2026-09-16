@@ -253,7 +253,7 @@
                       ]"
                     >
                       <img 
-                        src="/images/am.png" 
+                        src="/images/airtel-logo.png"
                         alt="Airtel Money"
                         class="h-8 w-auto"
                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"
@@ -272,7 +272,7 @@
                       ]"
                     >
                       <img 
-                        src="/images/mm.png" 
+                        src="/images/moov-logo.png"
                         alt="Moov Money"
                         class="h-8 w-auto"
                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"
@@ -292,7 +292,7 @@
                       ]"
                     >
                       <img
-                        src="/images/vm.png"
+                        src="/images/visa-logo.png"
                         alt="Visa"
                         class="h-8 w-auto"
                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"
@@ -683,14 +683,14 @@
                 <button type="button" @click="selectPaymentMethod('airtel')"
                   :class="['p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center',
                     orderForm.paymentMethod === 'airtel' ? 'border-red-500 bg-red-50' : 'border-gray-200']">
-                  <img src="/images/am.png" alt="Airtel" class="h-8 w-auto" onerror="this.style.display='none'" />
+                  <img src="/images/airtel-logo.png" alt="Airtel" class="h-8 w-auto" onerror="this.style.display='none'" />
                   <span class="text-xs mt-1 font-semibold text-red-600">Airtel</span>
                 </button>
 
                 <button type="button" @click="selectPaymentMethod('moov')"
                   :class="['p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center',
                     orderForm.paymentMethod === 'moov' ? 'border-orange-500 bg-orange-50' : 'border-gray-200']">
-                  <img src="/images/mm.png" alt="Moov" class="h-8 w-auto" onerror="this.style.display='none'" />
+                  <img src="/images/moov-logo.png" alt="Moov" class="h-8 w-auto" onerror="this.style.display='none'" />
                   <span class="text-xs mt-1 font-semibold text-orange-600">Moov</span>
                 </button>
               </div>

@@ -71,8 +71,8 @@
         <div class="space-y-4">
           <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
             <div class="flex items-center">
-              <div class="w-12 h-8 bg-red-100 rounded flex items-center justify-center mr-3">
-                <span class="text-red-600 font-bold text-xs">AM</span>
+              <div class="w-12 h-8 rounded flex items-center justify-center mr-3 bg-white border border-gray-100">
+                <img src="/images/airtel-logo.png" alt="Airtel Money" class="max-h-6 max-w-full object-contain" />
               </div>
               <div>
                 <h4 class="font-medium text-gray-900">Airtel Money</h4>
@@ -88,8 +88,8 @@
           
           <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
             <div class="flex items-center">
-              <div class="w-12 h-8 bg-orange-100 rounded flex items-center justify-center mr-3">
-                <span class="text-orange-600 font-bold text-xs">MM</span>
+              <div class="w-12 h-8 rounded flex items-center justify-center mr-3 bg-white border border-gray-100">
+                <img src="/images/moov-logo.png" alt="Moov Money" class="max-h-6 max-w-full object-contain" />
               </div>
               <div>
                 <h4 class="font-medium text-gray-900">Moov Money</h4>
@@ -105,10 +105,9 @@
           
           <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
             <div class="flex items-center">
-              <div class="w-12 h-8 bg-blue-100 rounded flex items-center justify-center mr-3">
-                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-                </svg>
+              <div class="w-12 h-8 rounded flex items-center justify-center gap-0.5 mr-3 bg-white border border-gray-100">
+                <img src="/images/visa-logo.png" alt="Visa" class="max-h-3.5 max-w-full object-contain" />
+                <img src="/images/mastercard-logo.png" alt="Mastercard" class="max-h-3.5 max-w-full object-contain" />
               </div>
               <div>
                 <h4 class="font-medium text-gray-900">Cartes Bancaires</h4>
