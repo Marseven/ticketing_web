@@ -1111,7 +1111,12 @@ class OrganizerController extends Controller
         if ($request->has('ticket_types') && is_string($request->ticket_types)) {
             $request->merge(['ticket_types' => json_decode($request->ticket_types, true)]);
         }
-        
+        // En FormData, les booléens arrivent en chaînes ("true"/"false") que la
+        // règle de validation `boolean` rejette → normaliser avant validation.
+        if ($request->has('is_active')) {
+            $request->merge(['is_active' => $request->boolean('is_active')]);
+        }
+
         // Debug: Log validation data
         \Illuminate\Support\Facades\Log::info('CreateEvent Debug', [
             'is_active' => $request->is_active,
@@ -1330,7 +1335,12 @@ class OrganizerController extends Controller
         if ($request->has('ticket_types') && is_string($request->ticket_types)) {
             $request->merge(['ticket_types' => json_decode($request->ticket_types, true)]);
         }
-        
+        // En FormData, les booléens arrivent en chaînes ("true"/"false") que la
+        // règle de validation `boolean` rejette → normaliser avant validation.
+        if ($request->has('is_active')) {
+            $request->merge(['is_active' => $request->boolean('is_active')]);
+        }
+
         // Debug: Log file upload info
         \Illuminate\Support\Facades\Log::info('EventEdit Debug', [
             'event_id' => $id,
