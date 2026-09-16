@@ -227,7 +227,7 @@
                       <span>{{ formatPrice(totalAmount) }} FCFA</span>
                     </div>
                     <div v-if="feesAmount > 0" class="flex justify-between items-center text-sm text-gray-500 mb-2">
-                      <span>Frais de service ({{ SERVICE_FEE_PERCENT }}%)</span>
+                      <span>Frais de service</span>
                       <span>{{ formatPrice(Math.round(feesAmount)) }} FCFA</span>
                     </div>
                     <div class="border-t border-primea-blue/10 pt-2 flex justify-between items-center">
@@ -665,7 +665,7 @@
                   <span>{{ formatPrice(totalAmount) }} XAF</span>
                 </div>
                 <div v-if="feesAmount > 0" class="flex justify-between items-center text-sm text-gray-500 mb-2">
-                  <span>Frais de service ({{ SERVICE_FEE_PERCENT }}%)</span>
+                  <span>Frais de service</span>
                   <span>{{ formatPrice(Math.round(feesAmount)) }} XAF</span>
                 </div>
                 <div class="border-t border-primea-blue/10 pt-2 flex justify-between items-center">
