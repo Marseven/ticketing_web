@@ -394,6 +394,7 @@ class WebhookController extends Controller
     {
         Log::info('Webhook E-Billing reçu', [
             'ip' => $request->ip(),
+            'ip_candidates' => $this->ebillingIpCandidates($request),
             'payload' => $request->all(),
         ]);
 
@@ -527,18 +528,40 @@ class WebhookController extends Controller
             }
         }
 
-        // Sinon, autoriser uniquement si l'IP est explicitement en liste blanche.
-        if (!empty($allowedIps) && in_array($request->ip(), $allowedIps, true)) {
+        // Sinon, autoriser si une des IP de la requête (adresse distante OU
+        // chaîne X-Forwarded-For, utile derrière le proxy mutualisé Hostinger)
+        // figure dans la liste blanche.
+        if (!empty($allowedIps) && array_intersect($this->ebillingIpCandidates($request), $allowedIps)) {
             return true;
         }
 
         Log::error('⛔ Webhook E-Billing rejeté', [
             'ip' => $request->ip(),
+            'ip_candidates' => $this->ebillingIpCandidates($request),
             'secret_configured' => !empty($secret),
             'token_fourni' => $request->headers->has('X-Webhook-Secret') || $request->query->has('token'),
             'allowed_ips_configured' => !empty($allowedIps),
         ]);
         return false;
+    }
+
+    /**
+     * IP candidates de la requête : adresse distante + chaîne X-Forwarded-For.
+     * Permet de retrouver l'IP réelle d'e-billing même derrière un proxy /
+     * hébergement mutualisé (où $request->ip() peut être l'IP du proxy).
+     */
+    private function ebillingIpCandidates(Request $request): array
+    {
+        $ips = $request->ips();
+        $ips[] = $request->ip();
+        $xff = (string) $request->header('X-Forwarded-For', '');
+        foreach (explode(',', $xff) as $ip) {
+            $ip = trim($ip);
+            if ($ip !== '') {
+                $ips[] = $ip;
+            }
+        }
+        return array_values(array_unique(array_filter($ips)));
     }
 
     /**
