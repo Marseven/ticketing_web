@@ -459,6 +459,7 @@
 <script>
 import { ref, reactive, onMounted, computed } from 'vue'
 import Swal from 'sweetalert2'
+import { paymentStatusLabel, paymentStatusBadgeClass } from '../../utils/status'
 
 export default {
   name: 'PaymentTracking',
@@ -851,27 +852,8 @@ export default {
       return classes[gateway] || 'bg-gray-100 text-gray-800'
     }
 
-    const getStatusName = (status) => {
-      const names = {
-        success: 'Réussi',
-        pending: 'En attente',
-        failed: 'Échoué',
-        cancelled: 'Annulé',
-        refunded: 'Remboursé'
-      }
-      return names[status] || status
-    }
-
-    const getStatusBadgeClass = (status) => {
-      const classes = {
-        success: 'bg-green-100 text-green-800',
-        pending: 'bg-yellow-100 text-yellow-800',
-        failed: 'bg-red-100 text-red-800',
-        cancelled: 'bg-gray-100 text-gray-800',
-        refunded: 'bg-purple-100 text-purple-800'
-      }
-      return classes[status] || 'bg-gray-100 text-gray-800'
-    }
+    const getStatusName = (status) => paymentStatusLabel(status)
+    const getStatusBadgeClass = (status) => paymentStatusBadgeClass(status)
 
     // Lifecycle
     onMounted(() => {

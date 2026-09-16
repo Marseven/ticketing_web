@@ -416,6 +416,7 @@
 <script>
 import { ref, reactive, onMounted } from 'vue'
 import Swal from 'sweetalert2'
+import { orderStatusLabel, orderStatusBadgeClass, ticketStatusLabel, ticketStatusBadgeClass } from '../../utils/status'
 
 export default {
   name: 'OrderManagement',
@@ -710,43 +711,11 @@ export default {
       })
     }
 
-    const getStatusName = (status) => {
-      const names = {
-        pending: 'En attente',
-        confirmed: 'Confirmée',
-        cancelled: 'Annulée',
-        refunded: 'Remboursée'
-      }
-      return names[status] || status
-    }
+    const getStatusName = (status) => orderStatusLabel(status)
+    const getStatusBadgeClass = (status) => orderStatusBadgeClass(status)
 
-    const getStatusBadgeClass = (status) => {
-      const classes = {
-        pending: 'bg-yellow-100 text-yellow-800',
-        confirmed: 'bg-green-100 text-green-800',
-        cancelled: 'bg-red-100 text-red-800',
-        refunded: 'bg-purple-100 text-purple-800'
-      }
-      return classes[status] || 'bg-gray-100 text-gray-800'
-    }
-
-    const getTicketStatusName = (status) => {
-      const names = {
-        issued: 'Émis',
-        used: 'Utilisé',
-        cancelled: 'Annulé'
-      }
-      return names[status] || status
-    }
-
-    const getTicketStatusClass = (status) => {
-      const classes = {
-        issued: 'bg-blue-100 text-blue-800',
-        used: 'bg-green-100 text-green-800',
-        cancelled: 'bg-red-100 text-red-800'
-      }
-      return classes[status] || 'bg-gray-100 text-gray-800'
-    }
+    const getTicketStatusName = (status) => ticketStatusLabel(status)
+    const getTicketStatusClass = (status) => ticketStatusBadgeClass(status)
 
     // Lifecycle
     onMounted(() => {

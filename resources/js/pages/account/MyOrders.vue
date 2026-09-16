@@ -290,6 +290,7 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { orderStatusLabel, orderStatusBadgeClass } from '../../utils/status'
 import CalendarIcon from '../../components/icons/CalendarIcon.vue'
 import { ticketApiService } from '../../services/api.js'
 import { 
@@ -479,15 +480,7 @@ export default {
       return new Intl.NumberFormat('fr-FR').format(price)
     }
 
-    const getOrderStatusClass = (status) => {
-      const classes = {
-        confirmed: 'bg-green-100 text-green-800',
-        pending: 'bg-yellow-100 text-yellow-800',
-        cancelled: 'bg-red-100 text-red-800',
-        refunded: 'bg-blue-100 text-blue-800'
-      }
-      return classes[status] || 'bg-gray-100 text-gray-800'
-    }
+    const getOrderStatusClass = (status) => orderStatusBadgeClass(status)
 
     const getOrderStatusIcon = (status) => {
       const icons = {
@@ -499,15 +492,7 @@ export default {
       return icons[status] || 'ExclamationTriangleIcon'
     }
 
-    const getOrderStatusText = (status) => {
-      const texts = {
-        confirmed: 'Confirmée',
-        pending: 'En attente',
-        cancelled: 'Annulée',
-        refunded: 'Remboursée'
-      }
-      return texts[status] || 'Inconnu'
-    }
+    const getOrderStatusText = (status) => orderStatusLabel(status)
 
     const getPaymentIcon = (method) => {
       // Retourne l'icône appropriée pour la méthode de paiement

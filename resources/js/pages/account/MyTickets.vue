@@ -222,6 +222,7 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { ticketStatusLabel, ticketStatusBadgeClass } from '../../utils/status'
 import CalendarIcon from '../../components/icons/CalendarIcon.vue'
 import { ticketApiService } from '../../services/api.js'
 import { 
@@ -359,14 +360,7 @@ export default {
       return new Intl.NumberFormat('fr-FR').format(price)
     }
 
-    const getStatusClass = (status) => {
-      const classes = {
-        active: 'bg-green-100 text-green-800',
-        used: 'bg-blue-100 text-blue-800', 
-        expired: 'bg-gray-100 text-gray-800'
-      }
-      return classes[status] || 'bg-gray-100 text-gray-800'
-    }
+    const getStatusClass = (status) => ticketStatusBadgeClass(status)
 
     const getStatusIcon = (status) => {
       const icons = {
@@ -377,14 +371,7 @@ export default {
       return icons[status] || 'ExclamationCircleIcon'
     }
 
-    const getStatusText = (status) => {
-      const texts = {
-        active: 'Actif',
-        used: 'Utilisé',
-        expired: 'Expiré'
-      }
-      return texts[status] || 'Inconnu'
-    }
+    const getStatusText = (status) => ticketStatusLabel(status)
 
     const viewTicket = (ticket) => {
       router.push(`/ticket/${ticket.code}`)
