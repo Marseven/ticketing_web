@@ -73,6 +73,23 @@ class EbillingAuthTest extends TestCase
             && $r->hasHeader('Authorization', 'Basic ' . base64_encode('user:sharedkey')));
     }
 
+    public function test_push_ussd_uses_v2_endpoint_with_bearer(): void
+    {
+        $this->setEnv([
+            'EBILLING_AUTH_MODE' => 'oauth',
+            'EBILLING_SERVER_URL' => 'https://ebill.test/api/v1/merchant/e_bills',
+        ]);
+        Http::fake([
+            'cognito.test/*' => Http::response(['access_token' => 'BEARER123', 'expires_in' => 3600], 200),
+            'ebill.test/*' => Http::response(['state' => 'ready'], 200),
+        ]);
+
+        (new EBillingService())->pushUSSD('INV-1', 'SIMU', '077000001');
+
+        Http::assertSent(fn ($r) => str_contains($r->url(), '/api/v2/merchant/e_bills/INV-1/ussd_push')
+            && $r->hasHeader('Authorization', 'Bearer BEARER123'));
+    }
+
     public function test_basic_mode_uses_basic_and_no_token_call(): void
     {
         $this->setEnv(['EBILLING_AUTH_MODE' => 'basic']);

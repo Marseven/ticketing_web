@@ -25,6 +25,9 @@ class EBillingService
     /** Clé de cache du token OAuth e-billing (dépôt). */
     private const TOKEN_CACHE_KEY = 'ebilling_oauth_token';
 
+    /** Scopes OAuth requis par défaut (préfixe ebilling-api/, séparés par espaces). */
+    private const DEFAULT_OAUTH_SCOPE = 'ebilling-api/invoice:create ebilling-api/invoice:read ebilling-api/payment:create ebilling-api/payment:read';
+
     public function __construct()
     {
         $this->username = env('EBILLING_USERNAME') ?? throw new \Exception('EBILLING_USERNAME n\'est pas configuré dans .env');
@@ -32,12 +35,15 @@ class EBillingService
         $this->serverUrl = env('EBILLING_SERVER_URL') ?? throw new \Exception('EBILLING_SERVER_URL n\'est pas configuré dans .env');
         $this->postUrl = env('EBILLING_POST_URL') ?? throw new \Exception('EBILLING_POST_URL n\'est pas configuré dans .env');
 
-        // Mode d'authentification : 'oauth' (Cognito) ou 'basic' (défaut sûr).
-        $this->authMode = strtolower((string) env('EBILLING_AUTH_MODE', 'basic'));
-        $this->oauthTokenUrl = (string) env('EBILLING_OAUTH_TOKEN_URL', '');
-        $this->oauthClientId = (string) env('EBILLING_OAUTH_CLIENT_ID', '');
-        $this->oauthClientSecret = (string) env('EBILLING_OAUTH_CLIENT_SECRET', '');
-        $this->oauthScope = (string) env('EBILLING_OAUTH_SCOPE', '');
+        // Cognito est désormais obligatoire (Basic refusé après les échéances
+        // billing-easy : Lab 30/06/2026, Prod 31/08/2026) → défaut 'oauth'.
+        // 'basic' reste possible pour un environnement encore en période de grâce.
+        $this->authMode = strtolower((string) env('EBILLING_AUTH_MODE', 'oauth'));
+        $this->oauthTokenUrl = trim((string) env('EBILLING_OAUTH_TOKEN_URL', ''));
+        $this->oauthClientId = trim((string) env('EBILLING_OAUTH_CLIENT_ID', ''));
+        $this->oauthClientSecret = trim((string) env('EBILLING_OAUTH_CLIENT_SECRET', ''));
+        $scope = trim((string) env('EBILLING_OAUTH_SCOPE', ''));
+        $this->oauthScope = $scope !== '' ? $scope : self::DEFAULT_OAUTH_SCOPE;
     }
 
     // ---------------------------------------------------------------------
@@ -203,7 +209,9 @@ class EBillingService
     public function pushUSSD(string $billId, string $paymentSystem, string $msisdn): array
     {
         try {
-            $url = rtrim($this->serverUrl, '/e_bills') . '/e_bills/' . $billId . '/ussd_push';
+            // Push USSD servi sur l'API v2 (création facture = v1) — cf. doc billing-easy.
+            $base = str_replace('/api/v1/', '/api/v2/', rtrim($this->serverUrl, '/e_bills'));
+            $url = $base . '/e_bills/' . $billId . '/ussd_push';
 
             $payload = [
                 'payment_system_name' => $paymentSystem,
