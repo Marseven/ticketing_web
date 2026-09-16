@@ -12,7 +12,7 @@
           <div>
             <h3 class="text-lg font-bold text-primea-blue">{{ title }}</h3>
             <p class="text-xs text-gray-500 mt-0.5">
-              Ajustez le cadrage. Le ratio est imposé pour garder un rendu cohérent partout sur le site.
+              Ajustez le cadrage et choisissez le format adapté à votre visuel.
             </p>
           </div>
           <button
@@ -27,12 +27,27 @@
           </button>
         </div>
 
+        <!-- Sélecteur de format -->
+        <div class="flex flex-wrap items-center gap-2 px-5 py-3 border-b border-gray-100 bg-gray-50">
+          <span class="text-xs font-medium text-gray-500 mr-1">Format :</span>
+          <button
+            v-for="r in ratios"
+            :key="r.label"
+            type="button"
+            class="px-3 py-1 rounded-full text-xs font-semibold border transition-colors"
+            :class="isRatioActive(r) ? 'bg-primea-blue text-white border-primea-blue' : 'bg-white text-gray-600 border-gray-200 hover:border-primea-blue'"
+            @click="selectedRatio = r.value"
+          >
+            {{ r.label }}
+          </button>
+        </div>
+
         <!-- Cropper -->
         <div class="flex-1 overflow-hidden bg-gray-900">
           <Cropper
             ref="cropperRef"
             :src="src"
-            :stencil-props="{ aspectRatio: numericAspectRatio }"
+            :stencil-props="stencilProps"
             :default-size="defaultSize"
             image-restriction="fit-area"
             class="cropper"
@@ -97,6 +112,24 @@ export default {
       return w && h ? w / h : 16 / 9
     })
 
+    // Formats proposés (paysage, carré, portrait). "Libre" = aucun ratio imposé.
+    const ratios = [
+      { label: 'Libre', value: null },
+      { label: '16:9', value: 16 / 9 },
+      { label: '4:3', value: 4 / 3 },
+      { label: '1:1', value: 1 },
+      { label: '3:4', value: 3 / 4 },
+      { label: '9:16', value: 9 / 16 },
+    ]
+    const selectedRatio = ref(numericAspectRatio.value)
+    const stencilProps = computed(() =>
+      selectedRatio.value ? { aspectRatio: selectedRatio.value } : {}
+    )
+    const isRatioActive = (r) => {
+      if (r.value === null) return selectedRatio.value === null
+      return selectedRatio.value !== null && Math.abs(r.value - selectedRatio.value) < 0.001
+    }
+
     const defaultSize = ({ imageSize }) => ({
       width: imageSize.width,
       height: imageSize.height,
@@ -140,7 +173,7 @@ export default {
       }
     }
 
-    return { cropperRef, processing, numericAspectRatio, defaultSize, cancel, confirm }
+    return { cropperRef, processing, numericAspectRatio, ratios, selectedRatio, stencilProps, isRatioActive, defaultSize, cancel, confirm }
   },
 }
 </script>
