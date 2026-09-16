@@ -152,6 +152,29 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Admin plateforme (via rôle OU user type "admin").
+     */
+    public function isPlatformAdmin(): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        return optional($this->userType)->name === 'admin';
+    }
+
+    /**
+     * Peut scanner des billets : admin (tous les événements), organisateur, ou
+     * utilisateur rattaché à au moins un organisateur (events de son orga).
+     */
+    public function canScanTickets(): bool
+    {
+        return $this->isPlatformAdmin()
+            || $this->is_organizer
+            || $this->organizers()->exists();
+    }
+
+    /**
      * Check if user has verified their email.
      */
     public function hasVerifiedEmail(): bool

@@ -149,13 +149,38 @@ class TicketController extends Controller
             'action' => 'nullable|string|in:validate,info'
         ]);
 
+        $user = $request->user();
+
+        // Peuvent scanner : les ADMINS (tous les événements) et les utilisateurs
+        // rattachés à un organisateur (uniquement les événements de leur(s) orga).
+        $isAdmin = $user->isPlatformAdmin();
+        $organizerIds = $user->organizers->pluck('id');
+        if (!$user->canScanTickets()) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Vous n\'êtes pas autorisé à scanner des billets.',
+                'result' => 'forbidden',
+            ], 403);
+        }
+
         // Validation unifiée (numérique + physique) via le service commun.
+        // Admin => tous les événements ; sinon restreint aux organisateurs liés.
         $r = $validator->validate($request->qr_code, [
-            'scanned_by' => auth()->id(),
+            'scanned_by' => $user->id,
             'device_id' => $request->header('X-Device-ID'),
             'location_hint' => $request->ip(),
             'metadata' => ['user_agent' => $request->header('User-Agent')],
+            'enforce_organizer' => !$isAdmin,
+            'organizer_ids' => $organizerIds,
         ]);
+
+        if ($r['result'] === 'forbidden') {
+            return response()->json([
+                'valid' => false,
+                'message' => $r['message'],
+                'result' => 'forbidden',
+            ], 403);
+        }
 
         $httpStatus = $r['result'] === 'valid' ? 200 : ($r['result'] === 'error' ? 500 : 400);
 

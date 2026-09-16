@@ -169,13 +169,19 @@ class ScanController extends Controller
 
         $user = $request->user();
 
-        if (!$user->is_organizer) {
+        // Peuvent scanner : les ADMINS (tous les événements) et les utilisateurs
+        // rattachés à un organisateur (uniquement les événements de leur(s) orga).
+        $isAdmin = $user->isPlatformAdmin();
+        $organizerIds = $user->organizers->pluck('id');
+
+        if (!$user->canScanTickets()) {
             return response()->json([
-                'message' => 'Seuls les organisateurs peuvent enregistrer des scans.',
+                'message' => 'Vous n\'êtes pas autorisé à scanner des billets.',
             ], 403);
         }
 
         // Validation unifiée (numérique + physique) via le service commun.
+        // Un admin scanne tous les événements ; sinon on restreint aux orga liées.
         $r = $validator->validate($request->qr_code, [
             'scanned_by' => $user->id,
             'device_id' => $request->device_id,
@@ -186,8 +192,8 @@ class ScanController extends Controller
                 'user_agent' => $request->header('User-Agent'),
                 'ip_address' => $request->ip(),
             ],
-            'enforce_organizer' => true,
-            'organizer_ids' => $user->organizers->pluck('id'),
+            'enforce_organizer' => !$isAdmin,
+            'organizer_ids' => $organizerIds,
         ]);
 
         // Accès refusé : ne pas exposer le détail du billet.

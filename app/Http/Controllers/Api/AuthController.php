@@ -268,10 +268,10 @@ class AuthController extends Controller
 
         // Pour l'app mobile, vérifier si c'est un organisateur
         $userAgent = $request->header('User-Agent');
-        if (str_contains($userAgent, 'TicketingMobile') && !$user->is_organizer) {
+        if (str_contains($userAgent, 'TicketingMobile') && !$user->canScanTickets()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Seuls les organisateurs peuvent utiliser l\'application mobile.',
+                'message' => 'Accès refusé. Réservé aux organisateurs, à leur personnel et aux administrateurs.',
             ], 403);
         }
 
@@ -307,6 +307,7 @@ class AuthController extends Controller
                 'avatar_url' => $user->avatar_file ? '/storage/images/users/' . $user->avatar_file : $user->avatar_url,
                 'is_organizer' => $userData->is_organizer,
                 'is_admin' => $userData->is_admin,
+                'can_scan' => $user->canScanTickets(),
                 'roles' => $userData->roles,
                 'active_tickets_count' => 0, // TODO: calculer
                 'email_verified_at' => $user->email_verified_at,
