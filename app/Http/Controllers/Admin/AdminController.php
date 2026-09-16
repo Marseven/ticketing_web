@@ -852,7 +852,8 @@ class AdminController extends Controller
                 'status' => $request->status,
                 'is_active' => $request->boolean('is_active', true),
                 'image_url' => $request->image_url,
-                'image_file' => $imageFile,
+                // Fichier uploadé via cover_image, sinon nom de fichier pré-uploadé (ImageUpload → /images/upload)
+                'image_file' => $imageFile ?: $request->input('image_file'),
                 'service_fee_bearer' => $request->input('service_fee_bearer', 'platform'),
             ]);
 
@@ -1026,6 +1027,12 @@ class AdminController extends Controller
 
             if ($request->has('service_fee_bearer')) {
                 $updateData['service_fee_bearer'] = $request->input('service_fee_bearer');
+            }
+
+            // Nom de fichier image pré-uploadé (ImageUpload → /images/upload).
+            // (Le fichier uploadé directement via cover_image est géré plus haut.)
+            if (!$request->hasFile('cover_image') && $request->has('image_file')) {
+                $updateData['image_file'] = $request->input('image_file');
             }
 
             $event->update($updateData);

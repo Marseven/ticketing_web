@@ -796,15 +796,18 @@ export default {
         // Préparer les données avec les images
         const formData = { ...eventForm }
         
-        // Gérer les données d'image
-        if (eventForm.image.url) {
-          formData.image_url = eventForm.image.url
-          formData.image_file = null
-        } else if (eventForm.image.filename) {
-          formData.image_file = eventForm.image.filename
+        // Gérer les données d'image. ImageUpload renvoie { filename, urls }
+        // (upload frais) ou { url } (image rechargée). On privilégie le nom de
+        // fichier (image_file) pour servir les variantes responsive côté serveur.
+        const img = eventForm.image || {}
+        if (img.filename) {
+          formData.image_file = img.filename
           formData.image_url = null
+        } else if (img.url) {
+          formData.image_url = img.url
+          formData.image_file = null
         }
-        
+
         // Nettoyer les données
         delete formData.image
         
