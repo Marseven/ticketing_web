@@ -75,8 +75,36 @@
             </div>
           </div>
 
-          <!-- Tickets Section -->
-          <div v-if="tickets && tickets.length > 0" class="mb-6">
+          <!-- Billet(s) affiché(s) en ligne + téléchargement -->
+          <div v-if="ticketCards.length > 0" class="mb-8">
+            <h3 class="text-lg font-bold text-primea-blue mb-4">{{ ticketCards.length > 1 ? 'Vos billets' : 'Votre billet' }}</h3>
+            <div class="space-y-8">
+              <div v-for="(t, i) in ticketCards" :key="t.id" class="space-y-3">
+                <div :ref="(el) => setTicketRef(el, i)" class="rounded-primea-lg overflow-hidden shadow-primea">
+                  <TicketComponent :ticket="t" size="large" />
+                </div>
+                <div class="flex flex-wrap gap-3 justify-center">
+                  <button
+                    @click="downloadPdf(t)"
+                    :disabled="downloadingId === t.id"
+                    class="inline-flex items-center justify-center gap-2 bg-primea-blue text-white px-6 py-3 rounded-primea-lg font-semibold hover:bg-primea-yellow hover:text-primea-blue transition-colors disabled:opacity-60"
+                  >
+                    <span v-if="downloadingId === t.id">Préparation…</span>
+                    <span v-else>Télécharger le billet (PDF)</span>
+                  </button>
+                  <button
+                    @click="downloadImage(t, i)"
+                    class="inline-flex items-center justify-center gap-2 border-2 border-primea-blue text-primea-blue px-6 py-3 rounded-primea-lg font-semibold hover:bg-primea-blue/5 transition-colors"
+                  >
+                    En image (JPG)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ancienne liste (remplacée par l'affichage en ligne ci-dessus) -->
+          <div v-if="false" class="mb-6">
             <h3 class="text-lg font-bold text-primea-blue mb-4">Vos tickets</h3>
 
             <div class="space-y-3">
@@ -115,7 +143,7 @@
           <!-- Download All Button -->
           <div class="text-center mb-6">
             <button
-              v-if="tickets && tickets.length > 0"
+              v-if="false"
               @click="downloadAllTickets"
               class="bg-primea-blue text-white px-8 py-3 rounded-primea-lg font-bold hover:bg-primea-yellow hover:text-primea-blue transition-all duration-200 shadow-primea-lg transform hover:scale-105"
             >
@@ -159,12 +187,16 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/vue/24/outline'
 import Swal from 'sweetalert2'
+import html2canvas from 'html2canvas'
+import TicketComponent from '../components/TicketComponent.vue'
+import { ticketService } from '../services/api'
 
 export default {
   name: 'TicketSuccess',
   components: {
     CheckCircleIcon,
-    ExclamationCircleIcon
+    ExclamationCircleIcon,
+    TicketComponent
   },
   setup() {
     const route = useRoute()
@@ -175,6 +207,107 @@ export default {
     const error = ref('')
     const order = ref(null)
     const tickets = ref([])
+
+    // Billets rendus en ligne (données complètes : image, QR, prix, date)
+    const ticketCards = ref([])
+    const ticketRefs = []
+    const setTicketRef = (el, i) => { ticketRefs[i] = el }
+    const downloadingId = ref(null)
+
+    const toIsoDate = (value) => {
+      if (!value) return null
+      if (typeof value === 'string' && value.includes('/')) {
+        const [datePart, timePart] = value.split(' ')
+        const [day, month, year] = datePart.split('/')
+        return `${year}-${month}-${day}${timePart ? 'T' + timePart : ''}`
+      }
+      return value
+    }
+
+    // Charger les données complètes de chaque billet pour l'affichage inline
+    const loadTicketCards = async () => {
+      const cards = []
+      for (const t of tickets.value) {
+        try {
+          const res = await ticketService.getTicket(t.code)
+          const a = res.data?.ticket
+          if (!a) continue
+          cards.push({
+            id: a.id ?? t.id,
+            code: a.code,
+            reference: a.code,
+            event: {
+              title: a.event?.title,
+              image: a.event?.image_url || a.event?.image || null,
+              venue_name: a.event?.venue_name,
+              date: toIsoDate(a.schedule?.starts_at),
+              time: ''
+            },
+            ticketType: a.ticket_type?.name || 'Standard',
+            price: a.ticket_type?.price ?? 0,
+            qrCode: a.qr_code || a.qrCode
+              || `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(a.code)}`
+          })
+        } catch (e) {
+          console.error('Billet introuvable:', t.code, e)
+        }
+      }
+      ticketCards.value = cards
+    }
+
+    const downloadPdf = async (t) => {
+      if (downloadingId.value) return
+      downloadingId.value = t.id
+      try {
+        const res = await fetch(`/api/v1/tickets/${t.code}/pdf`)
+        if (!res.ok) throw new Error('PDF indisponible')
+        const blob = await res.blob()
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `ticket-${t.code}.pdf`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      } catch (e) {
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Impossible de télécharger le PDF.', confirmButtonColor: '#272d63' })
+      } finally {
+        downloadingId.value = null
+      }
+    }
+
+    const downloadImage = async (t, i) => {
+      const el = ticketRefs[i]
+      if (!el) return
+      try {
+        // Attendre le chargement des images (affiche, QR) avant la capture
+        const imgs = Array.from(el.querySelectorAll('img'))
+        await Promise.all(imgs.map((img) => {
+          if (img.complete && img.naturalWidth > 0) return Promise.resolve()
+          return new Promise((resolve) => {
+            img.addEventListener('load', resolve, { once: true })
+            img.addEventListener('error', resolve, { once: true })
+          })
+        }))
+        const canvas = await html2canvas(el, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          imageTimeout: 15000,
+          backgroundColor: '#ffffff',
+          ignoreElements: (node) => node.classList?.contains('ticket-cover-bg')
+        })
+        const link = document.createElement('a')
+        link.download = `ticket-${t.code}.jpg`
+        link.href = canvas.toDataURL('image/jpeg', 0.95)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      } catch (e) {
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Impossible de générer l\'image.', confirmButtonColor: '#272d63' })
+      }
+    }
 
     const loadOrder = async () => {
       const reference = route.query.reference
@@ -218,6 +351,7 @@ export default {
         if (data.success) {
           order.value = data.data.order
           tickets.value = data.data.order.tickets || []
+          await loadTicketCards()
         } else {
           throw new Error(data.message || 'Erreur lors du chargement de la commande')
         }
@@ -336,6 +470,11 @@ export default {
       error,
       order,
       tickets,
+      ticketCards,
+      setTicketRef,
+      downloadingId,
+      downloadPdf,
+      downloadImage,
       formatPrice,
       formatDate,
       shareTicket,
