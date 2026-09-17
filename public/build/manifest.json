@@ -1,10 +1,6 @@
 {
-  "_EventCard-CZNEuqcb.css": {
-    "file": "assets/css/EventCard-CZNEuqcb.css",
-    "src": "_EventCard-CZNEuqcb.css"
-  },
-  "_EventCard-oLRAnL7_.js": {
-    "file": "assets/js/EventCard-oLRAnL7_.js",
+  "_EventCard-BOAYQtAa.js": {
+    "file": "assets/js/EventCard-BOAYQtAa.js",
     "name": "EventCard",
     "imports": [
       "_vue-vendor-DRAoFAHk.js",
@@ -15,6 +11,10 @@
     "css": [
       "assets/css/EventCard-CZNEuqcb.css"
     ]
+  },
+  "_EventCard-CZNEuqcb.css": {
+    "file": "assets/css/EventCard-CZNEuqcb.css",
+    "src": "_EventCard-CZNEuqcb.css"
   },
   "_TicketComponent-Cs6IwtJa.js": {
     "file": "assets/js/TicketComponent-Cs6IwtJa.js",
@@ -159,7 +159,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-Cewvs9vD.js",
+    "file": "assets/js/app-CRilSWN5.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -267,7 +267,7 @@
     ]
   },
   "resources/js/pages/Checkout.vue": {
-    "file": "assets/js/Checkout-Dl404On_.js",
+    "file": "assets/js/Checkout-BB5aEWhS.js",
     "name": "Checkout",
     "src": "resources/js/pages/Checkout.vue",
     "isDynamicEntry": true,
@@ -299,14 +299,14 @@
     ]
   },
   "resources/js/pages/EventDetail.vue": {
-    "file": "assets/js/EventDetail-oRXPjWom.js",
+    "file": "assets/js/EventDetail-BoF-ku1z.js",
     "name": "EventDetail",
     "src": "resources/js/pages/EventDetail.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vue-vendor-DRAoFAHk.js",
       "_events-DxA4fXC9.js",
-      "_EventCard-oLRAnL7_.js",
+      "_EventCard-BOAYQtAa.js",
       "resources/js/app.js",
       "_account-CDGQA4aH.js",
       "_vendor-CZnQ5pu1.js",
@@ -318,14 +318,14 @@
     ]
   },
   "resources/js/pages/Events.vue": {
-    "file": "assets/js/Events-BYD7xflC.js",
+    "file": "assets/js/Events-9FWPbmkt.js",
     "name": "Events",
     "src": "resources/js/pages/Events.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vue-vendor-DRAoFAHk.js",
       "_events-DxA4fXC9.js",
-      "_EventCard-oLRAnL7_.js",
+      "_EventCard-BOAYQtAa.js",
       "resources/js/app.js",
       "_account-CDGQA4aH.js",
       "_vendor-CZnQ5pu1.js",
@@ -380,7 +380,7 @@
     ]
   },
   "resources/js/pages/TicketRetrieve.vue": {
-    "file": "assets/js/TicketRetrieve-elj3eaEF.js",
+    "file": "assets/js/TicketRetrieve-DYvJID7r.js",
     "name": "TicketRetrieve",
     "src": "resources/js/pages/TicketRetrieve.vue",
     "isDynamicEntry": true,
@@ -397,7 +397,7 @@
     ]
   },
   "resources/js/pages/TicketSuccess.vue": {
-    "file": "assets/js/TicketSuccess-Cac25LG7.js",
+    "file": "assets/js/TicketSuccess-D7QSRsRO.js",
     "name": "TicketSuccess",
     "src": "resources/js/pages/TicketSuccess.vue",
     "isDynamicEntry": true,
@@ -408,7 +408,7 @@
       "_TicketComponent-Cs6IwtJa.js"
     ],
     "css": [
-      "assets/css/TicketSuccess-DaIrJljk.css"
+      "assets/css/TicketSuccess-DYh6P4AH.css"
     ]
   },
   "resources/js/pages/auth/EmailVerification.vue": {

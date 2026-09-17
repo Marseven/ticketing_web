@@ -78,6 +78,16 @@
           <!-- Billet(s) affiché(s) en ligne + téléchargement -->
           <div v-if="ticketCards.length > 0" class="mb-8">
             <h3 class="text-lg font-bold text-primea-blue mb-4">{{ ticketCards.length > 1 ? 'Vos billets' : 'Votre billet' }}</h3>
+            <div v-if="ticketCards.length > 1" class="mb-5 text-center">
+              <button
+                @click="downloadAllPdf"
+                :disabled="downloadingAll"
+                class="inline-flex items-center justify-center gap-2 bg-primea-yellow text-primea-blue px-6 py-3 rounded-primea-lg font-bold hover:bg-primea-blue hover:text-white transition-colors disabled:opacity-60"
+              >
+                <span v-if="downloadingAll">Téléchargement…</span>
+                <span v-else>Tout télécharger (PDF)</span>
+              </button>
+            </div>
             <div class="space-y-8">
               <div v-for="(t, i) in ticketCards" :key="t.id" class="space-y-3">
                 <div :ref="(el) => setTicketRef(el, i)" class="rounded-primea-lg overflow-hidden shadow-primea">
@@ -213,6 +223,7 @@ export default {
     const ticketRefs = []
     const setTicketRef = (el, i) => { ticketRefs[i] = el }
     const downloadingId = ref(null)
+    const downloadingAll = ref(false)
 
     const toIsoDate = (value) => {
       if (!value) return null
@@ -306,6 +317,19 @@ export default {
         document.body.removeChild(link)
       } catch (e) {
         Swal.fire({ icon: 'error', title: 'Erreur', text: 'Impossible de générer l\'image.', confirmButtonColor: '#272d63' })
+      }
+    }
+
+    const downloadAllPdf = async () => {
+      if (downloadingAll.value || ticketCards.value.length === 0) return
+      downloadingAll.value = true
+      try {
+        for (const t of ticketCards.value) {
+          await downloadPdf(t)
+          await new Promise((r) => setTimeout(r, 400)) // léger délai anti-blocage navigateur
+        }
+      } finally {
+        downloadingAll.value = false
       }
     }
 
@@ -473,8 +497,10 @@ export default {
       ticketCards,
       setTicketRef,
       downloadingId,
+      downloadingAll,
       downloadPdf,
       downloadImage,
+      downloadAllPdf,
       formatPrice,
       formatDate,
       shareTicket,
