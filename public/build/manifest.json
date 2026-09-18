@@ -1,6 +1,10 @@
 {
-  "_EventCard-BOAYQtAa.js": {
-    "file": "assets/js/EventCard-BOAYQtAa.js",
+  "_EventCard-CZNEuqcb.css": {
+    "file": "assets/css/EventCard-CZNEuqcb.css",
+    "src": "_EventCard-CZNEuqcb.css"
+  },
+  "_EventCard-CiWtoPNX.js": {
+    "file": "assets/js/EventCard-CiWtoPNX.js",
     "name": "EventCard",
     "imports": [
       "_vue-vendor-DRAoFAHk.js",
@@ -11,10 +15,6 @@
     "css": [
       "assets/css/EventCard-CZNEuqcb.css"
     ]
-  },
-  "_EventCard-CZNEuqcb.css": {
-    "file": "assets/css/EventCard-CZNEuqcb.css",
-    "src": "_EventCard-CZNEuqcb.css"
   },
   "_TicketComponent-Cs6IwtJa.js": {
     "file": "assets/js/TicketComponent-Cs6IwtJa.js",
@@ -47,8 +47,12 @@
     "file": "assets/css/account-hmN_kuMu.css",
     "src": "_account-hmN_kuMu.css"
   },
-  "_admin-BjRf6cHy.js": {
-    "file": "assets/js/admin-BjRf6cHy.js",
+  "_admin-D0LUwZYI.css": {
+    "file": "assets/css/admin-D0LUwZYI.css",
+    "src": "_admin-D0LUwZYI.css"
+  },
+  "_admin-DMQDZJx-.js": {
+    "file": "assets/js/admin-DMQDZJx-.js",
     "name": "admin",
     "isDynamicEntry": true,
     "imports": [
@@ -59,10 +63,6 @@
     "css": [
       "assets/css/admin-D0LUwZYI.css"
     ]
-  },
-  "_admin-D0LUwZYI.css": {
-    "file": "assets/css/admin-D0LUwZYI.css",
-    "src": "_admin-D0LUwZYI.css"
   },
   "_events-DxA4fXC9.js": {
     "file": "assets/js/events-DxA4fXC9.js",
@@ -159,7 +159,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/js/app-CRilSWN5.js",
+    "file": "assets/js/app-DKTgwOjQ.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -167,7 +167,7 @@
       "_vendor-CZnQ5pu1.js",
       "_vue-vendor-DRAoFAHk.js",
       "_account-CDGQA4aH.js",
-      "_admin-BjRf6cHy.js"
+      "_admin-DMQDZJx-.js"
     ],
     "dynamicImports": [
       "resources/js/pages/Events.vue",
@@ -199,33 +199,33 @@
       "_organizer-BTrRc7v-.js",
       "_organizer-BTrRc7v-.js",
       "resources/js/layouts/AdminLayout.vue",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
-      "_admin-BjRf6cHy.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
+      "_admin-DMQDZJx-.js",
       "resources/js/pages/static/HowItWorks.vue",
       "resources/js/pages/static/Help.vue",
       "resources/js/pages/static/Terms.vue",
@@ -267,7 +267,7 @@
     ]
   },
   "resources/js/pages/Checkout.vue": {
-    "file": "assets/js/Checkout-BB5aEWhS.js",
+    "file": "assets/js/Checkout-DspsCs4o.js",
     "name": "Checkout",
     "src": "resources/js/pages/Checkout.vue",
     "isDynamicEntry": true,
@@ -277,7 +277,7 @@
       "_events-DxA4fXC9.js",
       "_account-CDGQA4aH.js",
       "resources/js/app.js",
-      "_admin-BjRf6cHy.js"
+      "_admin-DMQDZJx-.js"
     ],
     "css": [
       "assets/css/Checkout-CxNRuNyZ.css",
@@ -299,18 +299,18 @@
     ]
   },
   "resources/js/pages/EventDetail.vue": {
-    "file": "assets/js/EventDetail-BoF-ku1z.js",
+    "file": "assets/js/EventDetail-D7BRG3ol.js",
     "name": "EventDetail",
     "src": "resources/js/pages/EventDetail.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vue-vendor-DRAoFAHk.js",
       "_events-DxA4fXC9.js",
-      "_EventCard-BOAYQtAa.js",
+      "_EventCard-CiWtoPNX.js",
       "resources/js/app.js",
       "_account-CDGQA4aH.js",
       "_vendor-CZnQ5pu1.js",
-      "_admin-BjRf6cHy.js"
+      "_admin-DMQDZJx-.js"
     ],
     "css": [
       "assets/css/EventDetail-BLTf3CWd.css",
@@ -318,18 +318,18 @@
     ]
   },
   "resources/js/pages/Events.vue": {
-    "file": "assets/js/Events-9FWPbmkt.js",
+    "file": "assets/js/Events-DkzsBYul.js",
     "name": "Events",
     "src": "resources/js/pages/Events.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vue-vendor-DRAoFAHk.js",
       "_events-DxA4fXC9.js",
-      "_EventCard-BOAYQtAa.js",
+      "_EventCard-CiWtoPNX.js",
       "resources/js/app.js",
       "_account-CDGQA4aH.js",
       "_vendor-CZnQ5pu1.js",
-      "_admin-BjRf6cHy.js"
+      "_admin-DMQDZJx-.js"
     ],
     "css": [
       "assets/css/Events-CWPRENpW.css",
@@ -380,7 +380,7 @@
     ]
   },
   "resources/js/pages/TicketRetrieve.vue": {
-    "file": "assets/js/TicketRetrieve-DYvJID7r.js",
+    "file": "assets/js/TicketRetrieve-D6VRERkV.js",
     "name": "TicketRetrieve",
     "src": "resources/js/pages/TicketRetrieve.vue",
     "isDynamicEntry": true,
@@ -389,7 +389,7 @@
       "resources/js/app.js",
       "_account-CDGQA4aH.js",
       "_vendor-CZnQ5pu1.js",
-      "_admin-BjRf6cHy.js"
+      "_admin-DMQDZJx-.js"
     ],
     "css": [
       "assets/css/TicketRetrieve-_qTnT-32.css",

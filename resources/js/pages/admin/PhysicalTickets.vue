@@ -130,7 +130,8 @@ const loadEvents = async () => {
     const res = await fetch('/api/v1/admin/events', { headers: authHeaders() })
     const data = await res.json()
     if (data.success) {
-      events.value = data.data?.data ?? data.data ?? []
+      // Réponse : { data: { events: { data: [...] } } } (paginator Laravel).
+      events.value = data.data?.events?.data ?? data.data?.events ?? data.data?.data ?? []
     }
   } catch (e) { console.error(e) }
 }
@@ -147,7 +148,8 @@ const onEventChange = async () => {
   try {
     const res = await fetch(`/api/v1/admin/events/${selectedEventId.value}`, { headers: authHeaders() })
     const data = await res.json()
-    const ev = data.data ?? data
+    // Réponse : { data: { event: {...} } } — les relations sont sous event.
+    const ev = data.data?.event ?? data.data ?? data
     ticketTypes.value = ev.ticket_types ?? ev.ticketTypes ?? []
     schedules.value = ev.schedules ?? []
   } catch (e) { console.error(e) }
