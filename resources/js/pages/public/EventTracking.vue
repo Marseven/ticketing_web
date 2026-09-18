@@ -7,7 +7,9 @@
 
       <!-- Lien invalide -->
       <div v-else-if="notFound" class="text-center py-20">
-        <div class="text-5xl mb-4">🔒</div>
+        <svg class="w-14 h-14 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 0h10.5a2.25 2.25 0 012.25 2.25v6.75a2.25 2.25 0 01-2.25 2.25H6.75a2.25 2.25 0 01-2.25-2.25v-6.75a2.25 2.25 0 012.25-2.25z" />
+        </svg>
         <h1 class="text-xl font-bold text-gray-900">Lien invalide ou expiré</h1>
         <p class="text-gray-600 mt-2">Ce lien de suivi n'est plus valide. Demandez-en un nouveau à l'organisation.</p>
       </div>
@@ -21,10 +23,26 @@
             <div class="p-5 flex-1">
               <p class="text-xs font-semibold text-primea-yellow uppercase tracking-wide mb-1">Suivi des billets</p>
               <h1 class="text-2xl font-bold text-primea-blue">{{ summary.event.title }}</h1>
-              <div class="mt-2 text-sm text-gray-600 space-y-1">
-                <p v-if="summary.event.organizer">👤 {{ summary.event.organizer }}</p>
-                <p v-if="summary.event.venue">📍 {{ summary.event.venue }}</p>
-                <p v-if="summary.event.date">🗓️ {{ formatDate(summary.event.date) }}</p>
+              <div class="mt-2 text-sm text-gray-600 space-y-1.5">
+                <p v-if="summary.event.organizer" class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13 13 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  {{ summary.event.organizer }}
+                </p>
+                <p v-if="summary.event.venue" class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  {{ summary.event.venue }}
+                </p>
+                <p v-if="summary.event.date" class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  {{ formatDate(summary.event.date) }}
+                </p>
               </div>
             </div>
           </div>
@@ -94,7 +112,12 @@
                 class="p-4 flex items-center gap-3 hover:bg-gray-50 cursor-pointer">
               <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
                    :class="t.scanned ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'">
-                <span v-if="t.scanned">✓</span><span v-else>○</span>
+                <svg v-if="t.scanned" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <circle cx="12" cy="12" r="7" />
+                </svg>
               </div>
               <div class="flex-1 min-w-0">
                 <p class="font-mono text-sm text-primea-blue">{{ t.code }}</p>
@@ -164,7 +187,9 @@
             <p v-if="!detail.checkins?.length" class="text-sm text-gray-500">Jamais scanné.</p>
             <ul v-else class="space-y-2">
               <li v-for="(c, i) in detail.checkins" :key="i" class="text-sm flex items-start gap-2">
-                <span :class="c.result === 'valid' ? 'text-green-600' : 'text-orange-500'">●</span>
+                <svg class="w-2.5 h-2.5 mt-1.5 flex-shrink-0" :class="c.result === 'valid' ? 'text-green-600' : 'text-orange-500'" viewBox="0 0 8 8" fill="currentColor">
+                  <circle cx="4" cy="4" r="4" />
+                </svg>
                 <div>
                   <p>{{ resultLabel(c.result) }} — {{ formatDate(c.scanned_at) }}</p>
                   <p class="text-xs text-gray-500">par {{ c.scanned_by || 'Inconnu' }}<span v-if="c.device_id"> · {{ c.device_id }}</span></p>
