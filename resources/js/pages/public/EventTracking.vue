@@ -241,7 +241,7 @@ const formatDate = (d) => d
   : '—'
 const formatAmount = (a) => new Intl.NumberFormat('fr-FR').format(a || 0)
 const sourceLabel = (s) => ({ online: 'En ligne', physical: 'Physique', comped: 'Invitation' }[s] || 'En ligne')
-const resultLabel = (r) => ({ valid: 'Entrée validée', duplicate: 'Déjà scanné', invalid: 'Refusé' }[r] || r)
+const resultLabel = (r) => ({ valid: 'Entrée validée', duplicate: 'Déjà scanné', invalid: 'Refusé', reset: 'Réinitialisé (admin)' }[r] || r)
 
 const loadSummary = async () => {
   try {

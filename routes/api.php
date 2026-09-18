@@ -389,6 +389,8 @@ Route::prefix('v1')->group(function () {
 
         // Liste de tous les billets (numériques + physiques)
         Route::get('tickets', [App\Http\Controllers\Admin\AdminController::class, 'tickets']);
+        // Réinitialiser un billet scanné -> de nouveau valide (cas de fraude avérée)
+        Route::post('tickets/{code}/reset-scan', [App\Http\Controllers\Admin\AdminController::class, 'resetTicketScan']);
 
         // Gestion des commandes (Orders)
         Route::prefix('orders')->group(function () {

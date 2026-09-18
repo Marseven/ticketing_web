@@ -113,6 +113,7 @@
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Commande</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Scanné le</th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
@@ -136,6 +137,14 @@
               </td>
               <td class="px-4 py-3 font-mono text-xs text-gray-600">{{ t.order_reference || '—' }}</td>
               <td class="px-4 py-3 text-gray-600">{{ t.used_at ? formatDateTime(t.used_at) : '—' }}</td>
+              <td class="px-4 py-3 text-right">
+                <button v-if="t.status === 'used'" @click="resetScan(t)"
+                        class="text-orange-600 hover:text-orange-800 text-xs font-medium"
+                        title="Réinitialiser : rendre ce billet de nouveau valide (fraude avérée)">
+                  Réinitialiser
+                </button>
+                <span v-else class="text-gray-300 text-xs">—</span>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -160,6 +169,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import Swal from 'sweetalert2'
 import { ticketStatusLabel, ticketStatusBadgeClass } from '../../utils/status'
 
 const loading = ref(false)
@@ -240,6 +250,36 @@ const resetFilters = () => {
   filters.date_to = ''
   filters.page = 1
   loadTickets()
+}
+
+const resetScan = async (t) => {
+  const confirm = await Swal.fire({
+    icon: 'warning',
+    title: 'Réinitialiser ce billet ?',
+    html: `Le billet <b>${t.code}</b> repassera à <b>valide (non scanné)</b> et pourra être scanné à nouveau.<br><span class="text-sm text-gray-500">À n'utiliser qu'en cas de fraude avérée. L'opération est tracée.</span>`,
+    showCancelButton: true,
+    confirmButtonText: 'Oui, réinitialiser',
+    cancelButtonText: 'Annuler',
+    confirmButtonColor: '#ea580c',
+    cancelButtonColor: '#6b7280',
+  })
+  if (!confirm.isConfirmed) return
+
+  try {
+    const res = await fetch(`/api/v1/admin/tickets/${encodeURIComponent(t.code)}/reset-scan`, {
+      method: 'POST',
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+    })
+    const data = await res.json()
+    if (data.success) {
+      Swal.fire({ icon: 'success', title: 'Billet réinitialisé', text: data.message, confirmButtonColor: '#272d63' })
+      loadTickets()
+    } else {
+      Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Échec', confirmButtonColor: '#272d63' })
+    }
+  } catch (e) {
+    Swal.fire({ icon: 'error', title: 'Erreur technique', text: 'Réessayez.', confirmButtonColor: '#272d63' })
+  }
 }
 
 const loadEvents = async () => {

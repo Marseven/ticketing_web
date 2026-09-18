@@ -8,6 +8,7 @@ use App\Models\Organizer;
 use App\Models\Event;
 use App\Models\Order;
 use App\Models\Ticket;
+use App\Models\Checkin;
 use App\Models\Payment;
 use App\Models\Payout;
 use App\Models\OrganizerBalance;
@@ -2568,6 +2569,62 @@ class AdminController extends Controller
                 'message' => 'Erreur technique lors du chargement des billets'
             ], 500);
         }
+    }
+
+    /**
+     * Réinitialise un billet scanné -> « émis » (de nouveau valide et
+     * scannable). Réservé aux administrateurs, pour les cas de fraude avérée.
+     *
+     * L'anti-double-scan se basant sur l'existence d'un check-in `valid`, on
+     * supprime ces check-ins valides ET on repasse le statut, puis on trace
+     * l'opération (qui a réinitialisé + rappel du scan précédent).
+     */
+    public function resetTicketScan(Request $request, string $code): JsonResponse
+    {
+        $user = $request->user();
+        if (!$user || !$user->isPlatformAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Action réservée aux administrateurs.'], 403);
+        }
+
+        $ticket = Ticket::where('code', $code)->first();
+        if (!$ticket) {
+            return response()->json(['success' => false, 'message' => 'Billet introuvable'], 404);
+        }
+
+        $lastValid = $ticket->checkins()
+            ->where('result', 'valid')
+            ->latest('scanned_at')
+            ->with('scanner:id,name')
+            ->first();
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($ticket, $user, $lastValid) {
+            // Débloque l'anti-double-scan (supprime les scans valides).
+            $ticket->checkins()->where('result', 'valid')->delete();
+
+            // Rend le billet de nouveau valide (émis, non utilisé).
+            $ticket->update(['status' => 'issued', 'used_at' => null]);
+
+            // Trace d'audit : qui a réinitialisé + rappel du scan précédent.
+            $note = 'Réinitialisation admin (' . $user->name . ')';
+            if ($lastValid) {
+                $note .= ' — scan précédent le ' . $lastValid->scanned_at->format('d/m/Y H:i')
+                    . ($lastValid->scanner ? ' par ' . $lastValid->scanner->name : '');
+            }
+            Checkin::create([
+                'ticket_id' => $ticket->id,
+                'scanned_by' => $user->id,
+                'result' => 'reset',
+                'scanned_at' => now(),
+                'device_id' => 'ADMIN-RESET',
+                'location_hint' => mb_substr($note, 0, 255),
+            ]);
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Billet réinitialisé : il est de nouveau valide et scannable.',
+            'data' => ['code' => $ticket->code, 'status' => 'issued'],
+        ]);
     }
 
     public function orders(Request $request): JsonResponse
