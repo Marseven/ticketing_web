@@ -2544,7 +2544,10 @@ class AdminController extends Controller
     public function showOrder($orderId): JsonResponse
     {
         try {
-            $order = Order::with(['event', 'buyer', 'organizer', 'tickets.ticketType', 'payments'])
+            $order = Order::with([
+                    'event.organizer', 'event.venue', 'event.schedules',
+                    'buyer', 'organizer', 'tickets.ticketType', 'payments',
+                ])
                 ->find($orderId);
 
             if (!$order) {
@@ -2554,9 +2557,59 @@ class AdminController extends Controller
                 ], 404);
             }
 
+            // Articles commandés : il n'existe pas de table de lignes de commande,
+            // on regroupe donc les billets par type (nom, prix unitaire, quantité).
+            $items = $order->tickets
+                ->groupBy('ticket_type_id')
+                ->map(function ($group) {
+                    $first = $group->first();
+                    $unit = (float) ($first->ticketType?->price ?? 0);
+                    return [
+                        'id' => $first->ticket_type_id ?? 0,
+                        'ticket_type_name' => $first->ticketType?->name ?? 'Billet',
+                        'unit_price' => $unit,
+                        'quantity' => $group->count(),
+                        'total_price' => $unit * $group->count(),
+                    ];
+                })->values();
+
+            $event = $order->event;
+
+            // Réponse normalisée pour le modal admin (client, événement,
+            // articles, billets avec statut LIVE = reflète les scans).
+            $payload = [
+                'id' => $order->id,
+                'reference' => $order->reference,
+                'status' => $order->status,
+                'created_at' => $order->created_at,
+                'total_amount' => $order->total_amount,
+                'service_fee_amount' => $order->service_fee_amount,
+                'service_fee_bearer' => $order->service_fee_bearer,
+                // Client : compte acheteur OU informations invité (guest checkout).
+                'customer_name' => $order->buyer?->name ?? $order->guest_name ?? '—',
+                'customer_email' => $order->buyer?->email ?? $order->guest_email ?? '—',
+                'customer_phone' => $order->buyer?->phone ?? $order->guest_phone,
+                'event' => $event ? [
+                    'title' => $event->title,
+                    'organizer' => ['name' => $event->organizer?->name ?? $order->organizer?->name],
+                    'venue' => $event->venue ? ['name' => $event->venue->name] : null,
+                    'schedules' => $event->schedules->map(fn ($s) => [
+                        'starts_at' => $s->starts_at,
+                    ])->values(),
+                ] : null,
+                'items' => $items,
+                'tickets' => $order->tickets->map(fn ($t) => [
+                    'id' => $t->id,
+                    'code' => $t->code,
+                    'status' => $t->status,
+                    'used_at' => $t->used_at,
+                    'ticket_type' => $t->ticketType ? ['name' => $t->ticketType->name] : null,
+                ])->values(),
+            ];
+
             return response()->json([
                 'success' => true,
-                'data' => ['order' => $order]
+                'data' => ['order' => $payload]
             ]);
 
         } catch (\Exception $e) {

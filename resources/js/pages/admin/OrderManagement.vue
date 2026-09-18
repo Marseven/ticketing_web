@@ -385,7 +385,7 @@
                   </span>
                 </div>
                 <div class="text-gray-600">
-                  <p>{{ ticket.ticketType?.name }}</p>
+                  <p>{{ ticket.ticket_type?.name }}</p>
                   <p v-if="ticket.used_at">Utilisé: {{ formatDateTime(ticket.used_at) }}</p>
                 </div>
               </div>
