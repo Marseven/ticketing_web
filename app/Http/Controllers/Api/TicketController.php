@@ -172,6 +172,9 @@ class TicketController extends Controller
             'metadata' => ['user_agent' => $request->header('User-Agent')],
             'enforce_organizer' => !$isAdmin,
             'organizer_ids' => $organizerIds,
+            // On scanne les participants à l'arrivée (souvent avant l'heure
+            // officielle) : ne pas bloquer un billet valide sur la date d'event.
+            'enforce_schedule' => false,
         ]);
 
         if ($r['result'] === 'forbidden') {

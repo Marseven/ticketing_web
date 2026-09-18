@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Event;
+use App\Models\EventSchedule;
 use App\Models\Organizer;
 use App\Models\Ticket;
 use App\Models\TicketType;
@@ -87,6 +88,61 @@ class TicketScanUnifiedTest extends TestCase
         $this->assertSame('not_found', $r['result']);
         $this->assertFalse($r['valid']);
         $this->assertNull($r['ticket']);
+    }
+
+    /**
+     * Par défaut, le garde de date bloque un billet dont l'événement n'a pas
+     * encore commencé (utile pour d'autres contextes que le scan à l'entrée).
+     */
+    public function test_future_scheduled_ticket_is_invalid_by_default(): void
+    {
+        $event = $this->makeEvent();
+        $schedule = EventSchedule::create([
+            'event_id' => $event->id,
+            'starts_at' => now()->addMonth(),
+            'ends_at' => now()->addMonth()->addHours(4),
+            'status' => 'active',
+        ]);
+        Ticket::create([
+            'event_id' => $event->id, 'schedule_id' => $schedule->id,
+            'code' => 'FUT-1', 'status' => 'issued',
+            'ticket_source' => 'online', 'issued_at' => now(),
+        ]);
+
+        $r = app(TicketValidationService::class)->validate('FUT-1', ['scanned_by' => $this->scannerId()]);
+
+        $this->assertSame('invalid', $r['result']);
+        $this->assertFalse($r['valid']);
+    }
+
+    /**
+     * Régression : le scan à l'entrée (endpoints mobiles) passe
+     * enforce_schedule=false, donc un billet valide pour un événement à venir
+     * est bien accepté au lieu d'être rejeté « invalide ».
+     */
+    public function test_future_scheduled_ticket_scans_when_schedule_not_enforced(): void
+    {
+        $event = $this->makeEvent();
+        $schedule = EventSchedule::create([
+            'event_id' => $event->id,
+            'starts_at' => now()->addMonth(),
+            'ends_at' => now()->addMonth()->addHours(4),
+            'status' => 'active',
+        ]);
+        $ticket = Ticket::create([
+            'event_id' => $event->id, 'schedule_id' => $schedule->id,
+            'code' => 'FUT-2', 'status' => 'issued',
+            'ticket_source' => 'online', 'issued_at' => now(),
+        ]);
+
+        $r = app(TicketValidationService::class)->validate('FUT-2', [
+            'scanned_by' => $this->scannerId(),
+            'enforce_schedule' => false,
+        ]);
+
+        $this->assertSame('valid', $r['result']);
+        $this->assertTrue($r['valid']);
+        $this->assertSame('used', $ticket->fresh()->status);
     }
 
     public function test_digital_ticket_with_type_scans(): void

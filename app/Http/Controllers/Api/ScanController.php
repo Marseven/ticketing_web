@@ -194,6 +194,8 @@ class ScanController extends Controller
             ],
             'enforce_organizer' => !$isAdmin,
             'organizer_ids' => $organizerIds,
+            // Scan à l'arrivée (souvent avant l'heure) : ne pas bloquer sur la date.
+            'enforce_schedule' => false,
         ]);
 
         // Accès refusé : ne pas exposer le détail du billet.
