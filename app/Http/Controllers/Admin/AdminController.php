@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Organizer;
 use App\Models\Event;
 use App\Models\Order;
+use App\Models\Ticket;
 use App\Models\Payment;
 use App\Models\Payout;
 use App\Models\OrganizerBalance;
@@ -2477,6 +2478,98 @@ class AdminController extends Controller
     /**
      * Liste des commandes
      */
+    /**
+     * Liste de TOUS les billets (numériques + physiques) avec filtres et
+     * statut LIVE (reflète les scans). Filtres : recherche (code/référence/
+     * client), événement, statut, provenance, organisateur, dates.
+     */
+    public function tickets(Request $request): JsonResponse
+    {
+        try {
+            $query = Ticket::with(['event', 'ticketType', 'order', 'buyer', 'schedule']);
+
+            if ($request->filled('search')) {
+                $s = $request->search;
+                $query->where(function ($q) use ($s) {
+                    $q->where('code', 'like', "%{$s}%")
+                      ->orWhere('batch_reference', 'like', "%{$s}%")
+                      ->orWhereHas('order', fn ($o) => $o->where('reference', 'like', "%{$s}%"))
+                      ->orWhereHas('buyer', fn ($b) => $b->where('name', 'like', "%{$s}%")
+                          ->orWhere('email', 'like', "%{$s}%"));
+                });
+            }
+
+            if ($request->filled('event_id')) {
+                $query->where('event_id', $request->event_id);
+            }
+
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
+            if ($request->filled('ticket_source')) {
+                $query->where('ticket_source', $request->ticket_source);
+            }
+
+            if ($request->filled('organizer_id')) {
+                $query->whereHas('event', fn ($e) => $e->where('organizer_id', $request->organizer_id));
+            }
+
+            if ($request->filled('date_from')) {
+                $query->whereDate('created_at', '>=', $request->date_from);
+            }
+
+            if ($request->filled('date_to')) {
+                $query->whereDate('created_at', '<=', $request->date_to);
+            }
+
+            $paginator = $query->orderByDesc('created_at')->paginate(25);
+
+            $paginator->getCollection()->transform(fn ($t) => [
+                'id' => $t->id,
+                'code' => $t->code,
+                'status' => $t->status,
+                'source' => $t->ticket_source,
+                'batch_reference' => $t->batch_reference,
+                'used_at' => $t->used_at,
+                'created_at' => $t->created_at,
+                'event' => $t->event ? ['id' => $t->event->id, 'title' => $t->event->title] : null,
+                'ticket_type' => $t->ticketType ? ['name' => $t->ticketType->name] : null,
+                'holder' => $t->buyer
+                    ? ['name' => $t->buyer->name, 'email' => $t->buyer->email]
+                    : ['name' => $t->order?->guest_name, 'email' => $t->order?->guest_email],
+                'order_reference' => $t->order?->reference,
+                'schedule_date' => $t->schedule?->starts_at,
+            ]);
+
+            // Stats globales (tiennent compte du filtre événement s'il est posé).
+            $statsBase = Ticket::query();
+            if ($request->filled('event_id')) {
+                $statsBase->where('event_id', $request->event_id);
+            }
+            $stats = [
+                'total' => (clone $statsBase)->count(),
+                'issued' => (clone $statsBase)->where('status', 'issued')->count(),
+                'used' => (clone $statsBase)->where('status', 'used')->count(),
+                'physical' => (clone $statsBase)->where('ticket_source', 'physical')->count(),
+                'online' => (clone $statsBase)->where('ticket_source', 'online')->count(),
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => ['tickets' => $paginator, 'stats' => $stats],
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur liste billets admin', ['error' => $e->getMessage()]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur technique lors du chargement des billets'
+            ], 500);
+        }
+    }
+
     public function orders(Request $request): JsonResponse
     {
         try {
@@ -2503,7 +2596,19 @@ class AdminController extends Controller
             }
 
             if ($request->filled('event_id')) {
-                $query->where('event_id', $request->event_id);
+                // orders n'a pas de colonne event_id : l'événement est lié via
+                // les tickets (hasOneThrough). On filtre donc par la relation.
+                $query->whereHas('tickets', function ($q) use ($request) {
+                    $q->where('event_id', $request->event_id);
+                });
+            }
+
+            if ($request->filled('date_from')) {
+                $query->whereDate('created_at', '>=', $request->date_from);
+            }
+
+            if ($request->filled('date_to')) {
+                $query->whereDate('created_at', '<=', $request->date_to);
             }
 
             $orders = $query->withCount('tickets')

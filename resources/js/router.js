@@ -51,6 +51,7 @@ const EventApproval = () => import(/* webpackChunkName: "admin-events" */ './pag
 const PhysicalTickets = () => import(/* webpackChunkName: "admin-events" */ './pages/admin/PhysicalTickets.vue');
 const LegacyImport = () => import(/* webpackChunkName: "admin-events" */ './pages/admin/LegacyImport.vue');
 const OrderManagement = () => import(/* webpackChunkName: "admin-orders" */ './pages/admin/OrderManagement.vue');
+const TicketManagement = () => import(/* webpackChunkName: "admin-orders" */ './pages/admin/TicketManagement.vue');
 const PaymentTracking = () => import(/* webpackChunkName: "admin-payments" */ './pages/admin/PaymentTracking.vue');
 const PayoutDashboard = () => import(/* webpackChunkName: "admin-payouts" */ './pages/admin/PayoutDashboard.vue');
 const OrganizerBalanceConfig = () => import(/* webpackChunkName: "admin-payouts" */ './pages/admin/OrganizerBalanceConfig.vue');
@@ -163,6 +164,7 @@ const routes = [
             { path: 'physical-tickets', component: PhysicalTickets, name: 'admin-physical-tickets' },
             { path: 'legacy-import', component: LegacyImport, name: 'admin-legacy-import' },
             { path: 'orders', component: OrderManagement, name: 'admin-orders' },
+            { path: 'tickets', component: TicketManagement, name: 'admin-tickets' },
             { path: 'payments', component: PaymentTracking, name: 'admin-payments' },
             { path: 'payouts', component: PayoutDashboard, name: 'admin-payouts' },
             { path: 'balance-config', component: OrganizerBalanceConfig, name: 'admin-balance-config' },
