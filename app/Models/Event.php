@@ -19,6 +19,7 @@ class Event extends Model
         'venue_id',
         'title',
         'slug',
+        'tracking_token',
         'description',
         'image_url',
         'image_file',
@@ -36,6 +37,15 @@ class Event extends Model
         'published_at',
         'created_by',
         'updated_by',
+    ];
+
+    /**
+     * Le jeton de suivi ne doit JAMAIS fuiter dans une sérialisation
+     * d'événement (listes publiques, API client…). On l'expose uniquement via
+     * les endpoints dédiés de génération de lien.
+     */
+    protected $hidden = [
+        'tracking_token',
     ];
 
     protected $casts = [
@@ -340,7 +350,31 @@ class Event extends Model
         if ($this->image_url) {
             return $this->image_url;
         }
-        
+
         return null;
+    }
+
+    /**
+     * Génère (si absent) et retourne le jeton public de suivi des billets.
+     */
+    public function ensureTrackingToken(): string
+    {
+        if (empty($this->tracking_token)) {
+            $this->tracking_token = \Illuminate\Support\Str::random(48);
+            $this->save();
+        }
+
+        return $this->tracking_token;
+    }
+
+    /**
+     * Régénère le jeton de suivi (révoque l'ancien lien partagé).
+     */
+    public function regenerateTrackingToken(): string
+    {
+        $this->tracking_token = \Illuminate\Support\Str::random(48);
+        $this->save();
+
+        return $this->tracking_token;
     }
 }

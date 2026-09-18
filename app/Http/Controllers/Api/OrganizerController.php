@@ -2080,6 +2080,32 @@ class OrganizerController extends Controller
     /**
      * Get event stats (for detail page)
      */
+    /**
+     * Lien public de suivi des billets (à partager avec l'organisateur).
+     * Scopé aux événements de l'organisateur connecté.
+     */
+    public function trackingLink(Request $request, $eventId): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user->is_organizer) {
+            return response()->json(['message' => 'Accès refusé.'], 403);
+        }
+
+        $organizerIds = $user->organizers->pluck('id');
+        $event = Event::whereIn('organizer_id', $organizerIds)->findOrFail($eventId);
+
+        $token = $event->ensureTrackingToken();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'token' => $token,
+                'url' => rtrim(config('app.url'), '/') . '/suivi/' . $token,
+            ],
+        ]);
+    }
+
     public function getEventStats(Request $request, $eventId): JsonResponse
     {
         $user = $request->user();

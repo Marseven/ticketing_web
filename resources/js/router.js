@@ -21,6 +21,7 @@ const ResetPassword = () => import('./pages/auth/ResetPassword.vue');
 const TicketRetrieve = () => import('./pages/TicketRetrieve.vue');
 const TicketDownload = () => import('./pages/TicketDownload.vue');
 const TicketSuccess = () => import('./pages/TicketSuccess.vue');
+const EventTracking = () => import('./pages/public/EventTracking.vue');
 const PaymentSuccess = () => import('./pages/PaymentSuccess.vue');
 
 // Espace client
@@ -101,6 +102,7 @@ const routes = [
     { path: '/ticket/:id/download', component: TicketDownload, name: 'ticket-download' },
     { path: '/ticket/:id', component: TicketDownload, name: 'ticket-view' },
     { path: '/ticket-success', component: TicketSuccess, name: 'ticket-success' },
+    { path: '/suivi/:token', component: EventTracking, name: 'event-tracking' },
     { path: '/payment-success', component: PaymentSuccess, name: 'payment-success' },
 
     // Pages statiques

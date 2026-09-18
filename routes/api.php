@@ -131,6 +131,13 @@ Route::prefix('v1')->group(function () {
         Route::get('tickets/retrieve/{email}', [App\Http\Controllers\Guest\TicketController::class, 'retrieve']);
     });
 
+    // Suivi public des billets par jeton (organisateur, sans login)
+    Route::prefix('track')->group(function () {
+        Route::get('{token}', [App\Http\Controllers\Tracking\EventTrackingController::class, 'summary']);
+        Route::get('{token}/tickets', [App\Http\Controllers\Tracking\EventTrackingController::class, 'tickets']);
+        Route::get('{token}/tickets/{code}', [App\Http\Controllers\Tracking\EventTrackingController::class, 'ticket']);
+    });
+
     // Routes des tickets
     Route::prefix('tickets')->group(function () {
         Route::get('retrieve/{token}', [App\Http\Controllers\Api\TicketController::class, 'retrieve']);
@@ -165,6 +172,7 @@ Route::prefix('v1')->group(function () {
         Route::get('events/{id}', [App\Http\Controllers\Api\OrganizerController::class, 'getEvent']);
         Route::delete('events/{id}', [App\Http\Controllers\Api\OrganizerController::class, 'deleteEvent']);
         Route::get('events/{id}/stats', [App\Http\Controllers\Api\OrganizerController::class, 'getEventStats']);
+        Route::get('events/{id}/tracking-link', [App\Http\Controllers\Api\OrganizerController::class, 'trackingLink']);
         Route::get('events/{eventId}/sales', [App\Http\Controllers\Api\OrganizerController::class, 'eventSales']);
         Route::get('events/{eventId}/sales-by-schedule', [App\Http\Controllers\Api\OrganizerController::class, 'salesBySchedule']);
         // Récurrence et prix variables
@@ -260,6 +268,8 @@ Route::prefix('v1')->group(function () {
             Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'events']);
             Route::post('/', [App\Http\Controllers\Admin\AdminController::class, 'createEvent']);
             Route::get('{event}', [App\Http\Controllers\Admin\AdminController::class, 'showEvent']);
+            Route::get('{event}/tracking-link', [App\Http\Controllers\Admin\AdminController::class, 'trackingLink']);
+            Route::post('{event}/tracking-link/regenerate', [App\Http\Controllers\Admin\AdminController::class, 'regenerateTrackingLink']);
             Route::put('{event}', [App\Http\Controllers\Admin\AdminController::class, 'updateEvent']);
             Route::post('{event}/toggle-status', [App\Http\Controllers\Admin\AdminController::class, 'toggleEventStatus']);
             // Validation manuelle des événements + commission variable

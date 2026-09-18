@@ -192,6 +192,12 @@
                 <button @click="duplicateEvent(event)" class="text-purple-600 hover:text-purple-900">
                   Dupliquer
                 </button>
+                <button @click="openTracking(event)" class="text-primea-blue hover:text-primea-yellow" title="Ouvrir le suivi des billets">
+                  Suivi
+                </button>
+                <button @click="copyTrackingLink(event)" class="text-gray-500 hover:text-gray-800" title="Copier le lien de suivi à envoyer à l'organisateur">
+                  Copier lien
+                </button>
               </td>
             </tr>
           </tbody>
@@ -979,6 +985,40 @@ export default {
       }
     }
 
+    // Lien public de suivi des billets (à envoyer à l'organisateur)
+    const fetchTrackingUrl = async (event) => {
+      const res = await fetch(`/api/v1/admin/events/${event.id}/tracking-link`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Accept': 'application/json' }
+      })
+      const data = await res.json()
+      if (!data.success) throw new Error(data.message || 'Erreur')
+      return data.data.url
+    }
+
+    const openTracking = async (event) => {
+      try {
+        const url = await fetchTrackingUrl(event)
+        window.open(url, '_blank')
+      } catch (e) {
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Impossible d\'ouvrir le suivi.', confirmButtonColor: '#272d63' })
+      }
+    }
+
+    const copyTrackingLink = async (event) => {
+      try {
+        const url = await fetchTrackingUrl(event)
+        try { await navigator.clipboard.writeText(url) } catch (_) { /* clipboard indispo */ }
+        Swal.fire({
+          icon: 'success',
+          title: 'Lien de suivi copié',
+          html: `<p class="text-sm text-gray-600 mb-2">À envoyer à l'organisateur :</p><input readonly value="${url}" class="w-full border rounded px-2 py-1 text-xs" onclick="this.select()" />`,
+          confirmButtonColor: '#272d63',
+        })
+      } catch (e) {
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Impossible de générer le lien.', confirmButtonColor: '#272d63' })
+      }
+    }
+
     const addSchedule = () => {
       eventForm.schedules.push({ starts_at: '', ends_at: '' })
     }
@@ -1086,6 +1126,8 @@ export default {
       saveEvent,
       viewEventDetails,
       duplicateEvent,
+      openTracking,
+      copyTrackingLink,
       addSchedule,
       removeSchedule,
       addTicketType,

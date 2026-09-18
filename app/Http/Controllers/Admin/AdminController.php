@@ -2646,6 +2646,50 @@ class AdminController extends Controller
     /**
      * Afficher une commande
      */
+    /**
+     * Renvoie (en le générant si besoin) le lien public de suivi des billets
+     * d'un événement, à transmettre à l'organisateur.
+     */
+    public function trackingLink($eventId): JsonResponse
+    {
+        $event = Event::find($eventId);
+        if (!$event) {
+            return response()->json(['success' => false, 'message' => 'Événement introuvable'], 404);
+        }
+
+        $token = $event->ensureTrackingToken();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'token' => $token,
+                'url' => rtrim(config('app.url'), '/') . '/suivi/' . $token,
+            ],
+        ]);
+    }
+
+    /**
+     * Régénère le lien de suivi (révoque l'ancien lien partagé).
+     */
+    public function regenerateTrackingLink($eventId): JsonResponse
+    {
+        $event = Event::find($eventId);
+        if (!$event) {
+            return response()->json(['success' => false, 'message' => 'Événement introuvable'], 404);
+        }
+
+        $token = $event->regenerateTrackingToken();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Nouveau lien généré. L\'ancien lien ne fonctionne plus.',
+            'data' => [
+                'token' => $token,
+                'url' => rtrim(config('app.url'), '/') . '/suivi/' . $token,
+            ],
+        ]);
+    }
+
     public function showOrder($orderId): JsonResponse
     {
         try {

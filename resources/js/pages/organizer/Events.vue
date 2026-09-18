@@ -182,6 +182,12 @@
                   Dupliquer
                 </button>
                 <button
+                  @click="openTracking(event)"
+                  class="px-3 py-1.5 text-sm rounded-lg bg-primea-blue text-white hover:opacity-90"
+                >
+                  Suivi billets
+                </button>
+                <button
                   v-if="!(event.tickets_sold > 0)"
                   @click="deleteEvent(event)"
                   class="bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors"
@@ -570,6 +576,20 @@ export default {
       // TODO: Sauvegarder en base
     }
 
+    // Ouvre la page publique de suivi des billets (lien à jeton)
+    const openTracking = async (event) => {
+      try {
+        const res = await fetch(`/api/v1/organizer/events/${event.id}/tracking-link`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Accept': 'application/json' }
+        })
+        const data = await res.json()
+        if (!data.success) throw new Error()
+        window.open(data.data.url, '_blank')
+      } catch (e) {
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Impossible d\'ouvrir le suivi des billets.', confirmButtonColor: '#272d63' })
+      }
+    }
+
     const duplicateEvent = async (event) => {
       try {
         // Preparer les schedules a partir de l'evenement source
@@ -748,6 +768,7 @@ export default {
       getApprovalClass,
       toggleFavorite,
       duplicateEvent,
+      openTracking,
       editEvent,
       deleteEvent,
       loadEvents,
