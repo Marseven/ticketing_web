@@ -9,8 +9,7 @@
     <NewFooter v-if="showFooter" />
     <!-- Mobile Bottom Navigation -->
     <MobileBottomNav v-if="showBottomNav" />
-    <!-- PWA Install Prompt -->
-    <PWAInstallPrompt />
+    <!-- Bannière d'installation PWA désactivée pour le moment -->
   </div>
 </template>
 
@@ -20,15 +19,13 @@ import { useRoute } from 'vue-router'
 import NewHeader from './components/layout/NewHeader.vue'
 import NewFooter from './components/layout/NewFooter.vue'
 import MobileBottomNav from './components/MobileBottomNav.vue'
-import PWAInstallPrompt from './components/PWAInstallPrompt.vue'
 
 export default {
   name: 'App',
   components: {
     NewHeader,
     NewFooter,
-    MobileBottomNav,
-    PWAInstallPrompt
+    MobileBottomNav
   },
   setup() {
     const route = useRoute()
