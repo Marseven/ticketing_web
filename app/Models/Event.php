@@ -25,6 +25,7 @@ class Event extends Model
         'image_file',
         'status',
         'use_variable_pricing',
+        'show_remaining_seats',
         'commission_percentage',
         'service_fee_bearer',
         'approval_status',
@@ -51,6 +52,7 @@ class Event extends Model
     protected $casts = [
         'published_at' => 'datetime',
         'use_variable_pricing' => 'boolean',
+        'show_remaining_seats' => 'boolean',
         'commission_percentage' => 'decimal:2',
         'approved_at' => 'datetime',
         'payout_settled_at' => 'datetime',

@@ -1253,6 +1253,7 @@ class OrganizerController extends Controller
                     ? $request->input('instant_payout_phone')
                     : null,
                 'service_fee_bearer' => $request->input('service_fee_bearer', 'platform'),
+                'show_remaining_seats' => $request->boolean('show_remaining_seats'),
             ]);
 
             // Créer les horaires
@@ -1422,6 +1423,11 @@ class OrganizerController extends Controller
             // Qui supporte les frais de service (par événement)
             if ($request->has('service_fee_bearer')) {
                 $updateData['service_fee_bearer'] = $request->input('service_fee_bearer');
+            }
+
+            // Affichage public des places restantes (optionnel)
+            if ($request->has('show_remaining_seats')) {
+                $updateData['show_remaining_seats'] = $request->boolean('show_remaining_seats');
             }
 
             // Gérer published_at

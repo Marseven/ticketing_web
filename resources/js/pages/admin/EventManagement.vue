@@ -316,6 +316,16 @@
                   <option value="cancelled">Annulé</option>
                 </select>
               </div>
+
+              <div class="md:col-span-2">
+                <label class="flex items-start gap-2 cursor-pointer">
+                  <input v-model="eventForm.show_remaining_seats" type="checkbox" class="mt-1 rounded border-gray-300 text-primea-blue focus:ring-primea-blue" />
+                  <span>
+                    <span class="block text-sm font-medium text-gray-700">Afficher les places restantes au public</span>
+                    <span class="block text-xs text-gray-500">Masqué par défaut. Activer pour créer un sentiment d'urgence.</span>
+                  </span>
+                </label>
+              </div>
             </div>
 
             <!-- Schedules -->
@@ -580,6 +590,7 @@ export default {
       image: {},
       schedules: [],
       ticket_types: [],
+      show_remaining_seats: false,
       // Pour un nouveau lieu
       new_venue_name: '',
       new_venue_city: '',
@@ -774,6 +785,7 @@ export default {
             category_id: data.data.event.category_id,
             venue_id: data.data.event.venue_id,
             status: data.data.event.status,
+            show_remaining_seats: data.data.event.show_remaining_seats ?? false,
             image: imageData,
             schedules: data.data.event.schedules?.map(s => ({
               starts_at: s.starts_at ? s.starts_at.slice(0, 16) : '',

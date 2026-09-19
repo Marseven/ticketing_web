@@ -86,9 +86,12 @@ const ScannerApp = () => import('./pages/scanner/ScannerApp.vue');
 const routes = [
     { path: '/', component: Home, name: 'home' },
     { path: '/events', component: Events, name: 'events' },
-    // Ancien lien /events/:slug -> redirige vers le lien court /:slug (compat).
-    { path: '/events/:slug', redirect: to => ({ path: `/${to.params.slug}` }) },
+    // Le lien d'un événement mène DIRECTEMENT à l'achat (page checkout).
+    // L'ancien lien /events/:slug redirige aussi vers l'achat (compat).
+    { path: '/events/:slug', redirect: to => ({ path: `/checkout/${to.params.slug}` }) },
     { path: '/checkout/:eventSlug', component: Checkout, name: 'checkout' },
+    // Page d'infos de l'événement, accessible via un lien « détails ».
+    { path: '/:slug/details', component: EventDetail, name: 'event-details' },
     { path: '/payment/:reference', component: Payment, name: 'payment' },
     { path: '/login', component: Login, name: 'login' },
     { path: '/register', component: Register, name: 'register' },
@@ -188,7 +191,9 @@ const routes = [
 
     // Lien court d'un événement : /:slug (doit rester la DERNIÈRE route pour ne
     // capter que les segments non déjà pris par une route spécifique).
-    { path: '/:slug', component: EventDetail, name: 'event-detail' },
+    // Lien court d'un événement : /:slug -> ACHAT direct (page checkout).
+    // Doit rester la DERNIÈRE route (ne capte que les segments non pris).
+    { path: '/:slug', name: 'event-detail', redirect: to => ({ path: `/checkout/${to.params.slug}` }) },
 ];
 
 const router = createRouter({

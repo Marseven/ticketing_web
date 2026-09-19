@@ -355,6 +355,17 @@
                     </label>
                     <p class="text-xs text-gray-500 mt-1 font-primea">Activer les ventes de billets pour cet événement</p>
                   </div>
+                  <div>
+                    <label class="flex items-center space-x-2">
+                      <input
+                        v-model="form.show_remaining_seats"
+                        type="checkbox"
+                        class="rounded border-gray-300 text-primea-blue focus:ring-primea-blue"
+                      />
+                      <span class="text-sm font-medium text-gray-700 font-primea">Afficher les places restantes au public</span>
+                    </label>
+                    <p class="text-xs text-gray-500 mt-1 font-primea">Masqué par défaut. Activez pour créer un sentiment d'urgence ; sinon le public ne voit pas le nombre de places restantes.</p>
+                  </div>
                 </div>
               </div>
 
@@ -528,6 +539,7 @@ const form = reactive({
   image_preview: '',
   image_file: null,
   is_active: false,
+  show_remaining_seats: false,
   payout_mode: 'deferred',
   instant_payout_phone: '',
   service_fee_bearer: 'platform',
@@ -609,6 +621,7 @@ const loadEvent = async () => {
       payout_mode: event.value.payout_mode || 'deferred',
       instant_payout_phone: event.value.instant_payout_phone || '',
       service_fee_bearer: event.value.service_fee_bearer || 'platform',
+      show_remaining_seats: event.value.show_remaining_seats ?? false,
       schedules: (event.value.schedules && event.value.schedules.length > 0)
         ? event.value.schedules.map(s => ({
             starts_at: s.starts_at ? new Date(s.starts_at).toISOString().slice(0, 16) : '',
@@ -660,6 +673,7 @@ const updateEvent = async () => {
       payout_mode: form.payout_mode,
       instant_payout_phone: form.payout_mode === 'instant' ? form.instant_payout_phone : '',
       service_fee_bearer: form.service_fee_bearer,
+      show_remaining_seats: form.show_remaining_seats ? 1 : 0,
       schedules: form.schedules,
       ticket_types: form.ticket_types.map(tt => ({
         id: tt.id || null,

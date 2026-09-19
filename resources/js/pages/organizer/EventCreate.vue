@@ -292,6 +292,17 @@
               </div>
             </div>
 
+            <!-- Affichage des places restantes au public -->
+            <div class="bg-white rounded-primea shadow-primea p-4 md:p-6">
+              <label class="flex items-start justify-between gap-3 cursor-pointer">
+                <span>
+                  <span class="block text-lg md:text-xl font-semibold text-primea-blue font-primea">Afficher les places restantes au public</span>
+                  <span class="block text-xs text-gray-500 font-primea mt-1">Désactivé par défaut. Activez-le si vous voulez créer un sentiment d'urgence ; sinon le public ne voit pas le nombre de places restantes.</span>
+                </span>
+                <input type="checkbox" v-model="form.show_remaining_seats" class="mt-1 rounded border-gray-300 text-primea-blue focus:ring-primea-blue" />
+              </label>
+            </div>
+
             <!-- Tarification variable / Prévente -->
             <div class="bg-white rounded-primea shadow-primea p-4 md:p-6">
               <div class="flex items-center justify-between mb-3 md:mb-4">
@@ -561,6 +572,7 @@ const form = reactive({
   service_fee_bearer: 'platform',
   // Tarification variable / prévente
   use_variable_pricing: false,
+  show_remaining_seats: false,
   price_tiers: [], // { ticket_index, price, valid_from, valid_until, description }
   // Nouveaux champs pour lieu
   new_venue_name: '',
@@ -781,6 +793,7 @@ const createEvent = async () => {
       payout_mode: form.payout_mode,
       instant_payout_phone: form.payout_mode === 'instant' ? form.instant_payout_phone : '',
       service_fee_bearer: form.service_fee_bearer,
+      show_remaining_seats: form.show_remaining_seats ? 1 : 0,
       schedules: form.schedules.map(schedule => ({
         starts_at: schedule.starts_at,
         ends_at: schedule.ends_at,

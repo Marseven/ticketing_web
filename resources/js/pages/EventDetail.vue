@@ -127,7 +127,7 @@
                       <div class="flex-1 min-w-0">
                         <h4 class="font-bold text-primea-blue mb-1 text-base md:text-lg">{{ ticketType.name }}</h4>
                         <p v-if="ticketType.description" class="text-sm text-gray-600 mb-2 line-clamp-2">{{ ticketType.description }}</p>
-                        <div class="flex items-center gap-2 text-xs md:text-sm">
+                        <div v-if="showRemainingSeats" class="flex items-center gap-2 text-xs md:text-sm">
                           <span class="text-gray-500">Places disponibles:</span>
                           <span class="font-semibold px-2 py-1 rounded-lg" :class="getQuantityDisplayCount(ticketType) > 10 ? 'bg-green-100 text-green-700' : getQuantityDisplayCount(ticketType) > 0 ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-700'">
                             {{ getQuantityDisplay(ticketType) }}
@@ -153,7 +153,7 @@
                     <div class="flex-1">
                       <h4 class="font-bold text-primea-blue mb-1">Billet standard</h4>
                       <p class="text-sm text-gray-600 mb-2">Accès général à l'événement</p>
-                      <div class="flex items-center gap-2 text-sm">
+                      <div v-if="showRemainingSeats" class="flex items-center gap-2 text-sm">
                         <span class="text-gray-500">Places disponibles:</span>
                         <span class="font-semibold px-2 py-1 rounded-lg" :class="availableTickets > 20 ? 'bg-green-100 text-green-700' : availableTickets > 0 ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-700'">
                           {{ availableTickets > 0 ? availableTickets : 'Complet' }}
@@ -424,6 +424,9 @@ export default {
       return new Date() > salesCutoff
     })
 
+    // Affichage public des places restantes : optionnel, réglé par l'organisateur.
+    const showRemainingSeats = computed(() => event.value?.show_remaining_seats === true)
+
     const availableTickets = computed(() => {
       if (isEventPassed.value) return 0
 
@@ -559,6 +562,7 @@ export default {
       minPrice,
       isEventPassed,
       availableTickets,
+      showRemainingSeats,
       canPurchaseTickets,
       descriptionParagraphs,
       formatFullDate,

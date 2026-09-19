@@ -75,6 +75,13 @@
                       <span class="text-gray-700">{{ eventTime }}</span>
                     </div>
                   </div>
+                  <router-link
+                    v-if="event?.slug"
+                    :to="`/${event.slug}/details`"
+                    class="inline-block mt-4 text-sm font-medium text-primea-blue hover:text-primea-yellow underline"
+                  >
+                    Voir les détails de l'événement
+                  </router-link>
                 </div>
               </div>
 

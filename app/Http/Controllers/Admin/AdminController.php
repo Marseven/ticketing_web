@@ -857,6 +857,7 @@ class AdminController extends Controller
                 // Fichier uploadé via cover_image, sinon nom de fichier pré-uploadé (ImageUpload → /images/upload)
                 'image_file' => $imageFile ?: $request->input('image_file'),
                 'service_fee_bearer' => $request->input('service_fee_bearer', 'platform'),
+                'show_remaining_seats' => $request->boolean('show_remaining_seats'),
             ]);
 
             // Créer les horaires
@@ -1029,6 +1030,10 @@ class AdminController extends Controller
 
             if ($request->has('service_fee_bearer')) {
                 $updateData['service_fee_bearer'] = $request->input('service_fee_bearer');
+            }
+
+            if ($request->has('show_remaining_seats')) {
+                $updateData['show_remaining_seats'] = $request->boolean('show_remaining_seats');
             }
 
             // Nom de fichier image pré-uploadé (ImageUpload → /images/upload).
