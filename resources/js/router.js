@@ -86,7 +86,8 @@ const ScannerApp = () => import('./pages/scanner/ScannerApp.vue');
 const routes = [
     { path: '/', component: Home, name: 'home' },
     { path: '/events', component: Events, name: 'events' },
-    { path: '/events/:slug', component: EventDetail, name: 'event-detail' },
+    // Ancien lien /events/:slug -> redirige vers le lien court /:slug (compat).
+    { path: '/events/:slug', redirect: to => ({ path: `/${to.params.slug}` }) },
     { path: '/checkout/:eventSlug', component: Checkout, name: 'checkout' },
     { path: '/payment/:reference', component: Payment, name: 'payment' },
     { path: '/login', component: Login, name: 'login' },
@@ -184,6 +185,10 @@ const routes = [
     
     // Scanner
     { path: '/scanner', component: ScannerApp, name: 'scanner' },
+
+    // Lien court d'un événement : /:slug (doit rester la DERNIÈRE route pour ne
+    // capter que les segments non déjà pris par une route spécifique).
+    { path: '/:slug', component: EventDetail, name: 'event-detail' },
 ];
 
 const router = createRouter({

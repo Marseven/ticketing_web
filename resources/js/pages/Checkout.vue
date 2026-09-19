@@ -584,7 +584,7 @@
                     <span>{{ event.venue_name || 'Lieu à confirmer' }}</span>
                   </div>
                   <router-link
-                    :to="`/events/${event.slug}`"
+                    :to="`/${event.slug}`"
                     class="bg-primea-yellow text-primea-blue px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-primea-yellow transition-colors shadow-md"
                   >
                     À propos

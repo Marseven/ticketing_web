@@ -502,7 +502,7 @@ const publishEvent = async () => {
 };
 
 const shareEvent = async () => {
-  const url = `${window.location.origin}/events/${event.value.slug}`;
+  const url = `${window.location.origin}/${event.value.slug}`;
   try {
     await navigator.clipboard.writeText(url);
     Swal.fire({
@@ -523,7 +523,7 @@ const shareEvent = async () => {
 };
 
 const viewPublicPage = () => {
-  const url = `/events/${event.value.slug}`;
+  const url = `/${event.value.slug}`;
   window.open(url, '_blank');
 };
 

@@ -361,7 +361,7 @@ export default {
     }
 
     const goToEvent = () => {
-      router.push(`/events/${props.event.slug}`)
+      router.push(`/${props.event.slug}`)
     }
 
     const goToCheckout = () => {

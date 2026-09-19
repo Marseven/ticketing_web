@@ -58,7 +58,7 @@ export default {
     const router = useRouter()
 
     const goToEvent = (eventId) => {
-      router.push(`/events/${eventId}`)
+      router.push(`/${eventId}`)
     }
 
     const formatDate = (date) => {

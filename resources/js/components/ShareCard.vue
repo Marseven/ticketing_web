@@ -67,7 +67,7 @@ export default {
   },
   setup(props) {
     const eventUrl = computed(() => {
-      return `${window.location.origin}/events/${props.event.slug}`
+      return `${window.location.origin}/${props.event.slug}`
     })
 
     const shareOnFacebook = () => {
