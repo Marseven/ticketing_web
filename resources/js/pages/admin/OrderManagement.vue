@@ -387,6 +387,11 @@
                 <div class="text-gray-600">
                   <p>{{ ticket.ticket_type?.name }}</p>
                   <p v-if="ticket.used_at">Utilisé: {{ formatDateTime(ticket.used_at) }}</p>
+                  <button v-if="ticket.status === 'used'" @click="resetScan(ticket)"
+                          class="mt-2 text-xs text-orange-600 hover:text-orange-800 font-medium"
+                          title="Rendre ce billet de nouveau valide (fraude avérée)">
+                    Réinitialiser le scan
+                  </button>
                 </div>
               </div>
             </div>
@@ -589,6 +594,36 @@ export default {
       loadOrders()
     }
 
+    const resetScan = async (ticket) => {
+      const confirm = await Swal.fire({
+        icon: 'warning',
+        title: 'Réinitialiser ce billet ?',
+        html: `Le billet <b>${ticket.code}</b> repassera à <b>valide (non scanné)</b> et pourra être scanné à nouveau.<br><span class="text-sm text-gray-500">À n'utiliser qu'en cas de fraude avérée. L'opération est tracée.</span>`,
+        showCancelButton: true,
+        confirmButtonText: 'Oui, réinitialiser',
+        cancelButtonText: 'Annuler',
+        confirmButtonColor: '#ea580c',
+        cancelButtonColor: '#6b7280',
+      })
+      if (!confirm.isConfirmed) return
+
+      try {
+        const res = await fetch(`/api/v1/admin/tickets/${encodeURIComponent(ticket.code)}/reset-scan`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Accept': 'application/json' }
+        })
+        const data = await res.json()
+        if (data.success) {
+          Swal.fire({ icon: 'success', title: 'Billet réinitialisé', text: data.message, confirmButtonColor: '#272d63' })
+          if (selectedOrder.value) await viewOrderDetails(selectedOrder.value)
+        } else {
+          Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Échec', confirmButtonColor: '#272d63' })
+        }
+      } catch (e) {
+        Swal.fire({ icon: 'error', title: 'Erreur technique', text: 'Réessayez.', confirmButtonColor: '#272d63' })
+      }
+    }
+
     const viewOrderDetails = async (order) => {
       try {
         const response = await fetch(`/api/v1/admin/orders/${order.id}`, {
@@ -744,6 +779,7 @@ export default {
       changePage,
       resetFilters,
       viewOrderDetails,
+      resetScan,
       updateOrderStatus,
       exportOrders,
       

@@ -538,7 +538,7 @@ const form = reactive({
 // Méthodes
 const loadCategories = async () => {
   try {
-    const response = await organizerService.getCategories();
+    const response = await organizerService.getCategories({ all: 1 });
     categories.value = response.data.categories || [];
   } catch (err) {
     console.error('Erreur chargement catégories:', err);

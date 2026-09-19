@@ -897,7 +897,7 @@ const loadInitialData = async () => {
   loading.value = true;
   try {
     // Charger les catégories
-    const categoriesResponse = await organizerService.getCategories();
+    const categoriesResponse = await organizerService.getCategories({ all: 1 });
     if (categoriesResponse.data.success) {
       categories.value = categoriesResponse.data.categories || categoriesResponse.data.data;
     }

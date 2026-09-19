@@ -12,8 +12,16 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
+        // Sélecteur de formulaire (création / édition d'événement) : TOUTES les
+        // catégories actives, indépendamment des événements déjà publiés — sinon
+        // on ne peut choisir que les catégories déjà utilisées.
+        if ($request->boolean('all')) {
+            $categories = \App\Models\Category::where('is_active', true)
+                ->orderBy('name')
+                ->get();
+        }
         // Si c'est une requête admin, récupérer toutes les catégories
-        if ($request->user() && $request->user()->hasRole(\App\Models\Role::ADMIN)) {
+        elseif ($request->user() && $request->user()->hasRole(\App\Models\Role::ADMIN)) {
             $categories = \App\Models\Category::orderBy('name')->get();
         } else {
             // Récupération des catégories qui ont des événements publiés

@@ -399,9 +399,10 @@ export const organizerService = {
     return api.post('/organizer/profile/avatar', formData)
   },
 
-  // Récupérer les catégories
-  getCategories() {
-    return api.get('/categories')
+  // Récupérer les catégories (passer { all: 1 } pour toutes les catégories
+  // actives, ex. sélecteur de création/édition d'événement)
+  getCategories(params = {}) {
+    return api.get('/categories', { params })
   },
 
   // Récupérer les lieux/venues

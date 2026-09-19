@@ -657,7 +657,7 @@ export default {
 
     const loadCategories = async () => {
       try {
-        const response = await fetch('/api/v1/categories', {
+        const response = await fetch('/api/v1/categories?all=1', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Accept': 'application/json',
