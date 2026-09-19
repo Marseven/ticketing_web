@@ -1,7 +1,7 @@
 <template>
   <div class="ticket-success-page min-h-screen bg-gray-50 font-primea">
-    <div class="container mx-auto px-4 py-12">
-      <div class="max-w-2xl mx-auto">
+    <div class="container mx-auto px-4 py-6">
+      <div class="max-w-xl mx-auto">
 
         <!-- Loading State -->
         <div v-if="loading" class="bg-white rounded-primea-xl shadow-primea p-8 text-center">
@@ -27,91 +27,59 @@
         </div>
 
         <!-- Success State -->
-        <div v-else-if="order" class="bg-white rounded-primea-xl shadow-primea p-8">
+        <div v-else-if="order" class="bg-white rounded-primea-xl shadow-primea p-5 sm:p-6">
 
-          <!-- Success Icon -->
-          <div class="text-center mb-8">
-            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircleIcon class="w-12 h-12 text-green-600" />
+          <!-- Confirmation compacte -->
+          <div class="text-center mb-4">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+              <CheckCircleIcon class="w-7 h-7 text-green-600" />
             </div>
-            <h1 class="text-3xl font-bold text-primea-blue mb-2">Paiement réussi !</h1>
-            <p class="text-gray-600">Votre commande a été confirmée</p>
+            <h1 class="text-xl font-bold text-primea-blue">Paiement réussi !</h1>
+            <p class="text-sm text-gray-500">Présentez le QR ci-dessous à l'entrée</p>
           </div>
 
-          <!-- Order Details -->
-          <div class="bg-primea-blue/5 rounded-primea-lg p-6 mb-6">
-            <h3 class="text-lg font-bold text-primea-blue mb-4">Détails de votre commande</h3>
-
-            <div class="space-y-3">
-              <div class="flex justify-between">
-                <span class="text-gray-600">Référence :</span>
-                <span class="font-semibold text-primea-blue">{{ order.reference }}</span>
-              </div>
-
-              <div class="flex justify-between">
-                <span class="text-gray-600">Événement :</span>
-                <span class="font-semibold">{{ order.event?.title || 'N/A' }}</span>
-              </div>
-
-              <div class="flex justify-between">
-                <span class="text-gray-600">Quantité :</span>
-                <span class="font-semibold">{{ order.quantity }} ticket(s)</span>
-              </div>
-
-              <div class="flex justify-between pt-2 border-t border-gray-300">
-                <span class="text-gray-800 font-semibold">Montant payé :</span>
-                <span class="font-bold text-green-600 text-lg">{{ formatPrice(order.total_amount) }} XAF</span>
-              </div>
-
-              <div class="flex justify-between">
-                <span class="text-xs text-gray-500">dont frais et taxes inclus :</span>
-                <span class="text-xs text-gray-500">{{ formatPrice(parseFloat(order.fees_amount || 0) + parseFloat(order.tax_amount || 0)) }} XAF</span>
-              </div>
-
-              <div class="flex justify-between mt-3">
-                <span class="text-gray-600">Date :</span>
-                <span class="font-semibold">{{ formatDate(order.created_at) }}</span>
-              </div>
+          <!-- Recap commande condense (ref + montant) -->
+          <div class="bg-primea-blue/5 rounded-primea-lg px-4 py-3 mb-4">
+            <div class="flex justify-between items-center gap-3">
+              <span class="font-semibold text-primea-blue truncate">{{ order.event?.title || 'Événement' }}</span>
+              <span class="text-sm font-medium text-gray-600 whitespace-nowrap">{{ order.quantity }} billet(s)</span>
+            </div>
+            <div class="flex justify-between items-center gap-3 mt-1">
+              <span class="text-xs font-mono text-gray-500">{{ order.reference }}</span>
+              <span class="font-bold text-green-600">{{ formatPrice(order.total_amount) }} XAF</span>
             </div>
           </div>
 
-          <!-- Billet(s) affiché(s) en ligne + téléchargement -->
-          <div v-if="ticketCards.length > 0" class="mb-8">
-            <h3 class="text-lg font-bold text-primea-blue mb-4">{{ ticketCards.length > 1 ? 'Vos billets' : 'Votre billet' }}</h3>
-            <div v-if="ticketCards.length > 1" class="mb-5 text-center">
-              <button
-                @click="downloadAllPdf"
-                :disabled="downloadingAll"
-                class="inline-flex items-center justify-center gap-2 bg-primea-yellow text-primea-blue px-6 py-3 rounded-primea-lg font-bold hover:bg-primea-blue hover:text-white transition-colors disabled:opacity-60"
-              >
-                <span v-if="downloadingAll">Téléchargement…</span>
-                <span v-else>Tout télécharger (PDF)</span>
-              </button>
-            </div>
-            <div class="space-y-8">
+          <!-- Billet(s) : l'element telechargeable EST le ticket -->
+          <div v-if="ticketCards.length > 0" class="mb-4">
+            <div class="space-y-6">
               <div v-for="(t, i) in ticketCards" :key="t.id" class="space-y-3">
                 <div :ref="(el) => setTicketRef(el, i)" class="rounded-primea-lg overflow-hidden shadow-primea">
                   <TicketComponent :ticket="t" size="large" />
                 </div>
-                <div class="flex flex-wrap gap-3 justify-center">
-                  <button
-                    @click="downloadPdf(t)"
-                    :disabled="downloadingId === t.id"
-                    class="inline-flex items-center justify-center gap-2 bg-primea-blue text-white px-6 py-3 rounded-primea-lg font-semibold hover:bg-primea-yellow hover:text-primea-blue transition-colors disabled:opacity-60"
-                  >
-                    <span v-if="downloadingId === t.id">Préparation…</span>
-                    <span v-else>Télécharger le billet (PDF)</span>
-                  </button>
-                  <button
-                    @click="downloadImage(t, i)"
-                    class="inline-flex items-center justify-center gap-2 border-2 border-primea-blue text-primea-blue px-6 py-3 rounded-primea-lg font-semibold hover:bg-primea-blue/5 transition-colors"
-                  >
-                    En image (JPG)
-                  </button>
-                </div>
+                <button
+                  @click="downloadImage(t, i)"
+                  class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-primea-lg transition-colors flex items-center justify-center gap-2"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Télécharger le billet
+                </button>
               </div>
             </div>
+            <div v-if="ticketCards.length > 1" class="mt-4 text-center">
+              <button
+                @click="downloadAllImages"
+                :disabled="downloadingAll"
+                class="text-primea-blue hover:text-primea-yellow font-medium text-sm underline"
+              >
+                <span v-if="downloadingAll">Téléchargement…</span>
+                <span v-else>Tout télécharger</span>
+              </button>
+            </div>
           </div>
+
 
           <!-- Ancienne liste (remplacée par l'affichage en ligne ci-dessus) -->
           <div v-if="false" class="mb-6">
@@ -333,6 +301,20 @@ export default {
       }
     }
 
+    // Télécharge chaque billet en image (l'élément du bas = le ticket)
+    const downloadAllImages = async () => {
+      if (downloadingAll.value || ticketCards.value.length === 0) return
+      downloadingAll.value = true
+      try {
+        for (let i = 0; i < ticketCards.value.length; i++) {
+          await downloadImage(ticketCards.value[i], i)
+          await new Promise((r) => setTimeout(r, 500))
+        }
+      } finally {
+        downloadingAll.value = false
+      }
+    }
+
     const loadOrder = async () => {
       const reference = route.query.reference
 
@@ -501,6 +483,7 @@ export default {
       downloadPdf,
       downloadImage,
       downloadAllPdf,
+      downloadAllImages,
       formatPrice,
       formatDate,
       shareTicket,

@@ -127,7 +127,7 @@ class PhysicalTicketController extends Controller
      */
     public function printBatch(string $batchReference)
     {
-        $tickets = Ticket::with(['event', 'ticketType', 'schedule'])
+        $tickets = Ticket::with(['event.venue', 'ticketType', 'schedule'])
             ->where('batch_reference', $batchReference)
             ->orderBy('id')
             ->get();
@@ -140,18 +140,22 @@ class PhysicalTicketController extends Controller
             // Format SVG : backend par défaut (pas de dépendance imagick), rendu
             // par dompdf via data URI.
             $svg = QrCode::format('svg')->size(220)->margin(1)->generate($ticket->code);
+
             return [
                 'code' => $ticket->code,
                 'qr' => 'data:image/svg+xml;base64,' . base64_encode($svg),
                 'event_title' => $ticket->event->title ?? '',
+                'venue' => $ticket->event->venue->name ?? null,
                 'type' => $ticket->ticketType->name ?? null,
                 'date' => $ticket->schedule?->starts_at,
+                'poster' => $this->eventPosterDataUri($ticket->event),
             ];
         });
 
         $pdf = Pdf::loadView('pdf.physical-tickets', [
             'items' => $items,
             'batch' => $batchReference,
+            'logo' => $this->fileDataUri(public_path('images/ico.png')),
         ])->setPaper('a4');
 
         return $pdf->download("tickets-{$batchReference}.pdf");
@@ -164,5 +168,48 @@ class PhysicalTicketController extends Controller
         } while (Ticket::where('code', $code)->exists());
 
         return $code;
+    }
+
+    /**
+     * Affiche de l'événement en data URI (dompdf ne charge pas les URLs
+     * distantes par défaut). Renvoie null si aucune image locale exploitable.
+     */
+    private function eventPosterDataUri(?Event $event): ?string
+    {
+        if (!$event) {
+            return null;
+        }
+
+        // Fichier local stocké (cas le plus courant).
+        if ($event->image_file) {
+            $path = storage_path('app/public/images/events/' . $event->image_file);
+            if ($uri = $this->fileDataUri($path)) {
+                return $uri;
+            }
+        }
+
+        // URL locale du type /storage/... : on retrouve le fichier sur le disque.
+        if ($event->image_url && !filter_var($event->image_url, FILTER_VALIDATE_URL)) {
+            $rel = ltrim(str_replace('storage/', '', $event->image_url), '/');
+            if ($uri = $this->fileDataUri(storage_path('app/public/' . $rel))) {
+                return $uri;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Lit un fichier image local et le renvoie en data URI base64 (ou null).
+     */
+    private function fileDataUri(string $path): ?string
+    {
+        if (!is_file($path) || !is_readable($path)) {
+            return null;
+        }
+
+        $mime = @mime_content_type($path) ?: 'image/png';
+
+        return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
     }
 }
