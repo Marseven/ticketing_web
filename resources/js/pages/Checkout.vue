@@ -185,8 +185,7 @@
                       :key="ticketType.id" 
                       :value="ticketType.id"
                     >
-                      {{ ticketType.name }} - {{ formatPrice(ticketType.price) }} FCFA 
-                      ({{ getAvailableQuantityText(ticketType) }})
+                      {{ ticketType.name }} - {{ formatPrice(ticketType.price) }} FCFA<template v-if="showRemainingSeats"> ({{ getAvailableQuantityText(ticketType) }})</template>
                     </option>
                   </select>
                   <div v-if="availableTicketTypes.length === 0 && !eventLoading" class="text-sm text-red-600 mt-1">
@@ -955,6 +954,8 @@ export default {
 
     // Dates (schedules) disponibles pour cet événement
     const eventSchedules = computed(() => event.value?.schedules || [])
+    // Affichage des places restantes : optionnel, réglé par l'organisateur.
+    const showRemainingSeats = computed(() => event.value?.show_remaining_seats === true)
     const hasMultipleDates = computed(() => eventSchedules.value.length > 1)
     const formatScheduleLabel = (schedule) => {
       if (!schedule?.starts_at) return 'Date'
@@ -1915,6 +1916,7 @@ export default {
       canPurchaseTickets,
       formatPrice,
       getAvailableQuantityText,
+      showRemainingSeats,
       getCategoryName,
       loadEvent,
       validatePhoneNumber,

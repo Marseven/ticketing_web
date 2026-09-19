@@ -330,6 +330,15 @@
               </div>
 
               <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Frais de service (e-billing 2,5 %)</label>
+                <select v-model="eventForm.service_fee_bearer" class="w-full border rounded-lg px-3 py-2">
+                  <option value="platform">La plateforme absorbe les frais</option>
+                  <option value="customer">Le client paie les frais (ajoutés au total)</option>
+                </select>
+                <p class="text-xs text-gray-500 mt-1">« Client » = frais ajoutés au montant payé ; « Plateforme » = absorbés. Le net reversé à l'organisateur est identique dans les deux cas.</p>
+              </div>
+
+              <div class="md:col-span-2">
                 <label class="flex items-start gap-2 cursor-pointer">
                   <input v-model="eventForm.show_remaining_seats" type="checkbox" class="mt-1 rounded border-gray-300 text-primea-blue focus:ring-primea-blue" />
                   <span>
@@ -604,6 +613,7 @@ export default {
       schedules: [],
       ticket_types: [],
       show_remaining_seats: false,
+      service_fee_bearer: 'platform',
       // Pour un nouveau lieu
       new_venue_name: '',
       new_venue_city: '',
@@ -759,6 +769,8 @@ export default {
         venue_id: '',
         status: 'draft',
         image: {},
+        show_remaining_seats: false,
+        service_fee_bearer: 'platform',
         new_venue_name: '',
         new_venue_city: '',
         new_venue_address: '',
@@ -801,6 +813,7 @@ export default {
             venue_id: data.data.event.venue_id,
             status: data.data.event.status,
             show_remaining_seats: data.data.event.show_remaining_seats ?? false,
+            service_fee_bearer: data.data.event.service_fee_bearer || 'platform',
             image: imageData,
             schedules: data.data.event.schedules?.map(s => ({
               starts_at: s.starts_at ? s.starts_at.slice(0, 16) : '',
