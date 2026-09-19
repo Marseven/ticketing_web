@@ -791,6 +791,7 @@ class AdminController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'organizer_id' => 'required|exists:organizers,id',
+            'co_organizer_id' => 'nullable|exists:organizers,id|different:organizer_id',
             'category_id' => 'required|exists:event_categories,id',
             'venue_id' => 'nullable|exists:venues,id',
             'new_venue_name' => 'nullable|string|max:255',
@@ -849,6 +850,7 @@ class AdminController extends Controller
                 'slug' => Str::slug($request->title),
                 'description' => $request->description,
                 'organizer_id' => $request->organizer_id,
+                'co_organizer_id' => $request->co_organizer_id ?: null,
                 'category_id' => $request->category_id,
                 'venue_id' => $venueId,
                 'status' => $request->status,
@@ -950,6 +952,7 @@ class AdminController extends Controller
             'title' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
             'organizer_id' => 'sometimes|exists:organizers,id',
+            'co_organizer_id' => 'nullable|exists:organizers,id|different:organizer_id',
             'category_id' => 'sometimes|exists:event_categories,id',
             'venue_id' => 'nullable|exists:venues,id',
             'new_venue_name' => 'nullable|string|max:255',
@@ -1016,9 +1019,13 @@ class AdminController extends Controller
 
             // Mettre à jour l'événement
             $updateData = $request->only([
-                'title', 'description', 'organizer_id',
+                'title', 'description', 'organizer_id', 'co_organizer_id',
                 'category_id', 'status', 'is_active', 'image_url'
             ]);
+            // co_organizer_id vide => on retire le co-organisateur
+            if ($request->has('co_organizer_id') && !$request->co_organizer_id) {
+                $updateData['co_organizer_id'] = null;
+            }
 
             if ($request->filled('title')) {
                 $updateData['slug'] = Str::slug($request->title);

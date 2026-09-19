@@ -15,6 +15,7 @@ class Event extends Model
 
     protected $fillable = [
         'organizer_id',
+        'co_organizer_id',
         'category_id',
         'venue_id',
         'title',
@@ -71,6 +72,15 @@ class Event extends Model
     public function organizer(): BelongsTo
     {
         return $this->belongsTo(Organizer::class, 'organizer_id');
+    }
+
+    /**
+     * Co-organisateur (2e organisateur) — affichage/crédit uniquement.
+     * L'argent reste sur l'organisateur principal (organizer_id).
+     */
+    public function coOrganizer(): BelongsTo
+    {
+        return $this->belongsTo(Organizer::class, 'co_organizer_id');
     }
 
     /**

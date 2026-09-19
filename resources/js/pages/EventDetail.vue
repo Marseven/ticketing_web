@@ -79,7 +79,9 @@
           <!-- Organizer Info (if available) -->
           <div v-if="event.organizer" class="mb-4 pb-4 border-b border-gray-200">
             <p class="text-sm text-gray-600">Organisé par</p>
-            <p class="font-bold text-primea-blue">{{ event.organizer.name || event.organizer.organization_name }}</p>
+            <p class="font-bold text-primea-blue">
+              {{ event.organizer.name || event.organizer.organization_name }}<template v-if="event.co_organizer"> et {{ event.co_organizer.name }}</template>
+            </p>
           </div>
 
           <!-- Desktop: Two Column Layout -->

@@ -265,6 +265,7 @@ class EventController extends Controller
 
         $event->load([
             'organizer',
+            'coOrganizer',
             'venue',
             'category',
             'schedules' => function ($query) {
@@ -292,6 +293,7 @@ class EventController extends Controller
             $enrichedEvent = [
                 'id' => $event->id,
                 'organizer_id' => $event->organizer_id,
+                'co_organizer_id' => $event->co_organizer_id,
                 'category_id' => $event->category_id,
                 'venue_id' => $event->venue_id,
                 'title' => $event->title,
@@ -313,6 +315,11 @@ class EventController extends Controller
                     'id' => $event->organizer->id,
                     'name' => $event->organizer->name,
                     'slug' => $event->organizer->slug,
+                ] : null,
+                'co_organizer' => $event->coOrganizer ? [
+                    'id' => $event->coOrganizer->id,
+                    'name' => $event->coOrganizer->name,
+                    'slug' => $event->coOrganizer->slug,
                 ] : null,
                 'venue' => $event->venue ? [
                     'id' => $event->venue->id,

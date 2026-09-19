@@ -271,7 +271,19 @@
                   </option>
                 </select>
               </div>
-              
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Co-organisateur (optionnel)</label>
+                <select v-model="eventForm.co_organizer_id" class="w-full border rounded-lg px-3 py-2">
+                  <option :value="null">Aucun</option>
+                  <option v-for="organizer in organizers" :key="'co-' + organizer.id" :value="organizer.id"
+                          :disabled="organizer.id === eventForm.organizer_id">
+                    {{ organizer.name }}
+                  </option>
+                </select>
+                <p class="text-xs text-gray-500 mt-1">Crédité « Organisée par … et … ». N'affecte pas les paiements (l'argent reste sur l'organisateur principal).</p>
+              </div>
+
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Catégorie *</label>
                 <select v-model="eventForm.category_id" required class="w-full border rounded-lg px-3 py-2">
@@ -584,6 +596,7 @@ export default {
       title: '',
       description: '',
       organizer_id: '',
+      co_organizer_id: null,
       category_id: '',
       venue_id: '',
       status: 'draft',
@@ -741,6 +754,7 @@ export default {
         title: '',
         description: '',
         organizer_id: '',
+        co_organizer_id: null,
         category_id: '',
         venue_id: '',
         status: 'draft',
@@ -782,6 +796,7 @@ export default {
             title: data.data.event.title,
             description: data.data.event.description,
             organizer_id: data.data.event.organizer_id,
+            co_organizer_id: data.data.event.co_organizer_id ?? null,
             category_id: data.data.event.category_id,
             venue_id: data.data.event.venue_id,
             status: data.data.event.status,
