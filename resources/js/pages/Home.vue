@@ -408,7 +408,10 @@ export default {
     // Vidéo par défaut : déposer le fichier dans public/videos/hero.mp4 pour
     // le remplacer facilement (ou configurer un hero admin de type vidéo).
     const DEFAULT_HERO_VIDEO = '/videos/hero.mp4'
-    const DEFAULT_HERO_IMAGE = 'https://images.unsplash.com/photo-1540575467063-178a50c2df87'
+    // Poster/fallback par défaut : image de marque Primea (auto-hébergée),
+    // plus de photo stock externe. Utilisée comme poster de la vidéo et comme
+    // image de repli si la vidéo échoue / n'autoplay pas (navigateurs in-app).
+    const DEFAULT_HERO_IMAGE = '/images/hero-poster.jpg'
     const heroVideoFailed = ref(false)
 
     const heroVideoSrc = computed(() =>

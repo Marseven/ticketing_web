@@ -1,14 +1,13 @@
 # Vidéo de fond du Hero (page d'accueil)
 
-Déposez ici le fichier **`hero.mp4`** pour l'afficher en arrière-plan animé du hero.
+Le fichier **`hero.mp4`** est la vidéo de fond animée du hero. Il est **versionné dans git** (il survit donc aux déploiements, contrairement à une bannière hero uploadée qui vit uniquement dans `storage/`).
 
-- Chemin attendu : `public/videos/hero.mp4` (servi en `/videos/hero.mp4`).
-- Format recommandé : **MP4 (H.264)**, muet, ~10-20 s en boucle.
-- Optimisation mobile : viser **< 3-5 Mo**, 720p suffit (le fond est assombri par un overlay). Compresser fortement.
-- Un `poster`/fallback image est affiché tant que la vidéo n'est pas prête, et si elle échoue au chargement (ou si l'utilisateur a activé « réduire les animations »).
+- Chemin : `public/videos/hero.mp4` (servi en `/videos/hero.mp4`).
+- Format : **MP4 (H.264)**, muet, ~10-20 s en boucle, **< 3-5 Mo**, 720p.
+- **Poster / image de repli** : `public/images/hero-poster.jpg` (marine Primea). Affiché tant que la vidéo n'est pas prête, si elle échoue, ou si elle n'autoplay pas (navigateurs in-app WhatsApp/Instagram). Défini par `DEFAULT_HERO_IMAGE` dans `resources/js/pages/Home.vue`.
 
-Alternative sans toucher au code : configurer une bannière Hero de **type vidéo** dans l'admin
-(« Hero Banner »), sa vidéo prend alors le dessus sur `hero.mp4`.
+## Précédence
 
-Pour changer le chemin par défaut, voir `DEFAULT_HERO_VIDEO` dans
-`resources/js/pages/Home.vue`.
+Une **bannière Hero admin active** (Admin → Bannières hero) prend le dessus sur `hero.mp4`. ⚠️ Ces bannières sont uploadées dans `storage/app/public/hero_banners/` (git-ignoré) : elles ne survivent pas forcément à un reset de `storage/`. Pour un hero **stable**, privilégier `public/videos/hero.mp4` (versionné) et **désactiver la bannière hero admin**.
+
+Chemin par défaut : `DEFAULT_HERO_VIDEO` dans `resources/js/pages/Home.vue`.
