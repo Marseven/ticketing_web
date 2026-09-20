@@ -4,12 +4,19 @@ namespace App\Notifications;
 
 use App\Models\Order;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class TicketsReady extends Notification
+class TicketsReady extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    /**
+     * Ne dispatcher le job qu'après le commit de la transaction : sinon le
+     * worker peut lire la commande avant qu'elle soit visible en base.
+     */
+    public $afterCommit = true;
 
     protected $order;
 
