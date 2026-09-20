@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { useLoadingStore } from '../stores/loading'
 
 // Configuration de base d'axios
 const api = axios.create({
@@ -20,7 +21,14 @@ api.interceptors.request.use(
     
     // Ajouter les headers requis pour Laravel
     config.headers['X-Requested-With'] = 'XMLHttpRequest'
-    
+
+    // Loader global : tout appel API affiche la barre/pastille, sauf s'il se
+    // déclare silencieux (X-No-Loader: 1 — ex. sondage de statut en arrière-plan).
+    if (!config.headers['X-No-Loader']) {
+      useLoadingStore().start()
+      config.__loader = true
+    }
+
     return config
   },
   (error) => {
@@ -30,8 +38,12 @@ api.interceptors.request.use(
 
 // Intercepteur pour gérer les erreurs de réponse
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (response.config?.__loader) useLoadingStore().stop()
+    return response
+  },
   (error) => {
+    if (error.config?.__loader) useLoadingStore().stop()
     console.log('Erreur API:', error.response?.status, error.response?.data)
     
     if (error.response?.status === 401) {

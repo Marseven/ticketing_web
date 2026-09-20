@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import authUtils from './utils/auth';
+import { useLoadingStore } from './stores/loading';
 
 // Composants chargés immédiatement (essentiels)
 import Home from './pages/Home.vue';
@@ -251,6 +252,21 @@ router.beforeEach((to, from, next) => {
     }
     
     next();
+});
+
+// Loader global : signale chaque changement de page (y compris le temps de
+// téléchargement des chunks lazy, sensible sur mobile). afterEach est aussi
+// appelé sur une navigation annulée/redirigée (argument `failure`), onError
+// sur une erreur — la barre ne reste donc jamais bloquée.
+router.beforeEach((to, from, next) => {
+    useLoadingStore().navStart();
+    next();
+});
+router.afterEach(() => {
+    useLoadingStore().navEnd();
+});
+router.onError(() => {
+    useLoadingStore().navEnd();
 });
 
 export default router;

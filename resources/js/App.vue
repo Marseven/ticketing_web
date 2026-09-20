@@ -10,6 +10,8 @@
     <!-- Mobile Bottom Navigation -->
     <MobileBottomNav v-if="showBottomNav" />
     <!-- Bannière d'installation PWA désactivée pour le moment -->
+    <!-- Loader global : barre en haut + pastille sur changement de page / appel API -->
+    <GlobalLoader />
   </div>
 </template>
 
@@ -19,13 +21,15 @@ import { useRoute } from 'vue-router'
 import NewHeader from './components/layout/NewHeader.vue'
 import NewFooter from './components/layout/NewFooter.vue'
 import MobileBottomNav from './components/MobileBottomNav.vue'
+import GlobalLoader from './components/GlobalLoader.vue'
 
 export default {
   name: 'App',
   components: {
     NewHeader,
     NewFooter,
-    MobileBottomNav
+    MobileBottomNav,
+    GlobalLoader
   },
   setup() {
     const route = useRoute()

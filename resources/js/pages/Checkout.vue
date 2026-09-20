@@ -1725,7 +1725,9 @@ export default {
           const response = await fetch(`/api/v1/payments/${paymentId}/status`, {
             headers: {
               'Accept': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+              'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+              // Sondage en arrière-plan : ne pas faire clignoter le loader global
+              'X-No-Loader': '1'
             }
           })
           
