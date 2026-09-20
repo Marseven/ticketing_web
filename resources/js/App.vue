@@ -2,7 +2,7 @@
   <div class="app-container">
     <!-- Header global: gère automatiquement mobile (avec burger) et desktop (menu normal) -->
     <NewHeader v-if="showHeader" />
-    <main :class="{ 'pb-20 md:pb-0': showBottomNav }">
+    <main :class="{ 'pb-20 lg:pb-0': showBottomNav }">
       <router-view />
     </main>
     <!-- Footer global: gère automatiquement mobile et desktop -->

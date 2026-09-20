@@ -60,7 +60,7 @@
         <!-- Grid Events Desktop - À venir -->
         <div v-if="filteredEvents.length > 0" class="mb-16">
           <h2 class="text-2xl font-bold text-primea-blue mb-8">Événements à venir</h2>
-          <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             <EventCard
               v-for="event in filteredEvents"
               :key="event.id"
@@ -78,7 +78,7 @@
             </svg>
             Événements passés
           </h2>
-          <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 opacity-75">
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 opacity-75">
             <EventCard
               v-for="event in pastEvents"
               :key="event.id"

@@ -2,7 +2,7 @@
   <header class="bg-white shadow-sm sticky top-0 z-50">
     <div class="max-w-7xl mx-auto">
       <!-- Mobile Header -->
-      <div class="md:hidden px-4 py-3">
+      <div class="lg:hidden px-4 py-3">
         <!-- Ligne 1: Actions (Retour et Menu) -->
         <div class="flex items-center justify-between mb-2">
           <!-- Back Button -->
@@ -42,18 +42,20 @@
       </div>
 
       <!-- Desktop/Tablet Header -->
-      <div class="hidden md:flex items-center justify-between px-6 py-4">
+      <!-- En-tête complet à partir de 1024 px : en dessous, les 5 entrées +
+           le logo demandent ~800 px et se chevauchaient sur tablette. -->
+      <div class="hidden lg:flex items-center justify-between px-6 py-4">
         <!-- Logo and Title -->
         <router-link :to="{ name: 'home' }" class="flex items-center group">
-          <img :src="branding.logo_url" :alt="branding.app_name" class="h-16 w-auto transition-transform duration-200 group-hover:scale-105" />
-          <div class="ml-4 text-left">
-            <h1 class="text-primea-blue text-3xl font-black leading-tight">{{ branding.header_title }}</h1>
-            <p class="text-primea-blue text-sm font-medium leading-tight">{{ branding.header_subtitle }}</p>
+          <img :src="branding.logo_url" :alt="branding.app_name" class="h-12 xl:h-16 w-auto transition-transform duration-200 group-hover:scale-105" />
+          <div class="ml-3 xl:ml-4 text-left">
+            <h1 class="text-primea-blue text-2xl xl:text-3xl font-black leading-tight">{{ branding.header_title }}</h1>
+            <p class="text-primea-blue text-xs xl:text-sm font-medium leading-tight">{{ branding.header_subtitle }}</p>
           </div>
         </router-link>
 
         <!-- Desktop Navigation -->
-        <nav class="flex items-center space-x-8">
+        <nav class="flex items-center space-x-6 whitespace-nowrap">
           <router-link
             :to="{ name: 'home' }"
             class="text-primea-blue hover:text-primea-yellow font-semibold transition-colors duration-200"
@@ -239,7 +241,7 @@
 
     <!-- Mobile Menu Overlay -->
     <transition name="slide">
-      <div v-if="mobileMenuOpen" class="fixed inset-0 z-50 md:hidden" @click="closeMenu">
+      <div v-if="mobileMenuOpen" class="fixed inset-0 z-50 lg:hidden" @click="closeMenu">
         <div class="absolute inset-0 bg-black/50"></div>
         <div @click.stop class="absolute right-0 top-0 bottom-0 w-full bg-gray-700/90 shadow-xl flex flex-col h-full">
           <!-- Menu Header -->

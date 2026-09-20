@@ -1,5 +1,5 @@
 <template>
-  <nav class="mobile-bottom-nav md:hidden" :class="{ 'nav-hidden': isHidden }">
+  <nav class="mobile-bottom-nav lg:hidden" :class="{ 'nav-hidden': isHidden }">
     <div class="nav-container">
       <router-link
         v-for="item in navItems"
