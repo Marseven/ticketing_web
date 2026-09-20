@@ -1,44 +1,59 @@
 <template>
   <div
+    ref="rootEl"
     :class="[
-      'ticket-min bg-white overflow-hidden font-primea relative shadow-primea-lg',
-      size === 'small' ? 'rounded-xl p-3 pb-7 ticket-sm' : 'rounded-2xl p-4 pb-9 ticket-lg'
+      'ticket-min bg-white overflow-hidden font-primea relative shadow-primea-lg w-full',
+      size === 'small' ? 'rounded-xl p-3 pb-7' : 'rounded-2xl p-4 pb-9'
     ]"
   >
-    <div :class="['flex items-center', size === 'small' ? 'gap-3' : 'gap-4']">
-      <!-- Affiche : ENTIÈRE, ratio naturel (jamais rognée), centrée sur la hauteur de la rangée -->
-      <div class="ticket-poster-wrap flex-shrink-0 flex items-center justify-center">
+    <!-- Contenu CENTRÉ : affiche (proportions conservées) + QR de même hauteur + mention -->
+    <div class="flex items-center justify-center" :style="{ gap: gap + 'px' }">
+      <!-- Affiche : ENTIÈRE, proportions conservées, la plus grande possible. Elle donne la hauteur. -->
+      <div class="flex-shrink-0 flex items-center justify-center">
         <img
           v-if="ticketImage"
+          ref="posterEl"
           :src="ticketImage"
           :alt="ticket?.event?.title || 'Affiche'"
           crossorigin="anonymous"
-          class="ticket-poster-img rounded-lg"
+          class="rounded-lg block"
+          :style="{ width: posterW + 'px', height: rowH + 'px' }"
+          @load="layout"
         />
-        <div v-else class="ticket-poster-placeholder flex items-center justify-center bg-primea-gradient rounded-lg">
+        <div
+          v-else
+          class="flex items-center justify-center bg-primea-gradient rounded-lg"
+          :style="{ width: rowH + 'px', height: rowH + 'px' }"
+        >
           <span class="text-white/50 text-sm">Affiche</span>
         </div>
       </div>
 
-      <!-- QR : case carrée, QR ENTIER avec zone blanche (jamais coupé) -->
-      <div class="ticket-qr-cell flex-shrink-0 flex items-center justify-center bg-white">
+      <!-- QR : carré de la MÊME hauteur que l'affiche, entier + zone blanche -->
+      <div
+        class="flex-shrink-0 flex items-center justify-center bg-white"
+        :style="{ width: rowH + 'px', height: rowH + 'px' }"
+      >
         <img
           :src="qrSrc"
           alt="QR Code"
           crossorigin="anonymous"
-          class="ticket-qr-img"
+          :style="{ width: qrPx + 'px', height: qrPx + 'px' }"
         />
       </div>
 
-      <!-- Mention verticale (droite), contenue dans la hauteur des cases -->
-      <div class="ticket-note-col flex-shrink-0 flex items-center justify-center">
-        <p class="ticket-vertical-note text-red-600 font-bold">
+      <!-- Mention : NOIRE, CENTRÉE, pivotée, contenue dans la hauteur (1 à 2 lignes) -->
+      <div class="relative flex-shrink-0" :style="{ width: noteW + 'px', height: rowH + 'px' }">
+        <p
+          class="ticket-note text-gray-900 font-bold text-center"
+          :style="{ width: rowH + 'px', fontSize: noteFont + 'px', maxHeight: noteW + 'px' }"
+        >
           QR CODE UNIQUE ET PERSONNEL — NE PAS LE PARTAGER
         </p>
       </div>
     </div>
 
-    <!-- Logo Primea (à gauche de la mention, jamais dessus) -->
+    <!-- Logo Primea, dans la bande de marge basse (jamais sur le QR) -->
     <img
       src="/images/logo.png?v=3"
       alt="Primea"
@@ -48,7 +63,7 @@
 </template>
 
 <script>
-import { computed } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 
 export default {
   name: 'TicketComponent',
@@ -74,7 +89,54 @@ export default {
       return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(ref)}`
     })
 
-    return { ticketImage, qrSrc }
+    // --- Moteur de mise en page : tout en px explicites (html2canvas) -------
+    // L'affiche est la plus grande possible en conservant ses proportions, dans
+    // les limites (maxW/maxH) ET la largeur disponible ; le QR prend la même
+    // hauteur ; la mention tient dans cette hauteur.
+    const small = props.size === 'small'
+    const pad = small ? 12 : 16
+    const gap = small ? 12 : 16
+    const noteW = small ? 16 : 22
+    const noteFont = small ? 5 : 7
+    const maxW = small ? 180 : 340
+    const maxH = small ? 140 : 220
+
+    const rootEl = ref(null)
+    const posterEl = ref(null)
+    const rowH = ref(small ? 130 : 200)
+    const posterW = ref(small ? 130 : 200)
+
+    const layout = () => {
+      const img = posterEl.value
+      const nw = img?.naturalWidth
+      const nh = img?.naturalHeight
+      if (!nw || !nh) return
+      const r = nw / nh
+
+      // Largeur disponible pour la rangée (carte moins ses marges internes).
+      const cardW = rootEl.value?.clientWidth || 0
+      const avail = Math.max(0, cardW - 2 * pad - 2 * gap - noteW)
+
+      // Contrainte : affiche W + QR (W/r) doit tenir dans avail.
+      let W = maxW
+      if (avail > 0) W = Math.min(W, avail / (1 + 1 / r))
+      let H = W / r
+      if (H > maxH) { H = maxH; W = H * r }
+
+      posterW.value = Math.max(40, Math.round(W))
+      rowH.value = Math.max(40, Math.round(H))
+    }
+
+    onMounted(() => {
+      if (posterEl.value?.complete) layout()
+      window.addEventListener('resize', layout)
+    })
+    onBeforeUnmount(() => window.removeEventListener('resize', layout))
+
+    // QR entier avec une zone blanche (~6 % de chaque côté).
+    const qrPx = computed(() => Math.max(32, Math.round(rowH.value * 0.88)))
+
+    return { ticketImage, qrSrc, rootEl, posterEl, rowH, posterW, qrPx, gap, noteW, noteFont, layout }
   }
 }
 </script>
@@ -92,37 +154,18 @@ export default {
   box-shadow: 0 8px 30px rgba(39, 45, 99, 0.15);
 }
 
-/* Dimensions FIXES en px (html2canvas ne gère ni aspect-ratio ni object-fit,
-   mais respecte une <img> en width/height auto plafonnée). */
-
-/* Affiche : entière au ratio naturel, plafonnée à la hauteur de la rangée.
-   Une affiche carrée remplit exactement la case (= le modèle) ; un banner
-   large s'affiche entier, moins haut, centré. */
-.ticket-lg .ticket-poster-wrap { height: 200px; }
-.ticket-sm .ticket-poster-wrap { height: 130px; }
-.ticket-lg .ticket-poster-img { max-height: 200px; max-width: 260px; width: auto; height: auto; }
-.ticket-sm .ticket-poster-img { max-height: 130px; max-width: 170px; width: auto; height: auto; }
-.ticket-lg .ticket-poster-placeholder { width: 200px; height: 200px; }
-.ticket-sm .ticket-poster-placeholder { width: 130px; height: 130px; }
-
-/* QR : case carrée, QR entier + zone blanche. */
-.ticket-lg .ticket-qr-cell { width: 200px; height: 200px; }
-.ticket-sm .ticket-qr-cell { width: 130px; height: 130px; }
-.ticket-lg .ticket-qr-img { width: 184px; height: 184px; }
-.ticket-sm .ticket-qr-img { width: 118px; height: 118px; }
-
-/* Mention verticale : contenue dans la hauteur des cases (pas de blanc
-   supplémentaire au-dessus/en dessous du QR), ne chevauche jamais le QR. */
-.ticket-lg .ticket-note-col { width: 22px; height: 200px; overflow: hidden; }
-.ticket-sm .ticket-note-col { width: 16px; height: 130px; overflow: hidden; }
-.ticket-vertical-note {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  white-space: nowrap;
-  line-height: 1;
-  letter-spacing: 0.02em;
+/* Mention : bloc écrit à l'horizontale (1 à 2 lignes, se replie seul quand la
+   rangée est basse) puis pivoté de -90° et centré — html2canvas rend bien
+   texte replié + transform (contrairement à writing-mode vertical). */
+.ticket-note {
+  position: absolute;
+  top: 50%;
+  left: 50%;
   margin: 0;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  transform-origin: center;
+  line-height: 1.25;
+  letter-spacing: 0.04em;
+  overflow: hidden;
 }
-.ticket-lg .ticket-vertical-note { font-size: 6.5px; }
-.ticket-sm .ticket-vertical-note { font-size: 4.5px; }
 </style>
