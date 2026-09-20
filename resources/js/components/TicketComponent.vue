@@ -6,10 +6,10 @@
       'shadow-primea-lg'
     ]"
   >
-    <div class="flex items-stretch">
+    <div class="flex items-stretch" :class="size === 'small' ? 'ticket-row-sm' : 'ticket-row-lg'">
       <!-- Affiche de l'événement (gauche) — fond cover : net à l'export -->
       <div
-        class="ticket-poster w-1/2 flex-shrink-0 bg-primea-gradient bg-center bg-cover"
+        class="ticket-poster flex-1 bg-primea-gradient bg-center bg-cover"
         :style="posterStyle"
       >
         <div v-if="!ticketImage" class="w-full h-full flex items-center justify-center">
@@ -17,21 +17,18 @@
         </div>
       </div>
 
-      <!-- QR Code (centre) -->
-      <div class="flex-1 flex flex-col items-center justify-center p-3 text-center">
+      <!-- QR Code — case CARRÉE que le QR remplit (peu de blanc autour) -->
+      <div class="ticket-qr-cell flex-shrink-0 flex items-center justify-center p-2 bg-white">
         <img
           :src="qrSrc"
           alt="QR Code"
           crossorigin="anonymous"
-          :class="size === 'small' ? 'w-24 h-24' : 'w-36 h-36'"
+          class="w-full h-full object-contain"
         />
-        <p :class="['font-mono text-gray-400 mt-2', size === 'small' ? 'text-[9px]' : 'text-[11px]']">
-          {{ ticket?.reference || 'TKT-XXXXXXXX' }}
-        </p>
       </div>
 
       <!-- Mention verticale (droite) -->
-      <div class="flex items-center justify-center pr-2 pl-0">
+      <div class="flex items-center justify-center px-1 bg-white">
         <p
           class="ticket-vertical-note text-red-600 font-bold tracking-widest"
           :class="size === 'small' ? 'text-[7px]' : 'text-[9px]'"
@@ -99,12 +96,12 @@ export default {
   box-shadow: 0 8px 30px rgba(39, 45, 99, 0.15);
 }
 
-/* Affiche : hauteur explicite (html2canvas ne gère pas aspect-ratio/object-fit,
-   mais rend correctement un background-size: cover). */
-.ticket-poster {
-  min-height: 200px;
-  align-self: stretch;
-}
+/* La case QR est CARRÉE : le QR la remplit (peu de blanc autour). La rangée
+   prend la hauteur de cette case ; l'affiche (flex-1) s'étire pour la remplir
+   (html2canvas rend correctement background-size: cover). */
+.ticket-row-lg .ticket-qr-cell { width: 210px; height: 210px; }
+.ticket-row-sm .ticket-qr-cell { width: 140px; height: 140px; }
+.ticket-poster { align-self: stretch; }
 
 /* Mention verticale (de bas en haut) */
 .ticket-vertical-note {
