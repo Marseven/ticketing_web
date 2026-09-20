@@ -13,6 +13,14 @@ class EventController extends Controller
      */
     public function index(Request $request)
     {
+        // Phase 0 perf : cache court (60 s) de la liste publique, clé = filtres + page.
+        // Absorbe les rafales à l'ouverture des ventes sans toucher la BD.
+        $isApi = $request->wantsJson() || $request->is('api/*');
+        $cacheKey = 'public:events:' . md5(json_encode($request->only(['search', 'category', 'date', 'city', 'page'])));
+        if ($isApi && ($cached = \Illuminate\Support\Facades\Cache::get($cacheKey)) !== null) {
+            return response()->json($cached);
+        }
+
         $query = Event::where('status', 'published')
             ->where('approval_status', 'approved')
             ->where('is_active', true)
@@ -234,14 +242,17 @@ class EventController extends Controller
                 return $eventArray;
             });
 
-            return response()->json([
+            $payload = [
                 'success' => true,
                 'events' => $enrichedEvents,
                 'total' => $events->total(),
                 'per_page' => $events->perPage(),
                 'current_page' => $events->currentPage(),
                 'last_page' => $events->lastPage(),
-            ]);
+            ];
+            \Illuminate\Support\Facades\Cache::put($cacheKey, $payload, 60);
+
+            return response()->json($payload);
         }
 
         return view('client.events.index', compact('events'));
@@ -261,6 +272,16 @@ class EventController extends Controller
                 ], 404);
             }
             abort(404, 'Événement non trouvé');
+        }
+
+        // Phase 0 perf : cache court (60 s) de la fiche publique. La clé inclut
+        // updated_at → invalidation automatique dès qu'on modifie l'événement.
+        // (Les compteurs de ventes peuvent avoir ≤ 60 s de retard ; le checkout
+        // revalide la disponibilité de toute façon.)
+        $isApi = $request->wantsJson() || $request->is('api/*');
+        $cacheKey = 'public:event:' . $event->slug . ':' . ($event->updated_at?->timestamp ?? 0);
+        if ($isApi && ($cached = \Illuminate\Support\Facades\Cache::get($cacheKey)) !== null) {
+            return response()->json($cached);
         }
 
         $event->load([
@@ -421,11 +442,14 @@ class EventController extends Controller
                 $enrichedEvent['category_name'] = $category->name;
             }
 
-            return response()->json([
+            $payload = [
                 'success' => true,
                 'event' => $enrichedEvent,
                 'related_events' => $relatedEvents,
-            ]);
+            ];
+            \Illuminate\Support\Facades\Cache::put($cacheKey, $payload, 60);
+
+            return response()->json($payload);
         }
 
         return view('client.events.show', compact('event', 'relatedEvents'));

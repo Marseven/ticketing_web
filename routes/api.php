@@ -41,8 +41,8 @@ Route::prefix('payment')->group(function () {
 });
 
 // Routes d'authentification (sans préfixe v1 pour correspondre aux annotations - DEPRECATED, utiliser v1/auth à la place)
-Route::post('register', [App\Http\Controllers\Api\AuthController::class, 'register']);
-Route::post('login', [App\Http\Controllers\Api\AuthController::class, 'login']);
+Route::post('register', [App\Http\Controllers\Api\AuthController::class, 'register'])->middleware('throttle:auth');
+Route::post('login', [App\Http\Controllers\Api\AuthController::class, 'login'])->middleware('throttle:auth');
 Route::post('logout', [App\Http\Controllers\Api\AuthController::class, 'logout'])->middleware('auth:sanctum');
 Route::get('me', [App\Http\Controllers\Api\AuthController::class, 'me'])->middleware('auth:sanctum');
 
@@ -65,8 +65,8 @@ Route::prefix('v1')->group(function () {
     
     // Routes d'authentification
     Route::prefix('auth')->group(function () {
-        Route::post('register', [App\Http\Controllers\Api\AuthController::class, 'register']);
-        Route::post('login', [App\Http\Controllers\Api\AuthController::class, 'login']);
+        Route::post('register', [App\Http\Controllers\Api\AuthController::class, 'register'])->middleware('throttle:auth');
+        Route::post('login', [App\Http\Controllers\Api\AuthController::class, 'login'])->middleware('throttle:auth');
         Route::post('logout', [App\Http\Controllers\Api\AuthController::class, 'logout'])->middleware('auth:sanctum');
         Route::get('me', [App\Http\Controllers\Api\AuthController::class, 'me'])->middleware('auth:sanctum');
         Route::post('refresh', [App\Http\Controllers\Api\AuthController::class, 'refresh'])->middleware('auth:sanctum');
@@ -77,7 +77,7 @@ Route::prefix('v1')->group(function () {
         Route::get('email/check', [App\Http\Controllers\Api\AuthController::class, 'checkEmailVerification'])->middleware('auth:sanctum');
 
         // Routes de réinitialisation de mot de passe
-        Route::post('forgot-password', [App\Http\Controllers\Auth\PasswordResetController::class, 'forgotPassword']);
+        Route::post('forgot-password', [App\Http\Controllers\Auth\PasswordResetController::class, 'forgotPassword'])->middleware('throttle:auth');
         Route::post('reset-password', [App\Http\Controllers\Auth\PasswordResetController::class, 'resetPassword']);
         Route::post('verify-reset-token', [App\Http\Controllers\Auth\PasswordResetController::class, 'verifyToken']);
     });
@@ -107,8 +107,8 @@ Route::prefix('v1')->group(function () {
 
     // Routes publiques pour les paiements (status checking et initiation accessibles sans auth)
     Route::prefix('payments')->group(function () {
-        Route::post('initiate', [App\Http\Controllers\Api\PaymentController::class, 'initiateGuestPayment']);
-        Route::post('push-ussd', [App\Http\Controllers\Api\PaymentController::class, 'pushUSSD']);
+        Route::post('initiate', [App\Http\Controllers\Api\PaymentController::class, 'initiateGuestPayment'])->middleware('throttle:payments');
+        Route::post('push-ussd', [App\Http\Controllers\Api\PaymentController::class, 'pushUSSD'])->middleware('throttle:payments');
         Route::post('kyc', [App\Http\Controllers\Api\PaymentController::class, 'checkKYC']);
         Route::get('{id}/status', [App\Http\Controllers\Api\PaymentController::class, 'getPaymentStatus']);
     });
@@ -122,17 +122,17 @@ Route::prefix('v1')->group(function () {
     // Routes publiques pour les achats invités
     Route::prefix('guest')->group(function () {
         // Commandes invité (sans authentification)
-        Route::post('orders', [App\Http\Controllers\Guest\OrderController::class, 'store']);
+        Route::post('orders', [App\Http\Controllers\Guest\OrderController::class, 'store'])->middleware('throttle:payments');
         Route::get('orders/{reference}', [App\Http\Controllers\Guest\OrderController::class, 'show']);
 
         // Billets invité
-        Route::get('tickets/search', [App\Http\Controllers\Guest\TicketController::class, 'search']);
+        Route::get('tickets/search', [App\Http\Controllers\Guest\TicketController::class, 'search'])->middleware('throttle:lookup');
         Route::get('tickets/{code}', [App\Http\Controllers\Guest\TicketController::class, 'show']);
-        Route::get('tickets/retrieve/{email}', [App\Http\Controllers\Guest\TicketController::class, 'retrieve']);
+        Route::get('tickets/retrieve/{email}', [App\Http\Controllers\Guest\TicketController::class, 'retrieve'])->middleware('throttle:lookup');
     });
 
     // Suivi public des billets par jeton (organisateur, sans login)
-    Route::prefix('track')->group(function () {
+    Route::prefix('track')->middleware('throttle:lookup')->group(function () {
         Route::get('{token}', [App\Http\Controllers\Tracking\EventTrackingController::class, 'summary']);
         Route::get('{token}/tickets', [App\Http\Controllers\Tracking\EventTrackingController::class, 'tickets']);
         Route::get('{token}/tickets/{code}', [App\Http\Controllers\Tracking\EventTrackingController::class, 'ticket']);
@@ -140,8 +140,8 @@ Route::prefix('v1')->group(function () {
 
     // Routes des tickets
     Route::prefix('tickets')->group(function () {
-        Route::get('retrieve/{token}', [App\Http\Controllers\Api\TicketController::class, 'retrieve']);
-        Route::post('validate', [App\Http\Controllers\Api\TicketController::class, 'validateTicket'])->middleware('auth:sanctum');
+        Route::get('retrieve/{token}', [App\Http\Controllers\Api\TicketController::class, 'retrieve'])->middleware('throttle:lookup');
+        Route::post('validate', [App\Http\Controllers\Api\TicketController::class, 'validateTicket'])->middleware(['auth:sanctum', 'throttle:scan']);
         Route::get('{code}/pdf', [App\Http\Controllers\Api\TicketController::class, 'downloadPDF']);
         Route::get('{code}', [App\Http\Controllers\Api\TicketController::class, 'show'])->name('api.tickets.validate');
     });
@@ -187,7 +187,7 @@ Route::prefix('v1')->group(function () {
     });
 
     // Routes des scans
-    Route::prefix('scans')->middleware('auth:sanctum')->group(function () {
+    Route::prefix('scans')->middleware(['auth:sanctum', 'throttle:scan'])->group(function () {
         Route::post('/', [App\Http\Controllers\Api\ScanController::class, 'store']);
         Route::post('bulk', [App\Http\Controllers\Api\ScanController::class, 'bulk']);
         Route::get('/', [App\Http\Controllers\Api\ScanController::class, 'index']);
