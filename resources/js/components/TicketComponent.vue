@@ -135,41 +135,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Section Titulaire (optionnel) -->
-    <div
-      v-if="ticket?.buyer_name || ticket?.buyer_email"
-      :class="[
-        'bg-gray-50 border-t-2 border-dashed border-gray-200',
-        size === 'small' ? 'px-4 py-3' : 'px-6 py-4'
-      ]"
-    >
-      <p :class="['font-semibold text-primea-blue uppercase mb-2', size === 'small' ? 'text-[10px]' : 'text-xs']">
-        Informations du titulaire
-      </p>
-      <div class="flex justify-between">
-        <div :class="size === 'small' ? 'text-xs' : 'text-sm'">
-          <span class="text-gray-500">Nom : </span>
-          <span class="font-medium text-gray-800">{{ ticket?.buyer_name || 'Non renseigné' }}</span>
-        </div>
-        <div :class="size === 'small' ? 'text-xs' : 'text-sm'">
-          <span class="text-gray-500">Email : </span>
-          <span class="font-medium text-gray-800">{{ ticket?.buyer_email || 'Non renseigné' }}</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Footer -->
-    <div
-      :class="[
-        'bg-primea-blue text-white text-center',
-        size === 'small' ? 'py-2 px-3' : 'py-3 px-4'
-      ]"
-    >
-      <p :class="['font-mono', size === 'small' ? 'text-[10px]' : 'text-xs']">
-        {{ ticket?.reference || 'TKT-XXXXXXXX' }}
-      </p>
-    </div>
   </div>
 </template>
 
