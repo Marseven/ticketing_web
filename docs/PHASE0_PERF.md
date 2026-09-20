@@ -25,7 +25,27 @@ git pull origin main
 /usr/bin/php artisan migrate --force        # index composites
 /usr/bin/php artisan optimize               # config + routes + vues en cache
 /usr/bin/php artisan queue:restart          # le worker cron recharge le code
+/usr/bin/php artisan images:optimize        # variantes des affiches déjà en ligne
 ```
+
+> ⚠️ **Le worker de file devient critique.** Les e-mails transactionnels
+> (confirmation de commande, paiement reçu, billets prêts) partent désormais par
+> la file : si le cron `queue:work` ne tourne pas, **plus aucun e-mail n'est
+> envoyé**. Vérifier après déploiement : passer une commande de test et contrôler
+> que la table `jobs` se vide et que le mail arrive (≤ 1 min).
+
+> `images:optimize` ne touche pas aux originaux ; ajouter `--shrink` pour réduire
+> aussi les masters de plus de 1600 px (irréversible — faire une copie de
+> `storage/app/public` avant), ou `--dry-run` pour simuler.
+
+### 1 bis. Ce que le déploiement change pour les visiteurs
+
+| Avant | Après |
+|---|---|
+| Accueil mobile : **5,3 Mo** (bundle admin + vidéo 3 Mo + 2 familles de polices) | **0,7 Mo**, la vidéo ne se charge plus que sur grand écran et bonne connexion |
+| Affiches servies en pleine résolution (jusqu'à 5 Mo par événement) | Master 1600 px + variante 800 px dans les listes (~90 Ko) |
+| E-mails envoyés pendant la requête (webhook de paiement compris) | Envoyés par la file, la réponse au prestataire n'attend plus le SMTP |
+| Dernières places vendables plusieurs fois en simultané | Verrou + décompte des paiements en cours |
 
 ### 2.2 `.env` : sortir cache et sessions de la base de données
 Aujourd'hui `CACHE_STORE`, `SESSION_DRIVER` et `QUEUE_CONNECTION` valent `database` :
