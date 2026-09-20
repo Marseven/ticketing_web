@@ -840,7 +840,8 @@ class AdminController extends Controller
             if ($request->hasFile('cover_image')) {
                 $file = $request->file('cover_image');
                 $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('events', $filename, 'public');
+                // Redimensionne avant stockage (cf. ImageOptimizer).
+                $path = app(\App\Services\ImageOptimizer::class)->store($file, 'events', $filename);
                 $imageFile = $path;
             }
 
@@ -1008,12 +1009,13 @@ class AdminController extends Controller
             if ($request->hasFile('cover_image')) {
                 // Supprimer l'ancienne image si elle existe
                 if ($event->image_file && \Storage::disk('public')->exists($event->image_file)) {
-                    \Storage::disk('public')->delete($event->image_file);
+                    \App\Services\ImageOptimizer::forget($event->image_file);
                 }
 
                 $file = $request->file('cover_image');
                 $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('events', $filename, 'public');
+                // Redimensionne avant stockage (cf. ImageOptimizer).
+                $path = app(\App\Services\ImageOptimizer::class)->store($file, 'events', $filename);
                 $event->image_file = $path;
             }
 
@@ -1413,7 +1415,8 @@ class AdminController extends Controller
             if ($request->hasFile('cover_image')) {
                 $file = $request->file('cover_image');
                 $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('venues', $filename, 'public');
+                // Redimensionne avant stockage (cf. ImageOptimizer).
+                $path = app(\App\Services\ImageOptimizer::class)->store($file, 'venues', $filename);
                 $imageFile = $path;
             }
 
@@ -1498,12 +1501,13 @@ class AdminController extends Controller
             if ($request->hasFile('cover_image')) {
                 // Supprimer l'ancienne image si elle existe
                 if ($venue->image_file && \Storage::disk('public')->exists($venue->image_file)) {
-                    \Storage::disk('public')->delete($venue->image_file);
+                    \App\Services\ImageOptimizer::forget($venue->image_file);
                 }
 
                 $file = $request->file('cover_image');
                 $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('venues', $filename, 'public');
+                // Redimensionne avant stockage (cf. ImageOptimizer).
+                $path = app(\App\Services\ImageOptimizer::class)->store($file, 'venues', $filename);
                 $venue->image_file = $path;
             }
 

@@ -2,7 +2,7 @@
   <article v-if="event && event.title" class="event-card-modern group cursor-pointer" @click="goToEvent">
     <!-- Image de l'événement -->
     <SmartImage
-      :src="eventImageUrl"
+      :src="displayedImageUrl"
       :alt="event.title"
       aspect-ratio="16/9"
       fit="contain"
@@ -127,6 +127,7 @@
 
 <script>
 import { computed, ref } from 'vue'
+import { cardImageUrl } from '../utils/imageVariant'
 import { useRouter } from 'vue-router'
 import Swal from 'sweetalert2'
 import CalendarIcon from './icons/CalendarIcon.vue'
@@ -150,6 +151,9 @@ export default {
   setup(props) {
     const router = useRouter()
     const imageError = ref(false)
+    // Une affiche uploadée avant l'optimisation n'a pas de variante `medium_` :
+    // on bascule alors sur l'image d'origine plutôt que sur le placeholder.
+    const fullSizeFallback = ref(false)
 
     // Computed properties
     const eventImageUrl = computed(() => {
@@ -159,34 +163,28 @@ export default {
       // Priorité: image (accessor) > image_url > image_file
       let imageUrl = props.event.image || props.event.image_url || props.event.image_file
 
-      console.log('EventCard - Image URL pour:', props.event.title, 'Image:', imageUrl)
 
       if (!imageUrl || imageUrl.trim() === '') {
-        console.log('EventCard - Aucune image trouvée')
         return null
       }
 
       // Si c'est déjà une URL complète (commence par http:// ou https://), on la retourne telle quelle
       if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-        console.log('EventCard - URL complète détectée:', imageUrl)
         return imageUrl
       }
 
       // Si c'est un chemin relatif commençant par /
       if (imageUrl.startsWith('/')) {
         const fullUrl = window.location.origin + imageUrl
-        console.log('EventCard - Chemin relatif converti:', fullUrl)
         return fullUrl
       }
 
       // Si c'est un nom de fichier dans le storage
       if (!imageUrl.includes('/')) {
         const fullUrl = `${window.location.origin}/storage/images/events/${imageUrl}`
-        console.log('EventCard - Nom de fichier converti:', fullUrl)
         return fullUrl
       }
 
-      console.log('EventCard - URL retournée telle quelle:', imageUrl)
       return imageUrl
     })
 
@@ -235,7 +233,6 @@ export default {
 
         // Vérifier que la date est valide
         if (isNaN(date.getTime())) {
-          console.warn('Date invalide pour l\'événement:', props.event.title, 'Date reçue:', dateStr);
           return null;
         }
 
@@ -365,8 +362,6 @@ export default {
     }
 
     const goToCheckout = () => {
-      console.log('goToCheckout called with event:', props.event)
-      console.log('Event slug:', props.event.slug)
 
       // Utiliser le slug s'il existe, sinon créer un slug basé sur l'ID ou le titre
       let slug = props.event.slug
@@ -393,31 +388,40 @@ export default {
         }
       }
 
-      console.log('Using slug:', slug)
       router.push(`/checkout/${slug}`)
     }
 
     const handleReserveClick = (event) => {
-      console.log('handleReserveClick called')
       event.preventDefault()
       event.stopPropagation()
 
       if (!canPurchase.value) {
-        console.log('Cannot purchase - button disabled')
         return
       }
 
       goToCheckout()
     }
 
-    const handleImageError = (event) => {
-      console.warn('EventCard - Erreur de chargement image pour:', props.event.title)
-      console.warn('EventCard - URL qui a échoué:', event?.target?.src)
+    // Les listes affichent la variante 800 px générée à l'upload : une carte
+    // fait ~400 px de large, servir le master n'apporte rien.
+    const displayedImageUrl = computed(() => {
+      const url = eventImageUrl.value
+      if (!url || fullSizeFallback.value) return url
+      return cardImageUrl(url)
+    })
+
+    const handleImageError = () => {
+      // 1er échec sur la variante : réessayer l'original ; 2e échec : placeholder.
+      if (!fullSizeFallback.value && displayedImageUrl.value !== eventImageUrl.value) {
+        fullSizeFallback.value = true
+        return
+      }
       imageError.value = true
     }
 
     return {
       eventImageUrl,
+      displayedImageUrl,
       eventDate,
       minPrice,
       isEventPassed,

@@ -188,8 +188,9 @@
             <div class="h-48 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 relative overflow-hidden">
               <img
                 v-if="event.image || event.image_url || event.image_file"
-                :src="event.image_url || event.image || event.image_file"
+                :src="cardImageUrl(event.image_url || event.image || event.image_file)"
                 :alt="event.title"
+                @error="restoreFullImage"
                 class="w-full h-full object-cover"
                 loading="lazy"
               />
@@ -264,8 +265,9 @@
             <div class="h-48 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 relative overflow-hidden">
               <img
                 v-if="event.image || event.image_url || event.image_file"
-                :src="event.image_url || event.image || event.image_file"
+                :src="cardImageUrl(event.image_url || event.image || event.image_file)"
                 :alt="event.title"
+                @error="restoreFullImage"
                 class="w-full h-full object-cover"
                 loading="lazy"
               />
@@ -355,6 +357,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useEventsStore } from '../stores/events'
 import { loadPublicCategories } from '../services/publicCategories'
+import { cardImageUrl, restoreFullImage } from '../utils/imageVariant'
 import EventCard from '../components/EventCard.vue'
 import BannerCarousel from '../components/BannerCarousel.vue'
 import { ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
@@ -616,6 +619,8 @@ export default {
     })
 
     return {
+      cardImageUrl,
+      restoreFullImage,
       events,
       loading,
       selectedCategory,

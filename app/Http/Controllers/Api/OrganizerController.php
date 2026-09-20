@@ -1208,7 +1208,9 @@ class OrganizerController extends Controller
             if ($request->hasFile('image_file')) {
                 $file = $request->file('image_file');
                 $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('images/events', $filename, 'public');
+                // Redimensionne avant stockage : une affiche prise au téléphone
+                // pèse plusieurs Mo pour être affichée dans une carte.
+                $path = app(\App\Services\ImageOptimizer::class)->store($file, 'images/events', $filename);
                 $imageFile = $filename;
                 $imageUrl = null; // Si on a un fichier, on ignore l'URL
                 
@@ -1452,13 +1454,13 @@ class OrganizerController extends Controller
             if ($request->hasFile('image_file')) {
                 // Supprimer l'ancienne image si elle existe
                 if ($event->image_file) {
-                    \Illuminate\Support\Facades\Storage::disk('public')->delete('images/events/' . $event->image_file);
+                    \App\Services\ImageOptimizer::forget('images/events/' . $event->image_file);
                 }
                 
-                // Stocker la nouvelle image
+                // Stocker la nouvelle image (redimensionnée)
                 $file = $request->file('image_file');
                 $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('images/events', $filename, 'public');
+                $path = app(\App\Services\ImageOptimizer::class)->store($file, 'images/events', $filename);
                 
                 $updateData['image_file'] = $filename;
                 $updateData['image_url'] = null; // Clear URL si on a un fichier
