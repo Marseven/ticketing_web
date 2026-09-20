@@ -592,8 +592,9 @@
                   </div>
                   <router-link
                     :to="`/${event.slug}/details`"
-                    class="bg-primea-yellow text-primea-blue px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-primea-yellow transition-colors shadow-md"
+                    class="inline-flex items-center gap-1.5 bg-primea-yellow text-primea-blue text-sm font-bold px-3.5 py-2 rounded-full shadow-md active:scale-95 transition"
                   >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     À propos
                   </router-link>
                 </div>
@@ -1952,15 +1953,9 @@ export default {
 </script>
 
 <style scoped>
-/* Variables CSS Primea */
-:root {
-  --primea-blue: #272d63;
-  --primea-yellow: #fab511;
-  --primea-white: #ffffff;
-  --primea-blue-dark: #1a1e47;
-  --primea-yellow-dark: #e09f0e;
-  --font-primary: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
+/* Les couleurs de marque viennent des classes Tailwind globales (bg-primea-*,
+   text-primea-*) pilotées par --brand-*-rgb. Ne pas déclarer de :root ici :
+   dans un <style scoped> il devient :root[data-v-…] et ne matche jamais. */
 
 .checkout-page {
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
@@ -1968,43 +1963,43 @@ export default {
 
 /* Classes Primea */
 .font-primea {
-  font-family: var(--font-primary);
+  font-family: 'Inter', 'Myriad Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .text-primea-blue {
-  color: var(--primea-blue);
+  color: rgb(var(--brand-primary-rgb, 39 45 99));
 }
 
 .text-primea-yellow {
-  color: var(--primea-yellow);
+  color: rgb(var(--brand-accent-rgb, 250 181 17));
 }
 
 .bg-primea-blue {
-  background-color: var(--primea-blue);
+  background-color: rgb(var(--brand-primary-rgb, 39 45 99));
 }
 
 .bg-primea-yellow {
-  background-color: var(--primea-yellow);
+  background-color: rgb(var(--brand-accent-rgb, 250 181 17));
 }
 
 .hover\:bg-primea-yellow:hover {
-  background-color: var(--primea-yellow) !important;
+  background-color: rgb(var(--brand-accent-rgb, 250 181 17)) !important;
 }
 
 .hover\:text-primea-blue:hover {
-  color: var(--primea-blue) !important;
+  color: rgb(var(--brand-primary-rgb, 39 45 99)) !important;
 }
 
 .hover\:text-primea-yellow:hover {
-  color: var(--primea-yellow);
+  color: rgb(var(--brand-accent-rgb, 250 181 17));
 }
 
 .border-primea-blue {
-  border-color: var(--primea-blue);
+  border-color: rgb(var(--brand-primary-rgb, 39 45 99));
 }
 
 .focus\:border-primea-blue:focus {
-  border-color: var(--primea-blue);
+  border-color: rgb(var(--brand-primary-rgb, 39 45 99));
 }
 
 .rounded-primea {
