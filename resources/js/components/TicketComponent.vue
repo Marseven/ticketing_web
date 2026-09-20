@@ -6,18 +6,13 @@
       'shadow-primea-lg'
     ]"
   >
-    <!-- Section Image Événement -->
-    <div class="relative">
-      <div :class="['ticket-cover relative overflow-hidden bg-primea-gradient', size === 'small' ? 'h-44' : 'h-64']">
-        <template v-if="ticket?.event?.image">
-          <!-- Fond flou : remplit le bandeau sans bord vide (comme la card event) -->
-          <img :src="ticket.event.image" alt="" aria-hidden="true" crossorigin="anonymous" class="ticket-cover-bg" />
-          <!-- Image principale : entière, ratio préservé (aucune déformation) -->
-          <img :src="ticket.event.image" :alt="ticket.event?.title" crossorigin="anonymous" class="ticket-cover-main" />
-        </template>
-        <div v-else class="w-full h-full flex items-center justify-center">
-          <span class="text-white/50 text-lg">Image de l'événement</span>
-        </div>
+    <!-- Section Image Événement : affiche PLEINE LARGEUR au ratio naturel
+         (comme le modèle) — pas de bandes noires, pas de déformation. -->
+    <div class="relative bg-primea-gradient">
+      <img v-if="ticket?.event?.image" :src="ticket.event.image" :alt="ticket.event?.title"
+           crossorigin="anonymous" class="w-full h-auto block" />
+      <div v-else :class="['w-full flex items-center justify-center', size === 'small' ? 'h-44' : 'h-64']">
+        <span class="text-white/50 text-lg">Image de l'événement</span>
       </div>
     </div>
 

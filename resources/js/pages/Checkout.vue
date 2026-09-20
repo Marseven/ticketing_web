@@ -78,9 +78,10 @@
                   <router-link
                     v-if="event?.slug"
                     :to="`/${event.slug}/details`"
-                    class="inline-block mt-4 text-sm font-medium text-primea-blue hover:text-primea-yellow underline"
+                    class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-primea-lg border border-primea-blue text-primea-blue font-semibold hover:bg-primea-blue hover:text-white transition-colors"
                   >
-                    Voir les détails de l'événement
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Voir les infos de l'événement
                   </router-link>
                 </div>
               </div>

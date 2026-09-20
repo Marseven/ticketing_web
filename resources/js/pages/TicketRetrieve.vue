@@ -140,14 +140,18 @@
         <!-- Found Tickets -->
         <div v-if="foundTickets.length > 0" class="mt-8">
           <h3 class="text-lg md:text-xl font-bold text-primea-blue md:text-white mb-4 md:mb-6">Tickets trouvés :</h3>
-          <div class="space-y-4">
-            <TicketCard
-              v-for="ticket in foundTickets"
-              :key="ticket.id"
-              :ticket="ticket"
-              @download="downloadTicket"
-              @view="viewTicket"
-            />
+          <div class="space-y-8">
+            <div v-for="(ticket, i) in foundTickets" :key="ticket.id" class="space-y-3">
+              <div :ref="el => setTicketRef(el, i)" class="rounded-2xl overflow-hidden shadow-lg bg-white">
+                <TicketComponent :ticket="ticket" size="large" />
+              </div>
+              <button
+                @click="downloadImage(ticket, i)"
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition-colors"
+              >
+                Télécharger le billet
+              </button>
+            </div>
           </div>
         </div>
 
@@ -184,14 +188,15 @@
 <script>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import TicketCard from '../components/TicketCard.vue'
+import html2canvas from 'html2canvas'
+import TicketComponent from '../components/TicketComponent.vue'
 import PhoneInput from '../components/PhoneInput.vue'
 import { ticketService } from '../services/api.js'
 
 export default {
   name: 'TicketRetrieve',
   components: {
-    TicketCard,
+    TicketComponent,
     PhoneInput
   },
   setup() {
@@ -328,6 +333,37 @@ export default {
       router.push(`/ticket/${ticket.code}`)
     }
 
+    // Téléchargement du billet en image (l'élément affiché = le ticket)
+    const ticketRefs = []
+    const setTicketRef = (el, i) => { ticketRefs[i] = el }
+
+    const downloadImage = async (ticket, i) => {
+      const el = ticketRefs[i]
+      if (!el) return
+      try {
+        const imgs = Array.from(el.querySelectorAll('img'))
+        await Promise.all(imgs.map((img) => {
+          if (img.complete && img.naturalWidth > 0) return Promise.resolve()
+          return new Promise((resolve) => {
+            img.addEventListener('load', resolve, { once: true })
+            img.addEventListener('error', resolve, { once: true })
+          })
+        }))
+        const canvas = await html2canvas(el, {
+          scale: 2, useCORS: true, allowTaint: true, imageTimeout: 15000, backgroundColor: '#ffffff'
+        })
+        const link = document.createElement('a')
+        link.download = `ticket-${ticket.code}.jpg`
+        link.href = canvas.toDataURL('image/jpeg', 0.95)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      } catch (e) {
+        // Repli : PDF serveur
+        window.open(`/api/v1/tickets/${ticket.code}/pdf`, '_blank')
+      }
+    }
+
     const clearForm = () => {
       searchForm.value = {
         reference: '',
@@ -348,6 +384,8 @@ export default {
       searchTicket,
       downloadTicket,
       viewTicket,
+      setTicketRef,
+      downloadImage,
       clearForm
     }
   }
