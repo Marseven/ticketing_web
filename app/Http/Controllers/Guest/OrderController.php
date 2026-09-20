@@ -107,6 +107,7 @@ class OrderController extends Controller
                 ->first();
 
             if (!$event) {
+                DB::rollBack();
                 return response()->json([
                     'success' => false,
                     'message' => 'Événement non trouvé'
@@ -115,6 +116,7 @@ class OrderController extends Controller
 
             // Vérifier que l'événement est publié ET approuvé par l'admin
             if (!$event->canSellTickets()) {
+                DB::rollBack();
                 return response()->json([
                     'success' => false,
                     'message' => 'Cet événement n\'est pas disponible pour la réservation'
@@ -128,6 +130,7 @@ class OrderController extends Controller
                 ->first();
 
             if (!$ticketType) {
+                DB::rollBack();
                 return response()->json([
                     'success' => false,
                     'message' => 'Type de billet non trouvé ou non disponible'
@@ -137,6 +140,7 @@ class OrderController extends Controller
             // Résoudre la date (schedule) choisie — récap des ventes par date.
             $scheduleId = $this->resolveScheduleId($event, $validated['schedule_id'] ?? null);
             if ($scheduleId === false) {
+                DB::rollBack();
                 return response()->json([
                     'success' => false,
                     'message' => 'Veuillez choisir une date pour cet événement',
@@ -144,18 +148,28 @@ class OrderController extends Controller
                 ], 422);
             }
 
-            // Vérifier la disponibilité des billets
-            // Calculer le nombre de billets vendus
-            $soldQuantity = \DB::table('tickets')
+            // Vérifier la disponibilité des billets.
+            //
+            // Le verrou est indispensable à l'ouverture des ventes : sans lui,
+            // deux achats simultanés sur les dernières places lisent le même
+            // compteur, passent tous les deux et on survend. On verrouille la
+            // ligne du type de billet pour sérialiser les acheteurs concurrents
+            // (la transaction est ouverte plus haut).
+            \App\Models\TicketType::whereKey($ticketType->id)->lockForUpdate()->first();
+
+            // Les billets `pending` (paiement en cours) occupent une place :
+            // les ignorer revenait à revendre des places déjà retenues.
+            $occupiedQuantity = \DB::table('tickets')
                 ->where('ticket_type_id', $ticketType->id)
-                ->whereIn('status', ['issued', 'used'])
+                ->whereIn('status', \App\Models\TicketType::OCCUPIED_STATUSES)
                 ->count();
 
             // Si available_quantity est null, c'est illimité
             if ($ticketType->available_quantity !== null) {
-                $availableQuantity = $ticketType->available_quantity - $soldQuantity;
+                $availableQuantity = $ticketType->available_quantity - $occupiedQuantity;
 
                 if ($availableQuantity < $validated['quantity']) {
+                    DB::rollBack();
                     return response()->json([
                         'success' => false,
                         'message' => "Seulement {$availableQuantity} billets disponibles pour ce type"
@@ -181,6 +195,7 @@ class OrderController extends Controller
                         $message = $isMultiDayEvent
                             ? 'Impossible de réserver des billets pour un événement terminé'
                             : 'Impossible de réserver des billets pour un événement déjà commencé';
+                        DB::rollBack();
                         return response()->json([
                             'success' => false,
                             'message' => $message

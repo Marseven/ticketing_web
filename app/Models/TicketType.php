@@ -9,6 +9,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TicketType extends Model
 {
+    /**
+     * Statuts de billet qui occupent une place : vendus (`issued`, `used`) et
+     * réservés le temps du paiement (`pending`). `void` = place relâchée.
+     */
+    public const OCCUPIED_STATUSES = ['pending', 'issued', 'used'];
+
     use HasFactory;
 
     protected $fillable = [
@@ -211,7 +217,32 @@ class TicketType extends Model
     }
 
     /**
+     * Places retenues par un paiement en cours.
+     *
+     * Un billet `pending` est réservé tant que le paiement n'a pas abouti ; il
+     * devient `issued` au webhook de succès, ou `void` si le paiement échoue ou
+     * si `CancelPendingOrders` expire la commande. Ces places ne sont donc plus
+     * à vendre, même si elles ne sont pas encore payées.
+     */
+    public function getReservedQuantityAttribute(): int
+    {
+        return $this->tickets()->where('status', 'pending')->count();
+    }
+
+    /**
+     * Places non disponibles à la vente : vendues + réservations en cours.
+     */
+    public function getOccupiedQuantityAttribute(): int
+    {
+        return $this->tickets()->whereIn('status', self::OCCUPIED_STATUSES)->count();
+    }
+
+    /**
      * Get remaining quantity.
+     *
+     * Décompte les réservations en cours : sur les dernières places d'une
+     * ouverture de vente, ne compter que les billets déjà émis revenait à
+     * annoncer — et à vendre — des places déjà retenues.
      */
     public function getRemainingQuantityAttribute(): ?int
     {
@@ -219,7 +250,7 @@ class TicketType extends Model
             return null;
         }
 
-        return max(0, $this->available_quantity - $this->sold_quantity);
+        return max(0, $this->available_quantity - $this->occupied_quantity);
     }
 
     /**
