@@ -517,12 +517,14 @@ class TicketController extends Controller
                 'buyer' => $ticket->buyer ? $ticket->buyer->name : 'Guest'
             ]);
 
-            // Générer le QR code en base64
-            $qrCode = QrCode::format('png')
+            // Générer le QR code en base64 — format SVG : backend par défaut, sans
+            // dépendance imagick (le PNG exige l'extension, absente sur certains
+            // hébergements) ; dompdf le rend via data URI, comme les billets physiques.
+            $qrCode = QrCode::format('svg')
                            ->size(200)
                            ->margin(1)
                            ->generate($ticket->code);
-            $qrCodeBase64 = 'data:image/png;base64,' . base64_encode($qrCode);
+            $qrCodeBase64 = 'data:image/svg+xml;base64,' . base64_encode($qrCode);
 
             // Charger le logo en base64
             $logoPath = public_path('images/logo.png');
@@ -638,9 +640,9 @@ class TicketController extends Controller
                 'has_logo' => !empty($logoBase64)
             ]);
 
-            // Générer le PDF (format A5 pour impression)
+            // Générer le PDF (A5 paysage : billet horizontal affiche + QR, comme le billet web)
             $pdf = Pdf::loadView('pdf.ticket', $data)
-                      ->setPaper('a5', 'portrait');
+                      ->setPaper('a5', 'landscape');
 
             Log::info('✅ PDF généré avec succès', ['code' => $code]);
 
