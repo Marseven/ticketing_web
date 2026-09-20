@@ -134,32 +134,20 @@ export default defineConfig({
                 '/fonts/MYRIADPRO-BOLDCOND.woff'
             ],
             output: {
-                // Créer des chunks manuels pour séparer les vendors
+                // Découpage : uniquement les grosses libs partagées, par
+                // bibliothèque. Surtout PAS de chunk par dossier de pages
+                // (admin/, account/…) : Rollup rattachait ces chunks à
+                // l'entrée en import STATIQUE, si bien qu'un visiteur de
+                // l'accueil téléchargeait tout l'admin. Les pages sont déjà
+                // découpées route par route par les imports dynamiques.
                 manualChunks(id) {
-                    // Séparer les dépendances node_modules
-                    if (id.includes('node_modules')) {
-                        // Créer un chunk séparé pour Vue et ses dépendances
-                        if (id.includes('vue') || id.includes('@vue')) {
-                            return 'vue-vendor';
-                        }
-                        // Créer un chunk séparé pour pinia
-                        if (id.includes('pinia')) {
-                            return 'pinia-vendor';
-                        }
-                        // Créer un chunk séparé pour les autres librairies
-                        return 'vendor';
-                    }
-                    // Séparer les pages admin dans leur propre chunk
-                    if (id.includes('/admin/')) {
-                        return 'admin';
-                    }
-                    // Séparer les pages organisateur
-                    if (id.includes('/organizer/')) {
-                        return 'organizer';
-                    }
-                    // Séparer les pages account
-                    if (id.includes('/account/')) {
-                        return 'account';
+                    if (!id.includes('node_modules')) return;
+                    if (id.includes('/leaflet')) return 'leaflet';
+                    if (id.includes('/chart.js') || id.includes('/vue-chartjs')) return 'charts';
+                    if (id.includes('/html2canvas')) return 'html2canvas';
+                    if (id.includes('/sweetalert2')) return 'sweetalert2';
+                    if (id.includes('/vue/') || id.includes('/@vue/') || id.includes('/vue-router/') || id.includes('/pinia/')) {
+                        return 'vue-vendor';
                     }
                 },
                 // Optimiser la génération des noms de fichiers

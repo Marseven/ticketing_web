@@ -372,6 +372,7 @@
 
 <script setup>
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
+import { loadPublicCategories } from '../../services/publicCategories'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 import { useBrandingStore } from '../../stores/branding'
@@ -461,18 +462,12 @@ const goBack = () => {
 
 const loadCategories = async () => {
   try {
-    const response = await fetch('/api/client/categories', {
-      headers: { 'Accept': 'application/json' }
-    })
-    if (!response.ok) throw new Error('Erreur de chargement')
-    const data = await response.json()
-    if (data.success && data.categories) {
-      categories.value = data.categories.map(cat => ({
-        id: cat.id,
-        name: cat.name,
-        slug: cat.slug
-      }))
-    }
+    const list = await loadPublicCategories()
+    categories.value = list.map(cat => ({
+      id: cat.id,
+      name: cat.name,
+      slug: cat.slug
+    }))
   } catch (error) {
     console.error('Erreur:', error)
   }

@@ -2,38 +2,12 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-/* Police Inter depuis Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+/* Inter est chargée dans app.blade.php (fonts.bunny.net, avec preconnect).
+   Ne pas la ré-importer ici : un @import CSS est une requête chaînée et
+   bloquante de plus sur le chemin critique. */
 
-/* Polices Myriad Pro */
-@font-face {
-    font-family: 'Myriad Pro';
-    src: url('/fonts/MYRIADPRO-REGULAR.woff') format('woff');
-    font-weight: 400;
-    font-style: normal;
-}
-
-@font-face {
-    font-family: 'Myriad Pro';
-    src: url('/fonts/MYRIADPRO-BOLD.woff') format('woff');
-    font-weight: 700;
-    font-style: normal;
-}
-
-@font-face {
-    font-family: 'Myriad Pro';
-    src: url('/fonts/MYRIADPRO-SEMIBOLD.woff') format('woff');
-    font-weight: 600;
-    font-style: normal;
-}
-
-@font-face {
-    font-family: 'Myriad Pro';
-    src: url('/fonts/MyriadPro-Light.woff') format('woff');
-    font-weight: 300;
-    font-style: normal;
-}
-
+/* Myriad Pro retirée du bundle : Inter est la police effective (première de
+   chaque pile). Les fichiers restent dans public/fonts pour les PDF/e-mails. */
 /* Configuration des polices */
 :root {
     --font-sans: 'Inter', 'Myriad Pro', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';

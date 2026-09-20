@@ -354,6 +354,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useEventsStore } from '../stores/events'
+import { loadPublicCategories } from '../services/publicCategories'
 import EventCard from '../components/EventCard.vue'
 import BannerCarousel from '../components/BannerCarousel.vue'
 import { ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
@@ -496,30 +497,16 @@ export default {
 
     const loadCategories = async () => {
       try {
-        const response = await fetch('/api/client/categories', {
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-          }
-        })
+        const list = await loadPublicCategories()
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
-        const data = await response.json()
-        
-        if (data.success && data.categories) {
-          categories.value = [
-            { id: 'all', name: 'Tous' },
-            ...data.categories.map(cat => ({
-              id: cat.id,
-              name: cat.name,
-              slug: cat.slug
-            }))
-          ]
-        }
+        categories.value = [
+          { id: 'all', name: 'Tous' },
+          ...list.map(cat => ({
+            id: cat.id,
+            name: cat.name,
+            slug: cat.slug
+          }))
+        ]
       } catch (error) {
         console.error('Erreur lors du chargement des catégories:', error)
         categories.value = [

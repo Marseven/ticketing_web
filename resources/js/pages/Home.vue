@@ -8,14 +8,14 @@
              /videos/hero.mp4). muted + playsinline = autoplay iOS/Android.
              Le poster sert d'image immédiate et de secours au chargement. -->
         <video
-          v-if="!heroVideoFailed"
+          v-if="showHeroVideo"
           :src="heroVideoSrc"
           :poster="heroFallbackImage"
           autoplay
           loop
           muted
           playsinline
-          preload="auto"
+          preload="none"
           disablepictureinpicture
           class="w-full h-full object-cover"
           @error="heroVideoFailed = true"
@@ -384,6 +384,7 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { loadPublicCategories } from '../services/publicCategories'
 import axios from 'axios'
 import BannerCarousel from '../components/BannerCarousel.vue'
 import SmartImage from '../components/SmartImage.vue'
@@ -413,6 +414,25 @@ export default {
     // image de repli si la vidéo échoue / n'autoplay pas (navigateurs in-app).
     const DEFAULT_HERO_IMAGE = '/images/hero-poster.jpg'
     const heroVideoFailed = ref(false)
+    // Le fond vidéo pèse ~1 Mo : on ne le charge que si le terminal peut se le
+    // permettre (grand écran, connexion correcte, ni économiseur de données ni
+    // « mouvement réduit »). Sinon le poster (25 Ko) fait le travail — 9
+    // visiteurs sur 10 arrivent sur mobile via WhatsApp/Facebook, où l'autoplay
+    // est de toute façon bloqué.
+    const heroVideoAllowed = ref(false)
+    const showHeroVideo = computed(() => heroVideoAllowed.value && !heroVideoFailed.value)
+
+    const heroVideoIsAffordable = () => {
+      try {
+        const conn = navigator.connection || {}
+        if (conn.saveData === true) return false
+        if (['slow-2g', '2g', '3g'].includes(conn.effectiveType)) return false
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false
+        return window.matchMedia('(min-width: 768px)').matches
+      } catch (e) {
+        return false
+      }
+    }
 
     const heroVideoSrc = computed(() =>
       heroBanner.value?.type === 'video' && heroBanner.value?.media_url
@@ -508,24 +528,16 @@ export default {
 
     const loadCategories = async () => {
       try {
-        const response = await fetch('/api/client/categories', {
-          headers: { 'Accept': 'application/json' }
-        })
+        const list = await loadPublicCategories()
 
-        if (!response.ok) throw new Error('Erreur de chargement')
-
-        const data = await response.json()
-
-        if (data.success && data.categories) {
-          categories.value = [
-            { id: 'all', name: 'Tous' },
-            ...data.categories.map(cat => ({
-              id: cat.id,
-              name: cat.name,
-              slug: cat.slug
-            }))
-          ]
-        }
+        categories.value = [
+          { id: 'all', name: 'Tous' },
+          ...list.map(cat => ({
+            id: cat.id,
+            name: cat.name,
+            slug: cat.slug
+          }))
+        ]
       } catch (error) {
         console.error('Erreur:', error)
         // En cas d'erreur, on garde seulement le filtre "Tous"
@@ -594,12 +606,7 @@ export default {
       loadEvents()
       loadCategories()
       loadHeroBanner()
-      // Mouvement réduit : ne pas autoplay la vidéo, afficher l'image.
-      try {
-        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-          heroVideoFailed.value = true
-        }
-      } catch (e) { /* no-op */ }
+      heroVideoAllowed.value = heroVideoIsAffordable()
     })
 
     return {
@@ -612,6 +619,7 @@ export default {
       heroVideoSrc,
       heroFallbackImage,
       heroVideoFailed,
+      showHeroVideo,
       filteredEvents,
       upcomingEvents,
       pastEvents,
