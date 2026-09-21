@@ -26,8 +26,8 @@
             </svg>
           </div>
           <div class="ml-4">
-            <p class="text-sm text-gray-600">Total Achats</p>
-            <p class="text-2xl font-bold text-blue-600">{{ stats.total_orders || 0 }}</p>
+            <p class="text-sm text-gray-600">Commandes au total</p>
+            <p class="text-2xl font-bold text-blue-600">{{ stats.total || 0 }}</p>
           </div>
         </div>
       </div>
@@ -40,8 +40,8 @@
             </svg>
           </div>
           <div class="ml-4">
-            <p class="text-sm text-gray-600">Confirmées</p>
-            <p class="text-2xl font-bold text-green-600">{{ stats.confirmed_orders || 0 }}</p>
+            <p class="text-sm text-gray-600">Payées</p>
+            <p class="text-2xl font-bold text-green-600">{{ stats.paid || 0 }}</p>
           </div>
         </div>
       </div>
@@ -54,8 +54,8 @@
             </svg>
           </div>
           <div class="ml-4">
-            <p class="text-sm text-gray-600">En Attente</p>
-            <p class="text-2xl font-bold text-yellow-600">{{ stats.pending_orders || 0 }}</p>
+            <p class="text-sm text-gray-600">En attente de paiement</p>
+            <p class="text-2xl font-bold text-yellow-600">{{ stats.pending || 0 }}</p>
           </div>
         </div>
       </div>
@@ -68,8 +68,8 @@
             </svg>
           </div>
           <div class="ml-4">
-            <p class="text-sm text-gray-600">Revenus Total</p>
-            <p class="text-2xl font-bold text-purple-600">{{ formatAmount(stats.total_revenue || 0) }} XAF</p>
+            <p class="text-sm text-gray-600">Annulées</p>
+            <p class="text-2xl font-bold text-purple-600">{{ stats.cancelled || 0 }}</p>
           </div>
         </div>
       </div>
@@ -436,11 +436,13 @@ export default {
     const events = ref([])
     const pagination = ref(null)
     
+    // Chiffres renvoyés par l'API pour TOUTES les commandes filtrées, pas
+    // seulement celles de la page affichée.
     const stats = reactive({
-      total_orders: 0,
-      confirmed_orders: 0,
-      pending_orders: 0,
-      total_revenue: 0
+      total: 0,
+      paid: 0,
+      pending: 0,
+      cancelled: 0
     })
     
     const filters = reactive({
@@ -491,14 +493,10 @@ export default {
             total: data.data.orders.total
           }
 
-          // Calculer les stats
-          const allOrders = data.data.orders.data
-          stats.total_orders = pagination.value.total
-          stats.confirmed_orders = allOrders.filter(o => o.status === 'confirmed').length
-          stats.pending_orders = allOrders.filter(o => o.status === 'pending').length
-          stats.total_revenue = allOrders
-            .filter(o => o.status === 'confirmed')
-            .reduce((sum, o) => sum + o.total_amount, 0)
+          // Les stats viennent du serveur : les recalculer ici ne portait que
+          // sur les 20 lignes affichées, et cherchait un statut « confirmed »
+          // qui n'existe pas en base (les commandes payées sont « paid »).
+          Object.assign(stats, data.data.stats || {})
         } else {
           orders.value = []
           pagination.value = null
