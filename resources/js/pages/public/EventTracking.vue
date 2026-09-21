@@ -68,6 +68,38 @@
           </div>
         </div>
 
+        <!-- Revenu -->
+        <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+          <p class="text-xs text-gray-500">Revenu des billets</p>
+          <p class="text-3xl font-bold text-primea-blue">{{ formatMoney(summary.stats.revenue) }}</p>
+          <p class="text-xs text-gray-500 mt-1">
+            En ligne {{ formatMoney(summary.stats.revenue_online) }}
+            · Physique {{ formatMoney(summary.stats.revenue_physical) }}
+          </p>
+        </div>
+
+        <!-- Par provenance : un clic filtre la liste plus bas -->
+        <div v-if="sourceRows.length" class="bg-white rounded-xl shadow-sm p-4 mb-6">
+          <h2 class="text-sm font-semibold text-gray-700 mb-3">Par provenance</h2>
+          <div class="space-y-2">
+            <button
+              v-for="row in sourceRows"
+              :key="row.key"
+              type="button"
+              @click="filterBySource(row.key)"
+              class="w-full flex items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors"
+              :class="filters.ticket_source === row.key ? 'bg-primea-blue/10' : 'hover:bg-gray-50'"
+            >
+              <span class="w-24 text-sm font-medium text-gray-700">{{ row.label }}</span>
+              <span class="flex-1 text-sm text-gray-600">
+                {{ row.total }} billet<span v-if="row.total > 1">s</span>
+                · {{ row.scanned }} entré<span v-if="row.scanned > 1">s</span>
+              </span>
+              <span class="text-sm font-semibold text-primea-blue whitespace-nowrap">{{ formatMoney(row.revenue) }}</span>
+            </button>
+          </div>
+        </div>
+
         <!-- Répartition par type -->
         <div v-if="summary.stats.by_type?.length" class="bg-white rounded-xl shadow-sm p-4 mb-6">
           <h2 class="text-sm font-semibold text-gray-700 mb-3">Par catégorie de billet</h2>
@@ -284,8 +316,33 @@ const loadTickets = async () => {
   }
 }
 
+// Séparateur de milliers posé à la main : `Intl` insère une espace insécable
+// étroite qui passe mal dans certains navigateurs in-app (WhatsApp, Facebook).
+const formatMoney = (value) => {
+  const amount = Math.round(Number(value) || 0)
+  return String(amount).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' FCFA'
+}
+
+// Ne montrer que les provenances réellement présentes : un événement sans
+// billet physique n'a pas besoin d'une ligne à zéro.
+const sourceRows = computed(() => {
+  const bySource = summary.value?.stats?.by_source || {}
+  return [
+    { key: 'online', label: 'En ligne' },
+    { key: 'physical', label: 'Physique' },
+    { key: 'comped', label: 'Invitations' },
+  ]
+    .map((row) => ({ ...row, ...(bySource[row.key] || { total: 0, scanned: 0, revenue: 0 }) }))
+    .filter((row) => row.total > 0)
+})
+
 const applyFilters = () => { filters.page = 1; loadTickets() }
 const setScan = (v) => { filters.scan = v; applyFilters() }
+// Re-cliquer sur la provenance active enlève le filtre.
+const filterBySource = (key) => {
+  filters.ticket_source = filters.ticket_source === key ? '' : key
+  applyFilters()
+}
 const debouncedLoad = () => { clearTimeout(searchTimeout); searchTimeout = setTimeout(applyFilters, 400) }
 const changePage = (p) => { filters.page = p; loadTickets() }
 

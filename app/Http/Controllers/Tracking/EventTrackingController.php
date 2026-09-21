@@ -52,9 +52,36 @@ class EventTrackingController extends Controller
         $total = (clone $base)->count();
         $scanned = (clone $base)->where('status', 'used')->count();
 
-        $revenue = Order::whereHas('tickets', fn ($q) => $q->where('event_id', $event->id))
+        // Revenu des ventes en ligne : `subtotal_amount`, soit le prix des
+        // billets hors frais de service — même définition que le tableau de
+        // bord organisateur, pour que les deux écrans affichent le même chiffre.
+        $revenueOnline = (float) Order::whereHas('tickets', fn ($q) => $q->where('event_id', $event->id))
             ->where('status', 'paid')
-            ->sum('total_amount');
+            ->sum('subtotal_amount');
+
+        // Les billets physiques n'ont pas de commande (vendus à l'entrée) : leur
+        // revenu se lit sur le tarif du type de billet.
+        // Requête à part et colonnes qualifiées : `tickets` et `ticket_types`
+        // portent toutes deux `event_id`.
+        $revenuePhysical = (float) Ticket::query()
+            ->join('ticket_types', 'tickets.ticket_type_id', '=', 'ticket_types.id')
+            ->where('tickets.event_id', $event->id)
+            ->where('tickets.ticket_source', 'physical')
+            ->whereIn('tickets.status', ['issued', 'used'])
+            ->sum('ticket_types.price');
+
+        $countBySource = function (string $source) use ($base) {
+            $scoped = (clone $base)->where('ticket_source', $source);
+
+            return [
+                'total' => (clone $scoped)->count(),
+                'scanned' => (clone $scoped)->where('status', 'used')->count(),
+            ];
+        };
+
+        $online = $countBySource('online');
+        $physical = $countBySource('physical');
+        $comped = $countBySource('comped');
 
         return response()->json([
             'success' => true,
@@ -70,10 +97,17 @@ class EventTrackingController extends Controller
                     'total' => $total,
                     'scanned' => $scanned,
                     'not_scanned' => $total - $scanned,
-                    'physical' => (clone $base)->where('ticket_source', 'physical')->count(),
-                    'online' => (clone $base)->where('ticket_source', 'online')->count(),
-                    'comped' => (clone $base)->where('ticket_source', 'comped')->count(),
-                    'revenue' => (float) $revenue,
+                    'physical' => $physical['total'],
+                    'online' => $online['total'],
+                    'comped' => $comped['total'],
+                    'by_source' => [
+                        'online' => $online + ['revenue' => $revenueOnline],
+                        'physical' => $physical + ['revenue' => $revenuePhysical],
+                        'comped' => $comped + ['revenue' => 0.0],
+                    ],
+                    'revenue' => $revenueOnline + $revenuePhysical,
+                    'revenue_online' => $revenueOnline,
+                    'revenue_physical' => $revenuePhysical,
                     'by_type' => $byType,
                 ],
             ],

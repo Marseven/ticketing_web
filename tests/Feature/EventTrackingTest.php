@@ -101,4 +101,61 @@ class EventTrackingTest extends TestCase
         $this->seedEvent();
         $this->getJson('/api/v1/track/wrong-token-xyz')->assertNotFound();
     }
+
+    public function test_summary_splits_counts_and_revenue_by_source(): void
+    {
+        [$event, $token] = $this->seedEvent();
+
+        // Une vente en ligne payée : 2 000 de billets + 50 de frais de service.
+        // Le revenu suit `subtotal_amount`, comme le tableau de bord organisateur.
+        $order = \App\Models\Order::create([
+            'organizer_id' => $event->organizer_id, 'buyer_id' => null, 'currency' => 'XAF',
+            'subtotal_amount' => 2000, 'fees_amount' => 0, 'service_fee_amount' => 50,
+            'commission_percentage' => 10, 'tax_amount' => 0, 'total_amount' => 2050,
+            'status' => 'paid', 'reference' => 'ORD-' . strtoupper(uniqid()),
+            'placed_at' => now(), 'is_guest_order' => true,
+        ]);
+        \App\Models\Ticket::where('code', 'TKT-ISSUED')->update(['order_id' => $order->id]);
+
+        $res = $this->getJson("/api/v1/track/{$token}")->assertOk();
+
+        $res->assertJsonPath('data.stats.online', 1)
+            ->assertJsonPath('data.stats.physical', 1)
+            ->assertJsonPath('data.stats.by_source.physical.scanned', 1)
+            ->assertJsonPath('data.stats.by_source.online.scanned', 0);
+
+        // En ligne : le sous-total, pas les frais. Physique : le tarif du type.
+        $this->assertSame(2000.0, (float) $res->json('data.stats.revenue_online'));
+        $this->assertSame(500.0, (float) $res->json('data.stats.revenue_physical'));
+        $this->assertSame(2500.0, (float) $res->json('data.stats.revenue'));
+    }
+
+    public function test_comped_tickets_bring_no_revenue(): void
+    {
+        [$event, $token] = $this->seedEvent();
+
+        \App\Models\Ticket::create([
+            'event_id' => $event->id,
+            'ticket_type_id' => $event->ticketTypes()->first()->id,
+            'code' => 'TKT-INVIT', 'status' => 'issued',
+            'ticket_source' => 'comped', 'issued_at' => now(),
+        ]);
+
+        $res = $this->getJson("/api/v1/track/{$token}")->assertOk();
+
+        $res->assertJsonPath('data.stats.comped', 1)
+            ->assertJsonPath('data.stats.by_source.comped.revenue', 0);
+        $this->assertSame(500.0, (float) $res->json('data.stats.revenue'), 'seul le billet physique compte');
+    }
+
+    public function test_ticket_list_can_be_filtered_by_source(): void
+    {
+        [, $token] = $this->seedEvent();
+
+        $online = $this->getJson("/api/v1/track/{$token}/tickets?ticket_source=online")->assertOk();
+        $this->assertSame(['TKT-ISSUED'], collect($online->json('data.tickets.data'))->pluck('code')->all());
+
+        $physical = $this->getJson("/api/v1/track/{$token}/tickets?ticket_source=physical")->assertOk();
+        $this->assertSame(['TKT-USED'], collect($physical->json('data.tickets.data'))->pluck('code')->all());
+    }
 }
