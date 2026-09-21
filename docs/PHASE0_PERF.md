@@ -89,3 +89,33 @@ perdues au basculement (les utilisateurs connectés se reconnectent une fois).
 Le plafond CPU du mutualisé, l'absence de Redis (cache/queue/sessions en RAM) et le
 worker de file d'attente lancé par le cron chaque minute. Voir l'analyse infra :
 VPS 2 vCPU + Redis + worker permanent + Cloudflare ≈ 80-95 000 XAF/an.
+
+---
+
+## Réconciliation des commandes créditées à tort
+
+Le webhook e-billing a longtemps traité **toute notification reçue** comme un
+paiement abouti (corrigé le 21 sept. 2026). Des commandes ont donc été marquées
+payées, et des billets émis, sans que le client ait validé le paiement.
+
+```bash
+# 1. Voir l'ampleur, sans rien modifier
+/usr/bin/php artisan payments:reconcile-ebilling --dry-run
+
+# 2. Annuler les commandes non payées et relâcher leurs places
+/usr/bin/php artisan payments:reconcile-ebilling
+```
+
+Options : `--since=2026-09-01`, `--event=chill-expo-1` (id ou slug), `--limit=500`.
+
+La commande interroge e-billing pour chaque commande payée et n'annule que
+celles dont la facture n'a jamais été réglée. Elle ne touche **jamais** :
+
+- une commande qu'elle n'a pas pu vérifier (facture inconnue, passerelle
+  injoignable) — elle les liste à part ;
+- un billet déjà **scanné** : la personne est entrée, la commande est annulée
+  mais l'historique du contrôle d'accès n'est pas réécrit. Ces cas sont
+  signalés explicitement, à traiter à la main.
+
+Commencer par `--dry-run` : le rapport donne référence, montant, état réel de la
+facture et nombre de billets concernés.
