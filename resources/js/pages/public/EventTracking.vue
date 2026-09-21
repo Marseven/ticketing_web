@@ -52,7 +52,7 @@
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           <div class="bg-white rounded-xl shadow-sm p-4 text-center">
             <p class="text-3xl font-bold text-primea-blue">{{ summary.stats.total }}</p>
-            <p class="text-xs text-gray-500 mt-1">Billets au total</p>
+            <p class="text-xs text-gray-500 mt-1">Billets vendus</p>
           </div>
           <div class="bg-white rounded-xl shadow-sm p-4 text-center">
             <p class="text-3xl font-bold text-green-600">{{ summary.stats.scanned }}</p>
@@ -60,7 +60,7 @@
           </div>
           <div class="bg-white rounded-xl shadow-sm p-4 text-center">
             <p class="text-3xl font-bold text-gray-700">{{ summary.stats.not_scanned }}</p>
-            <p class="text-xs text-gray-500 mt-1">Pas encore entrés</p>
+            <p class="text-xs text-gray-500 mt-1">Émis, pas encore entrés</p>
           </div>
           <div class="bg-white rounded-xl shadow-sm p-4 text-center">
             <p class="text-3xl font-bold text-primea-blue">{{ scanRate }}%</p>
@@ -70,7 +70,7 @@
 
         <!-- Revenu -->
         <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
-          <p class="text-xs text-gray-500">Revenu des billets</p>
+          <p class="text-xs text-gray-500">Revenu des billets vendus</p>
           <p class="text-3xl font-bold text-primea-blue">{{ formatMoney(summary.stats.revenue) }}</p>
           <p class="text-xs text-gray-500 mt-1">
             En ligne {{ formatMoney(summary.stats.revenue_online) }}
@@ -158,7 +158,7 @@
               <div class="text-right">
                 <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
                       :class="t.scanned ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'">
-                  {{ t.scanned ? 'Entré' : 'Non entré' }}
+                  {{ t.scanned ? 'Scanné' : 'Émis' }}
                 </span>
                 <p v-if="t.scanned && t.scanned_at" class="text-xs text-gray-400 mt-1">{{ formatDate(t.scanned_at) }}</p>
               </div>
@@ -254,10 +254,11 @@ const loadingDetail = ref(false)
 const detail = ref(null)
 
 const filters = reactive({ search: '', scan: '', ticket_source: '', page: 1 })
+// Un billet du suivi est payé par construction : il ne reste que deux états.
 const scanTabs = [
   { value: '', label: 'Tous' },
-  { value: 'scanned', label: 'Entrés' },
-  { value: 'not_scanned', label: 'Pas entrés' },
+  { value: 'scanned', label: 'Scannés' },
+  { value: 'not_scanned', label: 'Émis' },
 ]
 
 let searchTimeout = null

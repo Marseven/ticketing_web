@@ -20,6 +20,16 @@ use Illuminate\Http\Request;
  */
 class EventTrackingController extends Controller
 {
+    /**
+     * Statuts des billets visibles dans le suivi organisateur.
+     *
+     * Un billet n'y apparaît que s'il est payé : `pending` (paiement en cours,
+     * ou jamais abouti) et `void` (commande annulée) n'ont rien à y faire — ils
+     * gonflaient les compteurs sans correspondre à une vente. Il ne reste donc
+     * que deux états à lire : émis (pas encore scanné) et scanné.
+     */
+    private const PAID_STATUSES = ['issued', 'used'];
+
     private function resolveEvent(string $token): Event
     {
         return Event::with(['organizer', 'venue', 'schedules'])
@@ -34,7 +44,7 @@ class EventTrackingController extends Controller
     {
         $event = $this->resolveEvent($token);
 
-        $base = Ticket::where('event_id', $event->id);
+        $base = Ticket::where('event_id', $event->id)->whereIn('status', self::PAID_STATUSES);
 
         $byType = (clone $base)
             ->selectRaw('ticket_type_id,
@@ -122,6 +132,7 @@ class EventTrackingController extends Controller
         $event = $this->resolveEvent($token);
 
         $query = Ticket::where('event_id', $event->id)
+            ->whereIn('status', self::PAID_STATUSES)
             ->with([
                 'ticketType:id,name',
                 'order:id,reference,placed_at,guest_name,guest_email,guest_phone,buyer_id',
@@ -189,6 +200,7 @@ class EventTrackingController extends Controller
         $event = $this->resolveEvent($token);
 
         $ticket = Ticket::where('event_id', $event->id)
+            ->whereIn('status', self::PAID_STATUSES)
             ->where('code', $code)
             ->with([
                 'ticketType:id,name',

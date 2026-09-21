@@ -158,4 +158,49 @@ class EventTrackingTest extends TestCase
         $physical = $this->getJson("/api/v1/track/{$token}/tickets?ticket_source=physical")->assertOk();
         $this->assertSame(['TKT-USED'], collect($physical->json('data.tickets.data'))->pluck('code')->all());
     }
+
+    public function test_unpaid_and_void_tickets_are_invisible_in_tracking(): void
+    {
+        [$event, $token] = $this->seedEvent();
+        $type = $event->ticketTypes()->first();
+
+        // Paiement jamais abouti, et commande annulée : ni l'un ni l'autre n'est
+        // une vente. Ils gonflaient les compteurs et le revenu du suivi.
+        \App\Models\Ticket::create([
+            'event_id' => $event->id, 'ticket_type_id' => $type->id,
+            'code' => 'TKT-PENDING', 'status' => 'pending', 'ticket_source' => 'online',
+        ]);
+        \App\Models\Ticket::create([
+            'event_id' => $event->id, 'ticket_type_id' => $type->id,
+            'code' => 'TKT-VOID', 'status' => 'void', 'ticket_source' => 'physical',
+        ]);
+
+        $res = $this->getJson("/api/v1/track/{$token}")->assertOk();
+
+        // Seuls les 2 billets payés du jeu d'essai comptent.
+        $res->assertJsonPath('data.stats.total', 2)
+            ->assertJsonPath('data.stats.online', 1)
+            ->assertJsonPath('data.stats.physical', 1);
+
+        // Le billet physique impayé ne doit pas rapporter de revenu.
+        $this->assertSame(500.0, (float) $res->json('data.stats.revenue_physical'));
+
+        $codes = collect($this->getJson("/api/v1/track/{$token}/tickets")->json('data.tickets.data'))
+            ->pluck('code');
+        $this->assertFalse($codes->contains('TKT-PENDING'));
+        $this->assertFalse($codes->contains('TKT-VOID'));
+    }
+
+    public function test_an_unpaid_ticket_detail_is_not_reachable(): void
+    {
+        [$event, $token] = $this->seedEvent();
+
+        \App\Models\Ticket::create([
+            'event_id' => $event->id,
+            'ticket_type_id' => $event->ticketTypes()->first()->id,
+            'code' => 'TKT-PENDING', 'status' => 'pending', 'ticket_source' => 'online',
+        ]);
+
+        $this->getJson("/api/v1/track/{$token}/tickets/TKT-PENDING")->assertStatus(404);
+    }
 }
