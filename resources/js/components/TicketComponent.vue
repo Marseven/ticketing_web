@@ -84,7 +84,12 @@ export default {
     )
 
     const qrSrc = computed(() => {
-      if (props.ticket?.qrCode) return props.ticket.qrCode
+      // `qrCode` doit être une image (data URI renvoyée par l'API, ou URL) :
+      // certains endpoints exposent un champ `qr_code` qui contient la charge
+      // utile du QR, pas une image — l'utiliser en `src` donnerait un billet
+      // sans QR. Le service tiers ne reste qu'un dernier recours.
+      const q = props.ticket?.qrCode
+      if (typeof q === 'string' && (q.startsWith('data:image') || q.startsWith('http'))) return q
       const ref = props.ticket?.reference || 'PRIMEA-TICKET'
       return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(ref)}`
     })

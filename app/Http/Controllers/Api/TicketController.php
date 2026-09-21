@@ -441,6 +441,22 @@ class TicketController extends Controller
     }
 
     /**
+     * QR du billet en data URI, prêt à être affiché ou capturé côté client.
+     */
+    private function ticketQrDataUri(Ticket $ticket): ?string
+    {
+        try {
+            $svg = QrCode::format('svg')->size(300)->margin(1)->generate($ticket->code);
+
+            return 'data:image/svg+xml;base64,' . base64_encode($svg);
+        } catch (\Throwable $e) {
+            Log::warning('QR du billet non généré', ['code' => $ticket->code, 'error' => $e->getMessage()]);
+
+            return null;
+        }
+    }
+
+    /**
      * Formater les informations du ticket
      */
     private function formatTicketInfo(Ticket $ticket, bool $detailed = false): array
@@ -449,6 +465,11 @@ class TicketController extends Controller
             'id' => $ticket->id,
             'code' => $ticket->code,
             'status' => $ticket->status,
+            // QR fourni par l'API : sans lui, le front tombait sur un service
+            // tiers (api.qrserver.com) pour le code du billet — le code partait
+            // chez un tiers, et son indisponibilité laissait au client un billet
+            // sans QR. Même format SVG que le PDF (pas de dépendance imagick).
+            'qr_code' => $this->ticketQrDataUri($ticket),
             'event' => [
                 'id' => $ticket->event->id,
                 'title' => $ticket->event->title,

@@ -334,7 +334,9 @@ export default {
             },
             ticketType: apiTicket.ticket_type?.name || 'Standard',
             price: apiTicket.ticket_type?.price || 10000,
-            qrCode: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(apiTicket.code)}`,
+            // QR fourni par l'API (auto-hébergé) ; le service tiers ne sert plus
+            // que de secours si l'API n'en renvoie pas.
+            qrCode: apiTicket.qr_code || `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(apiTicket.code)}`,
             status: apiTicket.status,
             buyer_name: apiTicket.buyer?.name,
             buyer_email: apiTicket.buyer?.email,

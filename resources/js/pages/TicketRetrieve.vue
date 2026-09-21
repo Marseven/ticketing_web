@@ -258,7 +258,9 @@ export default {
             ticketType: apiTicket.ticket_type?.name,
             price: apiTicket.ticket_type?.price,
             currency: 'XAF',
-            qrCode: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${apiTicket.code}`,
+            // QR fourni par l'API (auto-hébergé) ; le service tiers ne sert plus
+            // que de secours si l'API n'en renvoie pas.
+            qrCode: apiTicket.qr_code || `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${apiTicket.code}`,
             status: apiTicket.order?.status || 'unknown',
             buyer_name: apiTicket.buyer?.name,
             buyer_email: apiTicket.buyer?.email,
@@ -289,7 +291,9 @@ export default {
             ticketType: apiTicket.ticket_type?.name,
             price: apiTicket.ticket_type?.price,
             currency: 'XAF',
-            qrCode: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${apiTicket.code}`,
+            // QR fourni par l'API (auto-hébergé) ; le service tiers ne sert plus
+            // que de secours si l'API n'en renvoie pas.
+            qrCode: apiTicket.qr_code || `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${apiTicket.code}`,
             status: apiTicket.order?.status || 'unknown',
             buyer_name: apiTicket.buyer?.name,
             buyer_email: apiTicket.buyer?.email,

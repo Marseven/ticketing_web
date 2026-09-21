@@ -216,6 +216,20 @@ class TicketController extends Controller
     /**
      * Search tickets by reference, phone or email
      */
+    /**
+     * QR du billet en data URI (SVG : pas de dépendance imagick).
+     */
+    private function qrDataUri($ticket): ?string
+    {
+        try {
+            $svg = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')->size(300)->margin(1)->generate($ticket->code);
+
+            return 'data:image/svg+xml;base64,' . base64_encode($svg);
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
     public function search(Request $request)
     {
         $request->validate([
@@ -284,7 +298,9 @@ class TicketController extends Controller
                 'status' => $ticket->status,
                 'issued_at' => $ticket->issued_at,
                 'used_at' => $ticket->used_at,
-                'qr_code' => $ticket->qr_code,
+                // Image du QR générée ici (même SVG que le PDF) : le front
+                // n'a plus besoin d'un service tiers pour afficher le billet.
+                'qr_code' => $this->qrDataUri($ticket),
                 'event' => [
                     'id' => $ticket->event->id,
                     'title' => $ticket->event->title,
