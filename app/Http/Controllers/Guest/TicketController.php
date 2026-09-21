@@ -227,12 +227,34 @@ class TicketController extends Controller
     public function search(Request $request)
     {
         $request->validate([
+            'name' => 'nullable|string|max:255',
+            // Le nom seul listerait les billets de tous les homonymes : il ne
+            // vaut comme critère qu'associé au téléphone.
+            'phone' => 'nullable|string|required_with:name',
             'reference' => 'nullable|string',
-            'phone' => 'nullable|string',
             'email' => 'nullable|email',
         ]);
 
-        $query = Ticket::query()->with(['event.schedules', 'event.venue', 'ticketType', 'buyer', 'order']);
+        $query = Ticket::query()->with(['event.schedules', 'event.venue', 'ticketType', 'buyer', 'order', 'schedule']);
+
+        // On ne rend que les billets encore utiles : événement actif, et date
+        // pas dépassée de plus d'un jour (le billet reste récupérable le jour J
+        // et le lendemain). La date étant lue en base à chaque recherche, un
+        // report d'événement prolonge automatiquement la fenêtre.
+        $cutoff = now()->subDay();
+        $stillUsable = function ($scheduleQuery) use ($cutoff) {
+            $scheduleQuery->whereRaw('COALESCE(ends_at, starts_at) >= ?', [$cutoff]);
+        };
+
+        $query->whereHas('event', function ($eventQuery) {
+            $eventQuery->where('is_active', true)->where('status', '!=', 'cancelled');
+        })->where(function ($q) use ($stillUsable) {
+            $q->whereHas('schedule', $stillUsable)
+              ->orWhere(function ($undated) use ($stillUsable) {
+                  // Billet sans date propre : on se rabat sur les dates de l'événement.
+                  $undated->whereNull('schedule_id')->whereHas('event.schedules', $stillUsable);
+              });
+        });
 
         // Recherche par référence (code du ticket OU référence de la commande)
         if ($request->filled('reference')) {
@@ -253,14 +275,49 @@ class TicketController extends Controller
             // Prendre les 8 derniers chiffres (format Gabon standard sans indicatif)
             $shortPhone = strlen($digits) >= 8 ? substr($digits, -8) : $digits;
 
-            $query->where(function($q) use ($shortPhone) {
-                $q->whereHas('buyer', function($buyerQuery) use ($shortPhone) {
-                    $buyerQuery->whereRaw("REPLACE(REPLACE(REPLACE(phone, '+', ''), ' ', ''), '-', '') LIKE ?", ["%{$shortPhone}%"]);
+            $buyerPhone = \App\Support\PhoneNumber::sqlDigits('phone');
+            $guestPhone = \App\Support\PhoneNumber::sqlDigits('guest_phone');
+
+            // Trois numéros peuvent désigner la même personne : celui du compte
+            // (KYC), celui laissé à la commande, et celui qui a effectivement
+            // payé. Les trois ouvrent droit au billet.
+            $query->where(function($q) use ($shortPhone, $buyerPhone, $guestPhone) {
+                $q->whereHas('buyer', function($buyerQuery) use ($shortPhone, $buyerPhone) {
+                    $buyerQuery->whereRaw("{$buyerPhone} LIKE ?", ["%{$shortPhone}"]);
                 })
-                ->orWhereHas('order', function($orderQuery) use ($shortPhone) {
-                    $orderQuery->whereRaw("REPLACE(REPLACE(REPLACE(guest_phone, '+', ''), ' ', ''), '-', '') LIKE ?", ["%{$shortPhone}%"]);
+                // Le compte est porté par le billet ou par la commande selon le
+                // parcours : les deux doivent être interrogés.
+                ->orWhereHas('order.buyer', function($buyerQuery) use ($shortPhone, $buyerPhone) {
+                    $buyerQuery->whereRaw("{$buyerPhone} LIKE ?", ["%{$shortPhone}"]);
+                })
+                ->orWhereHas('order', function($orderQuery) use ($shortPhone, $guestPhone) {
+                    $orderQuery->whereRaw("{$guestPhone} LIKE ?", ["%{$shortPhone}"]);
+                })
+                ->orWhereHas('order.payments', function($paymentQuery) use ($shortPhone) {
+                    $paymentQuery->where('payer_phone', 'LIKE', "%{$shortPhone}");
                 });
             });
+        }
+
+        // Recherche par nom : chaque mot saisi doit se retrouver dans le nom du
+        // compte ou celui laissé à la commande, dans n'importe quel ordre
+        // (« Leofa Abila » trouve « Abila Leofa »).
+        if ($request->filled('name')) {
+            $words = preg_split('/\s+/', trim($request->input('name')), -1, PREG_SPLIT_NO_EMPTY);
+
+            foreach (array_slice($words, 0, 4) as $word) {
+                $query->where(function($q) use ($word) {
+                    $q->whereHas('buyer', function($buyerQuery) use ($word) {
+                        $buyerQuery->where('name', 'LIKE', "%{$word}%");
+                    })
+                    ->orWhereHas('order.buyer', function($buyerQuery) use ($word) {
+                        $buyerQuery->where('name', 'LIKE', "%{$word}%");
+                    })
+                    ->orWhereHas('order', function($orderQuery) use ($word) {
+                        $orderQuery->where('guest_name', 'LIKE', "%{$word}%");
+                    });
+                });
+            }
         }
 
         // Recherche par email
@@ -303,7 +360,9 @@ class TicketController extends Controller
                     'image_url' => $ticket->event->image,
                 ],
                 'schedule' => [
-                    'starts_at' => $ticket->event->schedules->first()?->starts_at,
+                    // La date du billet, pas la première de l'événement : un
+                    // événement multi-dates en a plusieurs.
+                    'starts_at' => $ticket->schedule?->starts_at ?? $ticket->event->schedules->first()?->starts_at,
                 ],
                 'ticket_type' => [
                     'name' => $ticket->ticketType->name,

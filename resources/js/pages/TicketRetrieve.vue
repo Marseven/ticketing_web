@@ -25,7 +25,7 @@
             Vous avez perdu votre ticket ?
           </h1>
           <p class="text-lg md:text-xl text-gray-600 md:text-white/90">
-            Retrouvez-le en cherchant par référence, email ou téléphone
+            Indiquez le nom et le téléphone utilisés lors de l'achat
           </p>
         </div>
 
@@ -33,7 +33,44 @@
         <div class="bg-white md:bg-white/95 md:backdrop-blur-sm rounded-2xl md:rounded-3xl shadow-lg md:shadow-2xl p-6 md:p-8">
           <form @submit.prevent="searchTicket" class="space-y-5 md:space-y-6">
 
-            <!-- Main Search Options -->
+            <!-- Voie principale : nom + téléphone -->
+            <div class="space-y-5">
+              <!-- Nom et prénom : critère principal avec le téléphone -->
+              <div>
+                <label for="holder-name" class="block text-sm font-semibold text-primea-blue mb-2">
+                  Nom et prénom <span class="text-xs font-normal text-gray-500">(celui de l'acheteur)</span>
+                </label>
+                <input
+                  type="text"
+                  id="holder-name"
+                  v-model="searchForm.name"
+                  placeholder="Ex: Leofa Abila"
+                  class="w-full px-4 md:px-6 py-3 md:py-4 text-base border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-primea-blue transition-all duration-200 bg-white"
+                />
+              </div>
+              <!-- Téléphone : compte (KYC) ou paiement, les deux fonctionnent -->
+              <div>
+                <label for="phone" class="block text-sm font-semibold text-primea-blue mb-2">
+                  Numéro de téléphone <span class="text-xs font-normal text-gray-500">(celui du compte ou celui du paiement)</span>
+                </label>
+                <PhoneInput
+                  v-model="searchForm.phone"
+                  placeholder="Entrez votre numéro"
+                  :required="false"
+                />
+              </div>
+            </div>
+
+            <div class="relative">
+                <div class="absolute inset-x-0 top-3 flex items-center">
+                    <div class="flex-1 border-t border-gray-200"></div>
+                    <span class="px-3 text-xs font-medium text-gray-500 bg-white">OU, SI VOUS LES AVEZ</span>
+                    <div class="flex-1 border-t border-gray-200"></div>
+                </div>
+                <br>
+                <br>
+            </div>
+
             <div class="space-y-5">
               <!-- Reference Field -->
               <div>
@@ -48,49 +85,20 @@
                   class="w-full px-4 md:px-6 py-3 md:py-4 text-base border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-primea-blue transition-all duration-200 bg-white"
                 />
               </div>
-
-            <div class="relative">
-                <div class="absolute inset-x-0 top-3 flex items-center">
-                    <div class="flex-1 border-t border-gray-200"></div>
-                    <span class="px-3 text-xs font-medium text-gray-500 bg-white">OU</span>
-                    <div class="flex-1 border-t border-gray-200"></div>
-                </div>
-                <br>
-                <br>
-            </div>
-
-
-              <!-- Alternative Search Methods -->
-              <div class="relative">
-
-                <div class="mt-10 space-y-5">
-                  <!-- Email -->
-                  <div>
-                    <label for="email" class="block text-sm font-semibold text-primea-blue mb-2">
-                      Email <span class="text-xs font-normal text-gray-500">(utilisé pour l'achat)</span>
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      v-model="searchForm.email"
-                      placeholder="Ex: votreemail@example.com"
-                      class="w-full px-4 md:px-6 py-3 md:py-4 text-base border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-primea-blue transition-all duration-200 bg-white"
-                    />
-                  </div>
-
-                  <!-- Phone Number -->
-                  <div>
-                    <label for="phone" class="block text-sm font-semibold text-primea-blue mb-2">
-                      Numéro de téléphone <span class="text-xs font-normal text-gray-500">(utilisé pour l'achat)</span>
-                    </label>
-                    <PhoneInput
-                      v-model="searchForm.phone"
-                      placeholder="Entrez votre numéro"
-                      :required="false"
-                    />
-                  </div>
-                </div>
+              <!-- Email -->
+              <div>
+                <label for="email" class="block text-sm font-semibold text-primea-blue mb-2">
+                  Email <span class="text-xs font-normal text-gray-500">(utilisé pour l'achat)</span>
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  v-model="searchForm.email"
+                  placeholder="Ex: votreemail@example.com"
+                  class="w-full px-4 md:px-6 py-3 md:py-4 text-base border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-primea-blue transition-all duration-200 bg-white"
+                />
               </div>
+
             </div>
 
             <!-- Error Message -->
@@ -116,7 +124,7 @@
             <!-- Search Button -->
             <button
               type="submit"
-              :disabled="loading || (!searchForm.reference && !searchForm.phone && !searchForm.email)"
+              :disabled="loading || (!searchForm.name && !searchForm.reference && !searchForm.phone && !searchForm.email)"
               class="w-full bg-primea-blue text-white py-4 px-6 rounded-xl text-base md:text-lg font-bold transition-all duration-200 shadow-lg hover:bg-primea-yellow hover:text-primea-blue disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primea-blue disabled:hover:text-white transform hover:scale-105 disabled:transform-none"
             >
               <span v-if="loading" class="flex items-center justify-center">
@@ -209,6 +217,7 @@ export default {
     const foundTickets = ref([])
 
     const searchForm = ref({
+      name: '',
       reference: '',
       email: '',
       phone: ''
@@ -222,12 +231,19 @@ export default {
         success.value = ''
 
         // Validation
-        if (!searchForm.value.reference && !searchForm.value.phone && !searchForm.value.email) {
+        if (!searchForm.value.name && !searchForm.value.reference && !searchForm.value.phone && !searchForm.value.email) {
           throw new Error('Veuillez remplir au moins un champ de recherche')
+        }
+
+        // Le nom seul ressortirait les billets de tous les homonymes : le
+        // téléphone est ce qui identifie l'acheteur.
+        if (searchForm.value.name && !searchForm.value.phone) {
+          throw new Error('Ajoutez le numéro de téléphone utilisé lors de l\'achat')
         }
 
         // Use API to search tickets
         const response = await ticketService.searchTickets({
+          name: searchForm.value.name,
           reference: searchForm.value.reference,
           email: searchForm.value.email,
           phone: searchForm.value.phone
@@ -381,6 +397,7 @@ export default {
 
     const clearForm = () => {
       searchForm.value = {
+        name: '',
         reference: '',
         email: '',
         phone: ''
