@@ -14,6 +14,7 @@ use App\Models\Organizer;
 use App\Models\Report;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -33,7 +34,7 @@ class ReportController extends Controller
             // Statistiques globales
             $stats = $this->getGlobalStats($startDate, $endDate);
 
-            // Historique des rapports depuis la base de données
+            // Historique des rapports depuis la base de données (pagine)
             $reports = $this->getReportsHistory();
 
             return response()->json([
@@ -294,24 +295,27 @@ class ReportController extends Controller
     /**
      * Récupérer l'historique des rapports
      */
-    private function getReportsHistory(): array
+    private function getReportsHistory(): LengthAwarePaginator
     {
-        return Report::orderBy('created_at', 'desc')
-            ->take(20)
-            ->get()
-            ->map(function ($report) {
-                return [
-                    'id' => $report->id,
-                    'type' => $report->type,
-                    'period' => $report->period,
-                    'created_at' => $report->created_at->toISOString(),
-                    'file_size' => $report->file_size_human,
-                    'format' => $report->format,
-                    'status' => $report->status,
-                    'download_url' => $report->download_url
-                ];
-            })
-            ->toArray();
+        $reports = Report::orderBy('created_at', 'desc')->paginate(25);
+
+        // Les lignes gardent exactement la même forme qu'avant ;
+        // seule l'enveloppe devient un paginator Laravel
+        // (current_page / last_page / total / data).
+        $reports->getCollection()->transform(function ($report) {
+            return [
+                'id' => $report->id,
+                'type' => $report->type,
+                'period' => $report->period,
+                'created_at' => $report->created_at->toISOString(),
+                'file_size' => $report->file_size_human,
+                'format' => $report->format,
+                'status' => $report->status,
+                'download_url' => $report->download_url
+            ];
+        });
+
+        return $reports;
     }
 
     /**

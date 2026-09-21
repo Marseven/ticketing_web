@@ -71,6 +71,19 @@
       </table>
     </div>
 
+    <!-- Pagination -->
+    <Pagination
+      v-if="!loading && pagination.last_page > 1"
+      :current-page="pagination.current_page"
+      :total-pages="pagination.last_page"
+      @page-change="changePage"
+    />
+
+    <!-- Total -->
+    <p v-if="!loading && pagination.total" class="text-center text-sm text-gray-500 mt-4">
+      {{ pagination.total }} événement(s) {{ activeTabLabel.toLowerCase() }}
+    </p>
+
     <!-- Modal Approuver -->
     <div v-if="approveModal.open" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
@@ -120,6 +133,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import Swal from 'sweetalert2'
+import Pagination from '../../components/Pagination.vue'
 
 const tabs = [
   { value: 'pending', label: 'En attente' },
@@ -131,6 +145,10 @@ const loading = ref(false)
 const submitting = ref(false)
 const events = ref([])
 const activeTab = ref('pending')
+
+// Pagination cote serveur (EventApprovalController::index renvoie deja un paginator Laravel)
+const currentPage = ref(1)
+const pagination = ref({ current_page: 1, last_page: 1, total: 0, per_page: 20 })
 
 const approveModal = reactive({ open: false, event: null, commission: null })
 const rejectModal = reactive({ open: false, event: null, reason: '' })
@@ -146,12 +164,25 @@ const authHeaders = () => ({
 const loadEvents = async () => {
   loading.value = true
   try {
-    const res = await fetch(`/api/v1/admin/events/approval/queue?approval_status=${activeTab.value}`, {
+    const res = await fetch(`/api/v1/admin/events/approval/queue?approval_status=${activeTab.value}&page=${currentPage.value}`, {
       headers: authHeaders(),
     })
     const data = await res.json()
     if (data.success) {
-      events.value = data.data?.data ?? data.data ?? []
+      const payload = data.data
+      events.value = payload?.data ?? payload ?? []
+      pagination.value = {
+        current_page: payload?.current_page || 1,
+        last_page: payload?.last_page || 1,
+        total: payload?.total ?? events.value.length,
+        per_page: payload?.per_page || 20,
+      }
+      // Si la page demandee n'existe plus (event approuve/rejete), on recule
+      if (pagination.value.current_page > pagination.value.last_page) {
+        currentPage.value = pagination.value.last_page
+        loading.value = false
+        return loadEvents()
+      }
     }
   } catch (e) {
     console.error('Erreur chargement événements:', e)
@@ -162,7 +193,17 @@ const loadEvents = async () => {
 
 const switchTab = (tab) => {
   activeTab.value = tab
+  // Changer de filtre ramene toujours a la premiere page
+  currentPage.value = 1
   loadEvents()
+}
+
+// Change de page en conservant l'onglet courant
+const changePage = (page) => {
+  if (page === currentPage.value) return
+  currentPage.value = page
+  loadEvents()
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 const displayCommission = (event) => {

@@ -29,7 +29,7 @@
         
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
-          <select v-model="filters.status" @change="loadOrganizers" class="w-full border rounded-lg px-3 py-2">
+          <select v-model="filters.status" @change="applyFilters" class="w-full border rounded-lg px-3 py-2">
             <option value="">Tous les statuts</option>
             <option value="active">Actif</option>
             <option value="inactive">Inactif</option>
@@ -38,7 +38,7 @@
         
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Statut actif</label>
-          <select v-model="filters.verified" @change="loadOrganizers" class="w-full border rounded-lg px-3 py-2">
+          <select v-model="filters.verified" @change="applyFilters" class="w-full border rounded-lg px-3 py-2">
             <option value="">Tous</option>
             <option value="true">Actif</option>
             <option value="false">Inactif</option>
@@ -58,8 +58,11 @@
 
     <!-- Organizers List -->
     <div class="bg-white rounded-lg shadow">
-      <div class="p-6 border-b">
+      <div class="p-6 border-b flex flex-wrap items-center justify-between gap-2">
         <h2 class="text-xl font-bold">Liste des Organisateurs</h2>
+        <span v-if="pagination.total" class="text-sm text-gray-500">
+          {{ pagination.total }} organisateur(s) &middot; page {{ pagination.current_page }} / {{ pagination.last_page }}
+        </span>
       </div>
       
       <div v-if="loading" class="p-8 text-center">
@@ -139,6 +142,15 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Pagination -->
+      <div v-if="!loading && pagination.last_page > 1" class="px-6 pb-6">
+        <Pagination
+          :current-page="pagination.current_page"
+          :total-pages="pagination.last_page"
+          @page-change="changePage"
+        />
       </div>
     </div>
 
@@ -343,9 +355,13 @@
 import { ref, reactive, onMounted, nextTick } from 'vue'
 import intlTelInput from 'intl-tel-input'
 import 'intl-tel-input/styles'
+import Pagination from '../../components/Pagination.vue'
 
 export default {
   name: 'OrganizerManagement',
+  components: {
+    Pagination
+  },
   setup() {
     // État réactif
     const loading = ref(false)
@@ -359,6 +375,10 @@ export default {
     const managingOrganizer = ref(null)
     
     const organizers = ref([])
+
+    // Pagination cote serveur (l'API /admin/organizers renvoie deja un paginator Laravel)
+    const currentPage = ref(1)
+    const pagination = ref({ current_page: 1, last_page: 1, total: 0, per_page: 20 })
     const availableUsers = ref([])
     const phoneInput = ref(null)
     let iti = null
@@ -392,6 +412,7 @@ export default {
         if (filters.search) queryParams.append('search', filters.search)
         if (filters.status) queryParams.append('status', filters.status)
         if (filters.verified) queryParams.append('verified', filters.verified)
+        queryParams.append('page', currentPage.value)
         
         const response = await fetch(`/api/v1/admin/organizers?${queryParams}`, {
           headers: {
@@ -404,7 +425,20 @@ export default {
         
         const data = await response.json()
         if (data.success) {
-          organizers.value = data.data.organizers.data || data.data.organizers
+          const payload = data.data.organizers
+          organizers.value = payload?.data || payload || []
+          pagination.value = {
+            current_page: payload?.current_page || 1,
+            last_page: payload?.last_page || 1,
+            total: payload?.total ?? organizers.value.length,
+            per_page: payload?.per_page || 20,
+          }
+          // Si la page demandee n'existe plus, on recule sur la derniere page valide
+          if (pagination.value.current_page > pagination.value.last_page) {
+            currentPage.value = pagination.value.last_page
+            loading.value = false
+            return loadOrganizers()
+          }
         }
       } catch (error) {
         console.error('Erreur chargement organisateurs:', error)
@@ -441,7 +475,7 @@ export default {
     const debouncedSearch = () => {
       clearTimeout(searchTimeout)
       searchTimeout = setTimeout(() => {
-        loadOrganizers()
+        applyFilters()
       }, 500)
     }
 
@@ -619,7 +653,21 @@ export default {
         status: '',
         verified: '',
       })
+      applyFilters()
+    }
+
+    // Applique les filtres en revenant a la premiere page
+    const applyFilters = () => {
+      currentPage.value = 1
       loadOrganizers()
+    }
+
+    // Change de page en conservant les filtres courants
+    const changePage = (page) => {
+      if (page === currentPage.value) return
+      currentPage.value = page
+      loadOrganizers()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
     const initPhoneInput = () => {
@@ -718,6 +766,7 @@ export default {
       selectedOrganizer,
       managingOrganizer,
       organizers,
+      pagination,
       availableUsers,
       filters,
       organizerForm,
@@ -726,6 +775,8 @@ export default {
       
       // Méthodes
       loadOrganizers,
+      applyFilters,
+      changePage,
       loadAvailableUsers,
       debouncedSearch,
       openCreateModal,

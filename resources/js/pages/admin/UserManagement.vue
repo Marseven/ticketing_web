@@ -29,7 +29,7 @@
         
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Rôle</label>
-          <select v-model="filters.role" @change="loadUsers" class="w-full border rounded-lg px-3 py-2">
+          <select v-model="filters.role" @change="applyFilters" class="w-full border rounded-lg px-3 py-2">
             <option value="">Tous les rôles</option>
             <option value="admin">Administrateur</option>
             <option value="organizer">Organisateur</option>
@@ -39,7 +39,7 @@
         
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
-          <select v-model="filters.status" @change="loadUsers" class="w-full border rounded-lg px-3 py-2">
+          <select v-model="filters.status" @change="applyFilters" class="w-full border rounded-lg px-3 py-2">
             <option value="">Tous les statuts</option>
             <option value="active">Actif</option>
             <option value="inactive">Inactif</option>
@@ -56,8 +56,11 @@
 
     <!-- Users List -->
     <div class="bg-white rounded-lg shadow">
-      <div class="p-6 border-b">
+      <div class="p-6 border-b flex flex-wrap items-center justify-between gap-2">
         <h2 class="text-xl font-bold">Liste des Utilisateurs</h2>
+        <span v-if="pagination.total" class="text-sm text-gray-500">
+          {{ pagination.total }} utilisateur(s) &middot; page {{ pagination.current_page }} / {{ pagination.last_page }}
+        </span>
       </div>
       
       <div v-if="loading" class="p-8 text-center">
@@ -135,6 +138,15 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Pagination -->
+      <div v-if="!loading && pagination.last_page > 1" class="px-6 pb-6">
+        <Pagination
+          :current-page="pagination.current_page"
+          :total-pages="pagination.last_page"
+          @page-change="changePage"
+        />
       </div>
     </div>
 
@@ -295,11 +307,13 @@
 <script>
 import { ref, reactive, onMounted } from 'vue'
 import ImageUpload from '../../components/ImageUpload.vue'
+import Pagination from '../../components/Pagination.vue'
 
 export default {
   name: 'UserManagement',
   components: {
-    ImageUpload
+    ImageUpload,
+    Pagination
   },
   setup() {
     // État réactif
@@ -311,6 +325,10 @@ export default {
     const selectedUser = ref(null)
     
     const users = ref([])
+
+    // Pagination cote serveur (l'API /admin/users renvoie deja un paginator Laravel)
+    const currentPage = ref(1)
+    const pagination = ref({ current_page: 1, last_page: 1, total: 0, per_page: 20 })
     
     const filters = reactive({
       search: '',
@@ -338,6 +356,7 @@ export default {
         if (filters.search) queryParams.append('search', filters.search)
         if (filters.role) queryParams.append('role', filters.role)
         if (filters.status) queryParams.append('status', filters.status)
+        queryParams.append('page', currentPage.value)
         
         const response = await fetch(`/api/v1/admin/users?${queryParams}`, {
           headers: {
@@ -350,7 +369,20 @@ export default {
         
         const data = await response.json()
         if (data.success) {
-          users.value = data.data.users.data || data.data.users
+          const payload = data.data.users
+          users.value = payload?.data || payload || []
+          pagination.value = {
+            current_page: payload?.current_page || 1,
+            last_page: payload?.last_page || 1,
+            total: payload?.total ?? users.value.length,
+            per_page: payload?.per_page || 20,
+          }
+          // Si la page demandee n'existe plus (suppression du dernier element), on recule
+          if (pagination.value.current_page > pagination.value.last_page) {
+            currentPage.value = pagination.value.last_page
+            loading.value = false
+            return loadUsers()
+          }
         }
       } catch (error) {
         console.error('Erreur chargement utilisateurs:', error)
@@ -362,7 +394,7 @@ export default {
     const debouncedSearch = () => {
       clearTimeout(searchTimeout)
       searchTimeout = setTimeout(() => {
-        loadUsers()
+        applyFilters()
       }, 500)
     }
 
@@ -569,7 +601,21 @@ export default {
         role: '',
         status: '',
       })
+      applyFilters()
+    }
+
+    // Applique les filtres en revenant a la premiere page
+    const applyFilters = () => {
+      currentPage.value = 1
       loadUsers()
+    }
+
+    // Change de page en conservant les filtres courants
+    const changePage = (page) => {
+      if (page === currentPage.value) return
+      currentPage.value = page
+      loadUsers()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
     const handleImageChange = (imageData) => {
@@ -610,11 +656,14 @@ export default {
       editingUser,
       selectedUser,
       users,
+      pagination,
       filters,
       userForm,
       
       // Méthodes
       loadUsers,
+      applyFilters,
+      changePage,
       debouncedSearch,
       openCreateModal,
       editUser,

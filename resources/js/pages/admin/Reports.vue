@@ -183,7 +183,12 @@
     <!-- Reports History -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-        <h3 class="text-lg font-semibold" style="color: #272d63;">Historique des Rapports</h3>
+        <h3 class="text-lg font-semibold" style="color: #272d63;">
+          Historique des Rapports
+          <span v-if="pagination.total" class="ml-2 text-sm font-normal text-gray-500">
+            ({{ pagination.total }} &middot; page {{ pagination.current_page }} / {{ pagination.last_page }})
+          </span>
+        </h3>
         <button @click="clearHistory" 
                 class="text-sm text-red-600 hover:text-red-800 px-3 py-1 bg-red-100 hover:bg-red-200 rounded transition-colors duration-200">
           Vider l'historique
@@ -259,6 +264,15 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Pagination -->
+      <div v-if="!loading && pagination.last_page > 1" class="px-6 pb-6">
+        <Pagination
+          :current-page="pagination.current_page"
+          :total-pages="pagination.last_page"
+          @page-change="changePage"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -266,14 +280,22 @@
 <script>
 import { ref, reactive, onMounted } from 'vue'
 import Swal from 'sweetalert2'
+import Pagination from '../../components/Pagination.vue'
 
 export default {
   name: 'Reports',
+  components: {
+    Pagination
+  },
   setup() {
     const loading = ref(false)
     const generating = ref(false)
     const reports = ref([])
     const selectedPeriod = ref('')
+
+    // Pagination cote serveur (ReportController::index pagine l'historique a 25/page)
+    const currentPage = ref(1)
+    const pagination = ref({ current_page: 1, last_page: 1, total: 0, per_page: 25 })
     
     const dateRange = reactive({
       start: new Date().toISOString().split('T')[0],
@@ -293,7 +315,8 @@ export default {
       try {
         const params = new URLSearchParams({
           start_date: dateRange.start,
-          end_date: dateRange.end
+          end_date: dateRange.end,
+          page: currentPage.value
         })
         
         const response = await fetch(`/api/v1/admin/reports?${params}`, {
@@ -308,8 +331,23 @@ export default {
         if (response.ok) {
           const data = await response.json()
           if (data.success) {
-            reports.value = data.data.reports
+            // L'API renvoie desormais un paginator Laravel sous data.reports
+            const payload = data.data.reports
+            reports.value = payload?.data || payload || []
+            pagination.value = {
+              current_page: payload?.current_page || 1,
+              last_page: payload?.last_page || 1,
+              total: payload?.total ?? reports.value.length,
+              per_page: payload?.per_page || 25,
+            }
             Object.assign(stats, data.data.stats)
+
+            // Si la page demandee n'existe plus (suppression / vidage), on recule
+            if (pagination.value.current_page > pagination.value.last_page) {
+              currentPage.value = pagination.value.last_page
+              loading.value = false
+              return loadReports()
+            }
           }
         } else {
           loadMockData()
@@ -356,6 +394,13 @@ export default {
         }
       ]
       
+      pagination.value = {
+        current_page: 1,
+        last_page: 1,
+        total: reports.value.length,
+        per_page: 25,
+      }
+
       Object.assign(stats, {
         total_revenue: 12500000,
         total_tickets: 3420,
@@ -551,7 +596,17 @@ export default {
     }
     
     const refreshReports = () => {
+      // Actualiser revient toujours a la premiere page
+      currentPage.value = 1
       loadReports()
+    }
+
+    // Change de page en conservant la periode selectionnee
+    const changePage = (page) => {
+      if (page === currentPage.value) return
+      currentPage.value = page
+      loadReports()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
     
     // Utils
@@ -604,6 +659,7 @@ export default {
       loading,
       generating,
       reports,
+      pagination,
       selectedPeriod,
       dateRange,
       stats,
@@ -614,6 +670,7 @@ export default {
       clearHistory,
       setPredefinedPeriod,
       refreshReports,
+      changePage,
       formatAmount,
       formatDateTime,
       getReportTypeName,
