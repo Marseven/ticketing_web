@@ -12,12 +12,6 @@ class OrderConfirmation extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    /**
-     * Ne dispatcher le job qu'après le commit de la transaction : sinon le
-     * worker peut lire la commande avant qu'elle soit visible en base.
-     */
-    public $afterCommit = true;
-
     protected $order;
 
     /**
@@ -25,6 +19,12 @@ class OrderConfirmation extends Notification implements ShouldQueue
      */
     public function __construct(Order $order)
     {
+        // Ne dispatcher le job qu'après le commit : sinon le worker peut
+        // lire la commande avant qu'elle soit visible en base.
+        // (Méthode du trait Queueable : redéclarer la propriété
+        // `$afterCommit` ici serait une erreur fatale en PHP 8.3.)
+        $this->afterCommit();
+
         $this->order = $order;
     }
 
