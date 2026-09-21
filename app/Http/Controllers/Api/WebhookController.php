@@ -446,11 +446,34 @@ class WebhookController extends Controller
             'ebilling_state' => $request->input('state'),
         ];
 
-        // Pour E-Billing, la réception du webhook signifie que le paiement est réussi
         $webhookData = array_merge($request->all(), [
             'received_at' => now()->toISOString(),
             'payment_system_name' => $this->getPaymentSystemFullName($paymentSystem)
         ]);
+
+        // Recevoir une notification ne veut PAS dire que la facture est payée :
+        // e-billing en émet aussi à la création de la demande et lors d'un
+        // échec. On ne crédite que sur un état payé, confirmé auprès de la
+        // passerelle quand la notification ne le dit pas elle-même.
+        $state = $this->resolveEBillingState($request, $payment);
+
+        if (! $this->isPaidEBillingState($state)) {
+            Log::warning('Webhook E-Billing sans paiement confirmé : commande laissée en attente', [
+                'payment_id' => $payment->id,
+                'reference' => $reference,
+                'state' => $state,
+            ]);
+
+            $this->processPaymentStatus(
+                $payment,
+                $this->mapEBillingState($state),
+                $transactionId,
+                $webhookData,
+                $ebillingData
+            );
+
+            return response()->json(['status' => 'success', 'message' => 'Notification enregistrée']);
+        }
 
         // Traiter le paiement comme réussi
         $this->processPaymentStatus($payment, 'success', $transactionId, $webhookData, $ebillingData);
@@ -686,6 +709,76 @@ class WebhookController extends Controller
         }
 
         $payment->update($updateData);
+    }
+
+    /**
+     * États d'une facture e-billing qui valent paiement encaissé.
+     * Vocabulaire repris de l'intégration MyTicketO en production.
+     */
+    private const EBILLING_PAID_STATES = ['processed', 'paid'];
+
+    /**
+     * État de la facture : celui annoncé par la notification, sinon celui que
+     * la passerelle confirme. Retourne null si rien ne permet de conclure —
+     * auquel cas on ne crédite pas.
+     */
+    private function resolveEBillingState(Request $request, Payment $payment): ?string
+    {
+        $state = $request->input('state');
+
+        if (is_string($state) && $state !== '') {
+            return strtolower(trim($state));
+        }
+
+        $billingId = $request->input('billingid') ?: $payment->billing_id;
+
+        if (! $billingId) {
+            return null;
+        }
+
+        try {
+            $result = app(\App\Services\EBillingService::class)->getBillStatus((string) $billingId);
+            $confirmed = $result['bill_status'] ?? null;
+
+            Log::info('E-Billing : état de facture confirmé auprès de la passerelle', [
+                'payment_id' => $payment->id,
+                'billing_id' => $billingId,
+                'state' => $confirmed,
+            ]);
+
+            return is_string($confirmed) ? strtolower(trim($confirmed)) : null;
+        } catch (\Throwable $e) {
+            // Injoignable : on préfère laisser la commande en attente plutôt
+            // que de délivrer un billet non payé.
+            Log::error('E-Billing : confirmation impossible', [
+                'payment_id' => $payment->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
+    private function isPaidEBillingState(?string $state): bool
+    {
+        return $state !== null && in_array($state, self::EBILLING_PAID_STATES, true);
+    }
+
+    /**
+     * Traduit un état e-billing non payé en statut interne.
+     */
+    private function mapEBillingState(?string $state): string
+    {
+        // Valeurs comprises par mapWebhookStatus() : tout ce qu'il ne connaît
+        // pas y devient « failed », ce qui annulerait la commande à tort.
+        return match ($state) {
+            'failed', 'error', 'declined' => 'failed',
+            'cancelled', 'canceled' => 'cancelled',
+            'expired' => 'expired',
+            // « ready », état inconnu ou absent : la facture existe mais n'est
+            // pas payée, le client peut encore régler.
+            default => 'pending',
+        };
     }
 
     /**
