@@ -303,6 +303,8 @@ class PaymentController extends Controller
             }
 
             // Toujours mettre à jour le téléphone dans le payload pour permettre le retry avec un autre numéro
+            // Le retry peut se faire avec un autre numéro : la colonne suit.
+            $updateData['payer_phone'] = \App\Support\PhoneNumber::digits($request->phone);
             $updateData['payload'] = array_merge($existingPayment->payload ?? [], [
                 'phone' => $request->phone,
                 'operator' => $request->operator,
@@ -327,6 +329,8 @@ class PaymentController extends Controller
             'provider' => $provider,
             'amount' => $order->total_amount,
             'status' => 'initiated',
+            // Numéro payeur en colonne : clé de récupération du billet.
+            'payer_phone' => \App\Support\PhoneNumber::digits($request->phone),
             'payload' => [
                 'phone' => $request->phone,
                 'operator' => $request->operator,
@@ -1098,6 +1102,8 @@ class PaymentController extends Controller
             }
 
             // Toujours mettre à jour le téléphone dans le payload pour permettre le retry avec un autre numéro
+            // Le retry peut se faire avec un autre numéro : la colonne suit.
+            $updateData['payer_phone'] = \App\Support\PhoneNumber::digits($request->phone);
             $updateData['payload'] = array_merge($existingPayment->payload ?? [], [
                 'phone' => $request->phone,
                 'retry_at' => now()->toIso8601String(),
@@ -1147,6 +1153,9 @@ class PaymentController extends Controller
                 'provider_txn_ref' => $reference,
                 'amount' => $request->amount,
                 'status' => 'initiated',
+                // Le numéro qui paie, en colonne : c'est l'une des clés de
+                // récupération d'un billet (cf. Guest\TicketController::search).
+                'payer_phone' => \App\Support\PhoneNumber::digits($request->phone),
                 'payload' => [
                     'phone' => $request->phone,
                     'user_agent' => $request->header('User-Agent'),

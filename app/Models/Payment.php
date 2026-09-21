@@ -30,6 +30,7 @@ class Payment extends Model
         'payment_system_token',
         'payer_name',
         'payer_email',
+        'payer_phone',
         'short_description',
         'ebilling_created_at',
         'ebilling_state',
