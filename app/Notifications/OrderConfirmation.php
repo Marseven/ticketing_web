@@ -44,13 +44,19 @@ class OrderConfirmation extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $order = $this->order;
-        $ticketsCount = $order->tickets->count();
-        $eventTitle = $order->tickets->first()?->event->title ?? 'Événement';
+
+        // Ce courriel part à la création de la commande, donc AVANT le
+        // paiement : à ce moment il n'existe encore aucun billet. La quantité
+        // et l'événement se lisent sur ce qui a été commandé.
+        $ticketsCount = $order->tickets->count() ?: (int) $order->items->sum('qty');
+        $eventTitle = $order->resolveEvent()?->title ?? 'Événement';
 
         return (new MailMessage)
             ->subject('Confirmation de commande - Primea')
             ->greeting('Bonjour ' . ($notifiable->name ?? 'Client') . ' !')
-            ->line('Votre commande a été créée avec succès.')
+            ->line($order->status === 'paid'
+                ? 'Votre commande est confirmée, vos billets sont disponibles.'
+                : 'Votre commande a bien été enregistrée. Vos billets seront émis dès la confirmation du paiement.')
             ->line('**Référence de commande** : ' . $order->reference)
             ->line('**Événement** : ' . $eventTitle)
             ->line('**Nombre de billets** : ' . $ticketsCount)

@@ -801,23 +801,9 @@ class WebhookController extends Controller
      */
     private function issueTickets(Order $order): void
     {
-        // Générer les codes QR uniques pour chaque billet
-        foreach ($order->tickets as $ticket) {
-            if (empty($ticket->code)) {
-                $ticket->generateQRCode();
-            }
-            
-            $ticket->update([
-                'status' => 'issued',
-                'issued_at' => now(),
-            ]);
-        }
-
-        // TODO: Envoyer les billets par email/SMS
-        Log::info('Billets émis pour la commande', [
-            'order_id' => $order->id,
-            'tickets_count' => $order->tickets->count()
-        ]);
+        // Les billets naissent ici, au paiement confirmé — pas à la commande.
+        // Le service est idempotent : un webhook rejoué ne duplique rien.
+        app(\App\Services\TicketIssuer::class)->issue($order);
     }
 
     /**

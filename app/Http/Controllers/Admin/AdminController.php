@@ -2677,8 +2677,11 @@ class AdminController extends Controller
             if ($request->filled('event_id')) {
                 // orders n'a pas de colonne event_id : l'événement est lié via
                 // les tickets (hasOneThrough). On filtre donc par la relation.
-                $query->whereHas('tickets', function ($q) use ($request) {
-                    $q->where('event_id', $request->event_id);
+                // Une commande en attente n'a pas encore de billet : son
+                // événement se lit alors sur la ligne de commande.
+                $query->where(function ($q) use ($request) {
+                    $q->whereHas('tickets', fn ($t) => $t->where('event_id', $request->event_id))
+                      ->orWhereHas('items', fn ($i) => $i->where('event_id', $request->event_id));
                 });
             }
 
@@ -2774,7 +2777,7 @@ class AdminController extends Controller
         try {
             $order = Order::with([
                     'event.organizer', 'event.venue', 'event.schedules',
-                    'buyer', 'organizer', 'tickets.ticketType', 'payments',
+                    'buyer', 'organizer', 'tickets.ticketType', 'payments', 'items.ticketType',
                 ])
                 ->find($orderId);
 
@@ -2787,7 +2790,18 @@ class AdminController extends Controller
 
             // Articles commandés : il n'existe pas de table de lignes de commande,
             // on regroupe donc les billets par type (nom, prix unitaire, quantité).
-            $items = $order->tickets
+            // Lignes de commande si elles existent (tout ce qui est commandé
+            // depuis que les billets n'arrivent qu'au paiement) ; sinon on
+            // regroupe les billets, pour les commandes d'avant.
+            $items = $order->items->isNotEmpty()
+                ? $order->items->map(fn ($item) => [
+                    'id' => $item->ticket_type_id ?? 0,
+                    'ticket_type_name' => $item->ticketType?->name ?? 'Billet',
+                    'unit_price' => (float) $item->unit_price,
+                    'quantity' => (int) $item->qty,
+                    'total_price' => (float) $item->line_total,
+                ])->values()
+                : $order->tickets
                 ->groupBy('ticket_type_id')
                 ->map(function ($group) {
                     $first = $group->first();
@@ -2801,7 +2815,7 @@ class AdminController extends Controller
                     ];
                 })->values();
 
-            $event = $order->event;
+            $event = $order->resolveEvent();
 
             // Réponse normalisée pour le modal admin (client, événement,
             // articles, billets avec statut LIVE = reflète les scans).

@@ -71,6 +71,13 @@ class Order extends Model
     /**
      * Get the event related to this order through the first ticket.
      */
+    /**
+     * L'événement de la commande.
+     *
+     * ⚠️ Passe par les billets, qui n'existent qu'une fois la commande payée :
+     * sur une commande en attente, utiliser `resolveEvent()` qui retombe sur la
+     * ligne de commande.
+     */
     public function event()
     {
         return $this->hasOneThrough(
@@ -86,6 +93,27 @@ class Order extends Model
     /**
      * Get the payments for the order.
      */
+    /**
+     * Ce que la commande a demandé (type, date, quantité).
+     *
+     * Renseigné dès la commande, alors que les billets n'existent qu'une fois
+     * le paiement confirmé : c'est cette ligne qui retient la place entre les
+     * deux (cf. App\Services\TicketIssuer).
+     */
+    /**
+     * Événement de la commande, qu'elle soit payée ou non : par les billets
+     * s'ils existent, sinon par ce qui a été commandé.
+     */
+    public function resolveEvent(): ?Event
+    {
+        return $this->event ?? $this->items()->with('event')->first()?->event;
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class, 'order_id');

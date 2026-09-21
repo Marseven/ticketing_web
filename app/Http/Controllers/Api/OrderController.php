@@ -209,10 +209,10 @@ class OrderController extends Controller
 
             // Les billets `pending` (paiement en cours) occupent une place :
             // les ignorer revenait à revendre des places déjà retenues.
-            $occupiedQuantity = \DB::table('tickets')
-                ->where('ticket_type_id', $ticketType->id)
-                ->whereIn('status', \App\Models\TicketType::OCCUPIED_STATUSES)
-                ->count();
+            // Une place est prise par un billet vendu OU par une commande en
+            // attente de paiement (le billet n'existe pas encore) : le modèle
+            // est la seule source de vérité là-dessus.
+            $occupiedQuantity = $ticketType->fresh()->occupied_quantity;
 
             // Si available_quantity est null, c'est illimité
             if ($ticketType->available_quantity !== null) {
@@ -304,29 +304,26 @@ class OrderController extends Controller
                 'is_guest_order' => false,
             ]);
 
-            // Créer les billets
-            $ticketStatus = $totalAmount == 0 ? 'issued' : 'pending';
-            $issuedAt = $totalAmount == 0 ? now() : null;
+            // Ce qui est commandé, sans billet : les billets ne naissent qu'au
+            // paiement (cf. App\Services\TicketIssuer). Cette ligne retient la
+            // place en attendant.
+            \App\Models\OrderItem::create([
+                'order_id' => $order->id,
+                'event_id' => $event->id,
+                'ticket_type_id' => $ticketType->id,
+                'schedule_id' => $scheduleId,
+                'unit_price' => $unitPrice,
+                'qty' => $validated['quantity'],
+                'line_total' => $baseAmount,
+            ]);
 
-            for ($i = 0; $i < $validated['quantity']; $i++) {
-                \App\Models\Ticket::create([
-                    'order_id' => $order->id,
-                    'event_id' => $event->id,
-                    'ticket_type_id' => $ticketType->id,
-                    'schedule_id' => $scheduleId,
-                    'buyer_id' => $user->id,
-                    'code' => $this->generateTicketCode(),
-                    'status' => $ticketStatus,
-                    'issued_at' => $issuedAt,
-                ]);
-            }
-
-            // Pour les commandes gratuites, confirmer immédiatement
+            // Commande gratuite : rien à payer, les billets sont émis tout de suite.
             if ($totalAmount == 0) {
                 $order->update([
                     'status' => 'paid',
                     'processed_at' => now(),
                 ]);
+                app(\App\Services\TicketIssuer::class)->issue($order->fresh());
             }
 
             \DB::commit();
