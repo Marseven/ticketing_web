@@ -46,7 +46,7 @@
       <div class="relative flex-shrink-0" :style="{ width: noteW + 'px', height: rowH + 'px' }">
         <p
           class="ticket-note text-gray-900 font-bold text-center"
-          :style="{ width: rowH + 'px', fontSize: noteFont + 'px', maxHeight: noteW + 'px' }"
+          :style="{ width: rowH + 'px', fontSize: noteFont + 'px' }"
         >
           QR CODE UNIQUE ET PERSONNEL — NE PAS LE PARTAGER
         </p>
@@ -96,7 +96,12 @@ export default {
     const small = props.size === 'small'
     const pad = small ? 12 : 16
     const gap = small ? 12 : 16
-    const noteW = small ? 16 : 22
+    // Largeur de la colonne de la mention : de quoi loger 3 lignes pivotées
+    // (le cas des petits écrans, où la rangée est basse donc la mention se
+    // replie davantage) plus une marge. html2canvas ne coupe pas les lignes
+    // exactement comme le navigateur : avec une marge trop juste, le JPG
+    // téléchargé perdait le dernier mot alors que l'écran était bon.
+    const noteW = small ? 24 : 32
     const noteFont = small ? 5 : 7
     const maxW = small ? 180 : 340
     const maxH = small ? 140 : 220
@@ -166,6 +171,5 @@ export default {
   transform-origin: center;
   line-height: 1.25;
   letter-spacing: 0.04em;
-  overflow: hidden;
 }
 </style>
