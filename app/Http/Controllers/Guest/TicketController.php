@@ -221,13 +221,7 @@ class TicketController extends Controller
      */
     private function qrDataUri($ticket): ?string
     {
-        try {
-            $svg = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')->size(300)->margin(1)->generate($ticket->code);
-
-            return 'data:image/svg+xml;base64,' . base64_encode($svg);
-        } catch (\Throwable $e) {
-            return null;
-        }
+        return app(\App\Services\TicketQrCode::class)->dataUri($ticket->code);
     }
 
     public function search(Request $request)

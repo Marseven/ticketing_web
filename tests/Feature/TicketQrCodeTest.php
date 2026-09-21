@@ -71,11 +71,17 @@ class TicketQrCodeTest extends TestCase
             ->json('ticket.qr_code');
 
         $this->assertIsString($qr);
-        $this->assertStringStartsWith('data:image/svg+xml;base64,', $qr);
+        // PNG et non SVG : WebKit ne rasterise pas correctement un SVG dans un
+        // canvas, et le QR du billet téléchargé sur iPhone en ressortait cassé.
+        $this->assertStringStartsWith('data:image/png;base64,', $qr);
         $this->assertStringNotContainsString('qrserver.com', $qr);
 
-        $svg = base64_decode(substr($qr, strlen('data:image/svg+xml;base64,')));
-        $this->assertStringContainsString('<svg', $svg);
+        $png = base64_decode(substr($qr, strlen('data:image/png;base64,')));
+        $this->assertSame("\x89PNG", substr($png, 0, 4));
+
+        [$width, $height] = getimagesizefromstring($png);
+        $this->assertSame($width, $height, 'le QR doit être carré');
+        $this->assertGreaterThan(200, $width);
     }
 
     public function test_guest_search_returns_a_self_hosted_qr_image(): void
@@ -88,6 +94,6 @@ class TicketQrCodeTest extends TestCase
             ->json('data.tickets.0.qr_code');
 
         $this->assertIsString($qr);
-        $this->assertStringStartsWith('data:image/svg+xml;base64,', $qr);
+        $this->assertStringStartsWith('data:image/png;base64,', $qr);
     }
 }
