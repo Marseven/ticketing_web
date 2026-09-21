@@ -203,4 +203,25 @@ class EventTrackingTest extends TestCase
 
         $this->getJson("/api/v1/track/{$token}/tickets/TKT-PENDING")->assertStatus(404);
     }
+
+    public function test_summary_exposes_the_commission_already_deducted(): void
+    {
+        [$event, $token] = $this->seedEvent();
+        $event->update(['commission_percentage' => 15]);
+
+        $this->getJson("/api/v1/track/{$token}")
+            ->assertOk()
+            ->assertJsonPath('data.stats.commission_percentage', 15);
+    }
+
+    public function test_commission_falls_back_to_the_organizer_default(): void
+    {
+        [$event, $token] = $this->seedEvent();
+        $event->update(['commission_percentage' => null]);
+        $event->organizer->update(['default_commission_percentage' => 12]);
+
+        $this->getJson("/api/v1/track/{$token}")
+            ->assertOk()
+            ->assertJsonPath('data.stats.commission_percentage', 12);
+    }
 }

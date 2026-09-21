@@ -76,6 +76,9 @@
             En ligne {{ formatMoney(summary.stats.revenue_online) }}
             · Physique {{ formatMoney(summary.stats.revenue_physical) }}
           </p>
+          <!-- Le montant est un net : sans cette mention, l'organisateur peut
+               croire qu'une commission reste à prélever dessus. -->
+          <p v-if="commissionLabel" class="text-xs text-gray-400 mt-2">{{ commissionLabel }}</p>
         </div>
 
         <!-- Par provenance : un clic filtre la liste plus bas -->
@@ -323,6 +326,21 @@ const formatMoney = (value) => {
   const amount = Math.round(Number(value) || 0)
   return String(amount).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' FCFA'
 }
+
+// Commission Primea : déjà retenue sur les ventes en ligne. Les ventes
+// physiques encaissées à l'entrée n'en supportent pas — le préciser seulement
+// quand l'événement en a, sinon c'est du bruit.
+const commissionLabel = computed(() => {
+  const rate = Number(summary.value?.stats?.commission_percentage)
+  if (!Number.isFinite(rate) || rate <= 0) return ''
+
+  const taux = Number.isInteger(rate) ? rate : rate.toFixed(2).replace(/\.?0+$/, '')
+  const aDuPhysique = Number(summary.value?.stats?.revenue_physical) > 0
+
+  return aDuPhysique
+    ? `Commission Primea de ${taux} % déjà déduite des ventes en ligne (les ventes physiques n'en supportent pas).`
+    : `Commission Primea de ${taux} % déjà déduite : ce montant est ce qui vous revient.`
+})
 
 // Ne montrer que les provenances réellement présentes : un événement sans
 // billet physique n'a pas besoin d'une ligne à zéro.

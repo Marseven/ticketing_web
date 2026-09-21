@@ -118,6 +118,10 @@ class EventTrackingController extends Controller
                     'revenue' => $revenueOnline + $revenuePhysical,
                     'revenue_online' => $revenueOnline,
                     'revenue_physical' => $revenuePhysical,
+                    // Le revenu en ligne est un NET : la commission a déjà été
+                    // retenue sur le prix de base. L'organisateur doit pouvoir
+                    // le lire sans se demander ce qui sera encore prélevé.
+                    'commission_percentage' => $event->effectiveCommission(),
                     'by_type' => $byType,
                 ],
             ],
