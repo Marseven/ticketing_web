@@ -34,6 +34,29 @@ function waitForImages(el) {
 }
 
 /**
+ * Attend qu'une référence de billet soit montée.
+ *
+ * La préparation est lancée juste après le chargement des données ; selon
+ * l'ordre des drapeaux de chargement, l'élément peut ne pas encore être dans le
+ * DOM. Sans cette attente la préparation repart à vide et le premier clic
+ * retombe sur une capture lente — celle qu'iOS ignore.
+ *
+ * @param {() => HTMLElement|null} getEl
+ * @returns {Promise<HTMLElement|null>}
+ */
+export async function waitForTicketEl(getEl, timeoutMs = 4000) {
+  const deadline = Date.now() + timeoutMs
+
+  while (Date.now() < deadline) {
+    const el = getEl()
+    if (el) return el
+    await new Promise((resolve) => setTimeout(resolve, 100))
+  }
+
+  return getEl()
+}
+
+/**
  * Rend l'élément du billet en JPEG.
  *
  * `allowTaint: false` est volontaire : si une image reste inaccessible en

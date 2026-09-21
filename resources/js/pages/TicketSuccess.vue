@@ -166,7 +166,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/vue/24/outline'
 import Swal from 'sweetalert2'
-import { captureTicketBlob, saveTicketImage } from '../utils/ticketImage'
+import { captureTicketBlob, saveTicketImage, waitForTicketEl } from '../utils/ticketImage'
 import TicketComponent from '../components/TicketComponent.vue'
 import { ticketService } from '../services/api'
 
@@ -268,7 +268,7 @@ export default {
       preparingImages.value = true
       await nextTick()
       for (let i = 0; i < ticketCards.value.length; i++) {
-        const el = ticketRefs[i]
+        const el = await waitForTicketEl(() => ticketRefs[i])
         if (!el) continue
         try {
           ticketBlobs.value[i] = await captureTicketBlob(el)
@@ -375,7 +375,6 @@ export default {
           order.value = data.data.order
           tickets.value = data.data.order.tickets || []
           await loadTicketCards()
-          prepareTicketImages()
         } else {
           throw new Error(data.message || 'Erreur lors du chargement de la commande')
         }
@@ -385,6 +384,11 @@ export default {
         error.value = err.message || 'Impossible de charger votre commande'
       } finally {
         loading.value = false
+        // Après `loading = false` seulement : tant qu'il est vrai, les billets
+        // ne sont pas dans le DOM et il n'y a rien à capturer — la préparation
+        // repartait à vide et le premier clic retombait sur une capture lente,
+        // celle-là même qu'iOS ignore.
+        prepareTicketImages()
       }
     }
 

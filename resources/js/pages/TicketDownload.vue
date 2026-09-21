@@ -261,7 +261,7 @@
 <script>
 import { ref, computed, nextTick, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { captureTicketBlob, saveTicketImage } from '../utils/ticketImage'
+import { captureTicketBlob, saveTicketImage, waitForTicketEl } from '../utils/ticketImage'
 import TicketComponent from '../components/TicketComponent.vue'
 import { ticketService } from '../services/api.js'
 import Swal from 'sweetalert2'
@@ -473,7 +473,7 @@ export default {
 
     const prepareTicketImage = async () => {
       await nextTick()
-      const el = currentTicketEl()
+      const el = await waitForTicketEl(currentTicketEl)
       if (!el) return
       try {
         ticketBlob.value = await captureTicketBlob(el)

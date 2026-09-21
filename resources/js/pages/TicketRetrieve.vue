@@ -188,7 +188,7 @@
 <script>
 import { ref, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
-import { captureTicketBlob, saveTicketImage } from '../utils/ticketImage'
+import { captureTicketBlob, saveTicketImage, waitForTicketEl } from '../utils/ticketImage'
 import TicketComponent from '../components/TicketComponent.vue'
 import PhoneInput from '../components/PhoneInput.vue'
 import { ticketService } from '../services/api.js'
@@ -350,7 +350,7 @@ export default {
     const prepareTicketImages = async () => {
       await nextTick()
       for (let i = 0; i < foundTickets.value.length; i++) {
-        const el = ticketRefs[i]
+        const el = await waitForTicketEl(() => ticketRefs[i])
         if (!el) continue
         try {
           ticketBlobs.value[i] = await captureTicketBlob(el)
