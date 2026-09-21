@@ -140,4 +140,18 @@ class EbillingWebhookTest extends TestCase
         $this->assertNotSame('success', $payment->fresh()->status);
         $this->assertSame('pending', $payment->order->fresh()->status);
     }
+
+    public function test_an_unpaid_state_never_credits_the_order(): void
+    {
+        // « unpaid » est l'état qu'e-billing a renvoyé sur les commandes que
+        // l'ancien webhook créditait quand même.
+        Notification::fake();
+        $payment = $this->makePayment();
+
+        $this->notify($payment, ['state' => 'unpaid'])->assertOk();
+
+        $this->assertNotSame('success', $payment->fresh()->status);
+        $this->assertSame('pending', $payment->order->fresh()->status);
+        $this->assertSame('pending', $payment->order->tickets()->first()->status);
+    }
 }

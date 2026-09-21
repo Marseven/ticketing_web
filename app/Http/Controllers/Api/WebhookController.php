@@ -775,8 +775,11 @@ class WebhookController extends Controller
             'failed', 'error', 'declined' => 'failed',
             'cancelled', 'canceled' => 'cancelled',
             'expired' => 'expired',
-            // « ready », état inconnu ou absent : la facture existe mais n'est
-            // pas payée, le client peut encore régler.
+            // « unpaid » et « ready » : la facture existe et n'est pas réglée.
+            // C'est l'état qu'e-billing a renvoyé sur les commandes créditées à
+            // tort en septembre 2026. Le client peut encore payer, donc la
+            // commande reste en attente plutôt qu'annulée.
+            'unpaid', 'ready', 'pending' => 'pending',
             default => 'pending',
         };
     }
