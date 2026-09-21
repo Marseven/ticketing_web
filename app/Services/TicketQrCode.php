@@ -24,8 +24,12 @@ class TicketQrCode
     /** Taille visée de l'image finale, en pixels. */
     private const SIZE = 360;
 
-    /** Marge silencieuse, en modules (le standard en demande 4, 2 suffit ici). */
-    private const QUIET_ZONE = 2;
+    /**
+     * Marge silencieuse, en modules. Le standard en demande 4 ; 1 suffit ici car
+     * le QR est posé sur une carte blanche avec de l'espace autour — et une
+     * marge plus épaisse rapetissait visiblement le code face à l'affiche.
+     */
+    private const QUIET_ZONE = 1;
 
     /**
      * PNG binaire du QR encodant le texte donné.

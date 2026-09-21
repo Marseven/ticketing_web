@@ -3,7 +3,7 @@
     ref="rootEl"
     :class="[
       'ticket-min bg-white overflow-hidden font-primea relative shadow-primea-lg w-full',
-      size === 'small' ? 'rounded-xl p-3 pb-7' : 'rounded-2xl p-4 pb-9'
+      size === 'small' ? 'rounded-xl p-3' : 'rounded-2xl p-4'
     ]"
   >
     <!-- Contenu CENTRÉ : affiche (proportions conservées) + QR de même hauteur + mention -->
@@ -53,12 +53,31 @@
       </div>
     </div>
 
-    <!-- Logo Primea, dans la bande de marge basse (jamais sur le QR) -->
-    <img
-      src="/images/logo.png?v=3"
-      alt="Primea"
-      :class="['absolute opacity-90', size === 'small' ? 'bottom-1.5 right-3 h-4' : 'bottom-2 right-4 h-5']"
-    />
+    <!-- Bande basse, dans le flux : mentions à gauche, logo à droite.
+         En flux et non en absolu : html2canvas place mal un bloc de texte
+         ancré par `bottom` (le JPG le rognait alors que l'écran était bon). -->
+    <div
+      class="flex items-center justify-between"
+      :style="{ marginTop: (small ? 8 : 10) + 'px', paddingBottom: (small ? 6 : 8) + 'px', gap: gap + 'px' }"
+    >
+      <!-- Ni hauteur fixe ni `overflow-hidden` ici : html2canvas pose la ligne
+           de base plus bas que le navigateur, et la boîte rognait alors le bas
+           des lettres dans le JPG téléchargé. -->
+      <div
+        class="min-w-0 whitespace-nowrap text-gray-900"
+        :style="{ fontSize: infoFont + 'px', lineHeight: infoH + 'px' }"
+      >
+        <span class="font-bold">{{ typeLabel }}</span>
+        <span v-if="priceLabel"> · {{ priceLabel }}</span>
+        <span v-if="referenceLabel" class="text-gray-500"> · {{ referenceLabel }}</span>
+      </div>
+
+      <img
+        src="/images/logo.png?v=3"
+        alt="Primea"
+        :class="['flex-shrink-0 opacity-90', small ? 'h-4' : 'h-5']"
+      />
+    </div>
   </div>
 </template>
 
@@ -143,10 +162,35 @@ export default {
     })
     onBeforeUnmount(() => window.removeEventListener('resize', layout))
 
-    // QR entier avec une zone blanche (~6 % de chaque côté).
-    const qrPx = computed(() => Math.max(32, Math.round(rowH.value * 0.88)))
+    // Le QR occupe toute la hauteur de la rangée : à l'œil il fait alors la même
+    // hauteur que l'affiche, la fine marge blanche étant déjà dans le PNG.
+    const qrPx = computed(() => Math.max(32, rowH.value))
 
-    return { ticketImage, qrSrc, rootEl, posterEl, rowH, posterW, qrPx, gap, noteW, noteFont, layout }
+    // --- Mentions lisibles en bas de billet -------------------------------
+    // Ce qu'on lit quand on ne scanne pas : la catégorie achetée, ce qu'elle a
+    // coûté, et la référence à citer au support.
+    const infoFont = small ? 8 : 11
+    // Hauteur de ligne fixée en pixels : html2canvas calcule autrement la
+    // hauteur d'un bloc de texte et posait la ligne trop bas, hors de la carte.
+    const infoH = small ? 12 : 16
+
+    const typeLabel = computed(() => props.ticket?.ticketType || 'Standard')
+
+    const priceLabel = computed(() => {
+      const value = Number(props.ticket?.price)
+      if (!Number.isFinite(value)) return ''
+      if (value <= 0) return 'Gratuit'
+      // Séparateur de milliers posé à la main : `Intl` insère une espace
+      // insécable étroite que html2canvas ne rend pas toujours.
+      return String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' FCFA'
+    })
+
+    const referenceLabel = computed(() => props.ticket?.reference || props.ticket?.code || '')
+
+    return {
+      ticketImage, qrSrc, rootEl, posterEl, rowH, posterW, qrPx, gap, noteW, noteFont, layout,
+      small, pad, infoFont, infoH, typeLabel, priceLabel, referenceLabel
+    }
   }
 }
 </script>

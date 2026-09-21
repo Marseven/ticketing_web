@@ -19,7 +19,8 @@
         .qr { width: 130px; height: 130px; display: block; }
         .note { font-size: 6.5px; font-weight: bold; color: #111827; text-align: center; letter-spacing: .04em; text-transform: uppercase; margin-top: 5px; }
         .brand-row td { padding-top: 8px; }
-        .ref { font-family: DejaVu Sans Mono, monospace; font-size: 8px; color: #6b7280; }
+        .ref { font-family: DejaVu Sans, sans-serif; font-size: 8px; color: #6b7280; }
+        .ref strong { color: #111827; }
         .brand { text-align: right; }
         .brand img { height: 14px; }
     </style>
@@ -45,7 +46,7 @@
                     <td></td>
                 </tr>
                 <tr class="brand-row">
-                    <td class="ref">{{ $item['code'] }}</td>
+                    <td class="ref">@if (!empty($item['type']))<strong>{{ $item['type'] }}</strong> · @endif{{ $item['code'] }}</td>
                     <td colspan="2" class="brand">
                         @if (!empty($logo))
                             <img src="{{ $logo }}" alt="Primea">

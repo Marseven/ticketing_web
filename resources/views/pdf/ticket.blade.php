@@ -19,7 +19,8 @@
         .note { font-size: 7px; font-weight: bold; color: #111827; text-align: center; letter-spacing: .04em; text-transform: uppercase; margin-top: 6px; }
         .brand-row td { text-align: right; padding-top: 10px; }
         .brand-row img { height: 16px; }
-        .ref { font-family: DejaVu Sans Mono, monospace; font-size: 8px; color: #6b7280; text-align: left; padding-top: 10px; }
+        .ref { font-family: DejaVu Sans, sans-serif; font-size: 8px; color: #6b7280; text-align: left; padding-top: 10px; }
+        .ref strong { color: #111827; }
     </style>
 </head>
 <body>
@@ -40,7 +41,9 @@
                 <td></td>
             </tr>
             <tr class="brand-row">
-                <td class="ref">{{ $ticket->code }}</td>
+                <td class="ref">@if ($ticket->ticketType)<strong>{{ $ticket->ticketType->name }}</strong>
+                    @if ($ticket->ticketType->price > 0) · {{ number_format((float) $ticket->ticketType->price, 0, ',', ' ') }} FCFA @endif ·
+                    @endif{{ $ticket->code }}</td>
                 <td colspan="2">
                     @if (!empty($logoBase64))
                         <img src="{{ $logoBase64 }}" alt="Primea">
