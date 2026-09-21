@@ -2564,10 +2564,16 @@ class AdminController extends Controller
             if ($request->filled('event_id')) {
                 $statsBase->where('event_id', $request->event_id);
             }
+            // « Total » comptait tout, paiements en cours et billets annulés
+            // compris : il ne valait donc pas émis + scannés, ce qui rendait les
+            // cartes illisibles. Chaque état est désormais compté à part.
             $stats = [
                 'total' => (clone $statsBase)->count(),
+                'paid' => (clone $statsBase)->whereIn('status', ['issued', 'used'])->count(),
                 'issued' => (clone $statsBase)->where('status', 'issued')->count(),
                 'used' => (clone $statsBase)->where('status', 'used')->count(),
+                'pending' => (clone $statsBase)->where('status', 'pending')->count(),
+                'void' => (clone $statsBase)->where('status', 'void')->count(),
                 'physical' => (clone $statsBase)->where('ticket_source', 'physical')->count(),
                 'online' => (clone $statsBase)->where('ticket_source', 'online')->count(),
             ];

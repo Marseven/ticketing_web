@@ -7,26 +7,48 @@
     </div>
 
     <!-- Statistics -->
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+    <!-- Chaque carte dit exactement ce qu'elle compte : « Total » inclut les
+         paiements en cours et les billets annulés, il ne vaut donc PAS
+         « payés ». Les deux lignes sont séparées pour qu'on ne les confonde pas. -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
       <div class="bg-white rounded-lg shadow p-5">
-        <p class="text-sm text-gray-600">Total</p>
+        <p class="text-sm text-gray-600">Billets au total</p>
         <p class="text-2xl font-bold text-primea-blue">{{ stats.total || 0 }}</p>
+        <p class="text-xs text-gray-400 mt-1">tous statuts confondus</p>
       </div>
       <div class="bg-white rounded-lg shadow p-5">
-        <p class="text-sm text-gray-600">Émis</p>
+        <p class="text-sm text-gray-600">Payés</p>
+        <p class="text-2xl font-bold text-green-600">{{ stats.paid || 0 }}</p>
+        <p class="text-xs text-gray-400 mt-1">émis + scannés</p>
+      </div>
+      <div class="bg-white rounded-lg shadow p-5">
+        <p class="text-sm text-gray-600">En attente de paiement</p>
+        <p class="text-2xl font-bold text-yellow-600">{{ stats.pending || 0 }}</p>
+        <p class="text-xs text-gray-400 mt-1">place retenue, non vendue</p>
+      </div>
+      <div class="bg-white rounded-lg shadow p-5">
+        <p class="text-sm text-gray-600">Annulés</p>
+        <p class="text-2xl font-bold text-gray-500">{{ stats.void || 0 }}</p>
+        <p class="text-xs text-gray-400 mt-1">place relâchée</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white rounded-lg shadow p-5">
+        <p class="text-sm text-gray-600">Émis, pas encore scannés</p>
         <p class="text-2xl font-bold text-green-600">{{ stats.issued || 0 }}</p>
       </div>
       <div class="bg-white rounded-lg shadow p-5">
-        <p class="text-sm text-gray-600">Scannés</p>
+        <p class="text-sm text-gray-600">Scannés (entrés)</p>
         <p class="text-2xl font-bold text-blue-600">{{ stats.used || 0 }}</p>
       </div>
       <div class="bg-white rounded-lg shadow p-5">
-        <p class="text-sm text-gray-600">Physiques</p>
-        <p class="text-2xl font-bold text-gray-700">{{ stats.physical || 0 }}</p>
+        <p class="text-sm text-gray-600">Vendus en ligne</p>
+        <p class="text-2xl font-bold text-gray-700">{{ stats.online || 0 }}</p>
       </div>
       <div class="bg-white rounded-lg shadow p-5">
-        <p class="text-sm text-gray-600">En ligne</p>
-        <p class="text-2xl font-bold text-gray-700">{{ stats.online || 0 }}</p>
+        <p class="text-sm text-gray-600">Vendus en physique</p>
+        <p class="text-2xl font-bold text-gray-700">{{ stats.physical || 0 }}</p>
       </div>
     </div>
 
