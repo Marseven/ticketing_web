@@ -545,32 +545,53 @@ class OrderController extends Controller
     {
         $user = $request->user();
         
+        // Filtres partagés entre la liste paginée et les statistiques globales
+        $applyFilters = function ($q) use ($request) {
+            // Filtrage par statut ('paid' couvre aussi 'completed', que la
+            // réponse renvoie déjà sous le libellé 'paid')
+            if ($request->filled('status')) {
+                $statuses = $request->status === 'paid'
+                    ? ['paid', 'completed']
+                    : [$request->status];
+
+                $q->whereIn('orders.status', $statuses);
+            }
+
+            // Filtrage par event_id
+            if ($request->filled('event_id')) {
+                $q->whereHas('tickets.event', function ($sub) use ($request) {
+                    $sub->where('id', $request->event_id);
+                });
+            }
+
+            // Filtrage par date
+            if ($request->filled('from_date')) {
+                $q->where('orders.created_at', '>=', $request->from_date);
+            }
+
+            if ($request->filled('to_date')) {
+                $q->where('orders.created_at', '<=', $request->to_date);
+            }
+
+            // Recherche libre : référence de la commande ou titre de l'événement
+            if ($request->filled('search')) {
+                $term = '%' . $request->search . '%';
+                $q->where(function ($sub) use ($term) {
+                    $sub->where('orders.reference', 'like', $term)
+                        ->orWhereHas('tickets.event', function ($event) use ($term) {
+                            $event->where('title', 'like', $term);
+                        });
+                });
+            }
+        };
+
         $query = $user->orders()
             ->with(['tickets.event.venue', 'tickets.ticketType', 'tickets.schedule']);
-        
-        // Filtrage par statut
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-        
-        // Filtrage par event_id
-        if ($request->filled('event_id')) {
-            $query->whereHas('tickets.event', function($q) use ($request) {
-                $q->where('id', $request->event_id);
-            });
-        }
-        
-        // Filtrage par date
-        if ($request->filled('from_date')) {
-            $query->where('created_at', '>=', $request->from_date);
-        }
-        
-        if ($request->filled('to_date')) {
-            $query->where('created_at', '<=', $request->to_date);
-        }
-        
-        $perPage = min($request->get('per_page', 20), 100);
-        $orders = $query->orderBy('created_at', 'desc')->paginate($perPage);
+
+        $applyFilters($query);
+
+        $perPage = min(max((int) $request->get('per_page', 20), 1), 100);
+        $orders = $query->orderBy('orders.created_at', 'desc')->paginate($perPage)->withQueryString();
         
         // Formater les données pour correspondre à la structure attendue
         $formattedOrders = $orders->map(function($order) {
@@ -623,8 +644,46 @@ class OrderController extends Controller
             ];
         });
         
+        // Statistiques calculées sur TOUT l'ensemble filtré (pas seulement la page
+        // courante), afin que les cartes de synthèse restent justes une fois paginé.
+        $paidStatuses = ['paid', 'completed'];
+
+        $ordersStats = function () use ($user, $applyFilters) {
+            $q = $user->orders();
+            $applyFilters($q);
+
+            return $q;
+        };
+
+        $ticketsStats = function () use ($user, $applyFilters) {
+            return \App\Models\Ticket::whereHas('order', function ($q) use ($user, $applyFilters) {
+                $q->where('orders.buyer_id', $user->id);
+                $applyFilters($q);
+            });
+        };
+
+        $stats = [
+            'total_orders' => $ordersStats()->count(),
+            'confirmed_orders' => $ordersStats()->whereIn('orders.status', $paidStatuses)->count(),
+            'pending_orders' => $ordersStats()->where('orders.status', 'pending')->count(),
+            'total_spent' => round((float) $ordersStats()->whereIn('orders.status', $paidStatuses)->sum('total_amount'), 2),
+            'total_tickets' => $ticketsStats()->count(),
+            'active_tickets' => $ticketsStats()
+                ->whereHas('order', fn ($q) => $q->whereIn('orders.status', $paidStatuses))
+                ->count(),
+            'expired_tickets' => $ticketsStats()
+                ->whereHas('order', fn ($q) => $q->whereIn('orders.status', ['cancelled', 'refunded']))
+                ->count(),
+            'upcoming_events' => $ticketsStats()
+                ->whereHas('order', fn ($q) => $q->whereIn('orders.status', $paidStatuses))
+                ->whereHas('schedule', fn ($q) => $q->where('starts_at', '>', now()))
+                ->distinct()
+                ->count('event_id'),
+        ];
+
         return response()->json([
             'orders' => $formattedOrders,
+            'stats' => $stats,
             'pagination' => [
                 'total' => $orders->total(),
                 'per_page' => $orders->perPage(),

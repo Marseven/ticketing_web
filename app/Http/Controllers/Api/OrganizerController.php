@@ -1744,6 +1744,68 @@ class OrganizerController extends Controller
     }
 
     /**
+     * Liste paginée des achats (commandes payées) d'un événement.
+     *
+     * Complète getEvent() qui ne renvoie que les 10 achats les plus récents :
+     * ici l'organisateur peut parcourir l'intégralité des achats page par page.
+     */
+    public function eventOrders(Request $request, $eventId): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user->is_organizer) {
+            return response()->json([
+                'message' => 'Accès refusé.',
+            ], 403);
+        }
+
+        $organizerIds = $user->organizers->pluck('id');
+
+        $event = Event::whereIn('organizer_id', $organizerIds)->findOrFail($eventId);
+
+        $perPage = min(max((int) $request->get('per_page', 10), 1), 100);
+
+        $orders = \App\Models\Order::where('organizer_id', $event->organizer_id)
+            ->whereHas('tickets', function ($query) use ($event) {
+                $query->where('event_id', $event->id);
+            })
+            ->with(['buyer', 'tickets' => function ($query) use ($event) {
+                $query->where('event_id', $event->id);
+            }])
+            ->where('status', 'paid')
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+
+        $items = collect($orders->items())->map(function ($order) {
+            return [
+                'id' => $order->id,
+                'customer_name' => $order->buyer ? $order->buyer->name : $order->guest_name,
+                'customer_phone' => $order->buyer ? $order->buyer->phone : $order->guest_phone,
+                'ticket_quantity' => $order->tickets->count(),
+                'total_amount' => $order->total_amount,
+                'created_at' => $order->created_at->toIso8601String(),
+                'purchase_time' => $order->created_at->format('H:i'),
+                'purchase_date' => $order->created_at->format('d/m/Y'),
+            ];
+        })->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'orders' => $items,
+                'pagination' => [
+                    'total' => $orders->total(),
+                    'per_page' => $orders->perPage(),
+                    'current_page' => $orders->currentPage(),
+                    'last_page' => $orders->lastPage(),
+                    'from' => $orders->firstItem(),
+                    'to' => $orders->lastItem(),
+                ],
+            ],
+        ]);
+    }
+
+    /**
      * Preview recurring schedules without creating them
      */
     public function previewRecurrence(Request $request): JsonResponse

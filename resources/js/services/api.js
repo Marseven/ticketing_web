@@ -382,6 +382,11 @@ export const organizerService = {
     return api.get(`/organizer/events/${id}/stats`)
   },
 
+  // Récupérer les achats d'un événement (paginé)
+  getEventOrders(id, params = {}) {
+    return api.get(`/organizer/events/${id}/orders`, { params })
+  },
+
   // Récupérer le solde et les transactions
   getBalance() {
     return api.get('/organizer/balances')

@@ -79,7 +79,7 @@
           </div>
 
           <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-500">{{ filteredTickets.length }} tickets</span>
+            <span class="text-sm text-gray-500">{{ filteredTickets.length }} sur {{ stats.totalTickets }} tickets</span>
           </div>
         </div>
       </div>
@@ -198,6 +198,14 @@
           </div>
         </div>
 
+        <!-- Pagination -->
+        <Pagination
+          v-if="pagination.last_page > 1"
+          :current-page="pagination.current_page"
+          :total-pages="pagination.last_page"
+          @page-change="changePage"
+        />
+
         <!-- État vide -->
         <div v-if="!loading && !error && filteredTickets.length === 0" class="text-center py-16">
           <TicketIcon class="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -220,10 +228,11 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ticketStatusLabel, ticketStatusBadgeClass } from '../../utils/status'
 import CalendarIcon from '../../components/icons/CalendarIcon.vue'
+import Pagination from '../../components/Pagination.vue'
 import { ticketApiService } from '../../services/api.js'
 import { 
   TicketIcon,
@@ -241,6 +250,7 @@ export default {
   name: 'MyTickets',
   components: {
     CalendarIcon,
+    Pagination,
     TicketIcon,
     CheckCircleIcon,
     ClockIcon,
@@ -262,13 +272,53 @@ export default {
     const orders = ref([])
     const tickets = ref([])
 
+    // Pagination renvoyée par l'API (/api/v1/orders pagine déjà côté serveur :
+    // une « page » correspond donc à un lot de commandes payées)
+    const pagination = ref({
+      current_page: 1,
+      last_page: 1,
+      per_page: 10,
+      total: 0
+    })
+
+    // Statistiques calculées par l'API sur l'ensemble des tickets (pas juste la page)
+    const apiStats = ref({
+      total_tickets: 0,
+      active_tickets: 0,
+      expired_tickets: 0,
+      upcoming_events: 0
+    })
+
+    // Paramètres envoyés à l'API : page courante + recherche (appliquée côté
+    // serveur pour qu'elle porte sur TOUS les tickets, pas seulement la page).
+    // On ne demande que les commandes payées, qui sont les seules affichées ici.
+    const buildParams = () => {
+      const params = {
+        page: pagination.value.current_page,
+        per_page: pagination.value.per_page,
+        status: 'paid'
+      }
+
+      if (searchQuery.value) params.search = searchQuery.value
+
+      return params
+    }
+
     // Charger les données depuis l'API
     const loadTickets = async () => {
       try {
         loading.value = true
         error.value = null
-        const response = await ticketApiService.getMyTickets()
+        const response = await ticketApiService.getMyTickets(buildParams())
         orders.value = response.data.orders || []
+
+        if (response.data.pagination) {
+          pagination.value = { ...pagination.value, ...response.data.pagination }
+        }
+
+        if (response.data.stats) {
+          apiStats.value = { ...apiStats.value, ...response.data.stats }
+        }
         
         // Transformer les achats en tickets pour l'affichage
         // Ne garder que les commandes payées
@@ -298,6 +348,7 @@ export default {
       } catch (err) {
         console.error('Erreur lors du chargement des tickets:', err)
         error.value = 'Impossible de charger vos tickets'
+        pagination.value = { ...pagination.value, current_page: 1, last_page: 1, total: 1 }
         // Garder les données de démonstration en cas d'erreur
         tickets.value = [
           {
@@ -326,20 +377,41 @@ export default {
     })
 
     const stats = computed(() => ({
-      totalTickets: tickets.value.length,
-      activeTickets: tickets.value.filter(t => t.status === 'active').length,
-      upcomingEvents: tickets.value.filter(t => t.status === 'active' && new Date(t.event.date) > new Date()).length,
-      expiredTickets: tickets.value.filter(t => t.status === 'expired').length
+      totalTickets: apiStats.value.total_tickets,
+      activeTickets: apiStats.value.active_tickets,
+      upcomingEvents: apiStats.value.upcoming_events,
+      expiredTickets: apiStats.value.expired_tickets
     }))
 
+    // La recherche est envoyée à l'API : il ne reste ici que le filtre de
+    // statut, dérivé de l'état de la commande, appliqué aux tickets de la page.
     const filteredTickets = computed(() => {
       return tickets.value.filter(ticket => {
-        const matchesSearch = !searchQuery.value || 
-          ticket.event.title.toLowerCase().includes(searchQuery.value.toLowerCase())
-        const matchesStatus = !statusFilter.value || ticket.status === statusFilter.value
-        return matchesSearch && matchesStatus
+        return !statusFilter.value || ticket.status === statusFilter.value
       })
     })
+
+    // Changement de page : la recherche et le filtre courants sont conservés
+    const changePage = (page) => {
+      if (page === pagination.value.current_page) return
+      pagination.value.current_page = page
+      loadTickets()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+
+    // Tout changement de filtre ramène à la première page
+    const resetAndReload = () => {
+      pagination.value.current_page = 1
+      loadTickets()
+    }
+
+    let searchTimer = null
+    watch(searchQuery, () => {
+      clearTimeout(searchTimer)
+      searchTimer = setTimeout(resetAndReload, 400)
+    })
+
+    watch(statusFilter, resetAndReload)
 
     const formatDate = (date) => {
       return date.toLocaleDateString('fr-FR', {
@@ -395,6 +467,8 @@ export default {
       tickets,
       stats,
       filteredTickets,
+      pagination,
+      changePage,
       formatDate,
       formatTime,
       formatPrice,

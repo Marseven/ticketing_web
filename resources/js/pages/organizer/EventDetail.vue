@@ -219,8 +219,8 @@
 
             <!-- Recent orders -->
             <div class="bg-white rounded-primea shadow-primea p-6">
-              <h2 class="text-xl font-semibold text-primea-blue font-primea mb-6">Achats récents</h2>
-              <div v-if="recentOrders.length > 0" class="overflow-x-auto">
+              <h2 class="text-xl font-semibold text-primea-blue font-primea mb-6">Achats</h2>
+              <div v-if="orders.length > 0" class="overflow-x-auto">
                 <table class="w-full min-w-[700px]">
                   <thead class="bg-gray-50">
                     <tr>
@@ -233,7 +233,7 @@
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-gray-200">
-                    <tr v-for="order in recentOrders" :key="order.id">
+                    <tr v-for="order in orders" :key="order.id">
                       <td class="px-3 py-3 text-sm text-gray-900 font-primea">{{ order.customer_name }}</td>
                       <td class="px-3 py-3 text-sm text-gray-600 font-primea">{{ order.customer_phone || '-' }}</td>
                       <td class="px-3 py-3 text-sm text-gray-900 font-primea text-center">{{ order.ticket_quantity }}</td>
@@ -248,6 +248,13 @@
                 <ShoppingCartIcon class="w-12 h-12 mx-auto text-gray-300 mb-2" />
                 <p class="font-primea">Aucune commande pour cet événement</p>
               </div>
+
+              <Pagination
+                v-if="ordersPagination.last_page > 1"
+                :current-page="ordersPagination.current_page"
+                :total-pages="ordersPagination.last_page"
+                @page-change="changeOrdersPage"
+              />
             </div>
           </div>
 
@@ -338,6 +345,7 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { organizerService } from '../../services/api';
 import Swal from 'sweetalert2';
+import Pagination from '../../components/Pagination.vue';
 import { 
   ArrowLeftIcon,
   ExclamationTriangleIcon,
@@ -359,7 +367,41 @@ const router = useRouter();
 const loading = ref(true);
 const error = ref(null);
 const event = ref(null);
-const recentOrders = ref([]);
+const orders = ref([]);
+const ordersPagination = ref({
+  current_page: 1,
+  last_page: 1,
+  per_page: 10,
+  total: 0
+});
+
+// Achats de l'événement, chargés page par page depuis l'endpoint paginé dédié
+// (getEvent() ne renvoie que les 10 plus récents, sans pagination).
+const loadOrders = async (page = 1) => {
+  if (!event.value?.id) return;
+
+  try {
+    const response = await organizerService.getEventOrders(event.value.id, {
+      page,
+      per_page: ordersPagination.value.per_page
+    });
+
+    const payload = response.data?.data || {};
+    orders.value = payload.orders || [];
+
+    if (payload.pagination) {
+      ordersPagination.value = { ...ordersPagination.value, ...payload.pagination };
+    }
+  } catch (err) {
+    console.error('Erreur lors du chargement des achats:', err);
+    orders.value = [];
+  }
+};
+
+const changeOrdersPage = (page) => {
+  if (page === ordersPagination.value.current_page) return;
+  loadOrders(page);
+};
 
 // Méthodes
 const loadEvent = async () => {
@@ -440,8 +482,8 @@ const loadEvent = async () => {
       }));
     }
     
-    // Utiliser les achats récents retournés directement par l'API
-    recentOrders.value = recentOrdersData;
+    // Les achats sont chargés séparément, page par page
+    await loadOrders(1);
     
   } catch (err) {
     console.error('Erreur lors du chargement de l\'événement:', err);

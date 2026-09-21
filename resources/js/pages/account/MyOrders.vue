@@ -91,7 +91,7 @@
           </div>
 
           <div class="flex items-center justify-end">
-            <span class="text-xs md:text-sm text-gray-500">{{ filteredOrders.length }} achats</span>
+            <span class="text-xs md:text-sm text-gray-500">{{ orders.length }} sur {{ pagination.total }} achats</span>
           </div>
         </div>
       </div>
@@ -117,7 +117,7 @@
 
       <!-- Liste des achats -->
       <div v-else class="space-y-6">
-        <div v-for="order in filteredOrders" :key="order.id" 
+        <div v-for="order in orders" :key="order.id" 
              class="bg-white rounded-primea-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
           
           <!-- En-tête d'achat -->
@@ -266,8 +266,16 @@
           </div>
         </div>
 
+        <!-- Pagination -->
+        <Pagination
+          v-if="pagination.last_page > 1"
+          :current-page="pagination.current_page"
+          :total-pages="pagination.last_page"
+          @page-change="changePage"
+        />
+
         <!-- État vide -->
-        <div v-if="!loading && !error && filteredOrders.length === 0" class="text-center py-16">
+        <div v-if="!loading && !error && orders.length === 0" class="text-center py-16">
           <ClipboardDocumentListIcon class="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 class="text-xl font-medium text-gray-500 mb-2">Aucun achat trouvé</h3>
           <p class="text-gray-400 mb-6">
@@ -288,10 +296,11 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { orderStatusLabel, orderStatusBadgeClass } from '../../utils/status'
 import CalendarIcon from '../../components/icons/CalendarIcon.vue'
+import Pagination from '../../components/Pagination.vue'
 import { ticketApiService } from '../../services/api.js'
 import { 
   ClipboardDocumentListIcon,
@@ -313,6 +322,7 @@ export default {
   name: 'MyOrders',
   components: {
     CalendarIcon,
+    Pagination,
     ClipboardDocumentListIcon,
     CheckCircleIcon,
     ClockIcon,
@@ -338,13 +348,94 @@ export default {
     // Données réelles depuis l'API
     const orders = ref([])
 
+    // Pagination renvoyée par l'API (/api/v1/orders pagine déjà côté serveur)
+    const pagination = ref({
+      current_page: 1,
+      last_page: 1,
+      per_page: 10,
+      total: 0
+    })
+
+    // Statistiques calculées par l'API sur l'ensemble des achats (pas juste la page)
+    const apiStats = ref({
+      total_orders: 0,
+      confirmed_orders: 0,
+      pending_orders: 0,
+      total_spent: 0
+    })
+
+    // Correspondance entre le filtre affiché et le statut stocké côté serveur
+    const statusToApi = {
+      confirmed: 'paid',
+      pending: 'pending',
+      cancelled: 'cancelled',
+      refunded: 'refunded'
+    }
+
+    // Date de début correspondant au filtre de période (format ISO pour l'API)
+    const periodStartDate = () => {
+      if (!periodFilter.value) return null
+
+      const from = new Date()
+      switch (periodFilter.value) {
+        case '7days':
+          from.setDate(from.getDate() - 7)
+          break
+        case '30days':
+          from.setDate(from.getDate() - 30)
+          break
+        case '3months':
+          from.setMonth(from.getMonth() - 3)
+          break
+        case 'year':
+          from.setMonth(0, 1)
+          from.setHours(0, 0, 0, 0)
+          break
+        default:
+          return null
+      }
+
+      const pad = (n) => String(n).padStart(2, '0')
+
+      // Format local « YYYY-MM-DD HH:MM:SS » (pas d'UTC : la borne doit
+      // correspondre à l'heure vue par l'utilisateur)
+      return `${from.getFullYear()}-${pad(from.getMonth() + 1)}-${pad(from.getDate())} `
+        + `${pad(from.getHours())}:${pad(from.getMinutes())}:${pad(from.getSeconds())}`
+    }
+
+    // Paramètres envoyés à l'API : page courante + filtres (les filtres sont
+    // appliqués côté serveur pour qu'ils portent sur TOUS les achats, pas
+    // seulement sur la page affichée).
+    const buildParams = () => {
+      const params = {
+        page: pagination.value.current_page,
+        per_page: pagination.value.per_page
+      }
+
+      if (searchQuery.value) params.search = searchQuery.value
+      if (statusFilter.value) params.status = statusToApi[statusFilter.value] || statusFilter.value
+
+      const fromDate = periodStartDate()
+      if (fromDate) params.from_date = fromDate
+
+      return params
+    }
+
     // Charger les achats depuis l'API
     const loadOrders = async () => {
       try {
         loading.value = true
         error.value = null
-        const response = await ticketApiService.getMyTickets()
+        const response = await ticketApiService.getMyTickets(buildParams())
         const apiOrders = response.data.orders || []
+
+        if (response.data.pagination) {
+          pagination.value = { ...pagination.value, ...response.data.pagination }
+        }
+
+        if (response.data.stats) {
+          apiStats.value = { ...apiStats.value, ...response.data.stats }
+        }
         
         // Transformer les achats de l'API vers le format attendu par le composant
         orders.value = apiOrders.map(order => ({
@@ -385,6 +476,7 @@ export default {
       } catch (err) {
         console.error('Erreur lors du chargement des achats:', err)
         error.value = 'Impossible de charger vos achats'
+        pagination.value = { ...pagination.value, current_page: 1, last_page: 1, total: 1 }
         // Garder les données de démonstration en cas d'erreur
         orders.value = [
           {
@@ -423,43 +515,34 @@ export default {
     })
 
     const stats = computed(() => ({
-      totalOrders: orders.value.length,
-      confirmedOrders: orders.value.filter(o => o.status === 'confirmed').length,
-      totalSpent: orders.value.filter(o => o.status === 'confirmed').reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0),
-      pendingOrders: orders.value.filter(o => o.status === 'pending').length
+      totalOrders: apiStats.value.total_orders,
+      confirmedOrders: apiStats.value.confirmed_orders,
+      totalSpent: apiStats.value.total_spent,
+      pendingOrders: apiStats.value.pending_orders
     }))
 
-    const filteredOrders = computed(() => {
-      return orders.value.filter(order => {
-        const matchesSearch = !searchQuery.value || 
-          order.reference.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-          order.tickets.some(t => t.event.title.toLowerCase().includes(searchQuery.value.toLowerCase()))
-        
-        const matchesStatus = !statusFilter.value || order.status === statusFilter.value
-        
-        let matchesPeriod = true
-        if (periodFilter.value) {
-          const now = new Date()
-          const orderDate = order.orderDate
-          switch (periodFilter.value) {
-            case '7days':
-              matchesPeriod = (now - orderDate) <= 7 * 24 * 60 * 60 * 1000
-              break
-            case '30days':
-              matchesPeriod = (now - orderDate) <= 30 * 24 * 60 * 60 * 1000
-              break
-            case '3months':
-              matchesPeriod = (now - orderDate) <= 90 * 24 * 60 * 60 * 1000
-              break
-            case 'year':
-              matchesPeriod = orderDate.getFullYear() === now.getFullYear()
-              break
-          }
-        }
-        
-        return matchesSearch && matchesStatus && matchesPeriod
-      })
+    // Changement de page : les filtres courants sont conservés (ils sont
+    // renvoyés à l'API par buildParams).
+    const changePage = (page) => {
+      if (page === pagination.value.current_page) return
+      pagination.value.current_page = page
+      loadOrders()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+
+    // Tout changement de filtre ramène à la première page
+    const resetAndReload = () => {
+      pagination.value.current_page = 1
+      loadOrders()
+    }
+
+    let searchTimer = null
+    watch(searchQuery, () => {
+      clearTimeout(searchTimer)
+      searchTimer = setTimeout(resetAndReload, 400)
     })
+
+    watch([statusFilter, periodFilter], resetAndReload)
 
     const formatDate = (date) => {
       return date.toLocaleDateString('fr-FR', {
@@ -558,7 +641,8 @@ export default {
       error,
       orders,
       stats,
-      filteredOrders,
+      pagination,
+      changePage,
       formatDate,
       formatTime,
       formatPrice,
