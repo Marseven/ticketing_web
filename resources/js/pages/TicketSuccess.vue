@@ -29,13 +29,25 @@
         <!-- Success State -->
         <div v-else-if="order" class="bg-white rounded-primea-xl shadow-primea p-5 sm:p-6">
 
-          <!-- Confirmation compacte -->
+          <!-- Confirmation compacte. Le billet n'existe que si la commande est
+               payée : afficher un QR sur une commande en attente laissait
+               croire à un achat abouti. -->
           <div class="text-center mb-4">
-            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
-              <CheckCircleIcon class="w-7 h-7 text-green-600" />
+            <div
+              class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2"
+              :class="isPaid ? 'bg-green-100' : 'bg-amber-100'"
+            >
+              <CheckCircleIcon v-if="isPaid" class="w-7 h-7 text-green-600" />
+              <ExclamationCircleIcon v-else class="w-7 h-7 text-amber-600" />
             </div>
-            <h1 class="text-xl font-bold text-primea-blue">Paiement réussi !</h1>
-            <p class="text-sm text-gray-500">Présentez le QR ci-dessous à l'entrée</p>
+            <h1 class="text-xl font-bold text-primea-blue">
+              {{ isPaid ? 'Paiement réussi !' : 'Paiement en attente' }}
+            </h1>
+            <p class="text-sm text-gray-500">
+              {{ isPaid
+                ? 'Présentez le QR ci-dessous à l\'entrée'
+                : 'Validez le paiement sur votre téléphone pour recevoir votre billet' }}
+            </p>
           </div>
 
           <!-- Recap commande condense (ref + montant) -->
@@ -51,7 +63,18 @@
           </div>
 
           <!-- Billet(s) : l'element telechargeable EST le ticket -->
-          <div v-if="ticketCards.length > 0" class="mb-4">
+          <!-- Attente de paiement : on n'affiche aucun billet, seulement quoi faire. -->
+          <div v-if="!isPaid" class="mb-4 rounded-primea-lg border-2 border-amber-200 bg-amber-50 px-4 py-4 text-center">
+            <p class="text-sm text-amber-900 font-medium">
+              Cette commande n'est pas encore payée.
+            </p>
+            <p class="text-xs text-amber-800 mt-1">
+              Composez le code reçu sur votre téléphone pour valider le paiement. Votre billet
+              apparaîtra ici dès la confirmation — actualisez cette page ensuite.
+            </p>
+          </div>
+
+          <div v-else-if="ticketCards.length > 0" class="mb-4">
             <div class="space-y-6">
               <div v-for="(t, i) in ticketCards" :key="t.id" class="space-y-3">
                 <div :ref="(el) => setTicketRef(el, i)" class="rounded-primea-lg overflow-hidden shadow-primea">
@@ -131,7 +154,7 @@
           </div>
 
           <!-- Email Notification -->
-          <div v-if="order.guest_email && order.guest_email !== 'guest@primea.ga'" class="bg-blue-50 border border-blue-200 rounded-primea-lg p-4 mb-6 text-center">
+          <div v-if="isPaid && order.guest_email && order.guest_email !== 'guest@primea.ga'" class="bg-blue-50 border border-blue-200 rounded-primea-lg p-4 mb-6 text-center">
             <p class="text-blue-800 text-sm">
               Un email de confirmation avec vos tickets a été envoyé à <strong>{{ order.guest_email }}</strong>
             </p>
@@ -185,6 +208,9 @@ export default {
     const loading = ref(true)
     const error = ref('')
     const order = ref(null)
+    // Seule une commande payée donne droit au billet : la page est atteignable
+    // par simple URL, et le paiement mobile peut rester en attente.
+    const isPaid = computed(() => ['paid', 'completed'].includes(order.value?.status))
     const tickets = ref([])
 
     // Billets rendus en ligne (données complètes : image, QR, prix, date)
@@ -495,6 +521,7 @@ export default {
     return {
       authStore,
       loading,
+      isPaid,
       error,
       order,
       tickets,
