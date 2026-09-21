@@ -27,7 +27,8 @@ class ReconcileEbillingPayments extends Command
         {--since= : ne regarder que les commandes passées depuis cette date (AAAA-MM-JJ)}
         {--event= : limiter à un événement (id ou slug)}
         {--dry-run : lister sans rien modifier}
-        {--limit=500 : nombre maximum de commandes examinées}';
+        {--limit=500 : nombre maximum de commandes examinées}
+        {--explain : détailler ce que chaque commande invérifiable contient}';
 
     protected $description = 'Annule les commandes créditées à tort par le webhook e-billing';
 
@@ -121,12 +122,22 @@ class ReconcileEbillingPayments extends Command
      */
     private function billState(EBillingService $ebilling, Payment $payment): ?string
     {
-        if (! $payment->billing_id) {
+        // 1. L'état annoncé par la notification, déjà enregistré au moment du
+        //    webhook. C'est la preuve la plus directe : si la passerelle a dit
+        //    « ready », la facture n'était pas payée, inutile de la rappeler.
+        if (is_string($payment->ebilling_state) && $payment->ebilling_state !== '') {
+            return strtolower(trim($payment->ebilling_state));
+        }
+
+        // 2. Sinon on interroge la passerelle, si on sait quelle facture citer.
+        $billId = $this->billId($payment);
+
+        if (! $billId) {
             return null;
         }
 
         try {
-            $result = $ebilling->getBillStatus((string) $payment->billing_id);
+            $result = $ebilling->getBillStatus($billId);
             $state = $result['bill_status'] ?? null;
 
             return is_string($state) && $state !== '' ? strtolower(trim($state)) : null;
@@ -137,14 +148,57 @@ class ReconcileEbillingPayments extends Command
         }
     }
 
+    /**
+     * Identifiant de facture, où qu'il ait été rangé : colonne dédiée, ancien
+     * champ `transaction_id`, ou payload (création de facture / webhook).
+     */
+    private function billId(Payment $payment): ?string
+    {
+        $payload = is_array($payment->payload) ? $payment->payload : [];
+
+        $candidates = [
+            $payment->billing_id,
+            $payload['ebilling_bill_id'] ?? null,
+            $payload['webhook_data']['billingid'] ?? null,
+            $payment->transaction_id,
+        ];
+
+        foreach ($candidates as $candidate) {
+            if (is_string($candidate) && trim($candidate) !== '') {
+                return trim($candidate);
+            }
+            if (is_int($candidate)) {
+                return (string) $candidate;
+            }
+        }
+
+        return null;
+    }
+
     private function renderReport(int $confirmed, array $unpaid, array $unverifiable): void
     {
         $this->line("Paiements confirmés par la passerelle : {$confirmed}");
 
         if (! empty($unverifiable)) {
             $this->warn(count($unverifiable) . ' commande(s) invérifiable(s) (facture inconnue ou passerelle muette) — laissées telles quelles :');
-            foreach ($unverifiable as $payment) {
-                $this->line('  ' . $payment->order->reference . '  ' . $this->money($payment->order->total_amount));
+
+            if ($this->option('explain')) {
+                $this->table(
+                    ['Commande', 'Montant', 'État connu', 'N° facture', 'Transaction', 'Clés du payload'],
+                    collect($unverifiable)->map(fn ($p) => [
+                        $p->order->reference,
+                        $this->money($p->order->total_amount),
+                        $p->ebilling_state ?: '—',
+                        $this->billId($p) ?: '—',
+                        $p->transaction_id ?: '—',
+                        implode(', ', array_slice(array_keys(is_array($p->payload) ? $p->payload : []), 0, 6)) ?: '—',
+                    ])->all()
+                );
+            } else {
+                foreach ($unverifiable as $payment) {
+                    $this->line('  ' . $payment->order->reference . '  ' . $this->money($payment->order->total_amount));
+                }
+                $this->line('  → relancer avec --explain pour voir ce qu\'elles contiennent.');
             }
         }
 
