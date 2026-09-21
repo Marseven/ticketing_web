@@ -186,9 +186,9 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
-import html2canvas from 'html2canvas'
+import { captureTicketBlob, saveTicketImage } from '../utils/ticketImage'
 import TicketComponent from '../components/TicketComponent.vue'
 import PhoneInput from '../components/PhoneInput.vue'
 import { ticketService } from '../services/api.js'
@@ -269,6 +269,7 @@ export default {
           }))
 
           success.value = `${foundTickets.value.length} ticket(s) trouvé(s) !`
+          prepareTicketImages()
         } else if (response.data.data?.ticket) {
           // Single ticket found
           const apiTicket = response.data.data.ticket
@@ -341,31 +342,41 @@ export default {
     const ticketRefs = []
     const setTicketRef = (el, i) => { ticketRefs[i] = el }
 
-    const downloadImage = async (ticket, i) => {
-      const el = ticketRefs[i]
-      if (!el) return
-      try {
-        const imgs = Array.from(el.querySelectorAll('img'))
-        await Promise.all(imgs.map((img) => {
-          if (img.complete && img.naturalWidth > 0) return Promise.resolve()
-          return new Promise((resolve) => {
-            img.addEventListener('load', resolve, { once: true })
-            img.addEventListener('error', resolve, { once: true })
-          })
-        }))
-        const canvas = await html2canvas(el, {
-          scale: 2, useCORS: true, allowTaint: true, imageTimeout: 15000, backgroundColor: '#ffffff'
-        })
-        const link = document.createElement('a')
-        link.download = `ticket-${ticket.code}.jpg`
-        link.href = canvas.toDataURL('image/jpeg', 0.95)
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-      } catch (e) {
-        // Repli : PDF serveur
-        window.open(`/api/v1/tickets/${ticket.code}/pdf`, '_blank')
+    // Images préparées dès l'affichage : sur iPhone, un enregistrement lancé
+    // après une capture de plusieurs secondes sort du geste utilisateur et
+    // Safari l'ignore (cf. utils/ticketImage.js).
+    const ticketBlobs = ref([])
+
+    const prepareTicketImages = async () => {
+      await nextTick()
+      for (let i = 0; i < foundTickets.value.length; i++) {
+        const el = ticketRefs[i]
+        if (!el) continue
+        try {
+          ticketBlobs.value[i] = await captureTicketBlob(el)
+        } catch (e) {
+          console.error('Préparation du billet impossible:', e)
+        }
       }
+    }
+
+    // Non-`async` : `navigator.share` doit être appelé dans le geste.
+    const downloadImage = (ticket, i) => {
+      const filename = `ticket-${ticket.code}.jpg`
+      const pdfFallback = () => window.open(`/api/v1/tickets/${ticket.code}/pdf`, '_blank')
+      const ready = ticketBlobs.value[i]
+
+      if (ready) return saveTicketImage(ready, filename).catch(pdfFallback)
+
+      const el = ticketRefs[i]
+      if (!el) return Promise.resolve()
+
+      return captureTicketBlob(el)
+        .then((blob) => {
+          ticketBlobs.value[i] = blob
+          return saveTicketImage(blob, filename)
+        })
+        .catch(pdfFallback)
     }
 
     const clearForm = () => {

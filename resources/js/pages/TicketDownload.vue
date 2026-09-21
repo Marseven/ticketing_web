@@ -253,9 +253,9 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, nextTick, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import html2canvas from 'html2canvas'
+import { captureTicketBlob, saveTicketImage } from '../utils/ticketImage'
 import TicketComponent from '../components/TicketComponent.vue'
 import { ticketService } from '../services/api.js'
 import Swal from 'sweetalert2'
@@ -365,6 +365,7 @@ export default {
         }
       } finally {
         loading.value = false
+        prepareTicketImage()
       }
     }
 
@@ -456,68 +457,70 @@ export default {
       }
     }
 
-    const downloadTicketAsImage = async () => {
-      if (downloadingImage.value) return
+    // Image préparée dès l'affichage du billet : sur iPhone, un enregistrement
+    // lancé après une capture de plusieurs secondes sort du geste utilisateur
+    // et Safari l'ignore en silence (cf. utils/ticketImage.js).
+    const ticketBlob = ref(null)
+
+    const currentTicketEl = () =>
+      (window.innerWidth < 768 ? ticketMobileRef.value : ticketDesktopRef.value)
+
+    const prepareTicketImage = async () => {
+      await nextTick()
+      const el = currentTicketEl()
+      if (!el) return
+      try {
+        ticketBlob.value = await captureTicketBlob(el)
+      } catch (e) {
+        console.error('Préparation du billet impossible:', e)
+      }
+    }
+
+    const imageError = () => {
+      Swal.fire({
+        icon: 'error',
+        title: 'Erreur',
+        text: 'Impossible de générer l\'image du ticket. Veuillez réessayer.',
+        confirmButtonColor: '#272d63'
+      })
+    }
+
+    const imageSaved = (outcome, fileName) => {
+      if (outcome === 'cancelled') return
+      Swal.fire({
+        icon: 'success',
+        title: outcome === 'shared' ? 'Billet partagé !' : 'Image téléchargée !',
+        html: `<p class="text-gray-600 mb-2">Votre ticket a été enregistré en JPG :</p><p class="font-semibold text-primea-blue">${fileName}</p>`,
+        confirmButtonColor: '#272d63',
+        confirmButtonText: 'Parfait !'
+      })
+    }
+
+    // Non-`async` : `navigator.share` doit être appelé dans le geste.
+    const downloadTicketAsImage = () => {
+      if (downloadingImage.value) return Promise.resolve()
+
+      const fileName = `ticket-${route.params.id}.jpg`
+      const ready = ticketBlob.value
+
+      if (ready) {
+        return saveTicketImage(ready, fileName)
+          .then((outcome) => imageSaved(outcome, fileName))
+          .catch(imageError)
+      }
+
+      const el = currentTicketEl()
+      if (!el) return Promise.resolve()
 
       downloadingImage.value = true
-      const ticketCode = route.params.id
-      const fileName = `ticket-${ticketCode}.jpg`
-
-      try {
-        // Déterminer quel élément capturer (mobile ou desktop)
-        const targetRef = window.innerWidth < 768 ? ticketMobileRef.value : ticketDesktopRef.value
-        if (!targetRef) {
-          throw new Error('Élément ticket introuvable')
-        }
-
-        // Attendre que toutes les images (affiche, QR, logo) soient chargées
-        // pour éviter une capture partielle/blanche de l'image de l'événement.
-        const imgs = Array.from(targetRef.querySelectorAll('img'))
-        await Promise.all(imgs.map((img) => {
-          if (img.complete && img.naturalWidth > 0) return Promise.resolve()
-          return new Promise((resolve) => {
-            img.addEventListener('load', resolve, { once: true })
-            img.addEventListener('error', resolve, { once: true })
-          })
-        }))
-
-        const canvas = await html2canvas(targetRef, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          imageTimeout: 15000,
-          backgroundColor: '#ffffff',
-          // html2canvas ne sait pas flouter : on ignore le fond flou pour éviter
-          // un rendu "en triple". L'image principale (centrée sur le dégradé) suffit.
-          ignoreElements: (el) => el.classList?.contains('ticket-cover-bg')
+      return captureTicketBlob(el)
+        .then((blob) => {
+          ticketBlob.value = blob
+          return saveTicketImage(blob, fileName)
         })
-
-        // Convertir en JPG et télécharger
-        const link = document.createElement('a')
-        link.download = fileName
-        link.href = canvas.toDataURL('image/jpeg', 0.95)
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-
-        Swal.fire({
-          icon: 'success',
-          title: 'Image téléchargée !',
-          html: `<p class="text-gray-600 mb-2">Votre ticket a été sauvegardé en JPG :</p><p class="font-semibold text-primea-blue">${fileName}</p>`,
-          confirmButtonColor: '#272d63',
-          confirmButtonText: 'Parfait !'
-        })
-      } catch (err) {
-        console.error('Erreur capture image:', err)
-        Swal.fire({
-          icon: 'error',
-          title: 'Erreur',
-          text: 'Impossible de générer l\'image du ticket. Veuillez réessayer.',
-          confirmButtonColor: '#272d63'
-        })
-      } finally {
-        downloadingImage.value = false
-      }
+        .then((outcome) => imageSaved(outcome, fileName))
+        .catch(imageError)
+        .finally(() => { downloadingImage.value = false })
     }
 
     const shareTicket = async () => {

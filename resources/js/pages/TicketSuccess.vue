@@ -59,12 +59,13 @@
                 </div>
                 <button
                   @click="downloadImage(t, i)"
+                  :disabled="!imagesReady"
                   class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-primea-lg transition-colors flex items-center justify-center gap-2"
                 >
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
-                  Télécharger le billet
+                  {{ imagesReady ? 'Télécharger le billet' : 'Préparation du billet…' }}
                 </button>
               </div>
             </div>
@@ -160,12 +161,12 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, computed, nextTick, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/vue/24/outline'
 import Swal from 'sweetalert2'
-import html2canvas from 'html2canvas'
+import { captureTicketBlob, saveTicketImage } from '../utils/ticketImage'
 import TicketComponent from '../components/TicketComponent.vue'
 import { ticketService } from '../services/api'
 
@@ -256,36 +257,52 @@ export default {
       }
     }
 
-    const downloadImage = async (t, i) => {
-      const el = ticketRefs[i]
-      if (!el) return
-      try {
-        // Attendre le chargement des images (affiche, QR) avant la capture
-        const imgs = Array.from(el.querySelectorAll('img'))
-        await Promise.all(imgs.map((img) => {
-          if (img.complete && img.naturalWidth > 0) return Promise.resolve()
-          return new Promise((resolve) => {
-            img.addEventListener('load', resolve, { once: true })
-            img.addEventListener('error', resolve, { once: true })
-          })
-        }))
-        const canvas = await html2canvas(el, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          imageTimeout: 15000,
-          backgroundColor: '#ffffff',
-          ignoreElements: (node) => node.classList?.contains('ticket-cover-bg')
-        })
-        const link = document.createElement('a')
-        link.download = `ticket-${t.code}.jpg`
-        link.href = canvas.toDataURL('image/jpeg', 0.95)
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-      } catch (e) {
-        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Impossible de générer l\'image.', confirmButtonColor: '#272d63' })
+    // Images des billets préparées dès l'affichage : sur iPhone, un
+    // téléchargement déclenché après une capture de plusieurs secondes sort du
+    // geste de l'utilisateur et Safari l'ignore sans rien dire.
+    const ticketBlobs = ref([])
+    const preparingImages = ref(true)
+    const imagesReady = computed(() => !preparingImages.value)
+
+    const prepareTicketImages = async () => {
+      preparingImages.value = true
+      await nextTick()
+      for (let i = 0; i < ticketCards.value.length; i++) {
+        const el = ticketRefs[i]
+        if (!el) continue
+        try {
+          ticketBlobs.value[i] = await captureTicketBlob(el)
+        } catch (e) {
+          // On laissera le clic retenter : mieux vaut un bouton actif.
+          console.error('Préparation du billet impossible:', e)
+        }
       }
+      preparingImages.value = false
+    }
+
+    const imageError = () => {
+      Swal.fire({ icon: 'error', title: 'Erreur', text: 'Impossible de générer l\'image.', confirmButtonColor: '#272d63' })
+    }
+
+    // Volontairement non-`async` : `navigator.share` doit être appelé dans le
+    // geste, donc sans aucun `await` avant lui.
+    const downloadImage = (t, i) => {
+      const filename = `ticket-${t.code}.jpg`
+      const ready = ticketBlobs.value[i]
+
+      if (ready) {
+        return saveTicketImage(ready, filename).catch(imageError)
+      }
+
+      const el = ticketRefs[i]
+      if (!el) return Promise.resolve()
+
+      return captureTicketBlob(el)
+        .then((blob) => {
+          ticketBlobs.value[i] = blob
+          return saveTicketImage(blob, filename)
+        })
+        .catch(imageError)
     }
 
     const downloadAllPdf = async () => {
@@ -358,6 +375,7 @@ export default {
           order.value = data.data.order
           tickets.value = data.data.order.tickets || []
           await loadTicketCards()
+          prepareTicketImages()
         } else {
           throw new Error(data.message || 'Erreur lors du chargement de la commande')
         }
@@ -482,6 +500,7 @@ export default {
       downloadingAll,
       downloadPdf,
       downloadImage,
+      imagesReady,
       downloadAllPdf,
       downloadAllImages,
       formatPrice,
