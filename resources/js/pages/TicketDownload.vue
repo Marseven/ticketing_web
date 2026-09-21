@@ -64,8 +64,12 @@
             </div>
 
             <!-- Ticket Display -->
-            <div ref="ticketMobileRef" class="mb-6 flex justify-center">
-              <TicketComponent :ticket="ticket" size="small" />
+            <div class="mb-6 flex justify-center">
+              <!-- La réf enveloppe le billet au plus près : capturer le
+                   conteneur ajoutait du blanc autour dans le JPG. -->
+              <div ref="ticketMobileRef" class="w-full">
+                <TicketComponent :ticket="ticket" size="small" />
+              </div>
             </div>
 
             <!-- Download & Share Buttons -->
@@ -140,8 +144,10 @@
           <div class="hidden md:grid md:grid-cols-1 lg:grid-cols-3 gap-6">
 
             <!-- Ticket Column -->
-            <div ref="ticketDesktopRef" class="lg:col-span-2 flex justify-center items-start">
-              <TicketComponent :ticket="ticket" size="large" />
+            <div class="lg:col-span-2 flex justify-center items-start">
+              <div ref="ticketDesktopRef" class="w-full max-w-lg">
+                <TicketComponent :ticket="ticket" size="large" />
+              </div>
             </div>
 
             <!-- Instructions & Actions Column -->
