@@ -272,12 +272,15 @@ class OrderController extends Controller
             // l'événement est configuré service_fee_bearer = 'customer'. Sinon la
             // plateforme les absorbe et le client paie exactement le prix affiché.
             $customerBearsFee = $event->customerBearsServiceFee();
-            $serviceFeeAmount = $customerBearsFee
-                ? round($baseAmount * $event->serviceFeePercent() / 100, 2)
-                : 0;
 
-            // Le client paie le prix de base (+ frais de service si à sa charge)
-            $totalAmount = round($baseAmount + $serviceFeeAmount, 2);
+            // Majoration et non simple addition : e-billing prélève son taux sur
+            // le montant envoyé, pas sur le prix du billet (cf. App\Support\ServiceFee).
+            $totalAmount = \App\Support\ServiceFee::totalToCharge(
+                $baseAmount,
+                $event->serviceFeePercent(),
+                $customerBearsFee
+            );
+            $serviceFeeAmount = $totalAmount - (int) round($baseAmount);
 
             // Net reversé à l'organisateur = base - commission (les frais de
             // service n'impactent PAS la part organisateur)

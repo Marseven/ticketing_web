@@ -1123,21 +1123,27 @@ export default {
     // l'événement est configuré service_fee_bearer = 'customer'. Le backend
     // expose event.service_fee_percent (= 0 quand la plateforme absorbe).
     const SERVICE_FEE_PERCENT = 2.5
-    const feesAmount = computed(() => {
-      if (totalAmount.value === 0) return 0
+
+    // ⚠️ Majoration, pas addition : e-billing prélève son taux sur le montant
+    // envoyé. Pour que l'organisateur touche le prix exact du billet, on facture
+    // `prix / (1 − taux)`, arrondi au franc supérieur (le XAF n'a pas de
+    // centimes). Même formule qu'App\Support\ServiceFee côté serveur : les deux
+    // doivent afficher et débiter le même montant.
+    const feeRate = computed(() => {
       const pct = Number(event.value?.service_fee_percent)
-      if (Number.isFinite(pct)) {
-        return totalAmount.value * pct / 100
-      }
-      // Fallback si l'API n'expose pas encore le taux
-      return event.value?.service_fee_bearer === 'customer'
-        ? totalAmount.value * SERVICE_FEE_PERCENT / 100
-        : 0
+      if (Number.isFinite(pct)) return pct
+      // Repli si l'API n'expose pas encore le taux
+      return event.value?.service_fee_bearer === 'customer' ? SERVICE_FEE_PERCENT : 0
     })
 
     const totalWithFees = computed(() => {
-      return totalAmount.value + feesAmount.value
+      const base = Math.round(totalAmount.value)
+      const rate = feeRate.value
+      if (base <= 0 || !(rate > 0) || rate >= 100) return base
+      return Math.ceil(base / (1 - rate / 100))
     })
+
+    const feesAmount = computed(() => totalWithFees.value - Math.round(totalAmount.value))
 
     const isFreeOrder = computed(() => {
       return orderForm.value.quantity && orderForm.value.ticketTypeId && totalAmount.value === 0

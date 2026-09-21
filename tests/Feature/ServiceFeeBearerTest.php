@@ -84,7 +84,7 @@ class ServiceFeeBearerTest extends TestCase
         ];
     }
 
-    public function test_customer_bears_fee_adds_2_5_percent_to_total(): void
+    public function test_customer_bears_fee_is_grossed_up_not_simply_added(): void
     {
         $event = $this->makeEvent('customer');
 
@@ -93,10 +93,16 @@ class ServiceFeeBearerTest extends TestCase
 
         $order = Order::latest('id')->first();
 
-        // Base = 4 × 1000 = 4000 ; frais 2,5 % = 100 ; total = 4100
-        $this->assertEquals(100.00, (float) $order->service_fee_amount);
-        $this->assertEquals(4100.00, (float) $order->total_amount);
+        // Base = 4 × 1000 = 4000. Ajouter 2,5 % (= 4100) ne suffit pas : e-billing
+        // prélève sur le montant envoyé, et 4100 − 2,5 % = 3997,5 → l'organisateur
+        // serait court. Il faut 4000 / 0,975 = 4102,56 → 4103.
+        $this->assertSame(4103, (int) $order->total_amount);
+        $this->assertSame(103, (int) $order->service_fee_amount);
         $this->assertSame('customer', $order->service_fee_bearer);
+
+        // Le contrôle qui compte : après prélèvement, le prix des billets est entier.
+        $afterGateway = (float) $order->total_amount * (1 - 2.5 / 100);
+        $this->assertGreaterThanOrEqual(4000.0, $afterGateway);
 
         // Net organisateur inchangé = base − commission 10 % = 3600
         $this->assertEquals(3600.00, (float) $order->subtotal_amount);
