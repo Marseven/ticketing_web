@@ -632,49 +632,13 @@ class WebhookController extends Controller
 
             $updateData['paid_at'] = now();
 
-            // Marquer la commande comme payée
-            $order = Order::find($payment->order_id);
-            if ($order) {
-                // Vérifier si la commande n'est pas déjà payée
-                if ($order->status === 'paid') {
-                    Log::warning('🔄 Commande déjà payée (webhook multiple détecté)', [
-                        'order_id' => $order->id,
-                        'payment_id' => $payment->id,
-                        'processed_at' => $order->processed_at
-                    ]);
-                    return; // Ne rien faire
-                }
+            // Encaissement : même chemin que la vérification périodique des
+            // paiements en attente (payments:check-pending), pour qu'un billet
+            // émis sur notification soit identique à un billet émis sur relance.
+            // Le service est idempotent : un webhook rejoué ne crédite pas deux fois.
+            app(\App\Services\PaymentConfirmation::class)->confirm($payment, $updateData);
 
-                $order->update([
-                    'status' => 'paid',  // Utiliser 'paid' au lieu de 'completed' (enum MySQL)
-                    'processed_at' => now(),
-                ]);
-
-                // Émettre les billets
-                $this->issueTickets($order);
-
-                Log::info('✅ Commande payée et billets émis', ['order_id' => $order->id]);
-
-                // Envoyer les notifications
-                try {
-                    $buyer = $order->buyer;
-                    if ($buyer) {
-                        // Notification de paiement réussi
-                        $buyer->notify(new PaymentSuccessful($payment));
-                        Log::info('Notification PaymentSuccessful envoyée', ['order_id' => $order->id, 'payment_id' => $payment->id]);
-
-                        // Notification de billets prêts
-                        $buyer->notify(new TicketsReady($order));
-                        Log::info('Notification TicketsReady envoyée', ['order_id' => $order->id]);
-                    }
-                } catch (\Exception $e) {
-                    Log::error('Erreur envoi notifications paiement', [
-                        'order_id' => $order->id,
-                        'payment_id' => $payment->id,
-                        'error' => $e->getMessage()
-                    ]);
-                }
-            }
+            return;
         } elseif (in_array($internalStatus, ['failed', 'cancelled', 'expired'])) {
             // Libérer les places réservées si le paiement échoue
             $order = Order::find($payment->order_id);

@@ -149,3 +149,32 @@ Après déploiement :
 ```
 
 La config étant mise en cache, sans cela le fuseau reste à l'ancienne valeur.
+
+---
+
+## Récupération des paiements dont la notification s'est perdue
+
+La passerelle ne notifie pas toujours : le client est débité, rien n'arrive, et
+son billet n'est jamais émis (cas Moov du 22 sept. 2026). Plutôt que d'attendre
+une notification qui ne viendra pas, la plateforme **va demander** l'état des
+factures en attente.
+
+```bash
+# Tourne seule toutes les 5 min (routes/console.php). À la main :
+/usr/bin/php artisan payments:check-pending --dry-run   # voir sans encaisser
+/usr/bin/php artisan payments:check-pending             # encaisser
+```
+
+Règles :
+
+- ne regarde que les paiements `initiated` d'une commande `pending`, vieux d'au
+  moins **2 minutes** (laisser sa chance au webhook) et de moins de **48 h** ;
+- facture `processed`/`paid` → encaissement **par le même chemin que le
+  webhook** (`App\Services\PaymentConfirmation`), donc mêmes billets, mêmes
+  e-mails ; idempotent, rien n'est dupliqué si le webhook arrive ensuite ;
+- facture morte (`expired`, `failed`, `cancelled`…) → paiement marqué échoué,
+  **commande laissée en attente** : `CancelPendingOrders` relâchera la place, et
+  le client peut encore refaire un paiement ;
+- passerelle injoignable ou état inconnu → on ne touche à rien.
+
+⚠️ Dépend du cron `schedule:run`. Sans lui, la vérification ne tourne pas.

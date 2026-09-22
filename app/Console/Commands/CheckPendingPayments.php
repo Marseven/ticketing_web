@@ -1,0 +1,104 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Models\Payment;
+use App\Services\EbillingBillState;
+use App\Services\PaymentConfirmation;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
+
+/**
+ * Vérifie auprès de la passerelle les paiements restés en attente.
+ *
+ * La notification d'e-billing se perd parfois : le client est débité, mais rien
+ * n'arrive chez nous et son billet n'est jamais émis. Plutôt que d'attendre une
+ * notification qui ne viendra pas, on va demander l'état de la facture — et on
+ * encaisse par le même chemin que le webhook.
+ *
+ * Tourne toutes les cinq minutes (routes/console.php).
+ */
+class CheckPendingPayments extends Command
+{
+    protected $signature = 'payments:check-pending
+        {--minutes=2 : ne regarder que les paiements initiés depuis au moins ce délai}
+        {--hours=48 : ne pas remonter au-delà de cette ancienneté}
+        {--limit=100 : nombre maximum de paiements interrogés}
+        {--dry-run : lister sans rien encaisser}';
+
+    protected $description = 'Interroge e-billing sur les paiements en attente et encaisse ceux qui sont réglés';
+
+    public function handle(EbillingBillState $states, PaymentConfirmation $confirmation): int
+    {
+        $dryRun = (bool) $this->option('dry-run');
+        $payments = $this->pendingPayments();
+
+        if ($payments->isEmpty()) {
+            $this->info('Aucun paiement en attente à vérifier.');
+
+            return self::SUCCESS;
+        }
+
+        $this->info("{$payments->count()} paiement(s) en attente — vérification auprès d'e-billing…");
+
+        $settled = 0;
+        $dead = 0;
+        $stillWaiting = 0;
+
+        foreach ($payments as $payment) {
+            // En direct : on veut l'état courant de la facture, pas celui qui
+            // avait été enregistré au moment d'une notification précédente.
+            $state = $states->for($payment, preferStored: false);
+
+            if ($states->isPaid($state)) {
+                $this->line("  {$payment->order?->reference} : payé ({$state})");
+
+                if (! $dryRun && $confirmation->confirm($payment, ['ebilling_state' => $state])) {
+                    Log::info('Paiement récupéré par vérification périodique', [
+                        'payment_id' => $payment->id,
+                        'reference' => $payment->order?->reference,
+                    ]);
+                }
+
+                $settled++;
+                continue;
+            }
+
+            if ($states->isDead($state)) {
+                // La facture ne sera pas réglée. On enregistre l'état sans
+                // annuler : `CancelPendingOrders` libère la place à l'expiration,
+                // et le client garde la possibilité de refaire un paiement.
+                if (! $dryRun) {
+                    $payment->update(['status' => 'failed', 'ebilling_state' => $state]);
+                }
+
+                $dead++;
+                continue;
+            }
+
+            $stillWaiting++;
+        }
+
+        $this->newLine();
+        $this->info(($dryRun ? '[simulation] ' : '') . "Encaissés : {$settled} · Abandonnés : {$dead} · Toujours en attente : {$stillWaiting}");
+
+        return self::SUCCESS;
+    }
+
+    /**
+     * Paiements encore en cours, assez vieux pour que la notification normale
+     * ait eu le temps d'arriver, et assez récents pour valoir un appel.
+     */
+    private function pendingPayments()
+    {
+        return Payment::query()
+            ->with('order')
+            ->where('status', 'initiated')
+            ->where('created_at', '<=', now()->subMinutes((int) $this->option('minutes')))
+            ->where('created_at', '>=', now()->subHours((int) $this->option('hours')))
+            ->whereHas('order', fn ($q) => $q->where('status', 'pending'))
+            ->orderBy('id')
+            ->limit((int) $this->option('limit'))
+            ->get();
+    }
+}

@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Order;
 use App\Models\Payment;
-use App\Services\EBillingService;
+use App\Services\EbillingBillState;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -32,10 +32,7 @@ class ReconcileEbillingPayments extends Command
 
     protected $description = 'Annule les commandes créditées à tort par le webhook e-billing';
 
-    /** États d'une facture qui valent paiement encaissé. */
-    private const PAID_STATES = ['processed', 'paid'];
-
-    public function handle(EBillingService $ebilling): int
+    public function handle(EbillingBillState $states): int
     {
         $dryRun = (bool) $this->option('dry-run');
         $payments = $this->paymentsToCheck();
@@ -54,14 +51,14 @@ class ReconcileEbillingPayments extends Command
         $confirmed = 0;
 
         foreach ($payments as $payment) {
-            $state = $this->billState($ebilling, $payment);
+            $state = $this->billState($states, $payment);
 
             if ($state === null) {
                 $unverifiable[] = $payment;
                 continue;
             }
 
-            if (in_array($state, self::PAID_STATES, true)) {
+            if (app(EbillingBillState::class)->isPaid($state)) {
                 $confirmed++;
                 continue;
             }
@@ -117,62 +114,18 @@ class ReconcileEbillingPayments extends Command
     }
 
     /**
-     * État réel de la facture, ou null si la passerelle ne peut pas trancher —
-     * auquel cas on ne touche à rien.
+     * État de la facture. Ici on privilégie l'état déjà enregistré : on juge le
+     * passé, et c'est bien ce qu'e-billing avait annoncé au moment des faits
+     * qui dit si la commande a été créditée à tort.
      */
-    private function billState(EBillingService $ebilling, Payment $payment): ?string
+    private function billState(EbillingBillState $states, Payment $payment): ?string
     {
-        // 1. L'état annoncé par la notification, déjà enregistré au moment du
-        //    webhook. C'est la preuve la plus directe : si la passerelle a dit
-        //    « ready », la facture n'était pas payée, inutile de la rappeler.
-        if (is_string($payment->ebilling_state) && $payment->ebilling_state !== '') {
-            return strtolower(trim($payment->ebilling_state));
-        }
-
-        // 2. Sinon on interroge la passerelle, si on sait quelle facture citer.
-        $billId = $this->billId($payment);
-
-        if (! $billId) {
-            return null;
-        }
-
-        try {
-            $result = $ebilling->getBillStatus($billId);
-            $state = $result['bill_status'] ?? null;
-
-            return is_string($state) && $state !== '' ? strtolower(trim($state)) : null;
-        } catch (\Throwable $e) {
-            $this->warn("  Paiement #{$payment->id} : passerelle injoignable ({$e->getMessage()})");
-
-            return null;
-        }
+        return $states->for($payment, preferStored: true);
     }
 
-    /**
-     * Identifiant de facture, où qu'il ait été rangé : colonne dédiée, ancien
-     * champ `transaction_id`, ou payload (création de facture / webhook).
-     */
     private function billId(Payment $payment): ?string
     {
-        $payload = is_array($payment->payload) ? $payment->payload : [];
-
-        $candidates = [
-            $payment->billing_id,
-            $payload['ebilling_bill_id'] ?? null,
-            $payload['webhook_data']['billingid'] ?? null,
-            $payment->transaction_id,
-        ];
-
-        foreach ($candidates as $candidate) {
-            if (is_string($candidate) && trim($candidate) !== '') {
-                return trim($candidate);
-            }
-            if (is_int($candidate)) {
-                return (string) $candidate;
-            }
-        }
-
-        return null;
+        return app(EbillingBillState::class)->billId($payment);
     }
 
     private function renderReport(int $confirmed, array $unpaid, array $unverifiable): void

@@ -15,6 +15,11 @@ Artisan::command('inspire', function () {
 // comptées comme occupées, donc elles doivent être relâchées vite.
 Schedule::job(new CancelPendingOrders)->everyFifteenMinutes();
 
+// La notification d'e-billing se perd parfois : le client est débité mais son
+// billet n'est jamais émis. On va donc demander l'état des paiements en
+// attente plutôt que d'attendre une notification qui ne viendra pas.
+Schedule::command('payments:check-pending')->everyFiveMinutes()->withoutOverlapping();
+
 // Vérifier les payouts asynchrones SHAP (pending/processing) toutes les 5 min.
 // Compatible mutualisé (Hostinger): un unique cron `schedule:run` suffit,
 // pas besoin de queue worker permanent.
