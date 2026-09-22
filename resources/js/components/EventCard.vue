@@ -357,8 +357,10 @@ export default {
       return text.substring(0, maxLength).trim() + '...'
     }
 
+    // Clic sur la carte : la fiche de l'événement. C'est le geste de quelqu'un
+    // qui veut en savoir plus — seul « Prendre un ticket » mène à l'achat.
     const goToEvent = () => {
-      router.push(`/${props.event.slug}`)
+      router.push(`/${props.event.slug}/details`)
     }
 
     const goToCheckout = () => {

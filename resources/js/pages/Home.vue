@@ -156,7 +156,7 @@
                 <router-link
                   v-for="event in upcomingEvents"
                   :key="event.id"
-                  :to="`/${event.slug}`"
+                  :to="`/${event.slug}/details`"
                   class="flex-shrink-0 w-[80vw] bg-white rounded-xl shadow-md overflow-hidden snap-start"
                 >
                   <SmartImage
@@ -219,7 +219,7 @@
               <router-link
                 v-for="event in upcomingEvents"
                 :key="event.id"
-                :to="`/${event.slug}`"
+                :to="`/${event.slug}/details`"
                 class="block bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow"
               >
                 <SmartImage
@@ -263,7 +263,7 @@
                 <router-link
                   v-for="event in pastEvents"
                   :key="event.id"
-                  :to="`/${event.slug}`"
+                  :to="`/${event.slug}/details`"
                   class="flex-shrink-0 w-[80vw] bg-white rounded-xl shadow-md overflow-hidden grayscale snap-start"
                 >
                   <SmartImage
@@ -315,7 +315,7 @@
               <router-link
                 v-for="event in pastEvents"
                 :key="event.id"
-                :to="`/${event.slug}`"
+                :to="`/${event.slug}/details`"
                 class="block bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow"
               >
                 <SmartImage

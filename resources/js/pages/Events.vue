@@ -564,8 +564,9 @@ export default {
       return new Intl.NumberFormat('fr-FR').format(price)
     }
 
+    // Clic sur la carte : la fiche. Seul « Prendre un ticket » mène à l'achat.
     const goToEvent = (event) => {
-      router.push(`/${event.slug}`)
+      router.push(`/${event.slug}/details`)
     }
 
     const filterByCategory = (categoryId) => {
