@@ -119,3 +119,33 @@ celles dont la facture n'a jamais été réglée. Elle ne touche **jamais** :
 
 Commencer par `--dry-run` : le rapport donne référence, montant, état réel de la
 facture et nombre de billets concernés.
+
+---
+
+## Bascule du fuseau horaire vers Libreville (22 sept. 2026)
+
+L'application tournait en **UTC** alors que le Gabon est à **UTC+1**. Une heure
+saisie « 18:00 » par un organisateur était stockée telle quelle, relue comme de
+l'UTC, puis convertie par le navigateur du visiteur : **19:00 affiché**.
+
+`config/app.php` utilise désormais `env('APP_TIMEZONE', 'Africa/Libreville')`.
+
+**Aucune migration de données n'est nécessaire** pour les dates *saisies*
+(horaires d'événements, ouverture de billetterie) : elles étaient enregistrées
+en heure locale et sont maintenant relues comme telles — l'affichage se corrige
+tout seul.
+
+⚠️ **En revanche, les horodatages générés par la machine** (`created_at`,
+`placed_at`, `paid_at`, `issued_at`, `scanned_at`…) avaient été écrits en UTC.
+Ils seront désormais lus comme de l'heure de Libreville, donc **affichés une
+heure plus tôt que la réalité** pour tout ce qui précède la bascule. Les écarts
+entre deux horodatages restent justes ; seules les heures absolues de
+l'historique sont décalées.
+
+Après déploiement :
+
+```bash
+/usr/bin/php artisan optimize:clear && /usr/bin/php artisan optimize
+```
+
+La config étant mise en cache, sans cela le fuseau reste à l'ancienne valeur.

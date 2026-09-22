@@ -65,7 +65,10 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    // Le produit est gabonais : les horaires saisis et lus sont ceux de
+    // Libreville (UTC+1, sans heure d'été). En UTC, une ouverture de
+    // billetterie saisie « 18:00 » s'affichait 19:00 aux visiteurs.
+    'timezone' => env('APP_TIMEZONE', 'Africa/Libreville'),
 
     /*
     |--------------------------------------------------------------------------
