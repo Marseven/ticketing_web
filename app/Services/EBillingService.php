@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\PaymentGatewayUnavailable;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
@@ -30,19 +31,38 @@ class EBillingService
 
     public function __construct()
     {
-        $this->username = env('EBILLING_USERNAME') ?? throw new \Exception('EBILLING_USERNAME n\'est pas configuré dans .env');
-        $this->sharedKey = env('EBILLING_SHARED_KEY') ?? throw new \Exception('EBILLING_SHARED_KEY n\'est pas configuré dans .env');
-        $this->serverUrl = env('EBILLING_SERVER_URL') ?? throw new \Exception('EBILLING_SERVER_URL n\'est pas configuré dans .env');
-        $this->postUrl = env('EBILLING_POST_URL') ?? throw new \Exception('EBILLING_POST_URL n\'est pas configuré dans .env');
+        // Lecture via `config()` et non `env()` : une fois la configuration mise
+        // en cache (`artisan optimize`), `env()` renvoie null hors des fichiers
+        // de config. Les identifiants devenaient vides et le paiement tombait
+        // en erreur dès le premier déploiement optimisé.
+        $this->username = (string) config('services.ebilling.username');
+        $this->sharedKey = (string) config('services.ebilling.shared_key');
+        $this->serverUrl = (string) config('services.ebilling.server_url');
+        $this->postUrl = (string) config('services.ebilling.post_url');
+
+        $missing = collect([
+            'EBILLING_USERNAME' => $this->username,
+            'EBILLING_SHARED_KEY' => $this->sharedKey,
+            'EBILLING_SERVER_URL' => $this->serverUrl,
+            'EBILLING_POST_URL' => $this->postUrl,
+        ])->filter(fn ($value) => trim($value) === '')->keys();
+
+        if ($missing->isNotEmpty()) {
+            // Le détail part au journal, pas à l'écran du client : le nom des
+            // variables d'environnement n'a rien à faire sur une page d'achat.
+            throw new PaymentGatewayUnavailable(
+                'Configuration e-billing incomplète : ' . $missing->implode(', ')
+            );
+        }
 
         // Cognito est désormais obligatoire (Basic refusé après les échéances
         // billing-easy : Lab 30/06/2026, Prod 31/08/2026) → défaut 'oauth'.
         // 'basic' reste possible pour un environnement encore en période de grâce.
-        $this->authMode = strtolower((string) env('EBILLING_AUTH_MODE', 'oauth'));
-        $this->oauthTokenUrl = trim((string) env('EBILLING_OAUTH_TOKEN_URL', ''));
-        $this->oauthClientId = trim((string) env('EBILLING_OAUTH_CLIENT_ID', ''));
-        $this->oauthClientSecret = trim((string) env('EBILLING_OAUTH_CLIENT_SECRET', ''));
-        $scope = trim((string) env('EBILLING_OAUTH_SCOPE', ''));
+        $this->authMode = strtolower((string) config('services.ebilling.auth_mode', 'oauth'));
+        $this->oauthTokenUrl = trim((string) config('services.ebilling.oauth_token_url', ''));
+        $this->oauthClientId = trim((string) config('services.ebilling.oauth_client_id', ''));
+        $this->oauthClientSecret = trim((string) config('services.ebilling.oauth_client_secret', ''));
+        $scope = trim((string) config('services.ebilling.oauth_scope', ''));
         $this->oauthScope = $scope !== '' ? $scope : self::DEFAULT_OAUTH_SCOPE;
     }
 

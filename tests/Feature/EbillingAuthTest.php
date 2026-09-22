@@ -13,12 +13,33 @@ use Tests\TestCase;
  */
 class EbillingAuthTest extends TestCase
 {
+    /**
+     * Le service lit sa configuration via `config()` et non `env()` — sans quoi
+     * ses identifiants seraient vides dès que la config est mise en cache en
+     * production. Les tests doivent donc poser la config, pas l'environnement.
+     */
+    private const CONFIG_KEYS = [
+        'EBILLING_USERNAME' => 'services.ebilling.username',
+        'EBILLING_SHARED_KEY' => 'services.ebilling.shared_key',
+        'EBILLING_SERVER_URL' => 'services.ebilling.server_url',
+        'EBILLING_POST_URL' => 'services.ebilling.post_url',
+        'EBILLING_AUTH_MODE' => 'services.ebilling.auth_mode',
+        'EBILLING_OAUTH_TOKEN_URL' => 'services.ebilling.oauth_token_url',
+        'EBILLING_OAUTH_CLIENT_ID' => 'services.ebilling.oauth_client_id',
+        'EBILLING_OAUTH_CLIENT_SECRET' => 'services.ebilling.oauth_client_secret',
+        'EBILLING_OAUTH_SCOPE' => 'services.ebilling.oauth_scope',
+    ];
+
     private function setEnv(array $vars): void
     {
         foreach ($vars as $k => $v) {
             putenv("{$k}={$v}");
             $_ENV[$k] = $v;
             $_SERVER[$k] = $v;
+
+            if (isset(self::CONFIG_KEYS[$k])) {
+                config([self::CONFIG_KEYS[$k] => $v]);
+            }
         }
     }
 

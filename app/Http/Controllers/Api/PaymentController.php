@@ -473,7 +473,7 @@ class PaymentController extends Controller
     {
         try {
             // Simulation d'appel API Airtel Money
-            $response = Http::timeout(30)->post(env('AIRTEL_API_URL', 'https://api.airtel.com/payment'), [
+            $response = Http::timeout(30)->post(config('services.airtel.url', 'https://api.airtel.com/payment'), [
                 'reference' => $payment->provider_txn_ref,
                 'amount' => $payment->amount,
                 'phone' => $phone,
@@ -522,7 +522,7 @@ class PaymentController extends Controller
     {
         try {
             // Simulation d'appel API Moov Money
-            $response = Http::timeout(30)->post(env('MOOV_API_URL', 'https://api.moov.com/payment'), [
+            $response = Http::timeout(30)->post(config('services.moov.url', 'https://api.moov.com/payment'), [
                 'reference' => $payment->provider_txn_ref,
                 'amount' => $payment->amount,
                 'phone' => $phone,
@@ -570,12 +570,12 @@ class PaymentController extends Controller
     private function initiateCardPayment(Payment $payment): array
     {
         // Générer une URL de paiement sécurisée
-        $paymentUrl = env('CARD_PAYMENT_URL', 'https://secure.payment.com') . '?' . http_build_query([
+        $paymentUrl = config('services.card.url', 'https://secure.payment.com') . '?' . http_build_query([
             'reference' => $payment->provider_txn_ref,
             'amount' => $payment->amount,
             'currency' => 'XAF', // Franc CFA CEMAC (Gabon)
-            'return_url' => env('APP_URL') . '/payment/success',
-            'cancel_url' => env('APP_URL') . '/payment/cancel',
+            'return_url' => config('app.url') . '/payment/success',
+            'cancel_url' => config('app.url') . '/payment/cancel',
             'callback_url' => route('webhook.card'),
         ]);
 
@@ -903,7 +903,10 @@ class PaymentController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur technique: ' . $e->getMessage()
+                // Message standard : le détail est au journal juste au-dessus.
+                // Un message technique n'aide pas l'acheteur et expose le
+                // fonctionnement interne (variables d'environnement, URLs).
+                'message' => \App\Exceptions\PaymentGatewayUnavailable::PUBLIC_MESSAGE
             ], 500);
         }
     }
@@ -1397,7 +1400,10 @@ class PaymentController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur technique: ' . $e->getMessage()
+                // Message standard : le détail est au journal juste au-dessus.
+                // Un message technique n'aide pas l'acheteur et expose le
+                // fonctionnement interne (variables d'environnement, URLs).
+                'message' => \App\Exceptions\PaymentGatewayUnavailable::PUBLIC_MESSAGE
             ], 500);
         }
     }

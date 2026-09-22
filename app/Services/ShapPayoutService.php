@@ -17,9 +17,12 @@ class ShapPayoutService
 
     public function __construct()
     {
-        $this->apiId = trim(env('API_PAYOUT_ID', ''));
-        $this->apiSecret = trim(env('API_PAYOUT_SECRET', ''));
-        $this->baseUrl = trim(env('SHAP_BASE_URL', 'https://test.billing-easy.net/shap/api/v1/merchant/'));
+        // `config()` et non `env()` : avec la configuration en cache
+        // (`artisan optimize`), `env()` renvoie null hors des fichiers de
+        // config — les identifiants de versement seraient vides en production.
+        $this->apiId = trim((string) config('services.shap.api_id', ''));
+        $this->apiSecret = trim((string) config('services.shap.api_secret', ''));
+        $this->baseUrl = trim((string) config('services.shap.base_url', ''));
 
         // Log de vérification au démarrage
         Log::debug('ShapPayoutService initialized', [
