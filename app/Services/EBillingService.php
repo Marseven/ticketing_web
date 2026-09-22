@@ -155,6 +155,37 @@ class EBillingService
     }
 
     /**
+     * La passerelle accepte-t-elle nos identifiants ?
+     *
+     * Demande un jeton sans rien facturer : c'est la seule façon de distinguer
+     * « les identifiants sont présents » de « les identifiants sont bons », et
+     * de le savoir avant qu'un client ne bute sur la page d'achat.
+     *
+     * @return array{ok: bool, detail: string}
+     */
+    public function authCheck(): array
+    {
+        if (! $this->usesOAuth()) {
+            // En mode Basic, aucun point d'entrée ne valide les identifiants
+            // sans créer de facture : on s'arrête à leur présence.
+            return [
+                'ok' => true,
+                'detail' => 'mode Basic — présence vérifiée, validité non testable sans créer de facture',
+            ];
+        }
+
+        try {
+            $token = $this->oauthToken(force: true);
+        } catch (\Throwable $e) {
+            return ['ok' => false, 'detail' => $e->getMessage()];
+        }
+
+        return $token !== ''
+            ? ['ok' => true, 'detail' => 'jeton OAuth Cognito obtenu']
+            : ['ok' => false, 'detail' => 'jeton vide renvoyé par Cognito'];
+    }
+
+    /**
      * Créer une facture E-Billing
      */
     public function createBill(array $data): array
