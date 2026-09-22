@@ -230,7 +230,7 @@
 
                     <button
                       v-if="!isEventPast(event)"
-                      @click.stop="$router.push(`/checkout/${event.slug}`)"
+                      @click.stop="$router.push(`/${event.slug}`)"
                       class="btn-ticket btn-ticket--pulse"
                     >
                       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -307,7 +307,7 @@
 
                     <button
                       v-if="!isEventPast(event)"
-                      @click.stop="$router.push(`/checkout/${event.slug}`)"
+                      @click.stop="$router.push(`/${event.slug}`)"
                       class="btn-ticket btn-ticket--pulse"
                     >
                       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -388,7 +388,7 @@ export default {
         }
       }
 
-      router.push(`/checkout/${slug}`)
+      router.push(`/${slug}`)
     }
 
     const handleReserveClick = (event) => {

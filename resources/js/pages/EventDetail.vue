@@ -480,11 +480,11 @@ export default {
     }
 
     const goToBooking = () => {
-      router.push(`/checkout/${route.params.slug}`)
+      router.push(`/${route.params.slug}`)
     }
 
     const goToBookingWithType = (ticketTypeId) => {
-      router.push(`/checkout/${route.params.slug}?ticketType=${ticketTypeId}`)
+      router.push(`/${route.params.slug}?ticketType=${ticketTypeId}`)
     }
 
     const loadEvent = async () => {

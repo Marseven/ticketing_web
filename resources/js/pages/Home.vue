@@ -197,7 +197,7 @@
                             </p>
                           </div>
                           <router-link
-                            :to="`/checkout/${event.slug}`"
+                            :to="`/${event.slug}`"
                             class="btn-ticket btn-ticket--pulse"
                             @click.stop
                           >

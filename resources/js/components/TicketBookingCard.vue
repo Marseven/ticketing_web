@@ -91,7 +91,7 @@ export default {
 
     const proceedToCheckout = () => {
       if (totalQuantity.value > 0) {
-        router.push(`/checkout/${props.eventId}`)
+        router.push(`/${props.eventId}`)
       }
     }
 

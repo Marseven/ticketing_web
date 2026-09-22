@@ -89,8 +89,10 @@ const routes = [
     { path: '/events', component: Events, name: 'events' },
     // Le lien d'un événement mène DIRECTEMENT à l'achat (page checkout).
     // L'ancien lien /events/:slug redirige aussi vers l'achat (compat).
-    { path: '/events/:slug', redirect: to => ({ path: `/checkout/${to.params.slug}` }) },
-    { path: '/checkout/:eventSlug', component: Checkout, name: 'checkout' },
+    { path: '/events/:slug', redirect: to => ({ path: `/${to.params.slug}` }) },
+    // Ancien lien d'achat : renvoie vers le lien court, pour que l'adresse
+    // affichée — donc celle qu'on recopie et partage — reste la plus courte.
+    { path: '/checkout/:eventSlug', redirect: to => ({ path: `/${to.params.eventSlug}` }) },
     // Page d'infos de l'événement, accessible via un lien « détails ».
     { path: '/:slug/details', component: EventDetail, name: 'event-details' },
     { path: '/payment/:reference', component: Payment, name: 'payment' },
@@ -190,11 +192,12 @@ const routes = [
     // Scanner
     { path: '/scanner', component: ScannerApp, name: 'scanner' },
 
-    // Lien court d'un événement : /:slug (doit rester la DERNIÈRE route pour ne
-    // capter que les segments non déjà pris par une route spécifique).
-    // Lien court d'un événement : /:slug -> ACHAT direct (page checkout).
+    // Lien d'un événement : /:slug mène DIRECTEMENT à l'achat, et c'est cette
+    // page elle-même — plus une redirection : l'adresse doit rester courte
+    // (primea.ga/chill-expo-1), c'est ce qu'on partage.
+    // Le paramètre s'appelle `eventSlug` : la page d'achat le lit sous ce nom.
     // Doit rester la DERNIÈRE route (ne capte que les segments non pris).
-    { path: '/:slug', name: 'event-detail', redirect: to => ({ path: `/checkout/${to.params.slug}` }) },
+    { path: '/:eventSlug', component: Checkout, name: 'event-detail' },
 ];
 
 const router = createRouter({
