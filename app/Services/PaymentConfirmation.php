@@ -57,7 +57,7 @@ class PaymentConfirmation
             $alreadyPaid = in_array($order->status, ['paid', 'completed'], true);
 
             if (! $alreadyPaid) {
-                $order->update(['status' => 'paid', 'processed_at' => now()]);
+                $order->update(['status' => 'paid', 'paid_at' => now()]);
             }
 
             // Les billets naissent ici. Le service est lui-même idempotent.

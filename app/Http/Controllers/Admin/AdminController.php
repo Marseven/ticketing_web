@@ -2903,13 +2903,58 @@ class AdminController extends Controller
                 ], 404);
             }
 
-            $order->status = $request->status;
-            $order->save();
+            $previous = $order->status;
+            $admin = $request->user();
+
+            // Statut et billets vont de pair : soit les deux changent, soit
+            // aucun. Sans ça, un incident au milieu laisse une commande payée
+            // sans billet — ou l'inverse.
+            \DB::transaction(function () use ($order, $request, $previous, $admin) {
+                $order->status = $request->status;
+
+                if ($request->status === 'paid' && $previous !== 'paid') {
+                    $order->paid_at = now();
+                }
+
+                $order->save();
+
+                // Les billets ne naissent qu'au paiement : une validation
+                // manuelle doit donc les émettre, sinon l'admin confirme une
+                // commande payée qui ne donne aucun billet. Le service est
+                // idempotent.
+                if ($request->status === 'paid' && $previous !== 'paid') {
+                    app(\App\Services\TicketIssuer::class)->issue($order->fresh());
+
+                    Log::info('Commande validée à la main par un administrateur', [
+                        'order_id' => $order->id,
+                        'reference' => $order->reference,
+                        'admin_id' => $admin?->id,
+                    ]);
+                }
+
+                // Annulation manuelle : relâcher les places, comme le fait le
+                // webhook sur un paiement échoué.
+                if ($request->status === 'cancelled' && $previous !== 'cancelled') {
+                    foreach ($order->tickets()->get() as $ticket) {
+                        if ($ticket->status === 'used') {
+                            continue; // la personne est entrée : on ne réécrit pas l'histoire
+                        }
+
+                        $ticket->update(['status' => 'void', 'issued_at' => null]);
+                    }
+
+                    Log::info('Commande annulée à la main par un administrateur', [
+                        'order_id' => $order->id,
+                        'reference' => $order->reference,
+                        'admin_id' => $admin?->id,
+                    ]);
+                }
+            });
 
             return response()->json([
                 'success' => true,
                 'message' => 'Statut de la commande mis à jour',
-                'data' => ['order' => $order->fresh()]
+                'data' => ['order' => $order->fresh()->load('tickets')]
             ]);
 
         } catch (\Exception $e) {

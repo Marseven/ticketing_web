@@ -334,7 +334,7 @@ class OrderController extends Controller
             if ($totalAmount == 0) {
                 $order->update([
                     'status' => 'paid',
-                    'processed_at' => now(),
+                    'paid_at' => now(),
                 ]);
                 app(\App\Services\TicketIssuer::class)->issue($order->fresh());
             }

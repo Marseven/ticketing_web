@@ -25,6 +25,7 @@ class Order extends Model
         'status',
         'reference',
         'placed_at',
+        'paid_at',
         'is_guest_order',
         'guest_name',
         'guest_email',
@@ -33,6 +34,7 @@ class Order extends Model
 
     protected $casts = [
         'placed_at' => 'datetime',
+        'paid_at' => 'datetime',
         'subtotal_amount' => 'decimal:2',
         'fees_amount' => 'decimal:2',
         'commission_percentage' => 'decimal:2',

@@ -90,7 +90,7 @@
           <select v-model="filters.status" @change="loadOrders" class="w-full border rounded-lg px-3 py-2">
             <option value="">Tous les statuts</option>
             <option value="pending">En attente</option>
-            <option value="confirmed">Confirmée</option>
+            <option value="paid">Payée</option>
             <option value="cancelled">Annulée</option>
             <option value="refunded">Remboursée</option>
           </select>
@@ -207,11 +207,11 @@
                 <button @click="viewOrderDetails(order)" class="text-blue-600 hover:text-blue-900">
                   Détails
                 </button>
-                <button v-if="order.status === 'pending'" @click="updateOrderStatus(order, 'confirmed')" 
+                <button v-if="order.status === 'pending'" @click="updateOrderStatus(order, 'paid')" 
                         class="text-green-600 hover:text-green-900">
                   Confirmer
                 </button>
-                <button v-if="['pending', 'confirmed'].includes(order.status)" @click="updateOrderStatus(order, 'cancelled')" 
+                <button v-if="['pending', 'paid'].includes(order.status)" @click="updateOrderStatus(order, 'cancelled')" 
                         class="text-red-600 hover:text-red-900">
                   Annuler
                 </button>
@@ -283,9 +283,9 @@
                     <p class="text-sm text-gray-900">{{ formatDateTime(selectedOrder.created_at) }}</p>
                   </div>
                   
-                  <div v-if="selectedOrder.confirmed_at">
-                    <label class="block text-sm font-medium text-gray-700">Date de confirmation</label>
-                    <p class="text-sm text-gray-900">{{ formatDateTime(selectedOrder.confirmed_at) }}</p>
+                  <div v-if="selectedOrder.paid_at">
+                    <label class="block text-sm font-medium text-gray-700">Date de paiement</label>
+                    <p class="text-sm text-gray-900">{{ formatDateTime(selectedOrder.paid_at) }}</p>
                   </div>
                 </div>
               </div>
@@ -399,11 +399,11 @@
 
           <!-- Actions -->
           <div class="border-t pt-6 flex justify-end space-x-3">
-            <button v-if="selectedOrder.status === 'pending'" @click="updateOrderStatus(selectedOrder, 'confirmed')" 
+            <button v-if="selectedOrder.status === 'pending'" @click="updateOrderStatus(selectedOrder, 'paid')" 
                     class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
               Confirmer la Commande
             </button>
-            <button v-if="['pending', 'confirmed'].includes(selectedOrder.status)" @click="updateOrderStatus(selectedOrder, 'cancelled')" 
+            <button v-if="['pending', 'paid'].includes(selectedOrder.status)" @click="updateOrderStatus(selectedOrder, 'cancelled')" 
                     class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
               Annuler la Commande
             </button>
@@ -654,7 +654,7 @@ export default {
       const result = await Swal.fire({
         icon: 'warning',
         title: 'Confirmation',
-        text: `Êtes-vous sûr de vouloir ${newStatus === 'confirmed' ? 'confirmer' : 'annuler'} cette commande ?`,
+        text: `Êtes-vous sûr de vouloir ${newStatus === 'paid' ? 'confirmer' : 'annuler'} cette commande ?`,
         showCancelButton: true,
         confirmButtonColor: '#272d63',
         cancelButtonColor: '#d33',
@@ -682,7 +682,7 @@ export default {
 
         const data = await response.json()
         if (data.success) {
-          Swal.fire({ icon: 'success', title: 'Succès', text: `Commande ${newStatus === 'confirmed' ? 'confirmée' : 'annulée'} avec succès`, confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'success', title: 'Succès', text: `Commande ${newStatus === 'paid' ? 'confirmée' : 'annulée'} avec succès`, confirmButtonColor: '#272d63' })
           loadOrders()
           if (showDetailsModal.value) {
             selectedOrder.value.status = newStatus
