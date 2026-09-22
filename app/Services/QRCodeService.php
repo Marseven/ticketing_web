@@ -264,9 +264,16 @@ class QRCodeService
                 $offset += 4 + $length;
             }
 
-            // Vérifier le CRC
+            // Vérifier le CRC.
+            //
+            // Il porte sur tout le QR sauf ses quatre derniers caractères — et
+            // la balise « 6304 » en fait déjà partie, elle est dans la chaîne.
+            // La rajouter ici la comptait deux fois : aucun QR sécurisé émis
+            // par `generateTicketQRCode` ne se relisait, ni ici ni dans l'app
+            // mobile, qui portait la même erreur. Les billets munis d'un QR
+            // sécurisé étaient donc refusés à l'entrée comme « invalides ».
             $expectedCrc = substr($qrData, -4);
-            $dataForCrc = substr($qrData, 0, -4) . self::CRC . '04';
+            $dataForCrc = substr($qrData, 0, -4);
             $calculatedCrc = $this->calculateCRC($dataForCrc);
 
             if ($expectedCrc !== $calculatedCrc) {

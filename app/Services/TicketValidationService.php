@@ -160,7 +160,13 @@ class TicketValidationService
             // Décodage sécurisé impossible → on tente le code simple.
         }
 
-        $ticket = Ticket::byCode($scanned)->first();
+        // Tout ce que le popup de l'agent affiche est chargé d'un coup : à
+        // l'entrée on scanne à la chaîne, une poignée de requêtes par billet se
+        // paie en file d'attente.
+        $ticket = Ticket::byCode($scanned)
+            ->with(['event.venue', 'ticketType', 'buyer', 'schedule', 'order.items'])
+            ->first();
+
         return [$ticket, $ticket ? 'FALLBACK' : 'NOT_FOUND'];
     }
 
@@ -229,6 +235,14 @@ class TicketValidationService
             'ticket_type' => $ticket->ticketType ? [
                 'id' => $ticket->ticketType->id,
                 'name' => $ticket->ticketType->name,
+                // Prix payé s'il est connu (tarification variable), sinon prix
+                // catalogue. L'agent de contrôle voit ainsi la catégorie ET son
+                // tarif, ce qui lève l'essentiel des contestations à l'entrée.
+                'price' => $this->pricePaid($ticket),
+                'currency' => $ticket->order?->currency ?? 'XAF',
+            ] : null,
+            'order' => $ticket->order ? [
+                'reference' => $ticket->order->reference,
             ] : null,
             // 'holder' = nouvelle clé standardisée ; 'buyer' = alias rétro-compat
             // (l'app mobile et l'ancien /tickets/validate lisent 'buyer').
@@ -243,5 +257,22 @@ class TicketValidationService
             'issued_at' => $ticket->issued_at?->format('d/m/Y H:i:s'),
             'used_at' => $ticket->used_at?->format('d/m/Y H:i:s'),
         ];
+    }
+
+    /**
+     * Ce que cette place a coûté.
+     *
+     * La ligne de commande fait foi : avec la tarification variable, le prix
+     * catalogue d'aujourd'hui n'est pas celui payé en prévente. À défaut de
+     * ligne (billet physique, invitation), on retombe sur le prix du type.
+     */
+    private function pricePaid(Ticket $ticket): ?float
+    {
+        $line = $ticket->order?->items
+            ?->firstWhere('ticket_type_id', $ticket->ticket_type_id);
+
+        $price = $line?->unit_price ?? $ticket->ticketType?->price;
+
+        return $price === null ? null : (float) $price;
     }
 }
