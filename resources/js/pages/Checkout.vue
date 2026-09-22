@@ -125,7 +125,7 @@
             <!-- Colonne droite - Formulaire d'achat -->
             <div class="bg-white rounded-primea-xl shadow-primea p-8">
               <h3 class="text-2xl font-bold text-primea-blue mb-6">
-                {{ isEventPassed ? 'Achat impossible' : 'Votre achat' }}
+                {{ isEventPassed ? 'Achat impossible' : (salesNotOpenYet ? 'Billetterie à venir' : 'Votre achat') }}
               </h3>
 
               <!-- Message événement passé -->
@@ -141,7 +141,41 @@
                 </router-link>
               </div>
               
-              <form v-if="!isEventPassed" @submit.prevent="processOrder" class="space-y-6">
+              <!-- Billetterie annoncée mais pas encore ouverte : l'événement est
+                   visible, l'achat attend l'heure dite. Le décompte se met à
+                   jour tout seul et le formulaire apparaît à l'échéance. -->
+              <div
+                v-if="!isEventPassed && salesNotOpenYet"
+                class="bg-primea-blue/5 border-2 border-primea-blue/20 rounded-primea-lg p-6 text-center"
+              >
+                <p class="text-sm text-gray-600">La billetterie ouvre</p>
+                <p class="text-lg font-bold text-primea-blue mt-1">{{ salesOpeningLabel }}</p>
+
+                <div class="flex justify-center gap-2 mt-5">
+                  <div v-if="salesCountdown.days > 0" class="bg-white border-2 border-primea-blue rounded-primea-lg p-3 min-w-[64px]">
+                    <div class="text-2xl font-bold text-primea-blue">{{ salesCountdown.days }}</div>
+                    <div class="text-xs text-gray-600">JOURS</div>
+                  </div>
+                  <div class="bg-white border-2 border-primea-blue rounded-primea-lg p-3 min-w-[64px]">
+                    <div class="text-2xl font-bold text-primea-blue">{{ salesCountdown.hours }}</div>
+                    <div class="text-xs text-gray-600">HEURES</div>
+                  </div>
+                  <div class="bg-white border-2 border-primea-blue rounded-primea-lg p-3 min-w-[64px]">
+                    <div class="text-2xl font-bold text-primea-blue">{{ salesCountdown.minutes }}</div>
+                    <div class="text-xs text-gray-600">MIN</div>
+                  </div>
+                  <div class="bg-white border-2 border-primea-blue rounded-primea-lg p-3 min-w-[64px]">
+                    <div class="text-2xl font-bold text-primea-blue">{{ salesCountdown.seconds }}</div>
+                    <div class="text-xs text-gray-600">SEC</div>
+                  </div>
+                </div>
+
+                <p class="text-xs text-gray-500 mt-5">
+                  Gardez cette page ouverte : l'achat s'active automatiquement à l'ouverture.
+                </p>
+              </div>
+
+              <form v-if="!isEventPassed && !salesNotOpenYet" @submit.prevent="processOrder" class="space-y-6">
 
                 <!-- Sélection de la date (multi-dates) Desktop -->
                 <div v-if="hasMultipleDates">
@@ -612,8 +646,41 @@
             </router-link>
           </div>
 
+          <!-- Billetterie pas encore ouverte (mobile) : même règle que sur
+               grand écran, l'achat attend l'heure annoncée. -->
+          <div
+            v-if="!isEventPassed && salesNotOpenYet"
+            class="bg-primea-blue/5 border-2 border-primea-blue/20 rounded-xl p-5 text-center mx-auto w-[86%]"
+          >
+            <p class="text-xs text-gray-600">La billetterie ouvre</p>
+            <p class="text-base font-bold text-primea-blue mt-1">{{ salesOpeningLabel }}</p>
+
+            <div class="flex justify-center gap-2 mt-4">
+              <div v-if="salesCountdown.days > 0" class="bg-white border-2 border-primea-blue rounded-lg px-3 py-2 min-w-[56px]">
+                <div class="text-xl font-bold text-primea-blue">{{ salesCountdown.days }}</div>
+                <div class="text-[10px] text-gray-600">JOURS</div>
+              </div>
+              <div class="bg-white border-2 border-primea-blue rounded-lg px-3 py-2 min-w-[56px]">
+                <div class="text-xl font-bold text-primea-blue">{{ salesCountdown.hours }}</div>
+                <div class="text-[10px] text-gray-600">HEURES</div>
+              </div>
+              <div class="bg-white border-2 border-primea-blue rounded-lg px-3 py-2 min-w-[56px]">
+                <div class="text-xl font-bold text-primea-blue">{{ salesCountdown.minutes }}</div>
+                <div class="text-[10px] text-gray-600">MIN</div>
+              </div>
+              <div class="bg-white border-2 border-primea-blue rounded-lg px-3 py-2 min-w-[56px]">
+                <div class="text-xl font-bold text-primea-blue">{{ salesCountdown.seconds }}</div>
+                <div class="text-[10px] text-gray-600">SEC</div>
+              </div>
+            </div>
+
+            <p class="text-[11px] text-gray-500 mt-4">
+              Gardez cette page ouverte : l'achat s'active automatiquement.
+            </p>
+          </div>
+
           <!-- Order Form -->
-          <form v-if="!isEventPassed" @submit.prevent="processOrder" class="space-y-5 w-[76%] mx-auto">
+          <form v-if="!isEventPassed && !salesNotOpenYet" @submit.prevent="processOrder" class="space-y-5 w-[76%] mx-auto">
 
             <!-- Ticket Type Selection -->
             <div>
@@ -1051,6 +1118,44 @@ export default {
       const salesCutoff = isMultiDayEvent ? endsAt : startsAt
 
       return new Date() > salesCutoff
+    })
+
+    // --- Ouverture de la billetterie -------------------------------------
+    // L'API renvoie la DATE (pas un booléen « ouvert ») : la réponse est mise
+    // en cache 60 s côté serveur, un booléen y serait périmé pile à l'instant
+    // qui compte. On compare donc à `currentTime`, qui bat à la seconde — le
+    // formulaire d'achat apparaît de lui-même à l'échéance.
+    const salesOpeningDate = computed(() => {
+      const raw = event.value?.sales_start_at
+      if (!raw) return null
+      const d = new Date(raw)
+      return Number.isNaN(d.getTime()) ? null : d
+    })
+
+    const salesNotOpenYet = computed(() => {
+      const d = salesOpeningDate.value
+      return !!d && d.getTime() > currentTime.value.getTime()
+    })
+
+    const salesCountdown = computed(() => {
+      const d = salesOpeningDate.value
+      const diff = d ? d.getTime() - currentTime.value.getTime() : 0
+      if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 }
+      return {
+        days: Math.floor(diff / 86400000),
+        hours: Math.floor((diff % 86400000) / 3600000),
+        minutes: Math.floor((diff % 3600000) / 60000),
+        seconds: Math.floor((diff % 60000) / 1000),
+      }
+    })
+
+    const salesOpeningLabel = computed(() => {
+      const d = salesOpeningDate.value
+      if (!d) return ''
+      return d.toLocaleString('fr-FR', {
+        weekday: 'long', day: 'numeric', month: 'long',
+        hour: '2-digit', minute: '2-digit',
+      })
     })
 
     const timeUntilEvent = computed(() => {
@@ -1921,6 +2026,9 @@ export default {
       eventTime,
       eventDate,
       isEventPassed,
+      salesNotOpenYet,
+      salesCountdown,
+      salesOpeningLabel,
       timeUntilEvent,
       availableTicketTypes,
       canPurchaseTickets,

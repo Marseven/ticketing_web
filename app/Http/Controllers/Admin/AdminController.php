@@ -861,6 +861,8 @@ class AdminController extends Controller
                 'image_file' => $imageFile ?: $request->input('image_file'),
                 'service_fee_bearer' => $request->input('service_fee_bearer', 'platform'),
                 'show_remaining_seats' => $request->boolean('show_remaining_seats'),
+                // Ouverture de la billetterie : vide = vente ouverte dès la publication.
+                'sales_start_at' => $request->filled('sales_start_at') ? $request->input('sales_start_at') : null,
             ]);
 
             // Créer les horaires
@@ -1039,6 +1041,11 @@ class AdminController extends Controller
 
             if ($request->has('service_fee_bearer')) {
                 $updateData['service_fee_bearer'] = $request->input('service_fee_bearer');
+            }
+
+            if ($request->has('sales_start_at')) {
+                // Vider le champ rouvre la vente immédiatement.
+                $updateData['sales_start_at'] = $request->filled('sales_start_at') ? $request->input('sales_start_at') : null;
             }
 
             if ($request->has('show_remaining_seats')) {

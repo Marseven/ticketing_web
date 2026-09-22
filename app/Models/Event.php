@@ -37,6 +37,7 @@ class Event extends Model
         'instant_payout_phone',
         'payout_settled_at',
         'published_at',
+        'sales_start_at',
         'created_by',
         'updated_by',
     ];
@@ -55,6 +56,7 @@ class Event extends Model
         'use_variable_pricing' => 'boolean',
         'show_remaining_seats' => 'boolean',
         'commission_percentage' => 'decimal:2',
+        'sales_start_at' => 'datetime',
         'approved_at' => 'datetime',
         'payout_settled_at' => 'datetime',
         'created_at' => 'datetime',
@@ -243,6 +245,26 @@ class Event extends Model
     public function canSellTickets(): bool
     {
         return $this->status === 'published' && $this->isApproved();
+    }
+
+    /**
+     * La billetterie est-elle ouverte ?
+     *
+     * ⚠️ Distinct de `canSellTickets()` — qui conditionne la VISIBILITÉ de
+     * l'événement. Un événement annoncé avant l'ouverture des ventes doit être
+     * visible (avec son compte à rebours) sans être achetable.
+     */
+    public function salesOpen(): bool
+    {
+        return $this->sales_start_at === null || $this->sales_start_at->isPast();
+    }
+
+    /**
+     * Ouverture à venir : la date si elle n'est pas encore atteinte, sinon null.
+     */
+    public function salesOpeningAt(): ?\Illuminate\Support\Carbon
+    {
+        return $this->salesOpen() ? null : $this->sales_start_at;
     }
 
     /**

@@ -301,6 +301,23 @@
                 </span>
                 <input type="checkbox" v-model="form.show_remaining_seats" class="mt-1 rounded border-gray-300 text-primea-blue focus:ring-primea-blue" />
               </label>
+
+              <!-- Ouverture différée : l'affiche circule avant la mise en vente. -->
+              <div class="mt-5 pt-5 border-t border-gray-100">
+                <label class="block text-lg md:text-xl font-semibold text-primea-blue font-primea mb-1">
+                  Ouverture de la billetterie
+                  <span class="text-xs font-normal text-gray-500">(facultatif)</span>
+                </label>
+                <p class="text-xs text-gray-500 font-primea mb-2">
+                  Laissez vide pour vendre dès la publication. Sinon votre événement est visible
+                  avec un compte à rebours, et l'achat s'active tout seul à cette date.
+                </p>
+                <input
+                  type="datetime-local"
+                  v-model="form.sales_start_at"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-primea focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                />
+              </div>
             </div>
 
             <!-- Tarification variable / Prévente -->
@@ -573,6 +590,7 @@ const form = reactive({
   // Tarification variable / prévente
   use_variable_pricing: false,
   show_remaining_seats: false,
+  sales_start_at: '',
   price_tiers: [], // { ticket_index, price, valid_from, valid_until, description }
   // Nouveaux champs pour lieu
   new_venue_name: '',
@@ -794,6 +812,7 @@ const createEvent = async () => {
       instant_payout_phone: form.payout_mode === 'instant' ? form.instant_payout_phone : '',
       service_fee_bearer: form.service_fee_bearer,
       show_remaining_seats: form.show_remaining_seats ? 1 : 0,
+      sales_start_at: form.sales_start_at || null,
       schedules: form.schedules.map(schedule => ({
         starts_at: schedule.starts_at,
         ends_at: schedule.ends_at,

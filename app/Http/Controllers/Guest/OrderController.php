@@ -115,6 +115,19 @@ class OrderController extends Controller
             }
 
             // Vérifier que l'événement est publié ET approuvé par l'admin
+            // La billetterie n'ouvre qu'à la date annoncée : l'événement est
+            // visible avant (avec son compte à rebours), mais pas achetable.
+            // Contrôle côté serveur : l'écran ne protège rien.
+            if (! $event->salesOpen()) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'La billetterie ouvre le ' . $event->sales_start_at->locale('fr')->isoFormat('D MMMM YYYY [à] HH[h]mm') . '.',
+                    'error_code' => 'SALES_NOT_OPEN',
+                    'sales_start_at' => $event->sales_start_at->toIso8601String(),
+                ], 400);
+            }
+
             if (!$event->canSellTickets()) {
                 DB::rollBack();
                 return response()->json([

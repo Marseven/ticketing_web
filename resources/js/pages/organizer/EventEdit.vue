@@ -366,6 +366,23 @@
                     </label>
                     <p class="text-xs text-gray-500 mt-1 font-primea">Masqué par défaut. Activez pour créer un sentiment d'urgence ; sinon le public ne voit pas le nombre de places restantes.</p>
                   </div>
+
+                  <!-- Ouverture différée : l'affiche circule avant la mise en vente. -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 font-primea mb-1">
+                      Ouverture de la billetterie
+                      <span class="text-xs font-normal text-gray-500">(facultatif)</span>
+                    </label>
+                    <input
+                      v-model="form.sales_start_at"
+                      type="datetime-local"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primea-blue focus:border-primea-blue font-primea"
+                    />
+                    <p class="text-xs text-gray-500 mt-1 font-primea">
+                      Vide = vente ouverte dès la publication. Sinon l'événement est visible avec un
+                      compte à rebours, et l'achat s'active à cette date.
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -540,6 +557,7 @@ const form = reactive({
   image_file: null,
   is_active: false,
   show_remaining_seats: false,
+  sales_start_at: '',
   payout_mode: 'deferred',
   instant_payout_phone: '',
   service_fee_bearer: 'platform',
@@ -622,6 +640,10 @@ const loadEvent = async () => {
       instant_payout_phone: event.value.instant_payout_phone || '',
       service_fee_bearer: event.value.service_fee_bearer || 'platform',
       show_remaining_seats: event.value.show_remaining_seats ?? false,
+      // <input datetime-local> attend « AAAA-MM-JJTHH:MM ».
+      sales_start_at: event.value.sales_start_at
+        ? String(event.value.sales_start_at).slice(0, 16).replace(' ', 'T')
+        : '',
       schedules: (event.value.schedules && event.value.schedules.length > 0)
         ? event.value.schedules.map(s => ({
             starts_at: s.starts_at ? new Date(s.starts_at).toISOString().slice(0, 16) : '',
@@ -674,6 +696,7 @@ const updateEvent = async () => {
       instant_payout_phone: form.payout_mode === 'instant' ? form.instant_payout_phone : '',
       service_fee_bearer: form.service_fee_bearer,
       show_remaining_seats: form.show_remaining_seats ? 1 : 0,
+      sales_start_at: form.sales_start_at || null,
       schedules: form.schedules,
       ticket_types: form.ticket_types.map(tt => ({
         id: tt.id || null,

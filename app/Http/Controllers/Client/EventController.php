@@ -327,6 +327,12 @@ class EventController extends Controller
                 'status' => $event->status,
                 'is_active' => $event->is_active,
                 'show_remaining_seats' => (bool) $event->show_remaining_seats, // affichage public des places restantes (optionnel)
+                // Ouverture de la billetterie : null = déjà ouverte. On renvoie
+                // la DATE et non un booléen « ouvert » : cette réponse est mise
+                // en cache 60 s, et un booléen y serait périmé pile à l'instant
+                // qui compte. Le front compare à l'heure courante ; le serveur,
+                // lui, refuse toute commande avant l'heure (salesOpen()).
+                'sales_start_at' => $event->sales_start_at?->toIso8601String(),
                 'service_fee_bearer' => $event->service_fee_bearer,
                 'service_fee_percent' => $event->service_fee_percent, // 0 si plateforme supporte les frais
                 'published_at' => $event->published_at,

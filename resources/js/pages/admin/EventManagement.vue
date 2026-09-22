@@ -339,6 +339,21 @@
               </div>
 
               <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Ouverture de la billetterie <span class="text-xs font-normal text-gray-500">(facultatif)</span>
+                </label>
+                <input
+                  v-model="eventForm.sales_start_at"
+                  type="datetime-local"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primea-blue focus:border-primea-blue"
+                />
+                <p class="text-xs text-gray-500 mt-1">
+                  Laisser vide pour vendre dès la publication. Sinon l'événement est visible avec un
+                  compte à rebours, et l'achat ne s'active qu'à cette date.
+                </p>
+              </div>
+
+              <div class="md:col-span-2">
                 <label class="flex items-start gap-2 cursor-pointer">
                   <input v-model="eventForm.show_remaining_seats" type="checkbox" class="mt-1 rounded border-gray-300 text-primea-blue focus:ring-primea-blue" />
                   <span>
@@ -613,6 +628,7 @@ export default {
       schedules: [],
       ticket_types: [],
       show_remaining_seats: false,
+      sales_start_at: '',
       service_fee_bearer: 'platform',
       // Pour un nouveau lieu
       new_venue_name: '',
@@ -770,6 +786,7 @@ export default {
         status: 'draft',
         image: {},
         show_remaining_seats: false,
+        sales_start_at: '',
         service_fee_bearer: 'platform',
         new_venue_name: '',
         new_venue_city: '',
@@ -813,6 +830,10 @@ export default {
             venue_id: data.data.event.venue_id,
             status: data.data.event.status,
             show_remaining_seats: data.data.event.show_remaining_seats ?? false,
+            // <input datetime-local> attend « AAAA-MM-JJTHH:MM », sans fuseau.
+            sales_start_at: data.data.event.sales_start_at
+              ? String(data.data.event.sales_start_at).slice(0, 16).replace(' ', 'T')
+              : '',
             service_fee_bearer: data.data.event.service_fee_bearer || 'platform',
             image: imageData,
             schedules: data.data.event.schedules?.map(s => ({
