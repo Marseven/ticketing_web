@@ -23,7 +23,16 @@ Route::get('storage/banners/{filename}', [App\Http\Controllers\Api\ImageControll
     ->where('filename', '.*')
     ->middleware('throttle:1000,1');
 
+// Plan du site : donne les pages d'événements aux moteurs de recherche, qui
+// ne suivent pas toujours les liens rendus en JavaScript.
+Route::get('sitemap.xml', [App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+
 // Route catch-all pour Vue Router - DOIT être en dernier
-Route::get('/{any}', function () {
-    return view('app');
+//
+// Les métadonnées sont résolues ICI et non dans le navigateur : WhatsApp,
+// Facebook et les moteurs de recherche lisent le HTML servi sans exécuter le
+// JavaScript. Un lien d'événement partagé doit donc porter son affiche et son
+// titre dès la réponse du serveur.
+Route::get('/{any}', function (\Illuminate\Http\Request $request, \App\Services\PageMeta $meta) {
+    return view('app', ['meta' => $meta->forPath($request->path())]);
 })->where('any', '.*')->name('spa');

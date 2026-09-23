@@ -4,26 +4,38 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    @php $b = \App\Models\Setting::branding(); @endphp
+    @php
+        $b = \App\Models\Setting::branding();
+        // Métadonnées propres à la page, résolues côté serveur : les aperçus
+        // de lien (WhatsApp, Facebook) et les moteurs n'exécutent pas le JS.
+        $m = $meta ?? app(\App\Services\PageMeta::class)->forPath(request()->path());
+    @endphp
 
-    <title>{{ $b['meta_title'] }}</title>
-    <meta name="description" content="{{ $b['meta_description'] }}">
-    <link rel="canonical" href="{{ url()->current() }}">
+    <title>{{ $m['title'] }}</title>
+    <meta name="description" content="{{ $m['description'] }}">
+    <link rel="canonical" href="{{ $m['url'] }}">
 
     <!-- Open Graph -->
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="{{ $m['type'] }}">
     <meta property="og:site_name" content="{{ $b['app_name'] }}">
-    <meta property="og:title" content="{{ $b['meta_title'] }}">
-    <meta property="og:description" content="{{ $b['meta_description'] }}">
-    <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:image" content="{{ url($b['og_image']) }}">
+    <meta property="og:title" content="{{ $m['title'] }}">
+    <meta property="og:description" content="{{ $m['description'] }}">
+    <meta property="og:url" content="{{ $m['url'] }}">
+    <meta property="og:image" content="{{ $m['image'] }}">
+    <meta property="og:image:alt" content="{{ $m['title'] }}">
     <meta property="og:locale" content="fr_FR">
 
     <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="{{ $b['meta_title'] }}">
-    <meta name="twitter:description" content="{{ $b['meta_description'] }}">
-    <meta name="twitter:image" content="{{ url($b['og_image']) }}">
+    <meta name="twitter:card" content="{{ $m['card'] }}">
+    <meta name="twitter:title" content="{{ $m['title'] }}">
+    <meta name="twitter:description" content="{{ $m['description'] }}">
+    <meta name="twitter:image" content="{{ $m['image'] }}">
+
+    @if (!empty($m['jsonld']))
+        {{-- Données structurées : permettent à un moteur d'afficher la date
+             et le lieu de l'événement directement dans ses résultats. --}}
+        <script type="application/ld+json">{!! $m['jsonld'] !!}</script>
+    @endif
 
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="{{ $b['color_primary'] ?? '#272d63' }}">
@@ -66,6 +78,7 @@
         @endforeach
         }
     </style>
+    @include('partials.analytics')
 </head>
 <body class="font-sans antialiased">
     <div id="app"></div>

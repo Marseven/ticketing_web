@@ -1,2 +1,12 @@
 User-agent: *
-Disallow:
+Allow: /
+
+# Espaces privés : rien à indexer, et inutile de les faire parcourir.
+Disallow: /admin
+Disallow: /account
+Disallow: /organizer
+Disallow: /scanner
+Disallow: /checkout
+Disallow: /api/
+
+Sitemap: https://primea.ga/sitemap.xml
