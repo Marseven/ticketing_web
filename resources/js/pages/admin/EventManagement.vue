@@ -1086,12 +1086,30 @@ export default {
     // QR code menant à la page d'achat de l'événement : à poser sur une
     // affiche, un flyer ou un chevalet de table. La personne scanne et tombe
     // directement sur la billetterie.
+    // Une réponse en HTML là où on attend du JSON ne veut pas dire « erreur
+    // inconnue » : elle veut dire que le serveur n'a pas reconnu l'adresse et
+    // a servi l'application à la place. C'est ce que fait un cache de routes
+    // périmé après un déploiement. Le dire évite une enquête.
+    const readJsonOrExplain = async (res) => {
+      const type = res.headers.get('content-type') || ''
+
+      if (!type.includes('application/json')) {
+        const error = new Error('route-inconnue')
+        error.humanMessage = "Le serveur n'a pas reconnu cette adresse. "
+          + 'Après un déploiement, le cache des routes doit être reconstruit : '
+          + 'php artisan optimize:clear && php artisan optimize'
+        throw error
+      }
+
+      return res.json()
+    }
+
     const showShareQr = async (event) => {
       try {
         const res = await fetch(`/api/v1/admin/events/${event.id}/share-qr`, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Accept': 'application/json' }
         })
-        const data = await res.json()
+        const data = await readJsonOrExplain(res)
         if (!data.success) throw new Error(data.message || 'Erreur')
 
         const { url, qr, title } = data.data
@@ -1119,7 +1137,12 @@ export default {
           Swal.fire({ icon: 'success', title: 'Lien copié', confirmButtonColor: '#272d63' })
         }
       } catch (e) {
-        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Impossible de générer le QR code.', confirmButtonColor: '#272d63' })
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: e.humanMessage || e.message || 'Impossible de générer le QR code.',
+          confirmButtonColor: '#272d63',
+        })
       }
     }
 
@@ -1133,6 +1156,13 @@ export default {
         })
         if (!res.ok) throw new Error('Téléchargement impossible')
 
+        // Même garde : un cache de routes périmé renverrait la page HTML de
+        // l'application, qu'on enregistrerait sous le nom d'un PNG.
+        const type = res.headers.get('content-type') || ''
+        if (!type.startsWith('image/')) {
+          throw new Error("Le serveur n'a pas renvoyé une image. Le cache des routes doit être reconstruit.")
+        }
+
         const blob = await res.blob()
         const href = URL.createObjectURL(blob)
         const link = document.createElement('a')
@@ -1143,7 +1173,12 @@ export default {
         link.remove()
         URL.revokeObjectURL(href)
       } catch (e) {
-        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Téléchargement impossible.', confirmButtonColor: '#272d63' })
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: e.message || 'Téléchargement impossible.',
+          confirmButtonColor: '#272d63',
+        })
       }
     }
 
