@@ -512,11 +512,12 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
+import { toDateTimeLocal } from '../../utils/datetimeLocal';
 import { useRoute, useRouter } from 'vue-router';
 import { organizerService } from '../../services/api';
 import Swal from 'sweetalert2';
 import ImageCropper from '../../components/ImageCropper.vue';
-import { 
+import {
   ArrowLeftIcon,
   ExclamationTriangleIcon,
   PlusIcon,
@@ -641,14 +642,12 @@ const loadEvent = async () => {
       service_fee_bearer: event.value.service_fee_bearer || 'platform',
       show_remaining_seats: event.value.show_remaining_seats ?? false,
       // <input datetime-local> attend « AAAA-MM-JJTHH:MM ».
-      sales_start_at: event.value.sales_start_at
-        ? String(event.value.sales_start_at).slice(0, 16).replace(' ', 'T')
-        : '',
+      sales_start_at: toDateTimeLocal(event.value.sales_start_at),
       schedules: (event.value.schedules && event.value.schedules.length > 0)
         ? event.value.schedules.map(s => ({
-            starts_at: s.starts_at ? new Date(s.starts_at).toISOString().slice(0, 16) : '',
-            ends_at: s.ends_at ? new Date(s.ends_at).toISOString().slice(0, 16) : '',
-            door_time: s.door_time ? new Date(s.door_time).toISOString().slice(0, 16) : ''
+            starts_at: toDateTimeLocal(s.starts_at),
+            ends_at: toDateTimeLocal(s.ends_at),
+            door_time: toDateTimeLocal(s.door_time)
           }))
         : [{ starts_at: '', ends_at: '', door_time: '' }],
       ticket_types: (event.value.ticket_types || event.value.ticketTypes || []).map(tt => ({

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\SerializesDatesInAppTimezone;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +13,8 @@ use App\Traits\HasImages;
 
 class Event extends Model
 {
+    use SerializesDatesInAppTimezone;
+
     use HasFactory, HasImages;
 
     protected $fillable = [

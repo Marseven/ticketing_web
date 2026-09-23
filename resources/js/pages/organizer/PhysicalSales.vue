@@ -303,6 +303,7 @@
 
 <script>
 import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { toDateTimeLocal, nowForInput } from '../../utils/datetimeLocal';
 import Swal from 'sweetalert2'
 
 export default {
@@ -457,7 +458,7 @@ export default {
         ticket_type_id: '',
         quantity: 1,
         unit_price: 0,
-        sale_date: new Date().toISOString().slice(0, 16),
+        sale_date: nowForInput(),
         sales_point: '',
         notes: ''
       })
@@ -470,7 +471,7 @@ export default {
         ticket_type_id: ticketType.id,
         quantity: 1,
         unit_price: ticketType.price,
-        sale_date: new Date().toISOString().slice(0, 16),
+        sale_date: nowForInput(),
         sales_point: '',
         notes: ''
       })
@@ -483,7 +484,7 @@ export default {
         ticket_type_id: sale.ticket_type_id,
         quantity: sale.quantity,
         unit_price: sale.unit_price,
-        sale_date: new Date(sale.sale_date).toISOString().slice(0, 16),
+        sale_date: toDateTimeLocal(sale.sale_date),
         sales_point: sale.sales_point || '',
         notes: sale.notes || ''
       })

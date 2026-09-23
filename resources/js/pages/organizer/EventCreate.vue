@@ -547,11 +547,12 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue';
+import { fromDate } from '../../utils/datetimeLocal';
 import { useRouter } from 'vue-router';
 import { organizerService } from '../../services/api';
 import Swal from 'sweetalert2';
 import ImageCropper from '../../components/ImageCropper.vue';
-import { 
+import {
   ArrowLeftIcon,
   PlusIcon,
   TrashIcon,
@@ -728,7 +729,9 @@ const adjustEndTime = (schedule) => {
     // Ajouter 2 heures par défaut à la date de début
     const startDate = new Date(schedule.starts_at);
     startDate.setHours(startDate.getHours() + 2);
-    schedule.ends_at = startDate.toISOString().slice(0, 16); // Format datetime-local
+    // Heure locale, et non `toISOString()` qui repasserait en UTC et
+    // reculerait la fin d'une heure.
+    schedule.ends_at = fromDate(startDate);
   }
 };
 

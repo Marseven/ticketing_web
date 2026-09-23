@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\SerializesDatesInAppTimezone;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TicketPrice extends Model
 {
+    use SerializesDatesInAppTimezone;
+
     use HasFactory;
 
     protected $fillable = [

@@ -320,6 +320,7 @@
 
 <script>
 import { ref, reactive, computed, onMounted } from 'vue'
+import { toDateTimeLocal } from '../../utils/datetimeLocal';
 import Swal from 'sweetalert2'
 import ImageCropper from '../../components/ImageCropper.vue'
 
@@ -513,8 +514,8 @@ export default {
       bannerForm.position = banner.position
       bannerForm.order = banner.order
       bannerForm.is_active = banner.is_active
-      bannerForm.start_date = banner.start_date ? banner.start_date.slice(0, 16) : null
-      bannerForm.end_date = banner.end_date ? banner.end_date.slice(0, 16) : null
+      bannerForm.start_date = toDateTimeLocal(banner.start_date) || null
+      bannerForm.end_date = toDateTimeLocal(banner.end_date) || null
       imagePreview.value = banner.image_path ? `/storage/${banner.image_path}` : null
       showEditModal.value = true
     }

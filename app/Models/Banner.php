@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\SerializesDatesInAppTimezone;
+
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 
 class Banner extends Model
 {
+    use SerializesDatesInAppTimezone;
+
     protected $fillable = [
         'title',
         'description',

@@ -581,6 +581,7 @@
 
 <script>
 import { ref, reactive, onMounted, watch } from 'vue'
+import { toDateTimeLocal } from '../../utils/datetimeLocal';
 
 import ImageUpload from '../../components/ImageUpload.vue'
 
@@ -835,13 +836,13 @@ export default {
             show_remaining_seats: data.data.event.show_remaining_seats ?? false,
             // <input datetime-local> attend « AAAA-MM-JJTHH:MM », sans fuseau.
             sales_start_at: data.data.event.sales_start_at
-              ? String(data.data.event.sales_start_at).slice(0, 16).replace(' ', 'T')
+              ? toDateTimeLocal(data.data.event.sales_start_at)
               : '',
             service_fee_bearer: data.data.event.service_fee_bearer || 'platform',
             image: imageData,
             schedules: data.data.event.schedules?.map(s => ({
-              starts_at: s.starts_at ? s.starts_at.slice(0, 16) : '',
-              ends_at: s.ends_at ? s.ends_at.slice(0, 16) : ''
+              starts_at: toDateTimeLocal(s.starts_at),
+              ends_at: toDateTimeLocal(s.ends_at)
             })) || [{ starts_at: '', ends_at: '' }],
             ticket_types: (data.data.event.ticket_types || data.data.event.ticketTypes || []).map(t => ({
               name: t.name,
@@ -995,8 +996,8 @@ export default {
             new_venue_city: '',
             new_venue_address: '',
             schedules: eventData.schedules?.map(s => ({
-              starts_at: s.starts_at ? s.starts_at.slice(0, 16) : '',
-              ends_at: s.ends_at ? s.ends_at.slice(0, 16) : ''
+              starts_at: toDateTimeLocal(s.starts_at),
+              ends_at: toDateTimeLocal(s.ends_at)
             })) || [{ starts_at: '', ends_at: '' }],
             ticket_types: (eventData.ticket_types || eventData.ticketTypes || []).map(t => ({
               name: t.name,
