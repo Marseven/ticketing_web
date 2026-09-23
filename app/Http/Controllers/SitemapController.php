@@ -19,7 +19,13 @@ class SitemapController extends Controller
     /** Une heure : un événement publié doit être trouvable le jour même. */
     private const TTL = 3600;
 
-    /** Pages fixes, avec leur importance relative. */
+    /**
+     * Pages fixes, avec leur importance relative.
+     *
+     * Les mentions légales n'y figurent pas : tant que l'identité de
+     * l'éditeur n'est pas renseignée, la page ne doit être ni référencée ni
+     * mise en avant. La remettre ici une fois les champs complétés.
+     */
     private const STATIC_PAGES = [
         ['', '1.0', 'daily'],
         ['events', '0.9', 'daily'],
@@ -29,7 +35,6 @@ class SitemapController extends Controller
         ['terms', '0.3', 'yearly'],
         ['privacy', '0.3', 'yearly'],
         ['sales-terms', '0.3', 'yearly'],
-        ['legal-notice', '0.3', 'yearly'],
     ];
 
     public function index(): Response

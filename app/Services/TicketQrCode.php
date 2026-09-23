@@ -33,16 +33,24 @@ class TicketQrCode
 
     /**
      * PNG binaire du QR encodant le texte donné.
+     *
+     * Les deux réglages sont ouverts pour l'affichage d'un QR destiné à
+     * l'impression : une affiche se lit de loin, et un QR imprimé a besoin de
+     * la marge silencieuse standard de quatre modules, que le billet peut se
+     * permettre de réduire parce qu'il est posé sur une carte blanche.
      */
-    public function png(string $text): string
+    public function png(string $text, ?int $size = null, ?int $quietZone = null): string
     {
+        $size = $size ?? self::SIZE;
+        $quietZone = $quietZone ?? self::QUIET_ZONE;
+
         $matrix = Encoder::encode($text, ErrorCorrectionLevel::M())->getMatrix();
         $modules = $matrix->getWidth();
-        $total = $modules + 2 * self::QUIET_ZONE;
+        $total = $modules + 2 * $quietZone;
 
         // Taille de module entière : un module à virgule donnerait des bords
         // flous, que les lecteurs de QR n'aiment pas.
-        $moduleSize = max(1, (int) floor(self::SIZE / $total));
+        $moduleSize = max(1, (int) floor($size / $total));
         $side = $total * $moduleSize;
 
         $image = imagecreatetruecolor($side, $side);
@@ -56,8 +64,8 @@ class TicketQrCode
                     continue;
                 }
 
-                $left = ($x + self::QUIET_ZONE) * $moduleSize;
-                $top = ($y + self::QUIET_ZONE) * $moduleSize;
+                $left = ($x + $quietZone) * $moduleSize;
+                $top = ($y + $quietZone) * $moduleSize;
                 imagefilledrectangle($image, $left, $top, $left + $moduleSize - 1, $top + $moduleSize - 1, $black);
             }
         }
@@ -74,10 +82,10 @@ class TicketQrCode
      * Le même QR prêt à être posé dans un `src`, ou null si la génération échoue
      * (un billet sans QR reste préférable à une page en erreur).
      */
-    public function dataUri(string $text): ?string
+    public function dataUri(string $text, ?int $size = null, ?int $quietZone = null): ?string
     {
         try {
-            return 'data:image/png;base64,' . base64_encode($this->png($text));
+            return 'data:image/png;base64,' . base64_encode($this->png($text, $size, $quietZone));
         } catch (\Throwable $e) {
             Log::warning('QR du billet non généré', ['text' => $text, 'error' => $e->getMessage()]);
 

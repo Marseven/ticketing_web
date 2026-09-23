@@ -43,6 +43,16 @@ class PageMeta
         'sitemap.xml', 'sw.js', 'manifest.webmanifest',
     ];
 
+    /**
+     * Pages servies mais tenues hors des moteurs de recherche.
+     *
+     * Les mentions légales attendent l'identité de l'éditeur : la page reste
+     * consultable pour être relue et complétée, mais elle n'a rien à faire
+     * dans un index tant qu'elle porte des champs à remplir. Retirer cette
+     * entrée une fois la page complétée.
+     */
+    private const NOINDEX = ['legal-notice'];
+
     /** Titres des pages fixes, pour que chaque URL ait le sien. */
     private const STATIC_TITLES = [
         'events' => 'Tous les événements',
@@ -57,7 +67,7 @@ class PageMeta
     ];
 
     /**
-     * @return array{title:string, description:string, image:string, type:string, url:string, card:string, jsonld:?string}
+     * @return array{title:string, description:string, image:string, type:string, url:string, card:string, jsonld:?string, robots:?string}
      */
     public function forPath(string $path): array
     {
@@ -73,6 +83,10 @@ class PageMeta
 
         if (isset(self::STATIC_TITLES[$first])) {
             $meta['title'] = self::STATIC_TITLES[$first] . ' · ' . $brand['app_name'];
+
+            if (in_array($first, self::NOINDEX, true)) {
+                $meta['robots'] = 'noindex, nofollow';
+            }
 
             return $meta;
         }
@@ -104,6 +118,7 @@ class PageMeta
             'url' => url()->current(),
             'card' => 'summary',
             'jsonld' => null,
+            'robots' => null,
         ];
     }
 

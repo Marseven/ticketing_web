@@ -14,6 +14,9 @@
     <title>{{ $m['title'] }}</title>
     <meta name="description" content="{{ $m['description'] }}">
     <link rel="canonical" href="{{ $m['url'] }}">
+    @if (!empty($m['robots']))
+        <meta name="robots" content="{{ $m['robots'] }}">
+    @endif
 
     <!-- Open Graph -->
     <meta property="og:type" content="{{ $m['type'] }}">

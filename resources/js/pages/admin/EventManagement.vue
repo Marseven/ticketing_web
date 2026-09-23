@@ -198,6 +198,9 @@
                 <button @click="copyTrackingLink(event)" class="text-gray-500 hover:text-gray-800" title="Copier le lien de suivi à envoyer à l'organisateur">
                   Copier lien
                 </button>
+                <button @click="showShareQr(event)" class="text-primea-blue hover:text-primea-yellow" title="QR code menant à la page d'achat, pour l'affiche ou le flyer">
+                  QR
+                </button>
               </td>
             </tr>
           </tbody>
@@ -1080,6 +1083,70 @@ export default {
       }
     }
 
+    // QR code menant à la page d'achat de l'événement : à poser sur une
+    // affiche, un flyer ou un chevalet de table. La personne scanne et tombe
+    // directement sur la billetterie.
+    const showShareQr = async (event) => {
+      try {
+        const res = await fetch(`/api/v1/admin/events/${event.id}/share-qr`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Accept': 'application/json' }
+        })
+        const data = await res.json()
+        if (!data.success) throw new Error(data.message || 'Erreur')
+
+        const { url, qr, title } = data.data
+
+        const result = await Swal.fire({
+          title: 'QR code de l\'événement',
+          html: `
+            <p class="text-sm text-gray-600 mb-3">${title}</p>
+            <img src="${qr}" alt="QR code" class="mx-auto rounded-lg border border-gray-200" style="width:240px;height:240px" />
+            <p class="text-xs text-gray-500 mt-3 mb-1">Mène à la page d'achat :</p>
+            <input readonly value="${url}" class="w-full border rounded px-2 py-1 text-xs text-center" onclick="this.select()" />
+          `,
+          showCancelButton: true,
+          showDenyButton: true,
+          confirmButtonText: 'Télécharger',
+          denyButtonText: 'Copier le lien',
+          cancelButtonText: 'Fermer',
+          confirmButtonColor: '#272d63',
+          denyButtonColor: '#fab511',
+        })
+
+        if (result.isConfirmed) await downloadShareQr(event)
+        if (result.isDenied) {
+          try { await navigator.clipboard.writeText(url) } catch (_) { /* presse-papiers indisponible */ }
+          Swal.fire({ icon: 'success', title: 'Lien copié', confirmButtonColor: '#272d63' })
+        }
+      } catch (e) {
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Impossible de générer le QR code.', confirmButtonColor: '#272d63' })
+      }
+    }
+
+    // L'image d'impression fait 1024 px et demande le jeton d'authentification :
+    // un simple lien ne suffirait pas, on récupère donc le fichier puis on le
+    // remet au navigateur.
+    const downloadShareQr = async (event) => {
+      try {
+        const res = await fetch(`/api/v1/admin/events/${event.id}/share-qr?format=png`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        })
+        if (!res.ok) throw new Error('Téléchargement impossible')
+
+        const blob = await res.blob()
+        const href = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = href
+        link.download = `${(event.slug || 'evenement')}-qr.png`
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        URL.revokeObjectURL(href)
+      } catch (e) {
+        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Téléchargement impossible.', confirmButtonColor: '#272d63' })
+      }
+    }
+
     const addSchedule = () => {
       eventForm.schedules.push({ starts_at: '', ends_at: '' })
     }
@@ -1189,6 +1256,7 @@ export default {
       duplicateEvent,
       openTracking,
       copyTrackingLink,
+      showShareQr,
       addSchedule,
       removeSchedule,
       addTicketType,

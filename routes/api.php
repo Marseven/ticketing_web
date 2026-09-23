@@ -270,6 +270,8 @@ Route::prefix('v1')->group(function () {
             Route::post('/', [App\Http\Controllers\Admin\AdminController::class, 'createEvent']);
             Route::get('{event}', [App\Http\Controllers\Admin\AdminController::class, 'showEvent']);
             Route::get('{event}/tracking-link', [App\Http\Controllers\Admin\AdminController::class, 'trackingLink']);
+            // QR menant à la page d'achat : pour l'affiche, le flyer, le chevalet.
+            Route::get('{event}/share-qr', [App\Http\Controllers\Admin\AdminController::class, 'eventShareQr']);
             Route::post('{event}/tracking-link/regenerate', [App\Http\Controllers\Admin\AdminController::class, 'regenerateTrackingLink']);
             Route::put('{event}', [App\Http\Controllers\Admin\AdminController::class, 'updateEvent']);
             Route::post('{event}/toggle-status', [App\Http\Controllers\Admin\AdminController::class, 'toggleEventStatus']);

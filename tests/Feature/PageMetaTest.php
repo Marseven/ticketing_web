@@ -139,6 +139,21 @@ class PageMetaTest extends TestCase
         $this->assertStringContainsString('<title>', $html);
     }
 
+    public function test_the_legal_notice_is_kept_out_of_search_engines(): void
+    {
+        // La page attend l'identité de l'éditeur : elle reste consultable pour
+        // être relue et complétée, mais elle n'a rien à faire dans un index
+        // tant qu'elle porte des champs à remplir.
+        $html = $this->get('/legal-notice')->assertOk()->getContent();
+
+        $this->assertStringContainsString('name="robots" content="noindex, nofollow"', $html);
+    }
+
+    public function test_an_ordinary_page_is_left_indexable(): void
+    {
+        $this->assertStringNotContainsString('name="robots"', $this->get('/terms')->getContent());
+    }
+
     public function test_the_admin_area_never_queries_events(): void
     {
         // La résolution tourne sur chaque page servie : elle ne doit pas

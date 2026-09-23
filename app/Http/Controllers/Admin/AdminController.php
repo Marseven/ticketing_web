@@ -2774,6 +2774,57 @@ class AdminController extends Controller
     }
 
     /**
+     * QR code menant à la page d'achat d'un événement.
+     *
+     * Sert à imprimer l'affiche, le flyer ou le chevalet de table : la
+     * personne scanne et tombe directement sur la billetterie de
+     * l'événement. C'est le même chemin que le lien partagé par message,
+     * `/{slug}`, qui ouvre l'achat.
+     *
+     * Avec `?format=png`, renvoie l'image à télécharger plutôt que du JSON —
+     * c'est ce qu'attend un graphiste pour la poser dans une maquette.
+     */
+    public function eventShareQr(Request $request, $eventId)
+    {
+        $event = Event::find($eventId);
+
+        if (!$event) {
+            return response()->json(['success' => false, 'message' => 'Événement introuvable'], 404);
+        }
+
+        if (!$event->slug) {
+            return response()->json([
+                'success' => false,
+                'message' => "Cet événement n'a pas encore d'adresse : enregistrez-le d'abord.",
+            ], 422);
+        }
+
+        $url = rtrim(config('app.url'), '/') . '/' . $event->slug;
+        $qr = app(\App\Services\TicketQrCode::class);
+
+        // Un QR imprimé se lit de loin et a besoin de la marge silencieuse
+        // standard de quatre modules ; celle du billet est volontairement plus
+        // étroite parce qu'il est posé sur une carte blanche.
+        if ($request->query('format') === 'png') {
+            $filename = \Illuminate\Support\Str::slug($event->title ?: 'evenement') . '-qr.png';
+
+            return response($qr->png($url, 1024, 4), 200, [
+                'Content-Type' => 'image/png',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'title' => $event->title,
+                'url' => $url,
+                'qr' => $qr->dataUri($url, 720, 4),
+            ],
+        ]);
+    }
+
+    /**
      * Régénère le lien de suivi (révoque l'ancien lien partagé).
      */
     public function regenerateTrackingLink($eventId): JsonResponse
