@@ -4,10 +4,10 @@
       <!-- Header -->
       <div class="text-center mb-12">
         <h1 class="text-3xl sm:text-4xl font-bold text-primea-blue mb-4">
-          Politique de confidentialite
+          Politique de confidentialité
         </h1>
         <p class="text-sm text-gray-500">
-          Derniere mise a jour : 12 avril 2026
+          Dernière mise à jour : 23 septembre 2026
         </p>
       </div>
 
@@ -16,183 +16,286 @@
         <!-- Introduction -->
         <section>
           <p>
-            La presente Politique de confidentialite decrit la maniere dont Primea
-            (accessible a l'adresse https://primea.ga) collecte, utilise, stocke et protege
-            vos donnees personnelles. En utilisant notre plateforme, vous acceptez les
-            pratiques decrites dans cette politique. Nous nous engageons a proteger la vie
-            privee de nos utilisateurs conformement a la reglementation applicable au Gabon.
+            La présente Politique de confidentialité décrit la manière dont Primea, accessible à
+            l'adresse https://primea.ga, collecte, utilise, conserve et protège vos données à
+            caractère personnel. En utilisant notre plateforme, vous prenez connaissance des
+            pratiques décrites dans ce document.
+          </p>
+          <p class="mt-3">
+            Ces traitements sont soumis à la <strong>loi n° 001/2011 du 25 septembre 2011
+            relative à la protection des données à caractère personnel, modifiée par la loi
+            n° 025/2023 du 12 juillet 2023</strong>. L'autorité de contrôle compétente est la
+            Commission nationale pour la protection des données à caractère personnel (CNPDCP),
+            devenue l'<strong>Autorité pour la protection des données à caractère personnel et de
+            la vie privée (APDPVP)</strong>.
           </p>
         </section>
 
         <!-- Section 1 -->
         <section>
           <h2 class="text-xl font-bold text-primea-blue mb-3">
-            1. Donnees collectees
+            1. Responsable du traitement
           </h2>
-          <p class="mb-3">
-            Nous collectons les categories de donnees suivantes :
+          <p>
+            Le responsable du traitement est l'éditeur de la plateforme Primea, dont les
+            informations d'identification complètes figurent dans les
+            <router-link to="/legal-notice" class="text-primea-blue font-medium hover:text-primea-yellow">
+              Mentions légales
+            </router-link>.
+            Les organisateurs d'événements agissent pour leur part comme responsables de
+            traitement pour les opérations qu'ils réalisent sur les données des participants à
+            leurs propres événements.
           </p>
-          <h3 class="font-semibold text-primea-blue mb-2">Donnees fournies directement :</h3>
-          <ul class="list-disc list-inside space-y-1 ml-4 mb-4">
-            <li>Nom et prenom</li>
-            <li>Adresse email</li>
-            <li>Numero de telephone</li>
-            <li>Mot de passe (stocke de maniere chiffree)</li>
-            <li>Informations de commande (billets achetes, montants)</li>
-          </ul>
-          <h3 class="font-semibold text-primea-blue mb-2">Donnees collectees automatiquement :</h3>
-          <ul class="list-disc list-inside space-y-1 ml-4">
-            <li>Adresse IP</li>
-            <li>Type de navigateur et systeme d'exploitation</li>
-            <li>Pages consultees et duree de visite</li>
-            <li>Donnees de connexion (date, heure)</li>
-          </ul>
         </section>
 
         <!-- Section 2 -->
         <section>
           <h2 class="text-xl font-bold text-primea-blue mb-3">
-            2. Finalites du traitement
+            2. Données collectées
           </h2>
-          <p class="mb-3">Vos donnees sont utilisees pour :</p>
-          <ul class="list-disc list-inside space-y-1 ml-4">
-            <li>Creer et gerer votre compte utilisateur</li>
-            <li>Traiter vos commandes et emettre vos billets electroniques</li>
-            <li>Vous envoyer les confirmations de commande et billets par email</li>
-            <li>Assurer le service client et repondre a vos demandes</li>
-            <li>Ameliorer nos services et l'experience utilisateur</li>
-            <li>Prevenir la fraude et assurer la securite de la plateforme</li>
-            <li>Respecter nos obligations legales et reglementaires</li>
+          <p class="mb-3">
+            Nous collectons les catégories de données suivantes :
+          </p>
+          <h3 class="font-semibold text-primea-blue mb-2">Données que vous nous fournissez :</h3>
+          <ul class="list-disc list-inside space-y-1 ml-4 mb-4">
+            <li>Nom et prénom</li>
+            <li>Adresse e-mail</li>
+            <li>Numéro de téléphone</li>
+            <li>Mot de passe, lorsque vous créez un compte (conservé sous forme chiffrée)</li>
           </ul>
+          <h3 class="font-semibold text-primea-blue mb-2">Données liées à votre activité :</h3>
+          <ul class="list-disc list-inside space-y-1 ml-4 mb-4">
+            <li>Historique de vos commandes (événements, types de billets, montants, références)</li>
+            <li>Historique de vos billets et leur statut</li>
+            <li>
+              Journaux de scan de vos billets au contrôle d'accès : date et heure du scan,
+              appareil ayant réalisé le scan, résultat de la validation
+            </li>
+          </ul>
+          <h3 class="font-semibold text-primea-blue mb-2">Données techniques :</h3>
+          <ul class="list-disc list-inside space-y-1 ml-4">
+            <li>Adresse IP</li>
+            <li>Type de navigateur et système d'exploitation</li>
+            <li>Pages consultées et données de connexion (date, heure)</li>
+          </ul>
+          <p class="mt-3">
+            L'achat d'un billet est possible <strong>en tant qu'invité</strong>, sans création de
+            compte : seules les données nécessaires à l'émission et à la remise du billet — nom,
+            adresse e-mail et numéro de téléphone — sont alors demandées.
+          </p>
         </section>
 
         <!-- Section 3 -->
         <section>
           <h2 class="text-xl font-bold text-primea-blue mb-3">
-            3. Base legale du traitement
+            3. Finalités du traitement
           </h2>
-          <p>
-            Le traitement de vos donnees repose sur les bases legales suivantes :
-            l'execution du contrat (achat de billets), votre consentement (creation de compte,
-            communications), nos interets legitimes (amelioration des services, prevention
-            de la fraude), et le respect de nos obligations legales.
-          </p>
+          <p class="mb-3">Vos données sont utilisées pour :</p>
+          <ul class="list-disc list-inside space-y-1 ml-4">
+            <li>Créer et gérer votre compte utilisateur, lorsque vous en ouvrez un</li>
+            <li>Traiter vos commandes et émettre vos billets électroniques</li>
+            <li>Vous transmettre les confirmations de commande et vos billets</li>
+            <li>
+              Vous permettre de récupérer un billet déjà émis via la rubrique « Récupérer mon
+              ticket », à partir de votre nom et de votre numéro de téléphone
+            </li>
+            <li>Contrôler l'accès aux événements et empêcher qu'un même billet soit utilisé deux fois</li>
+            <li>Fournir aux organisateurs les statistiques de fréquentation de leurs événements</li>
+            <li>Assurer le service client et répondre à vos demandes</li>
+            <li>Prévenir la fraude et assurer la sécurité de la plateforme</li>
+            <li>Respecter nos obligations légales, comptables et fiscales</li>
+          </ul>
         </section>
 
         <!-- Section 4 -->
         <section>
           <h2 class="text-xl font-bold text-primea-blue mb-3">
-            4. Partage des donnees
+            4. Base légale du traitement
           </h2>
-          <p class="mb-3">Vos donnees peuvent etre partagees avec :</p>
-          <ul class="list-disc list-inside space-y-1 ml-4">
-            <li>
-              <strong>Les organisateurs d'evenements :</strong> Nom et informations de commande
-              necessaires a la gestion de l'evenement et au controle d'acces.
-            </li>
-            <li>
-              <strong>Les prestataires de paiement :</strong> Donnees strictement necessaires
-              au traitement de la transaction (Airtel Money, Moov Money, prestataires de
-              paiement par carte).
-            </li>
-            <li>
-              <strong>Les prestataires techniques :</strong> Hebergeur et services tiers
-              necessaires au fonctionnement de la plateforme, dans le respect de la confidentialite.
-            </li>
-          </ul>
-          <p class="mt-3">
-            Nous ne vendons jamais vos donnees personnelles a des tiers a des fins commerciales.
+          <p>
+            Conformément à la loi n° 001/2011 du 25 septembre 2011 modifiée, le traitement de vos
+            données repose sur : l'exécution du contrat (achat et délivrance des billets,
+            contrôle d'accès), votre consentement (création de compte, communications
+            facultatives), l'intérêt légitime du responsable de traitement (sécurité de la
+            plateforme, prévention de la fraude, amélioration du service) et le respect de nos
+            obligations légales. Lorsque le traitement repose sur votre consentement, vous pouvez
+            le retirer à tout moment, sans que cela remette en cause la licéité des traitements
+            déjà réalisés.
           </p>
         </section>
 
         <!-- Section 5 -->
         <section>
           <h2 class="text-xl font-bold text-primea-blue mb-3">
-            5. Securite des donnees
+            5. Destinataires des données
           </h2>
-          <p>
-            Nous mettons en oeuvre des mesures techniques et organisationnelles appropriees
-            pour proteger vos donnees personnelles contre tout acces non autorise, perte,
-            destruction ou alteration. Ces mesures incluent notamment : le chiffrement des
-            mots de passe, l'utilisation du protocole HTTPS pour toutes les communications,
-            l'authentification par token securise (Sanctum), et la limitation des acces aux
-            donnees au personnel autorise.
+          <p class="mb-3">Vos données peuvent être communiquées aux destinataires suivants :</p>
+          <ul class="list-disc list-inside space-y-1 ml-4">
+            <li>
+              <strong>Les organisateurs d'événements :</strong> nom et informations de commande
+              nécessaires à la gestion de l'événement et au contrôle d'accès, pour le seul
+              événement concerné.
+            </li>
+            <li>
+              <strong>La passerelle de paiement e-billing / SHAP :</strong> données strictement
+              nécessaires à l'exécution de la transaction par mobile money (Airtel Money, Moov
+              Money) ou par carte.
+            </li>
+            <li>
+              <strong>Les prestataires techniques :</strong> hébergeur et services tiers
+              nécessaires au fonctionnement de la plateforme, tenus à une obligation de
+              confidentialité.
+            </li>
+            <li>
+              <strong>Les autorités compétentes :</strong> lorsque la communication est requise
+              par la loi ou par une décision de justice.
+            </li>
+          </ul>
+          <p class="mt-3">
+            <strong>Nous ne vendons ni ne louons vos données personnelles à des tiers, à quelque
+            fin que ce soit.</strong> Vos données ne sont pas utilisées à des fins de prospection
+            par des tiers.
           </p>
         </section>
 
         <!-- Section 6 -->
         <section>
           <h2 class="text-xl font-bold text-primea-blue mb-3">
-            6. Conservation des donnees
+            6. Données de paiement
           </h2>
           <p>
-            Vos donnees personnelles sont conservees pendant la duree necessaire aux finalites
-            pour lesquelles elles ont ete collectees. Les donnees de compte sont conservees
-            tant que le compte est actif. Les donnees de commande sont conservees pendant la
-            duree legale de conservation des documents comptables. Apres suppression de votre
-            compte, vos donnees sont anonymisees ou supprimees dans un delai de 30 jours,
-            a l'exception des donnees que nous sommes legalement tenus de conserver.
+            <strong>Les données de paiement ne transitent jamais par Primea.</strong> Les numéros
+            de carte, codes de confirmation mobile money et identifiants bancaires sont saisis et
+            traités directement par la passerelle de paiement e-billing / SHAP, dans son propre
+            environnement sécurisé. Primea ne conserve que la référence de la transaction, son
+            montant, son statut et le moyen de paiement utilisé, aux fins de suivi des commandes
+            et de comptabilité.
+          </p>
+          <p class="mt-3">
+            La sécurisation de ces transactions s'inscrit dans le cadre de la loi n° 025/2021 du
+            28 décembre 2021 portant réglementation des transactions électroniques en République
+            gabonaise.
           </p>
         </section>
 
         <!-- Section 7 -->
         <section>
           <h2 class="text-xl font-bold text-primea-blue mb-3">
-            7. Vos droits
+            7. Sécurité des données
           </h2>
-          <p class="mb-3">Vous disposez des droits suivants concernant vos donnees personnelles :</p>
-          <ul class="list-disc list-inside space-y-1 ml-4">
-            <li><strong>Droit d'acces :</strong> Obtenir une copie de vos donnees personnelles</li>
-            <li><strong>Droit de rectification :</strong> Corriger des donnees inexactes ou incompletes</li>
-            <li><strong>Droit de suppression :</strong> Demander la suppression de vos donnees</li>
-            <li><strong>Droit d'opposition :</strong> Vous opposer au traitement de vos donnees</li>
-            <li><strong>Droit a la portabilite :</strong> Recevoir vos donnees dans un format structure</li>
-            <li><strong>Droit de retrait du consentement :</strong> Retirer votre consentement a tout moment</li>
-          </ul>
-          <p class="mt-3">
-            Pour exercer ces droits, contactez-nous a :
-            <a href="mailto:contact@primea.ga" class="text-primea-blue font-medium hover:text-primea-yellow">
-              contact@primea.ga
-            </a>.
-            Nous repondrons a votre demande dans un delai de 30 jours.
+          <p>
+            Nous mettons en œuvre des mesures techniques et organisationnelles appropriées pour
+            protéger vos données contre tout accès non autorisé, perte, destruction ou
+            altération. Ces mesures incluent notamment le chiffrement des mots de passe,
+            l'utilisation du protocole HTTPS pour toutes les communications, l'authentification
+            par jeton sécurisé et la limitation des accès aux données au seul personnel autorisé.
+            Les QR codes des billets sont générés de manière à ne pas être devinables.
           </p>
         </section>
 
         <!-- Section 8 -->
         <section>
           <h2 class="text-xl font-bold text-primea-blue mb-3">
-            8. Cookies
+            8. Conservation des données
           </h2>
           <p>
-            La plateforme utilise des cookies essentiels au fonctionnement du service
-            (cookies de session, d'authentification). Ces cookies sont strictement necessaires
-            et ne requierent pas votre consentement prealable. Nous n'utilisons pas de cookies
-            publicitaires ou de suivi a des fins marketing.
+            Vos données sont conservées pendant la durée nécessaire aux finalités pour lesquelles
+            elles ont été collectées. Les données de compte sont conservées tant que le compte est
+            actif. Les données de commande, de paiement et de billetterie sont conservées pendant
+            la durée légale de conservation des documents comptables. Les journaux de scan sont
+            conservés le temps nécessaire au suivi de l'événement, aux statistiques remises à
+            l'organisateur et à la preuve en cas de contestation. Après suppression de votre
+            compte, vos données sont anonymisées ou supprimées dans un délai de 30 jours, à
+            l'exception de celles que nous sommes légalement tenus de conserver.
           </p>
         </section>
 
         <!-- Section 9 -->
         <section>
           <h2 class="text-xl font-bold text-primea-blue mb-3">
-            9. Modifications de la politique
+            9. Vos droits
+          </h2>
+          <p class="mb-3">
+            Conformément à la loi n° 001/2011 du 25 septembre 2011 modifiée par la loi
+            n° 025/2023 du 12 juillet 2023, vous disposez des droits suivants :
+          </p>
+          <ul class="list-disc list-inside space-y-1 ml-4">
+            <li><strong>Droit à l'information :</strong> être informé des traitements réalisés sur vos données</li>
+            <li><strong>Droit d'accès :</strong> obtenir une copie de vos données personnelles</li>
+            <li><strong>Droit de rectification :</strong> corriger des données inexactes ou incomplètes</li>
+            <li><strong>Droit d'opposition :</strong> vous opposer, pour motif légitime, au traitement de vos données</li>
+            <li><strong>Droit de suppression :</strong> demander l'effacement de vos données</li>
+            <li><strong>Droit à la portabilité :</strong> recevoir vos données dans un format structuré</li>
+            <li><strong>Droit de retrait du consentement :</strong> retirer votre consentement à tout moment</li>
+          </ul>
+          <p class="mt-3">
+            Pour exercer ces droits, contactez-nous à :
+            <a href="mailto:contact@primea.ga" class="text-primea-blue font-medium hover:text-primea-yellow">
+              contact@primea.ga
+            </a>.
+            Nous répondrons à votre demande dans un délai de 30 jours. Une preuve d'identité
+            pourra vous être demandée afin d'éviter toute communication de données à une personne
+            non autorisée.
+          </p>
+          <p class="mt-3">
+            Si vous estimez que vos droits ne sont pas respectés, vous pouvez saisir l'Autorité
+            pour la protection des données à caractère personnel et de la vie privée (APDPVP),
+            anciennement Commission nationale pour la protection des données à caractère
+            personnel (CNPDCP).
+          </p>
+        </section>
+
+        <!-- Section 10 -->
+        <section>
+          <h2 class="text-xl font-bold text-primea-blue mb-3">
+            10. Cookies
           </h2>
           <p>
-            Nous nous reservons le droit de modifier cette politique de confidentialite a tout
-            moment. Toute modification substantielle sera communiquee aux utilisateurs par email
-            ou par notification sur la plateforme. La date de derniere mise a jour est indiquee
-            en haut de cette page. La poursuite de l'utilisation de la plateforme apres
-            modification vaut acceptation de la nouvelle politique.
+            La plateforme utilise des cookies essentiels au fonctionnement du service : cookies
+            de session, d'authentification et de sécurité. Ces cookies sont strictement
+            nécessaires à la fourniture du service que vous demandez et ne requièrent pas votre
+            consentement préalable. <strong>Nous n'utilisons pas de cookies publicitaires ni de
+            traceurs à des fins de marketing.</strong>
+          </p>
+        </section>
+
+        <!-- Section 11 -->
+        <section>
+          <h2 class="text-xl font-bold text-primea-blue mb-3">
+            11. Transfert de données hors du Gabon
+          </h2>
+          <p>
+            Certains de nos prestataires techniques, notamment d'hébergement ou de paiement,
+            peuvent être établis hors du territoire gabonais. Dans ce cas, les transferts sont
+            limités aux données strictement nécessaires à la fourniture du service et encadrés
+            par des engagements contractuels de confidentialité et de sécurité, dans le respect
+            des conditions posées par la loi n° 001/2011 du 25 septembre 2011 modifiée relatives
+            aux transferts de données vers un pays tiers.
+          </p>
+        </section>
+
+        <!-- Section 12 -->
+        <section>
+          <h2 class="text-xl font-bold text-primea-blue mb-3">
+            12. Modifications de la politique
+          </h2>
+          <p>
+            Nous nous réservons le droit de modifier la présente politique de confidentialité à
+            tout moment. Toute modification substantielle sera communiquée aux utilisateurs par
+            e-mail ou par notification sur la plateforme. La date de dernière mise à jour est
+            indiquée en haut de cette page. La poursuite de l'utilisation de la plateforme après
+            modification vaut prise de connaissance de la nouvelle politique.
           </p>
         </section>
 
         <!-- Contact -->
         <section class="bg-gray-50 rounded-xl p-6">
           <h2 class="text-xl font-bold text-primea-blue mb-3">
-            10. Contact
+            13. Contact
           </h2>
           <p>
-            Pour toute question relative a la protection de vos donnees personnelles
-            ou pour exercer vos droits, contactez-nous a :
+            Pour toute question relative à la protection de vos données personnelles
+            ou pour exercer vos droits, contactez-nous à :
           </p>
           <p class="mt-2">
             <strong>Email :</strong>
@@ -207,6 +310,36 @@
             </a>
           </p>
         </section>
+
+        <!-- Documents liés -->
+        <section class="border-t border-gray-200 pt-6">
+          <h2 class="text-xl font-bold text-primea-blue mb-3">
+            Documents liés
+          </h2>
+          <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+            <router-link to="/terms" class="text-primea-blue font-medium hover:text-primea-yellow">
+              Conditions générales d'utilisation
+            </router-link>
+            <router-link to="/privacy" class="text-primea-blue font-medium hover:text-primea-yellow">
+              Politique de confidentialité
+            </router-link>
+            <router-link to="/sales-terms" class="text-primea-blue font-medium hover:text-primea-yellow">
+              Conditions générales de vente
+            </router-link>
+            <router-link to="/legal-notice" class="text-primea-blue font-medium hover:text-primea-yellow">
+              Mentions légales
+            </router-link>
+          </div>
+        </section>
+
+        <!-- Avertissement juridique -->
+        <section>
+          <p class="text-xs text-gray-400 italic border-l-2 border-gray-200 pl-4">
+            Ce document constitue un projet rédigé au regard des textes en vigueur en République
+            gabonaise. Il doit être revu et validé par un conseil juridique gabonais avant sa
+            publication définitive.
+          </p>
+        </section>
       </div>
 
       <!-- Back link -->
@@ -215,7 +348,7 @@
           to="/"
           class="text-primea-blue hover:text-primea-yellow font-medium transition-colors"
         >
-          &larr; Retour a l'accueil
+          &larr; Retour à l'accueil
         </router-link>
       </div>
     </div>

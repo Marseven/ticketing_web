@@ -79,6 +79,8 @@ const HowItWorks = () => import('./pages/static/HowItWorks.vue');
 const Help = () => import('./pages/static/Help.vue');
 const Terms = () => import('./pages/static/Terms.vue');
 const Privacy = () => import('./pages/static/Privacy.vue');
+const Sales = () => import('./pages/static/Sales.vue');
+const LegalNotice = () => import('./pages/static/LegalNotice.vue');
 const Contact = () => import('./pages/static/Contact.vue');
 
 // Scanner
@@ -117,6 +119,8 @@ const routes = [
     { path: '/help', component: Help, name: 'help' },
     { path: '/terms', component: Terms, name: 'terms' },
     { path: '/privacy', component: Privacy, name: 'privacy' },
+    { path: '/sales-terms', component: Sales, name: 'sales-terms' },
+    { path: '/legal-notice', component: LegalNotice, name: 'legal-notice' },
     { path: '/contact', component: Contact, name: 'contact' },
 
     // Routes espace client

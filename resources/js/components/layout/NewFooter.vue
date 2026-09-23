@@ -10,7 +10,9 @@
           <router-link to="/help" class="text-gray-600 hover:text-primea-yellow transition-colors">Aide</router-link>
           <router-link to="/contact" class="text-gray-600 hover:text-primea-yellow transition-colors">Contact</router-link>
           <router-link to="/terms" class="text-gray-600 hover:text-primea-yellow transition-colors">CGU</router-link>
+          <router-link to="/sales-terms" class="text-gray-600 hover:text-primea-yellow transition-colors">CGV</router-link>
           <router-link to="/privacy" class="text-gray-600 hover:text-primea-yellow transition-colors">Confidentialité</router-link>
+          <router-link to="/legal-notice" class="text-gray-600 hover:text-primea-yellow transition-colors">Mentions légales</router-link>
         </div>
 
         <p class="text-sm text-gray-500">&copy; {{ new Date().getFullYear() }} {{ branding.app_name }}. Tous droits réservés.</p>
@@ -71,8 +73,18 @@
                 </router-link>
               </li>
               <li>
+                <router-link to="/sales-terms" class="text-gray-600 hover:text-primea-yellow transition-colors">
+                  CGV
+                </router-link>
+              </li>
+              <li>
                 <router-link to="/privacy" class="text-gray-600 hover:text-primea-yellow transition-colors">
                   Politique de confidentialité
+                </router-link>
+              </li>
+              <li>
+                <router-link to="/legal-notice" class="text-gray-600 hover:text-primea-yellow transition-colors">
+                  Mentions légales
                 </router-link>
               </li>
               <li>
