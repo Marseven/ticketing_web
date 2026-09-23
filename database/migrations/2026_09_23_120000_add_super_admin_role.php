@@ -1,23 +1,23 @@
 <?php
 
 use App\Models\Role;
-use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Rôle « super administrateur ».
+ * S'assure que le rôle « super administrateur » existe.
  *
- * La supervision de la plateforme donne à voir l'état technique, la
- * fréquentation et les flux financiers en cours. C'est un cran au-dessus de
- * l'administration courante : tout le monde n'a pas à y accéder.
+ * Ce rôle n'est pas nouveau : le RoleSeeder le crée depuis l'origine
+ * (« Super Admin », niveau 100, accès complet au système). Cette migration ne
+ * fait que garantir sa présence sur une installation où le seeder n'aurait
+ * pas tourné, avec les mêmes attributs.
  *
- * ⚠️ Les administrateurs actuels reçoivent ce rôle, sinon personne ne
- * pourrait ouvrir la page le jour du déploiement. À l'exploitant de le
- * retirer à qui n'en a pas besoin :
+ * ⚠️ Elle n'accorde le rôle à personne. Un administrateur ordinaire n'est pas
+ * un super administrateur : le lui donner d'office élargirait ses droits sans
+ * que personne ne l'ait demandé. Pour voir qui le détient, ou l'accorder :
  *
- *     php artisan admin:super --revoke quelquun@example.com
+ *     php artisan admin:super --list
+ *     php artisan admin:super quelquun@example.com
  */
 return new class extends Migration
 {
@@ -27,33 +27,23 @@ return new class extends Migration
             return;
         }
 
-        $role = Role::firstOrCreate(
+        $adminTypeId = \App\Models\UserType::where('name', 'admin')->value('id');
+
+        Role::firstOrCreate(
             ['slug' => Role::SUPER_ADMIN],
-            [
-                'name' => Role::SUPER_ADMIN,
-                'description' => 'Supervision de la plateforme et administration complète',
+            array_filter([
+                'name' => 'Super Admin',
+                'description' => 'Accès complet au système avec tous les privilèges',
+                'type' => Role::TYPE_SYSTEM,
+                'user_type_id' => $adminTypeId,
                 'level' => 100,
-            ]
+            ], fn ($value) => $value !== null)
         );
-
-        $admins = User::whereHas('roles', fn ($q) => $q->where('slug', Role::ADMIN))->get();
-
-        foreach ($admins as $admin) {
-            $admin->roles()->syncWithoutDetaching([$role->id]);
-        }
     }
 
     public function down(): void
     {
-        if (! Schema::hasTable('roles')) {
-            return;
-        }
-
-        $role = Role::where('slug', Role::SUPER_ADMIN)->first();
-
-        if ($role) {
-            DB::table('role_user')->where('role_id', $role->id)->delete();
-            $role->delete();
-        }
+        // Rien : le rôle préexistait à cette migration, le supprimer
+        // retirerait des droits que cette migration n'a pas donnés.
     }
 };

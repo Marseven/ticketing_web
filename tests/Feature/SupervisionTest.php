@@ -43,7 +43,7 @@ class SupervisionTest extends TestCase
         if ($superAdmin) {
             $super = Role::firstOrCreate(
                 ['slug' => Role::SUPER_ADMIN],
-                ['name' => Role::SUPER_ADMIN, 'description' => 'Super administrateur', 'level' => 100]
+                ['name' => 'Super Admin', 'description' => 'Accès complet au système', 'level' => 100]
             );
             $user->roles()->syncWithoutDetaching([$super->id]);
         }

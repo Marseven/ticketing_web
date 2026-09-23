@@ -34,7 +34,12 @@ class Role extends Model
     const TYPE_CUSTOM = 'custom';
 
     // Rôles système prédéfinis
-    const SUPER_ADMIN = 'super-admin';
+    /**
+     * ⚠️ Underscore et non tiret : ce rôle existe depuis le RoleSeeder
+     * (« Super Admin », niveau 100, accès complet). Un second rôle
+     * « super-admin » avait été créé par erreur, en parallèle de celui-ci.
+     */
+    const SUPER_ADMIN = 'super_admin';
     const ADMIN = 'admin';
     const ORGANIZER = 'organizer';
     const CLIENT = 'client';

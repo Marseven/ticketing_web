@@ -80,7 +80,7 @@ class SuperAdminCommandTest extends TestCase
     public function test_it_warns_when_nobody_holds_the_role(): void
     {
         // Personne ne peut alors ouvrir la supervision : cela doit se voir.
-        Role::firstOrCreate(['slug' => Role::SUPER_ADMIN], ['name' => Role::SUPER_ADMIN, 'level' => 100]);
+        Role::firstOrCreate(['slug' => Role::SUPER_ADMIN], ['name' => 'Super Admin', 'level' => 100]);
         User::whereHas('roles', fn ($q) => $q->where('slug', Role::SUPER_ADMIN))
             ->get()
             ->each(fn ($u) => $u->roles()->detach());
