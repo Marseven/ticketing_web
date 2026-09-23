@@ -71,6 +71,7 @@ class ManageSuperAdmin extends Command
 
         if ($holders->isEmpty()) {
             $this->warn('Aucun super administrateur. Personne ne peut ouvrir la supervision.');
+            $this->suggestCandidates();
 
             return;
         }
@@ -79,6 +80,32 @@ class ManageSuperAdmin extends Command
 
         foreach ($holders as $holder) {
             $this->line('  · ' . $holder->email . ' (' . $holder->name . ')');
+        }
+    }
+
+    /**
+     * Propose les comptes à qui accorder le rôle.
+     *
+     * Sans cette liste, « personne ne détient le rôle » laisse chercher :
+     * l'exploitant sait qu'il lui manque quelque chose, pas à quelle adresse
+     * l'accorder.
+     */
+    private function suggestCandidates(): void
+    {
+        $candidates = User::whereHas('roles', fn ($q) => $q->where('slug', Role::ADMIN))
+            ->orderBy('email')
+            ->limit(10)
+            ->get(['name', 'email']);
+
+        if ($candidates->isEmpty()) {
+            return;
+        }
+
+        $this->newLine();
+        $this->line('Comptes administrateurs, à qui le rôle peut être accordé :');
+
+        foreach ($candidates as $candidate) {
+            $this->line('  php artisan admin:super ' . $candidate->email);
         }
     }
 }

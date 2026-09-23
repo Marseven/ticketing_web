@@ -395,7 +395,15 @@ export default {
     const eventsStore = useEventsStore()
 
     // Couleurs pour les catégories de tickets
-    const ticketColors = ['#272d63', '#fab511', '#059669', '#dc2626', '#7c3aed', '#ea580c']
+    /**
+     * Couleurs des catégories de billets, dans l'ordre d'affichage.
+     *
+     * Vert, puis jaune, puis bleu : l'ordre du drapeau gabonais. Il était
+     * auparavant bleu, jaune, vert, ce qui se lisait comme les couleurs d'un
+     * pays voisin — un contresens sur une affiche gabonaise, et une remarque
+     * de plus à gérer. Les teintes restent celles de la marque.
+     */
+    const ticketColors = ['#059669', '#fab511', '#272d63', '#dc2626', '#7c3aed', '#ea580c']
 
     // State
     const event = ref(null)

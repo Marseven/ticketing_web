@@ -514,9 +514,14 @@ export default {
     const route = useRoute()
     const router = useRouter()
 
-    // Masqué par défaut tant que le profil n'est pas chargé : mieux vaut une
-    // entrée qui apparaît qu'une entrée qui mène à un refus.
-    const { isSuperAdmin } = useAuthStore()
+    // ⚠️ Ne PAS déstructurer le store : Pinia enveloppe un store « setup »
+    // dans `reactive()`, donc `const { isSuperAdmin } = useAuthStore()` copie
+    // la VALEUR du moment — fausse, puisque le profil n'est pas encore
+    // chargé — et ne se met plus jamais à jour. L'entrée de menu restait donc
+    // invisible même pour un super administrateur. On garde le store et on
+    // relit la propriété à chaque rendu.
+    const authStore = useAuthStore()
+    const isSuperAdmin = computed(() => authStore.isSuperAdmin)
     
     // État réactif
     const sidebarOpen = ref(false)
