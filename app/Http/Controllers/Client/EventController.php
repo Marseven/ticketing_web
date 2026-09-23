@@ -108,6 +108,11 @@ class EventController extends Controller
                     'status' => $event->status,
                     'is_active' => $event->is_active,
                     'published_at' => $event->published_at,
+                    // Date d'ouverture de la billetterie, jamais un booléen
+                    // « ouvert » : la liste est mise en cache 60 s côté serveur
+                    // et un booléen y serait périmé pile à l'instant qui compte.
+                    // Le navigateur compare la date à son horloge, à la seconde.
+                    'sales_start_at' => $event->sales_start_at?->toIso8601String(),
                     'created_at' => $event->created_at,
                     'updated_at' => $event->updated_at,
                     'organizer' => $event->organizer ? [

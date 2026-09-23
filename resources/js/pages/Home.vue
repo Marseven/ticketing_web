@@ -196,7 +196,18 @@
                               {{ event.venue?.name || 'Lieu à définir' }}
                             </p>
                           </div>
+                          <!-- Billetterie pas encore ouverte : on annonce,
+                               on ne propose pas d'acheter. -->
+                          <span
+                            v-if="salesPending(event)"
+                            class="bg-white/90 text-primea-blue rounded-lg px-3 py-2 text-xs font-semibold text-center leading-tight"
+                          >
+                            <span class="block uppercase tracking-wide opacity-70">Billetterie</span>
+                            <span class="block text-sm">{{ salesBadge(event) }}</span>
+                          </span>
+
                           <router-link
+                            v-else
                             :to="`/${event.slug}`"
                             class="btn-ticket btn-ticket--pulse"
                             @click.stop
@@ -388,6 +399,7 @@ import { loadPublicCategories } from '../services/publicCategories'
 import axios from 'axios'
 import BannerCarousel from '../components/BannerCarousel.vue'
 import SmartImage from '../components/SmartImage.vue'
+import { useSalesClock } from '../utils/salesOpening'
 
 export default {
   name: 'Home',
@@ -397,6 +409,10 @@ export default {
   },
   setup() {
     const router = useRouter()
+
+    // Un événement peut être annoncé bien avant l'ouverture des ventes : sa
+    // carte montre alors le délai restant au lieu du bouton d'achat.
+    const { salesPending, salesBadge } = useSalesClock()
 
     const searchQuery = ref('')
     const selectedCategory = ref('all')
@@ -610,6 +626,8 @@ export default {
     })
 
     return {
+      salesPending,
+      salesBadge,
       searchQuery,
       selectedCategory,
       events,

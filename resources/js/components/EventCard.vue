@@ -23,6 +23,13 @@
         </span>
       </div>
 
+      <!-- Billetterie pas encore ouverte : on annonce, on ne vend pas -->
+      <div v-if="salesNotOpenYet" class="absolute top-4 right-4">
+        <span class="bg-primea-blue text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-lg">
+          En vente {{ shortCountdown }}
+        </span>
+      </div>
+
       <!-- Prix et bouton réserver -->
       <div class="absolute bottom-4 left-4 right-4 flex items-end justify-between">
         <div class="bg-black/70 backdrop-blur-sm rounded-lg px-3 py-2 text-white">
@@ -33,8 +40,17 @@
           <div v-else class="text-lg font-bold text-green-400">Gratuit</div>
         </div>
 
+        <!-- Avant l'ouverture, rien à acheter : on dit quand ça commence. -->
+        <div
+          v-if="salesNotOpenYet"
+          class="bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 text-primea-blue text-xs font-semibold text-center"
+        >
+          <div class="uppercase tracking-wide opacity-70">Billetterie</div>
+          <div class="text-sm">{{ shortCountdown }}</div>
+        </div>
+
         <button
-          v-if="canPurchase"
+          v-else-if="canPurchase"
           @click.stop="goToCheckout"
           class="btn-ticket btn-ticket--pulse"
         >
@@ -128,6 +144,7 @@
 <script>
 import { computed, ref } from 'vue'
 import { cardImageUrl } from '../utils/imageVariant'
+import { useSalesOpening } from '../utils/salesOpening'
 import { useRouter } from 'vue-router'
 import Swal from 'sweetalert2'
 import CalendarIcon from './icons/CalendarIcon.vue'
@@ -314,8 +331,14 @@ export default {
       return 'Acheter un ticket'
     })
 
+    // La billetterie peut ouvrir plus tard que la publication : l'événement
+    // est visible et annoncé, mais personne ne peut encore acheter.
+    const { salesNotOpenYet, shortCountdown } = useSalesOpening(() => props.event)
+
     const canPurchase = computed(() => {
-      return !isEventPassed.value && availableTickets.value > 0
+      return !isEventPassed.value
+        && !salesNotOpenYet.value
+        && availableTickets.value > 0
     })
 
     const organizerName = computed(() => {
@@ -430,6 +453,8 @@ export default {
       availableTickets,
       buttonText,
       canPurchase,
+      salesNotOpenYet,
+      shortCountdown,
       organizerName,
       formatDate,
       formatTime,

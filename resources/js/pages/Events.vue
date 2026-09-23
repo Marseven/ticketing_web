@@ -228,8 +228,17 @@
                       <div class="text-xs text-gray-200">{{ event.venue?.name || event.venue_name || 'Lieu à confirmer' }}</div>
                     </div>
 
+                    <!-- Billetterie à venir : le délai remplace le bouton. -->
+                    <span
+                      v-if="!isEventPast(event) && salesPending(event)"
+                      class="bg-white/90 text-primea-blue rounded-lg px-3 py-2 text-xs font-semibold text-center leading-tight"
+                    >
+                      <span class="block uppercase tracking-wide opacity-70">Billetterie</span>
+                      <span class="block text-sm">{{ salesBadge(event) }}</span>
+                    </span>
+
                     <button
-                      v-if="!isEventPast(event)"
+                      v-else-if="!isEventPast(event)"
                       @click.stop="$router.push(`/${event.slug}`)"
                       class="btn-ticket btn-ticket--pulse"
                     >
@@ -305,8 +314,17 @@
                       <div class="text-xs text-gray-200">{{ event.venue?.name || event.venue_name || 'Lieu à confirmer' }}</div>
                     </div>
 
+                    <!-- Billetterie à venir : le délai remplace le bouton. -->
+                    <span
+                      v-if="!isEventPast(event) && salesPending(event)"
+                      class="bg-white/90 text-primea-blue rounded-lg px-3 py-2 text-xs font-semibold text-center leading-tight"
+                    >
+                      <span class="block uppercase tracking-wide opacity-70">Billetterie</span>
+                      <span class="block text-sm">{{ salesBadge(event) }}</span>
+                    </span>
+
                     <button
-                      v-if="!isEventPast(event)"
+                      v-else-if="!isEventPast(event)"
                       @click.stop="$router.push(`/${event.slug}`)"
                       class="btn-ticket btn-ticket--pulse"
                     >
@@ -358,6 +376,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useEventsStore } from '../stores/events'
 import { loadPublicCategories } from '../services/publicCategories'
 import { cardImageUrl, restoreFullImage } from '../utils/imageVariant'
+import { useSalesClock } from '../utils/salesOpening'
 import EventCard from '../components/EventCard.vue'
 import BannerCarousel from '../components/BannerCarousel.vue'
 import { ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
@@ -373,6 +392,10 @@ export default {
     const router = useRouter()
     const route = useRoute()
     const eventsStore = useEventsStore()
+
+    // Un événement annoncé avant l'ouverture des ventes affiche le délai
+    // restant à la place du bouton d'achat.
+    const { salesPending, salesBadge } = useSalesClock()
 
     // État des événements
     const events = ref([])
@@ -620,6 +643,8 @@ export default {
     })
 
     return {
+      salesPending,
+      salesBadge,
       cardImageUrl,
       restoreFullImage,
       events,

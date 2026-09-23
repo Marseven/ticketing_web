@@ -123,7 +123,8 @@
                     :key="ticketType.id"
                     class="bg-white p-4 rounded-xl border-2 border-gray-200 hover:border-primea-blue transition-all duration-200 cursor-pointer"
                     :style="{ borderLeftWidth: '4px', borderLeftColor: ticketColors[index % ticketColors.length] }"
-                    @click="goToBookingWithType(ticketType.id)"
+                    :class="salesNotOpenYet ? 'cursor-default' : ''"
+                    @click="salesNotOpenYet ? null : goToBookingWithType(ticketType.id)"
                   >
                     <div class="flex items-start justify-between gap-4">
                       <div class="flex-1 min-w-0">
@@ -143,7 +144,8 @@
                           <span v-else class="text-green-600">GRATUIT</span>
                         </div>
                         <div class="text-xs text-gray-500">XAF</div>
-                        <div class="text-xs font-semibold text-primea-blue mt-1">Réserver →</div>
+                        <div v-if="!salesNotOpenYet" class="text-xs font-semibold text-primea-blue mt-1">Réserver →</div>
+                        <div v-else class="text-xs font-semibold text-gray-400 mt-1">Bientôt en vente</div>
                       </div>
                     </div>
                   </div>
@@ -273,12 +275,48 @@
         </button>
 
         <div v-else class="flex-1 px-5 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
-             :class="isEventPassed ? 'bg-gray-500 text-white' : 'bg-red-600 text-white'">
+             :class="salesNotOpenYet ? 'bg-primea-blue text-white' : (isEventPassed ? 'bg-gray-500 text-white' : 'bg-red-600 text-white')">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
           </svg>
-          {{ isEventPassed ? 'Terminé' : 'Complet' }}
+          <template v-if="salesNotOpenYet">
+            En vente dans {{ salesCountdown.days > 0 ? salesCountdown.days + ' j' : salesCountdown.hours + ' h' }}
+          </template>
+          <template v-else>{{ isEventPassed ? 'Terminé' : 'Complet' }}</template>
         </div>
+      </div>
+    </div>
+
+    <!-- Billetterie à venir : on annonce l'ouverture, on ne vend pas encore -->
+    <div v-if="event && !loading && !error && salesNotOpenYet" class="max-w-7xl mx-auto px-4 pb-8">
+      <div class="bg-primea-blue/5 border-2 border-primea-blue/20 rounded-2xl p-6 text-center">
+        <p class="text-sm font-semibold uppercase tracking-wide text-primea-blue/70">
+          Ouverture de la billetterie
+        </p>
+        <p class="text-lg md:text-xl font-bold text-primea-blue mt-1">{{ salesOpeningLabel }}</p>
+
+        <div class="flex justify-center gap-3 mt-4">
+          <div v-if="salesCountdown.days > 0" class="bg-white border-2 border-primea-blue rounded-xl p-3 min-w-[68px]">
+            <div class="text-2xl font-bold text-primea-blue">{{ salesCountdown.days }}</div>
+            <div class="text-[11px] uppercase tracking-wide text-gray-500">jours</div>
+          </div>
+          <div class="bg-white border-2 border-primea-blue rounded-xl p-3 min-w-[68px]">
+            <div class="text-2xl font-bold text-primea-blue">{{ salesCountdown.hours }}</div>
+            <div class="text-[11px] uppercase tracking-wide text-gray-500">heures</div>
+          </div>
+          <div class="bg-white border-2 border-primea-blue rounded-xl p-3 min-w-[68px]">
+            <div class="text-2xl font-bold text-primea-blue">{{ salesCountdown.minutes }}</div>
+            <div class="text-[11px] uppercase tracking-wide text-gray-500">min</div>
+          </div>
+          <div class="bg-white border-2 border-primea-blue rounded-xl p-3 min-w-[68px]">
+            <div class="text-2xl font-bold text-primea-blue">{{ salesCountdown.seconds }}</div>
+            <div class="text-[11px] uppercase tracking-wide text-gray-500">sec</div>
+          </div>
+        </div>
+
+        <p class="text-sm text-gray-600 mt-4">
+          L'achat s'ouvrira automatiquement à cette heure, sans recharger la page.
+        </p>
       </div>
     </div>
 
@@ -301,11 +339,12 @@
           </button>
 
           <div v-else class="px-10 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-3"
-               :class="isEventPassed ? 'bg-gray-500 text-white' : 'bg-red-600 text-white'">
+               :class="salesNotOpenYet ? 'bg-primea-blue text-white' : (isEventPassed ? 'bg-gray-500 text-white' : 'bg-red-600 text-white')">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
             </svg>
-            {{ isEventPassed ? 'Événement terminé' : 'Événement complet' }}
+            <template v-if="salesNotOpenYet">Billetterie pas encore ouverte</template>
+            <template v-else>{{ isEventPassed ? 'Événement terminé' : 'Événement complet' }}</template>
           </div>
         </div>
       </div>
@@ -330,6 +369,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useEventsStore } from '../stores/events'
+import { useSalesOpening } from '../utils/salesOpening'
 import EventCard from '../components/EventCard.vue'
 import BannerCarousel from '../components/BannerCarousel.vue'
 import FavoriteButton from '../components/FavoriteButton.vue'
@@ -447,8 +487,16 @@ export default {
       return 1000
     })
 
+    // La billetterie peut ouvrir après la publication : l'événement est
+    // visible et annoncé, avec son compte à rebours, mais pas encore
+    // achetable. Le serveur refuse de toute façon la commande.
+    const { salesNotOpenYet, countdown: salesCountdown, openingLabel: salesOpeningLabel } =
+      useSalesOpening(() => event.value)
+
     const canPurchaseTickets = computed(() => {
-      return !isEventPassed.value && availableTickets.value > 0
+      return !isEventPassed.value
+        && !salesNotOpenYet.value
+        && availableTickets.value > 0
     })
 
     const descriptionParagraphs = computed(() => {
@@ -566,6 +614,9 @@ export default {
       availableTickets,
       showRemainingSeats,
       canPurchaseTickets,
+      salesNotOpenYet,
+      salesCountdown,
+      salesOpeningLabel,
       descriptionParagraphs,
       formatFullDate,
       formatTime,

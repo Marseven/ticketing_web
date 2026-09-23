@@ -82,6 +82,47 @@ class SalesOpeningTest extends TestCase
         $this->assertSame($opening->toIso8601String(), $exposed);
     }
 
+    public function test_the_listing_shows_the_event_and_its_opening_date(): void
+    {
+        // La carte d'un événement affiche le compte à rebours : il lui faut la
+        // date, sans avoir à ouvrir la fiche.
+        $opening = now()->addDays(7)->startOfHour();
+        $event = $this->makeEvent($opening->toDateTimeString());
+
+        $listed = collect($this->getJson('/api/client/events')->assertOk()->json('events'))
+            ->firstWhere('slug', $event->slug);
+
+        $this->assertNotNull($listed, 'un événement en attente d\'ouverture reste listé');
+        $this->assertSame($opening->toIso8601String(), $listed['sales_start_at']);
+    }
+
+    public function test_an_event_selling_already_carries_no_opening_date(): void
+    {
+        // Sans date, rien à décompter : la carte affiche le bouton d'achat.
+        $event = $this->makeEvent(null);
+
+        $listed = collect($this->getJson('/api/client/events')->assertOk()->json('events'))
+            ->firstWhere('slug', $event->slug);
+
+        $this->assertNotNull($listed);
+        $this->assertNull($listed['sales_start_at']);
+    }
+
+    public function test_an_opening_already_passed_does_not_hold_back_the_sale(): void
+    {
+        // Le navigateur compare la date à son horloge : une date dépassée
+        // doit revenir telle quelle, et non disparaître, sinon l'écran ne
+        // peut pas distinguer « ouvert » de « jamais programmé ».
+        $opening = now()->subHour()->startOfHour();
+        $event = $this->makeEvent($opening->toDateTimeString());
+
+        $listed = collect($this->getJson('/api/client/events')->assertOk()->json('events'))
+            ->firstWhere('slug', $event->slug);
+
+        $this->assertSame($opening->toIso8601String(), $listed['sales_start_at']);
+        $this->assertTrue($event->salesOpen());
+    }
+
     public function test_buying_before_the_opening_is_refused(): void
     {
         $event = $this->makeEvent(now()->addDays(7)->toDateTimeString());
