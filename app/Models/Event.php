@@ -25,6 +25,7 @@ class Event extends Model
         'image_url',
         'image_file',
         'status',
+        'is_active',
         'use_variable_pricing',
         'show_remaining_seats',
         'commission_percentage',

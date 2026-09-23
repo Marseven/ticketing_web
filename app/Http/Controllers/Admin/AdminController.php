@@ -863,6 +863,14 @@ class AdminController extends Controller
                 'show_remaining_seats' => $request->boolean('show_remaining_seats'),
                 // Ouverture de la billetterie : vide = vente ouverte dès la publication.
                 'sales_start_at' => $request->filled('sales_start_at') ? $request->input('sales_start_at') : null,
+                // La file d'approbation sert à valider les événements des
+                // ORGANISATEURS. Ici c'est l'administrateur lui-même qui crée
+                // l'événement : la validation a déjà eu lieu. Le laisser en
+                // attente le rendait invisible sur le site sans que rien ne le
+                // signale, et obligeait l'admin à s'approuver lui-même.
+                'approval_status' => 'approved',
+                'approved_by' => $request->user()?->id,
+                'approved_at' => now(),
             ]);
 
             // Créer les horaires
@@ -1024,8 +1032,16 @@ class AdminController extends Controller
             // Mettre à jour l'événement
             $updateData = $request->only([
                 'title', 'description', 'organizer_id', 'co_organizer_id',
-                'category_id', 'status', 'is_active', 'image_url'
+                'category_id', 'status', 'image_url'
             ]);
+
+            // `is_active` passe par `boolean()` : le formulaire part en
+            // multipart à cause de l'image, et une case décochée y arrive
+            // comme la CHAÎNE « false », que le cast booléen d'Eloquent lit
+            // comme vraie. L'événement resterait actif quoi qu'on clique.
+            if ($request->has('is_active')) {
+                $updateData['is_active'] = $request->boolean('is_active');
+            }
             // co_organizer_id vide => on retire le co-organisateur
             if ($request->has('co_organizer_id') && !$request->co_organizer_id) {
                 $updateData['co_organizer_id'] = null;
