@@ -45,11 +45,6 @@
                 </router-link>
               </li>
               <li>
-                <router-link :to="{ name: 'organizer-choice' }" class="text-gray-600 hover:text-primea-yellow transition-colors">
-                  Devenir organisateur
-                </router-link>
-              </li>
-              <li>
                 <router-link :to="{ name: 'ticket-retrieve' }" class="text-gray-600 hover:text-primea-yellow transition-colors">
                   Récupérer mon ticket
                 </router-link>

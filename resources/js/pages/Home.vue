@@ -63,18 +63,9 @@
             N'A JAMAIS ÉTÉ AUSSI SIMPLE !
           </h1>
 
-          <!-- CTA Button (réduit) -->
-          <div>
-            <router-link
-              to="/organizer-choice"
-              class="inline-flex items-center gap-2 bg-primea-yellow text-primea-blue px-6 py-2.5 rounded-lg text-sm font-bold shadow-lg ring-1 ring-white/20 hover:shadow-xl transition-shadow"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-              </svg>
-              Créateur d'événements
-            </router-link>
-          </div>
+          <!-- L'inscription autonome comme organisateur est fermée : les comptes
+               sont créés par l'administration. Pour la rouvrir, rétablir ce lien
+               et la carte d'inscription de `pages/auth/OrganizerChoice.vue`. -->
         </div>
       </div>
 

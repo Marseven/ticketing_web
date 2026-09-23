@@ -155,12 +155,18 @@
           </div>
         </div>
 
+        <!-- L'inscription autonome est fermée : les comptes organisateurs
+             sont créés par l'administration. Rétablir le lien vers
+             « organizer-choice » pour la rouvrir. -->
         <div class="mt-10 text-center">
+          <p class="text-gray-600 mb-4">
+            Les comptes organisateurs sont ouverts par notre équipe, après un échange sur votre projet.
+          </p>
           <router-link
-            :to="{ name: 'organizer-choice' }"
+            to="/contact"
             class="inline-flex items-center gap-2 bg-primea-blue text-white px-8 py-4 rounded-xl font-semibold hover:bg-primea-blue/90 transition-colors"
           >
-            Devenir organisateur
+            Nous parler de votre événement
           </router-link>
         </div>
       </section>

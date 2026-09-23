@@ -103,7 +103,12 @@ const routes = [
     { path: '/register', component: Register, name: 'register' },
     { path: '/organizer-choice', component: OrganizerChoice, name: 'organizer-choice' },
     { path: '/login-organizer', component: LoginOrganizer, name: 'login-organizer' },
-    { path: '/register-organizer', component: RegisterOrganizer, name: 'register-organizer' },
+    // Inscription autonome fermée : les comptes organisateurs sont créés par
+    // l'administration. La route est conservée pour que les anciens liens ne
+    // tombent pas dans le vide, mais elle mène au formulaire de contact.
+    // Pour la rouvrir : remettre `component: RegisterOrganizer` à la place de
+    // la redirection, et rétablir les liens publics retirés.
+    { path: '/register-organizer', redirect: '/contact', name: 'register-organizer' },
     { path: '/email/verify/:id?/:hash?', component: EmailVerification, name: 'email-verification' },
     { path: '/email-verification-result', component: EmailVerificationResult, name: 'email-verification-result' },
     { path: '/forgot-password', component: ForgotPassword, name: 'forgot-password' },

@@ -351,11 +351,9 @@
                   </div>
                 </template>
 
-                <div v-if="!isAuthenticated" class="pt-6">
-                  <router-link to="/organizer-choice" @click="closeMenu" class="block w-full bg-primea-yellow text-primea-blue text-center py-3 px-6 rounded-lg font-bold hover:bg-primea-yellow transition-colors">
-                    Créateur d'événements
-                  </router-link>
-                </div>
+                <!-- L'inscription autonome comme organisateur est fermée : les comptes
+                     sont créés par l'administration. Pour la rouvrir, rétablir ce lien
+                     et la carte d'inscription de `pages/auth/OrganizerChoice.vue`. -->
               </div>
             </div>
 

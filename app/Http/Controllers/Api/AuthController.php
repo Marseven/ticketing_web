@@ -95,7 +95,14 @@ class AuthController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'phone' => $phone,
-                'is_organizer' => $request->is_organizer ?? false,
+                // L'inscription autonome comme organisateur est fermée par
+                // défaut : le drapeau envoyé par le formulaire est ignoré et
+                // le compte créé est un compte client. Masquer les liens ne
+                // suffisait pas, l'inscription étant un appel d'API public.
+                // Voir config/features.php pour rouvrir.
+                'is_organizer' => config('features.organizer_self_signup', false)
+                    ? (bool) ($request->is_organizer ?? false)
+                    : false,
                 'status' => 'active',
                 'email_verified_at' => null, // L'email n'est pas encore vérifié
             ]);

@@ -27,30 +27,11 @@
           </div>
         </router-link>
 
-        <!-- Divider -->
-        <div class="relative py-3">
-          <div class="absolute inset-0 flex items-center">
-            <div class="w-full border-t border-gray-300"></div>
-          </div>
-          <div class="relative flex justify-center">
-            <span class="px-4 bg-white text-sm text-gray-500 font-medium">
-              ou
-            </span>
-          </div>
-        </div>
-
-        <!-- Bouton Créer un compte -->
-        <router-link
-          to="/register-organizer"
-          class="block w-full bg-white border-2 border-primea-blue text-primea-blue py-4 px-6 rounded-xl text-center text-lg font-bold transition-all duration-200 hover:bg-primea-blue hover:text-white transform hover:scale-105"
-        >
-          <div class="flex items-center justify-center gap-3">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-            </svg>
-            <span>Créer un compte</span>
-          </div>
-        </router-link>
+        <!-- L'inscription autonome est fermée : les comptes organisateurs
+             sont créés par l'administration. Pour la rouvrir, rétablir ici la
+             carte « Créer un compte » vers /register-organizer, ainsi que les
+             liens publics retirés du pied de page, de l'en-tête mobile, de
+             l'accueil et de « Comment ça marche ». -->
 
         <!-- Retour à l'accueil -->
         <div class="pt-4 text-center border-t border-gray-200">
