@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'organizer' => \App\Http\Middleware\OrganizerMiddleware::class,
             'admin.access' => \App\Http\Middleware\AdminAccess::class,
+            'superadmin.access' => \App\Http\Middleware\SuperAdminAccess::class,
             'organizer.access' => \App\Http\Middleware\OrganizerAccess::class,
             'client.access' => \App\Http\Middleware\ClientAccess::class,
             'role' => \App\Http\Middleware\RoleMiddleware::class,

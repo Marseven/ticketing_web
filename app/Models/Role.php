@@ -34,6 +34,7 @@ class Role extends Model
     const TYPE_CUSTOM = 'custom';
 
     // Rôles système prédéfinis
+    const SUPER_ADMIN = 'super-admin';
     const ADMIN = 'admin';
     const ORGANIZER = 'organizer';
     const CLIENT = 'client';

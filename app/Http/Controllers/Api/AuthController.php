@@ -308,6 +308,10 @@ class AuthController extends Controller
                 'is_organizer' => $userData->is_organizer,
                 'is_admin' => $userData->is_admin,
                 'can_scan' => $user->canScanTickets(),
+                // Ouvre la supervision de la plateforme. Le menu s'en sert
+                // pour n'afficher l'entrée qu'aux personnes concernées ; le
+                // contrôle qui compte reste côté serveur.
+                'is_super_admin' => $user->isSuperAdmin(),
                 'roles' => $userData->roles,
                 'active_tickets_count' => 0, // TODO: calculer
                 'email_verified_at' => $user->email_verified_at,
@@ -399,6 +403,9 @@ class AuthController extends Controller
             'avatar_url' => $user->avatar_file ? '/storage/images/users/' . $user->avatar_file : $user->avatar_url,
             'is_organizer' => $user->is_organizer,
             'is_admin' => $user->is_admin,
+            // Même drapeau qu'à la connexion : le menu de supervision ne
+            // s'affiche que pour les super administrateurs.
+            'is_super_admin' => $user->isSuperAdmin(),
             'active_tickets_count' => $user->active_tickets_count,
             'roles' => $user->roles,
             'organizers' => $user->is_organizer ? $user->organizers : [],

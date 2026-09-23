@@ -164,6 +164,18 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Super administrateur : accès à la supervision de la plateforme.
+     *
+     * Un cran au-dessus de l'administration courante. On regarde le rôle et
+     * rien d'autre — surtout pas le type d'utilisateur, qui sert à d'autres
+     * choses et se trouve moins bien gardé.
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->roles()->where('slug', Role::SUPER_ADMIN)->exists();
+    }
+
+    /**
      * Peut scanner des billets : admin (tous les événements), organisateur, ou
      * utilisateur rattaché à au moins un organisateur (events de son orga).
      */

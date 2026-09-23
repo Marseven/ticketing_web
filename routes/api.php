@@ -56,6 +56,13 @@ Route::prefix('events')->middleware('auth:sanctum')->group(function () {
 });
 
 Route::prefix('v1')->group(function () {
+
+    // Fréquentation : signalée par le navigateur à chaque changement d'écran,
+    // puisqu'une SPA ne provoque qu'un seul chargement côté serveur. Public,
+    // car l'essentiel du trafic vient de visiteurs non connectés.
+    Route::post('traffic/hit', [App\Http\Controllers\Api\TrafficController::class, 'store'])
+        ->middleware('throttle:120,1');
+
     
     // Catégories (accès public)
     Route::get('categories', [App\Http\Controllers\Client\CategoryController::class, 'index']);
@@ -265,6 +272,14 @@ Route::prefix('v1')->group(function () {
         });
         
         // Gestion des événements
+        // Supervision de la plateforme : santé, fréquentation, flux.
+        // Un cran au-dessus de l'administration courante.
+        Route::prefix('supervision')->middleware('superadmin.access')->group(function () {
+            Route::get('health', [App\Http\Controllers\Admin\SupervisionController::class, 'health']);
+            Route::get('traffic', [App\Http\Controllers\Admin\SupervisionController::class, 'traffic']);
+            Route::get('flows', [App\Http\Controllers\Admin\SupervisionController::class, 'flows']);
+        });
+
         Route::prefix('events')->group(function () {
             Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'events']);
             Route::post('/', [App\Http\Controllers\Admin\AdminController::class, 'createEvent']);

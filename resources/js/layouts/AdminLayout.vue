@@ -317,6 +317,22 @@
             </svg>
             Analytics
           </router-link>
+
+          <!-- Supervision de la plateforme : santé, fréquentation, flux.
+               L'entrée n'apparaît qu'aux super administrateurs ; le contrôle
+               qui compte reste côté serveur, qui refuse les autres. -->
+          <router-link v-if="isSuperAdmin"
+                       to="/admin/supervision"
+                       class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors"
+                       :class="getMenuItemClass('/admin/supervision')"
+                       :style="getMenuItemStyle('/admin/supervision')"
+                       @mouseover="handleMenuHover($event, '/admin/supervision')"
+                       @mouseleave="handleMenuLeave($event, '/admin/supervision')">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Supervision
+          </router-link>
         </div>
       </nav>
     </div>
@@ -490,12 +506,17 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import Swal from 'sweetalert2'
 import { useRoute, useRouter } from 'vue-router'
 import authUtils from '../utils/auth'
+import { useAuthStore } from '../stores/auth'
 
 export default {
   name: 'AdminLayout',
   setup() {
     const route = useRoute()
     const router = useRouter()
+
+    // Masqué par défaut tant que le profil n'est pas chargé : mieux vaut une
+    // entrée qui apparaît qu'une entrée qui mène à un refus.
+    const { isSuperAdmin } = useAuthStore()
     
     // État réactif
     const sidebarOpen = ref(false)
@@ -793,6 +814,7 @@ export default {
     })
 
     return {
+      isSuperAdmin,
       // État
       sidebarOpen,
       showNotifications,

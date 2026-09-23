@@ -27,3 +27,10 @@ app.mount('#app');
 // Initialiser l'authentification après le montage
 const authStore = useAuthStore();
 authStore.initialize();
+
+// Mesure de fréquentation : une SPA ne provoque qu'un chargement côté serveur,
+// c'est donc le navigateur qui signale chaque changement d'écran. Les espaces
+// privés ne sont pas comptés, et aucun cookie n'est posé.
+import { trackNavigation, recordPageView } from './utils/traffic';
+trackNavigation(router);
+recordPageView(window.location.pathname);

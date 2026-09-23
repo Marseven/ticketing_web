@@ -13,6 +13,17 @@ Artisan::command('inspire', function () {
 // Exécuté toutes les heures
 // Toutes les 15 min : les places d'une commande abandonnée sont désormais
 // comptées comme occupées, donc elles doivent être relâchées vite.
+// Battement du planificateur. Sans cette trace, rien ne distingue « aucune
+// tâche à faire » de « le cron ne tourne plus » — or dans le second cas les
+// paiements en attente ne sont plus vérifiés et les versements s'arrêtent.
+Schedule::call(function () {
+    \Illuminate\Support\Facades\Cache::put(
+        \App\Http\Controllers\Admin\SupervisionController::HEARTBEAT_KEY,
+        now()->toIso8601String(),
+        now()->addDay()
+    );
+})->everyMinute()->name('supervision-heartbeat')->withoutOverlapping();
+
 Schedule::job(new CancelPendingOrders)->everyFifteenMinutes();
 
 // La notification d'e-billing se perd parfois : le client est débité mais son

@@ -12,6 +12,9 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!token.value)
   const isOrganizer = computed(() => user.value?.is_organizer || userRole.value === 'organizer')
   const isAdmin = computed(() => user.value?.is_admin || userRole.value === 'admin')
+  // Supervision de la plateforme : le serveur tranche, ce drapeau ne sert
+  // qu'à ne pas montrer une entrée de menu qui mènerait à un refus.
+  const isSuperAdmin = computed(() => user.value?.is_super_admin === true)
   const activeTicketsCount = computed(() => user.value?.active_tickets_count || 0)
   
   // Configuration axios
@@ -141,6 +144,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     isOrganizer,
     isAdmin,
+    isSuperAdmin,
     activeTicketsCount,
     login,
     register,

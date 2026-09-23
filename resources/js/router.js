@@ -50,6 +50,7 @@ const UserManagement = () => import(/* webpackChunkName: "admin-users" */ './pag
 const OrganizerManagement = () => import(/* webpackChunkName: "admin-organizers" */ './pages/admin/OrganizerManagement.vue');
 const EventManagement = () => import(/* webpackChunkName: "admin-events" */ './pages/admin/EventManagement.vue');
 const EventApproval = () => import(/* webpackChunkName: "admin-events" */ './pages/admin/EventApproval.vue');
+const Supervision = () => import(/* webpackChunkName: "admin-supervision" */ './pages/admin/Supervision.vue');
 const PhysicalTickets = () => import(/* webpackChunkName: "admin-events" */ './pages/admin/PhysicalTickets.vue');
 const LegacyImport = () => import(/* webpackChunkName: "admin-events" */ './pages/admin/LegacyImport.vue');
 const OrderManagement = () => import(/* webpackChunkName: "admin-orders" */ './pages/admin/OrderManagement.vue');
@@ -174,6 +175,8 @@ const routes = [
             { path: 'organizers', component: OrganizerManagement, name: 'admin-organizers' },
             { path: 'events', component: EventManagement, name: 'admin-events' },
             { path: 'events-approval', component: EventApproval, name: 'admin-events-approval' },
+            // Réservé aux super administrateurs : le serveur refuse les autres.
+            { path: 'supervision', component: Supervision, name: 'admin-supervision' },
             { path: 'physical-tickets', component: PhysicalTickets, name: 'admin-physical-tickets' },
             { path: 'legacy-import', component: LegacyImport, name: 'admin-legacy-import' },
             { path: 'orders', component: OrderManagement, name: 'admin-orders' },
