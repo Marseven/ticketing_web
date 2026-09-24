@@ -132,4 +132,40 @@ class ShapPayoutWebhookTest extends TestCase
 
         $this->assertSame('failed', $payout->fresh()->status);
     }
+
+    public function test_a_replayed_callback_credits_the_balance_only_once(): void
+    {
+        // Les passerelles rejouent leurs notifications. Le recrédit était
+        // inconditionnel : la première retransmission doublait le montant rendu
+        // à l'organisateur.
+        Notification::fake();
+        config(['services.shap.webhook_secret' => 'le-bon-secret']);
+        $payout = $this->pendingPayout(amount: 50000);
+        $headers = ['X-Webhook-Secret' => 'le-bon-secret'];
+
+        $this->postJson(self::URL, $this->forged($payout), $headers)->assertOk();
+        $this->postJson(self::URL, $this->forged($payout), $headers)->assertOk();
+        $this->postJson(self::URL, $this->forged($payout), $headers)->assertOk();
+
+        $this->assertSame(50000.0, (float) $payout->organizer->balances()->first()->balance,
+            'le montant n\'est rendu qu\'une fois, quel que soit le nombre de rappels');
+    }
+
+    public function test_a_settled_payout_is_never_flipped_back(): void
+    {
+        // Le solde a déjà été rendu : encaisser ensuite paierait deux fois.
+        Notification::fake();
+        config(['services.shap.webhook_secret' => 'le-bon-secret']);
+        $payout = $this->pendingPayout(amount: 50000);
+        $headers = ['X-Webhook-Secret' => 'le-bon-secret'];
+
+        $this->postJson(self::URL, $this->forged($payout), $headers)->assertOk();
+        $this->postJson(self::URL, [
+            'external_reference' => $payout->external_reference,
+            'status' => 'success',
+        ], $headers)->assertOk();
+
+        $this->assertSame('failed', $payout->fresh()->status);
+        $this->assertSame(50000.0, (float) $payout->organizer->balances()->first()->balance);
+    }
 }

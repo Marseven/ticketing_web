@@ -494,6 +494,27 @@ class PayoutService
                 return;
             }
 
+            // Un versement déjà tranché ne se rejoue pas.
+            //
+            // Le recrédit du solde était inconditionnel : deux rappels « échec »
+            // sur le même versement créditaient deux fois le montant. Les
+            // passerelles rejouent couramment leurs notifications — ce n'était
+            // donc pas un scénario d'attaque, mais un doublon d'argent à la
+            // première retransmission.
+            //
+            // On ne repasse pas non plus de `failed` à `success` : le solde a
+            // déjà été rendu, encaisser en plus le paierait deux fois. Ce cas
+            // demande un arbitrage humain, pas une écriture automatique.
+            if (in_array($payout->status, ['success', 'failed'], true)) {
+                Log::info('↩️ SHAP Webhook - Rappel ignoré, versement déjà tranché', [
+                    'payout_id' => $payout->id,
+                    'statut_actuel' => $payout->status,
+                    'statut_rappel' => $callbackData['status'] ?? null,
+                ]);
+
+                return;
+            }
+
             Log::info('✅ SHAP Webhook - Processing Payout Callback', [
                 'payout_id' => $payout->id,
                 'organizer_id' => $payout->organizer_id,
