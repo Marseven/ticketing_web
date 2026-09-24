@@ -472,6 +472,17 @@ class AdminController extends Controller
                 if (!$request->boolean('is_admin') && !$request->boolean('is_organizer')) {
                     $user->assignRole(\App\Models\Role::CLIENT);
                 }
+
+                // Le TYPE suit le rôle. Les comptes créés avant que la
+                // création ne le renseigne s'affichaient « Client » à la
+                // connexion : les modifier ici les remet d'aplomb.
+                $typeName = $request->boolean('is_admin') ? 'admin' : 'client';
+                $userType = \App\Models\UserType::where('name', $typeName)->first();
+
+                if ($userType && $user->user_type_id !== $userType->id) {
+                    $user->user_type_id = $userType->id;
+                    $user->save();
+                }
             }
 
             DB::commit();

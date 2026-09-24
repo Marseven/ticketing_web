@@ -318,10 +318,8 @@
             Analytics
           </router-link>
 
-          <!-- Supervision de la plateforme : santé, fréquentation, flux.
-               L'entrée n'apparaît qu'aux super administrateurs ; le contrôle
-               qui compte reste côté serveur, qui refuse les autres. -->
-          <router-link v-if="isSuperAdmin"
+          <!-- Supervision de la plateforme : santé, fréquentation, flux. -->
+          <router-link
                        to="/admin/supervision"
                        class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors"
                        :class="getMenuItemClass('/admin/supervision')"
@@ -515,11 +513,9 @@ export default {
     const router = useRouter()
 
     // ⚠️ Ne PAS déstructurer le store : Pinia enveloppe un store « setup »
-    // dans `reactive()`, donc `const { isSuperAdmin } = useAuthStore()` copie
-    // la VALEUR du moment — fausse, puisque le profil n'est pas encore
-    // chargé — et ne se met plus jamais à jour. L'entrée de menu restait donc
-    // invisible même pour un super administrateur. On garde le store et on
-    // relit la propriété à chaque rendu.
+    // dans `reactive()`, donc `const { x } = useAuthStore()` copie la VALEUR
+    // du moment — fausse, puisque le profil n'est pas encore chargé — et ne
+    // se met plus jamais à jour. On garde le store et on relit à chaque rendu.
     const authStore = useAuthStore()
     const isSuperAdmin = computed(() => authStore.isSuperAdmin)
     

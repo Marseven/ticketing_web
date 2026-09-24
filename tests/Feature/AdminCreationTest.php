@@ -239,6 +239,44 @@ class AdminCreationTest extends TestCase
         $this->assertTrue(Hash::check('AncienMotDePasse1!', $user->fresh()->password));
     }
 
+    public function test_an_admin_holding_only_the_role_is_seen_as_admin_at_login(): void
+    {
+        // Le compte créé avant le correctif : rôle posé, type absent. Il
+        // s'affichait « Client » à la connexion et perdait l'accès à
+        // l'administration, alors que le serveur l'y autorisait.
+        $ancien = User::create([
+            'name' => 'Leofa Abila', 'email' => 'leofa@primea.test',
+            'password' => bcrypt('MotDePasse1!'), 'status' => 'active',
+            'email_verified_at' => now(),
+        ]);
+        $ancien->roles()->syncWithoutDetaching([Role::where('slug', Role::ADMIN)->value('id')]);
+
+        Sanctum::actingAs($ancien->fresh('roles'));
+
+        $this->getJson('/api/v1/auth/me')
+            ->assertOk()
+            ->assertJsonPath('is_admin', true);
+    }
+
+    public function test_editing_an_admin_repairs_a_missing_user_type(): void
+    {
+        $ancien = User::create([
+            'name' => 'Leofa Abila', 'email' => 'leofa2@primea.test',
+            'password' => bcrypt('MotDePasse1!'), 'status' => 'active',
+        ]);
+        $ancien->roles()->syncWithoutDetaching([Role::where('slug', Role::ADMIN)->value('id')]);
+
+        $this->assertNull($ancien->userType);
+
+        $this->putJson('/api/v1/admin/users/' . $ancien->id, [
+            'name' => 'Leofa Abila',
+            'email' => 'leofa2@primea.test',
+            'is_admin' => true,
+        ])->assertSuccessful();
+
+        $this->assertSame('admin', $ancien->fresh()->userType?->name);
+    }
+
     public function test_a_password_is_never_stored_in_clear(): void
     {
         Notification::fake();

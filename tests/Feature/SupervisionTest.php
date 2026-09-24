@@ -55,13 +55,13 @@ class SupervisionTest extends TestCase
     //  Accès
     // ---------------------------------------------------------------
 
-    public function test_an_ordinary_administrator_is_turned_away(): void
+    public function test_an_ordinary_administrator_gets_in(): void
     {
+        // La supervision est ouverte aux administrateurs : c'est leur outil
+        // pour savoir si la plateforme tourne.
         Sanctum::actingAs($this->user(superAdmin: false));
 
-        $this->getJson('/api/v1/admin/supervision/health')
-            ->assertStatus(403)
-            ->assertJsonPath('message', 'Réservé aux super administrateurs.');
+        $this->getJson('/api/v1/admin/supervision/health')->assertOk();
     }
 
     public function test_a_visitor_is_turned_away(): void
@@ -69,7 +69,7 @@ class SupervisionTest extends TestCase
         $this->getJson('/api/v1/admin/supervision/health')->assertStatus(401);
     }
 
-    public function test_a_super_administrator_gets_in(): void
+    public function test_a_super_administrator_gets_in_too(): void
     {
         Sanctum::actingAs($this->user(superAdmin: true));
 

@@ -273,8 +273,8 @@ Route::prefix('v1')->group(function () {
         
         // Gestion des événements
         // Supervision de la plateforme : santé, fréquentation, flux.
-        // Un cran au-dessus de l'administration courante.
-        Route::prefix('supervision')->middleware('superadmin.access')->group(function () {
+        // Ouverte aux administrateurs — le groupe exige déjà `admin.access`.
+        Route::prefix('supervision')->group(function () {
             Route::get('health', [App\Http\Controllers\Admin\SupervisionController::class, 'health']);
             Route::get('traffic', [App\Http\Controllers\Admin\SupervisionController::class, 'traffic']);
             Route::get('flows', [App\Http\Controllers\Admin\SupervisionController::class, 'flows']);

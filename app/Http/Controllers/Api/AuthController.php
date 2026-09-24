@@ -290,8 +290,12 @@ class AuthController extends Controller
         // Charger les rôles et le user type
         $userData = $user->load(['roles', 'userType']);
 
-        // Déterminer le type d'utilisateur via user_type
-        $isAdmin = $userData->userType && $userData->userType->name === 'admin';
+        // Administrateur par son TYPE **ou** par son RÔLE. Ne regarder que le
+        // type faisait apparaître « Client » à un administrateur dont le rôle
+        // était posé sans le type — et il perdait l'accès à l'administration,
+        // alors que le serveur l'y autorisait. `isPlatformAdmin()` est la
+        // définition que le reste de l'application utilise.
+        $isAdmin = $userData->isPlatformAdmin();
         $isOrganizer = $userData->is_organizer;
 
         // Ajouter les propriétés calculées
@@ -388,8 +392,8 @@ class AuthController extends Controller
     {
         $user = $request->user()->load(['roles', 'userType']);
 
-        // Déterminer le type d'utilisateur via user_type
-        $isAdmin = $user->userType && $user->userType->name === 'admin';
+        // Même définition qu'à la connexion : type OU rôle.
+        $isAdmin = $user->isPlatformAdmin();
         $isOrganizer = $user->is_organizer;
         
         // Ajouter les propriétés calculées
