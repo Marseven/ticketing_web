@@ -145,7 +145,7 @@ class TicketController extends Controller
     public function validateTicket(Request $request, TicketValidationService $validator): JsonResponse
     {
         $request->validate([
-            'qr_code' => 'required|string',
+            'qr_code' => 'required|string|max:4096',
             'action' => 'nullable|string|in:validate,info'
         ]);
 

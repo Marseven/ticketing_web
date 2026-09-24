@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Guest;
 
+use App\Rules\PhoneNumberRule;
 use App\Http\Controllers\Controller;
 use App\Models\Ticket;
 use App\Models\Order;
@@ -259,8 +260,8 @@ class TicketController extends Controller
             'name' => 'nullable|string|max:255',
             // Le nom seul listerait les billets de tous les homonymes : il ne
             // vaut comme critère qu'associé au téléphone.
-            'phone' => 'nullable|string|required_with:name',
-            'reference' => 'nullable|string',
+            'phone' => ['nullable', 'string', 'max:32', 'required_with:name', new PhoneNumberRule()],
+            'reference' => 'nullable|string|max:64',
             'email' => 'nullable|email',
         ]);
 

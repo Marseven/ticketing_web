@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Rules\PhoneNumberRule;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\Order;
@@ -258,7 +259,7 @@ class PaymentController extends Controller
         // celui par lequel on y arrive.
         $request->validate([
             'gateway' => 'required|string|in:airtelmoney,moovmoney,ORABANK_NG',
-            'phone' => 'required|string|max:32',
+            'phone' => ['required', 'string', 'max:32', new PhoneNumberRule()],
             'operator' => 'nullable|string|max:32',
         ], [
             'gateway.required' => 'Choisissez un moyen de paiement.',
@@ -803,7 +804,7 @@ class PaymentController extends Controller
     {
         $request->validate([
             'payment_id' => 'required|integer',
-            'phone' => 'required|string',
+            'phone' => ['required', 'string', 'max:32', new PhoneNumberRule()],
             'gateway' => 'required|in:airtelmoney,moovmoney',
         ]);
 
@@ -984,7 +985,7 @@ class PaymentController extends Controller
     public function checkKYC(Request $request): JsonResponse
     {
         $request->validate([
-            'phone' => 'required|string',
+            'phone' => ['required', 'string', 'max:32', new PhoneNumberRule()],
             'gateway' => 'required|in:airtelmoney,moovmoney',
         ]);
 
@@ -1238,7 +1239,7 @@ class PaymentController extends Controller
     {
         $request->validate([
             'payment_id' => 'required|integer|exists:payments,id',
-            'phone' => 'required|string',
+            'phone' => ['required', 'string', 'max:32', new PhoneNumberRule()],
             'gateway' => 'required|in:airtelmoney,moovmoney',
         ]);
 

@@ -923,8 +923,8 @@ class OrganizerController extends Controller
         } elseif ($type === 'password') {
             // Validation pour changement de mot de passe
             $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
-                'current_password' => 'required|string',
-                'password' => 'required|string|min:6|confirmed',
+                'current_password' => 'required|string|max:255',
+                'password' => 'required|string|min:6|max:255|confirmed',
             ]);
 
             if ($validator->fails()) {
@@ -1127,14 +1127,14 @@ class OrganizerController extends Controller
 
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:5000',
             'category_id' => 'required|exists:event_categories,id',
             'venue_id' => 'nullable|exists:venues,id',
             'new_venue_name' => 'required_if:venue_id,new|nullable|string|max:255',
             'new_venue_city' => 'required_if:venue_id,new|nullable|string|max:255',
             'new_venue_address' => 'required_if:venue_id,new|nullable|string|max:500',
             'max_attendees' => 'nullable|integer|min:1',
-            'image_url' => 'nullable|string',
+            'image_url' => 'nullable|string|max:2048',
             'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
             'is_active' => 'sometimes|boolean',
             'published_at' => 'nullable|date',
@@ -1147,7 +1147,7 @@ class OrganizerController extends Controller
             'schedules.*.door_time' => 'nullable|date',
             'ticket_types' => 'required|array|min:1',
             'ticket_types.*.name' => 'required|string|max:255',
-            'ticket_types.*.description' => 'nullable|string',
+            'ticket_types.*.description' => 'nullable|string|max:2000',
             'ticket_types.*.price' => 'required|numeric|min:0',
             'ticket_types.*.capacity' => 'required|integer|min:1',
             'ticket_types.*.is_active' => 'boolean'
@@ -1362,13 +1362,13 @@ class OrganizerController extends Controller
 
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'title' => 'sometimes|string|max:255',
-            'description' => 'sometimes|nullable|string',
+            'description' => 'sometimes|nullable|string|max:5000',
             'category_id' => 'sometimes|exists:event_categories,id',
             'venue_id' => 'sometimes|nullable|exists:venues,id',
             'new_venue_name' => 'required_if:venue_id,new|nullable|string|max:255',
             'new_venue_city' => 'required_if:venue_id,new|nullable|string|max:255',
             'new_venue_address' => 'required_if:venue_id,new|nullable|string|max:500',
-            'image_url' => 'sometimes|nullable|string',
+            'image_url' => 'sometimes|nullable|string|max:2048',
             'image_file' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
             'is_active' => 'sometimes|boolean',
             'status' => 'sometimes|in:draft,published,cancelled',
@@ -1383,7 +1383,7 @@ class OrganizerController extends Controller
             'ticket_types' => 'sometimes|array',
             'ticket_types.*.id' => 'nullable|integer',
             'ticket_types.*.name' => 'required_with:ticket_types|string|max:255',
-            'ticket_types.*.description' => 'nullable|string',
+            'ticket_types.*.description' => 'nullable|string|max:2000',
             'ticket_types.*.price' => 'required_with:ticket_types|numeric|min:0',
             'ticket_types.*.capacity' => 'required_with:ticket_types|integer|min:1',
             'ticket_types.*.is_active' => 'boolean'
@@ -1838,9 +1838,9 @@ class OrganizerController extends Controller
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'frequency' => 'required|in:daily,weekly,monthly,yearly',
             'interval' => 'required|integer|min:1',
-            'by_day' => 'nullable|string',
-            'by_month_day' => 'nullable|string',
-            'by_month' => 'nullable|string',
+            'by_day' => 'nullable|string|max:255',
+            'by_month_day' => 'nullable|string|max:255',
+            'by_month' => 'nullable|string|max:255',
             'count' => 'nullable|integer|min:1',
             'until' => 'nullable|date',
             'start_time' => 'required|date',
@@ -1915,9 +1915,9 @@ class OrganizerController extends Controller
             'enabled' => 'required|boolean',
             'frequency' => 'required_if:enabled,true|in:daily,weekly,monthly,yearly',
             'interval' => 'required_if:enabled,true|integer|min:1',
-            'by_day' => 'nullable|string',
-            'by_month_day' => 'nullable|string',
-            'by_month' => 'nullable|string',
+            'by_day' => 'nullable|string|max:255',
+            'by_month_day' => 'nullable|string|max:255',
+            'by_month' => 'nullable|string|max:255',
             'count' => 'nullable|integer|min:1',
             'until' => 'nullable|date',
             'exceptions' => 'nullable|array',
@@ -2026,7 +2026,7 @@ class OrganizerController extends Controller
             'prices.*.valid_from' => 'nullable|date',
             'prices.*.valid_until' => 'nullable|date',
             'prices.*.priority' => 'nullable|integer',
-            'prices.*.description' => 'nullable|string',
+            'prices.*.description' => 'nullable|string|max:2000',
         ]);
 
         if ($validator->fails()) {

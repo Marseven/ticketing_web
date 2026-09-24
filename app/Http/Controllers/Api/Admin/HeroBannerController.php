@@ -44,7 +44,7 @@ class HeroBannerController extends Controller
             'title' => 'nullable|string|max:255',
             'type' => 'required|in:image,video',
             'media_file' => 'nullable|file|mimes:jpeg,png,jpg,gif,webp,mp4,webm,ogg|max:10240',
-            'media_url' => 'nullable|string',
+            'media_url' => 'nullable|string|max:2048',
             'display_order' => 'nullable|integer',
             'is_active' => 'nullable|boolean',
         ]);
@@ -141,7 +141,7 @@ class HeroBannerController extends Controller
             'title' => 'nullable|string|max:255',
             'type' => 'nullable|in:image,video',
             'media_file' => 'nullable|file|mimes:jpeg,png,jpg,gif,webp,mp4,webm,ogg|max:10240',
-            'media_url' => 'nullable|string',
+            'media_url' => 'nullable|string|max:2048',
             'display_order' => 'nullable|integer',
             'is_active' => 'nullable|boolean',
         ]);

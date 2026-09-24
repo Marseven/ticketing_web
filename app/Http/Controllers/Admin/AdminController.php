@@ -280,12 +280,12 @@ class AdminController extends Controller
             'is_admin' => 'boolean',
             'is_organizer' => 'boolean',
             'avatar_url' => 'nullable|url',
-            'avatar_file' => 'nullable|string',
+            'avatar_file' => 'nullable|string|max:255',
             // Mot de passe facultatif : quand l'administrateur le définit, le
             // compte est utilisable immédiatement. Sinon on envoie un lien de
             // création, ce qui reste préférable — le mot de passe transite
             // alors par la personne concernée et par personne d'autre.
-            'password' => 'nullable|string|min:8|confirmed',
+            'password' => 'nullable|string|min:8|max:255|confirmed',
         ]);
 
         if ($validator->fails()) {
@@ -399,9 +399,9 @@ class AdminController extends Controller
             'is_active' => 'sometimes|boolean',
             'status' => 'sometimes|in:active,inactive,suspended',
             'avatar_url' => 'nullable|url',
-            'avatar_file' => 'nullable|string',
+            'avatar_file' => 'nullable|string|max:255',
             // Facultatif : ne change le mot de passe que s'il est renseigné.
-            'password' => 'nullable|string|min:8|confirmed',
+            'password' => 'nullable|string|min:8|max:255|confirmed',
         ]);
 
         if ($validator->fails()) {
@@ -648,7 +648,7 @@ class AdminController extends Controller
     {
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'bio' => 'nullable|string',
+            'bio' => 'nullable|string|max:2000',
             'contact_email' => 'required|email|max:255',
             'contact_phone' => 'nullable|string|max:20',
             'status' => 'required|in:active,inactive',
@@ -726,7 +726,7 @@ class AdminController extends Controller
     {
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'name' => 'sometimes|string|max:255',
-            'bio' => 'nullable|string',
+            'bio' => 'nullable|string|max:2000',
             'contact_email' => 'sometimes|email|max:255',
             'contact_phone' => 'nullable|string|max:20',
             'status' => 'sometimes|in:active,inactive',
@@ -868,7 +868,7 @@ class AdminController extends Controller
     {
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:5000',
             'organizer_id' => 'required|exists:organizers,id',
             'co_organizer_id' => 'nullable|exists:organizers,id|different:organizer_id',
             'category_id' => 'required|exists:event_categories,id',
@@ -889,7 +889,7 @@ class AdminController extends Controller
             'ticket_types.*.name' => 'required|string|max:255',
             'ticket_types.*.price' => 'required|numeric|min:0',
             'ticket_types.*.capacity' => 'required|integer|min:1',
-            'ticket_types.*.description' => 'nullable|string',
+            'ticket_types.*.description' => 'nullable|string|max:2000',
         ]);
 
         if ($validator->fails()) {
@@ -1041,7 +1041,7 @@ class AdminController extends Controller
     {
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'title' => 'sometimes|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:5000',
             'organizer_id' => 'sometimes|exists:organizers,id',
             'co_organizer_id' => 'nullable|exists:organizers,id|different:organizer_id',
             'category_id' => 'sometimes|exists:event_categories,id',
@@ -1062,7 +1062,7 @@ class AdminController extends Controller
             'ticket_types.*.name' => 'required|string|max:255',
             'ticket_types.*.price' => 'required|numeric|min:0',
             'ticket_types.*.capacity' => 'required|integer|min:1',
-            'ticket_types.*.description' => 'nullable|string',
+            'ticket_types.*.description' => 'nullable|string|max:2000',
         ]);
 
         if ($validator->fails()) {
@@ -1252,7 +1252,7 @@ class AdminController extends Controller
     {
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'name' => 'required|string|max:255|unique:event_categories,name',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:5000',
             'color' => 'nullable|string|max:7',
             'is_active' => 'boolean',
             'status' => 'sometimes|in:active,inactive',
@@ -1314,7 +1314,7 @@ class AdminController extends Controller
 
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'name' => 'sometimes|string|max:255|unique:event_categories,name,' . $category->id,
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:5000',
             'color' => 'nullable|string|max:7',
             'is_active' => 'sometimes|boolean',
             'status' => 'sometimes|in:active,inactive',
@@ -1463,15 +1463,15 @@ class AdminController extends Controller
     {
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'address' => 'required|string',
+            'description' => 'nullable|string|max:5000',
+            'address' => 'required|string|max:500',
             'city' => 'required|string|max:255',
             'postal_code' => 'nullable|string|max:20',
             'country' => 'nullable|string|max:255',
             'capacity' => 'nullable|integer|min:1',
             'phone' => 'nullable|string|max:30',
             'email' => 'nullable|email|max:255',
-            'image' => 'nullable|string',
+            'image' => 'nullable|string|max:2048',
             'image_url' => 'nullable|url',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'status' => 'nullable|string|in:active,inactive',
@@ -1566,7 +1566,7 @@ class AdminController extends Controller
 
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'name' => 'sometimes|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:5000',
             'address' => 'sometimes|string',
             'city' => 'sometimes|string|max:255',
             'postal_code' => 'nullable|string|max:20',
@@ -1574,7 +1574,7 @@ class AdminController extends Controller
             'capacity' => 'nullable|integer|min:1',
             'phone' => 'nullable|string|max:30',
             'email' => 'nullable|email|max:255',
-            'image' => 'nullable|string',
+            'image' => 'nullable|string|max:2048',
             'image_url' => 'nullable|url',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'status' => 'nullable|string|in:active,inactive',
@@ -1912,7 +1912,7 @@ class AdminController extends Controller
     {
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'name' => 'required|string|max:255|unique:roles',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:5000',
             'type' => 'required|in:custom', // Seulement custom, pas system
             'level' => 'required|integer|min:0|max:100',
             'privilege_ids' => 'nullable|array',
@@ -1988,7 +1988,7 @@ class AdminController extends Controller
 
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'name' => 'sometimes|string|max:255|unique:roles,name,' . $role->id,
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:5000',
             'level' => 'sometimes|integer|min:0|max:100',
             'is_active' => 'sometimes|boolean',
             'privilege_ids' => 'nullable|array',

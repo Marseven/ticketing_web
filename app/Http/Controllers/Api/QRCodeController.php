@@ -285,7 +285,7 @@ class QRCodeController extends Controller
     public function analyzeQRCode(Request $request): JsonResponse
     {
         $request->validate([
-            'qr_content' => 'required|string',
+            'qr_content' => 'required|string|max:4096',
         ]);
 
         $user = $request->user();

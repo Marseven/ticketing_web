@@ -280,7 +280,7 @@ class LegacyImportController extends Controller
     public function run(Request $request): JsonResponse
     {
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
-            'confirm' => 'required|string',
+            'confirm' => 'required|string|max:50',
             'fresh' => 'boolean',
             'all' => 'boolean',
         ]);

@@ -99,7 +99,7 @@ class TwoFactorController extends Controller
     public function confirm(Request $request): JsonResponse
     {
         $request->validate(
-            ['code' => 'required|string'],
+            ['code' => 'required|string|max:32'],
             ['code.required' => 'Saisissez le code affiché par votre application.']
         );
 

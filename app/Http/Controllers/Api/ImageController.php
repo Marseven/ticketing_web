@@ -206,7 +206,7 @@ class ImageController extends Controller
     public function delete(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'filename' => 'required|string',
+            'filename' => 'required|string|max:255',
             'type' => 'required|string|in:' . implode(',', self::SUPPORTED_TYPES),
         ]);
 

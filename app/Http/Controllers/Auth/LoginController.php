@@ -37,8 +37,8 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'login' => 'required|string', // Peut être email ou téléphone
-            'password' => 'required|string',
+            'login' => 'required|string|max:255', // Peut être email ou téléphone
+            'password' => 'required|string|max:255',
         ]);
 
         $login = $request->login;

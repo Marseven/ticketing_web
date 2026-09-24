@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Rules\PhoneNumberRule;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -58,8 +59,8 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required|string|min:2|max:255',
             'email' => 'nullable|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'phone' => 'required|string|max:20|unique:users',
+            'password' => 'required|string|min:8|max:255|confirmed',
+            'phone' => ['required', 'string', 'max:20', 'unique:users', new PhoneNumberRule()],
             'is_organizer' => 'nullable|boolean',
             'organization_name' => 'nullable|string|max:255',
         ], [
@@ -237,8 +238,8 @@ class AuthController extends Controller
     public function login(Request $request): JsonResponse
     {
         $request->validate([
-            'login' => 'required|string', // Peut être email ou téléphone
-            'password' => 'required|string',
+            'login' => 'required|string|max:255', // Peut être email ou téléphone
+            'password' => 'required|string|max:255',
         ], [
             'login.required' => 'L\'email ou le téléphone est obligatoire',
             'password.required' => 'Le mot de passe est obligatoire',
@@ -396,9 +397,9 @@ class AuthController extends Controller
     public function twoFactorChallenge(Request $request, TotpService $totp): JsonResponse
     {
         $request->validate([
-            'challenge' => 'required|string',
-            'code' => 'required_without:recovery_code|nullable|string',
-            'recovery_code' => 'required_without:code|nullable|string',
+            'challenge' => 'required|string|max:128',
+            'code' => 'required_without:recovery_code|nullable|string|max:32',
+            'recovery_code' => 'required_without:code|nullable|string|max:32',
         ], [
             'challenge.required' => 'Session de connexion expirée, recommencez.',
             'code.required_without' => 'Saisissez le code de votre application ou un code de secours.',

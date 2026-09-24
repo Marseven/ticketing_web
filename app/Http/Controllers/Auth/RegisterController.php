@@ -40,7 +40,7 @@ class RegisterController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:8|max:255|confirmed',
             'phone' => 'nullable|string|max:20',
             'is_organizer' => 'nullable|boolean',
             'terms' => 'accepted',

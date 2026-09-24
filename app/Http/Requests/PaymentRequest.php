@@ -20,7 +20,7 @@ class PaymentRequest extends FormRequest
                 'string',
                 'regex:/^(074|077|076|060|062|066|065)\d{6}$/',
             ],
-            'operator' => 'nullable|string',
+            'operator' => 'nullable|string|max:32',
         ];
     }
 

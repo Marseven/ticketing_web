@@ -139,7 +139,7 @@ class OrderController extends Controller
     {
         // Validation des données
         $validated = $request->validate([
-            'event_slug' => 'required|string|exists:events,slug',
+            'event_slug' => 'required|string|max:255|exists:events,slug',
             'ticket_type_id' => 'required|integer|exists:ticket_types,id',
             'schedule_id' => 'nullable|integer|exists:event_schedules,id',
             'quantity' => 'required|integer|min:1|max:10',

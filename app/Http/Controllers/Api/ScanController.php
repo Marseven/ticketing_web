@@ -162,9 +162,9 @@ class ScanController extends Controller
     public function store(Request $request, TicketValidationService $validator): JsonResponse
     {
         $request->validate([
-            'qr_code' => 'required|string',
+            'qr_code' => 'required|string|max:4096',
             'scanned_at' => 'required|date',
-            'device_id' => 'required|string',
+            'device_id' => 'required|string|max:255',
         ]);
 
         $user = $request->user();
