@@ -205,6 +205,55 @@ class TicketTypeSyncTest extends TestCase
         $this->assertSame(50000.0, $this->ticket->fresh()->price_paid);
     }
 
+    public function test_the_amount_paid_settles_an_event_with_two_prices(): void
+    {
+        // Deux catégories, pas de ligne de commande (achats anciens) : le
+        // montant réglé ne peut correspondre qu'à l'une des deux.
+        $vip = TicketType::create([
+            'event_id' => $this->event->id, 'name' => 'VIP', 'price' => 500,
+            'currency' => 'XAF', 'status' => 'active', 'available_quantity' => 50,
+        ]);
+
+        $this->standard->update(['price' => 200]);
+        $this->ticket->order->update(['subtotal_amount' => 500]);
+        $this->ticket->forceFill(['ticket_type_id' => 999999])->save();
+
+        $this->artisan('tickets:reattach-types')->assertSuccessful();
+
+        $this->assertSame($vip->id, $this->ticket->fresh()->ticket_type_id);
+    }
+
+    public function test_two_categories_at_the_same_price_stay_untouched(): void
+    {
+        // Rien ne permet alors de les distinguer : on s'abstient.
+        TicketType::create([
+            'event_id' => $this->event->id, 'name' => 'Tribune', 'price' => 1000,
+            'currency' => 'XAF', 'status' => 'active', 'available_quantity' => 50,
+        ]);
+
+        $this->ticket->order->update(['subtotal_amount' => 1000]);
+        $this->ticket->forceFill(['ticket_type_id' => 999999])->save();
+
+        $this->artisan('tickets:reattach-types')->assertSuccessful();
+
+        $this->assertSame(999999, $this->ticket->fresh()->ticket_type_id);
+    }
+
+    public function test_an_amount_matching_no_category_stays_untouched(): void
+    {
+        TicketType::create([
+            'event_id' => $this->event->id, 'name' => 'VIP', 'price' => 500,
+            'currency' => 'XAF', 'status' => 'active', 'available_quantity' => 50,
+        ]);
+
+        $this->ticket->order->update(['subtotal_amount' => 777]);
+        $this->ticket->forceFill(['ticket_type_id' => 999999])->save();
+
+        $this->artisan('tickets:reattach-types')->assertSuccessful();
+
+        $this->assertSame(999999, $this->ticket->fresh()->ticket_type_id);
+    }
+
     public function test_a_category_can_be_forced_by_hand(): void
     {
         // Le cas où l'exploitant sait, et la commande ne peut pas savoir.
@@ -230,19 +279,24 @@ class TicketTypeSyncTest extends TestCase
         $this->artisan('tickets:reattach-types', ['--type' => 424242])->assertFailed();
     }
 
-    public function test_the_repair_command_leaves_ambiguous_events_alone(): void
+    public function test_an_order_that_says_nothing_stays_untouched(): void
     {
+        // Ni ligne de commande, ni catégorie unique, ni montant exploitable :
+        // attribuer un tarif au hasard sur un billet payé serait pire que de
+        // ne rien faire.
         TicketType::create([
             'event_id' => $this->event->id, 'name' => 'VIP', 'price' => 5000,
             'currency' => 'XAF', 'status' => 'active', 'available_quantity' => 20,
         ]);
 
+        // Montant qui ne correspond à aucune catégorie : la colonne ne peut
+        // pas être nulle en base, mais le résultat est le même — rien à en
+        // tirer.
+        $this->ticket->order->update(['subtotal_amount' => 777]);
         $this->ticket->forceFill(['ticket_type_id' => 999999])->save();
 
         $this->artisan('tickets:reattach-types')->assertSuccessful();
 
-        // Deux catégories : attribuer un tarif au hasard sur un billet payé
-        // serait pire que de s'abstenir.
         $this->assertSame(999999, $this->ticket->fresh()->ticket_type_id);
     }
 

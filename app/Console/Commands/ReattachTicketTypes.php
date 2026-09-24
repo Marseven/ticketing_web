@@ -143,7 +143,46 @@ class ReattachTicketTypes extends Command
 
         $actives = $ticket->event?->ticketTypes->where('status', 'active')->values() ?? collect();
 
-        return $actives->count() === 1 ? $actives->first() : null;
+        if ($actives->count() === 1) {
+            return $actives->first();
+        }
+
+        return $this->fromAmountPaid($ticket, $actives);
+    }
+
+    /**
+     * Retrouve la catégorie par le MONTANT réglé.
+     *
+     * Une commande d'un seul billet à 50 000 F ne peut être qu'un billet à
+     * 50 000 F. Ce n'est plus une supposition dès lors qu'une seule catégorie
+     * porte ce prix — si deux catégories coûtent pareil, on s'abstient, car
+     * rien ne permet alors de les distinguer.
+     *
+     * On compare le sous-total, hors frais de service : ce sont les places
+     * qu'il représente.
+     *
+     * @param  \Illuminate\Support\Collection<int, TicketType>  $actives
+     */
+    private function fromAmountPaid(Ticket $ticket, $actives): ?TicketType
+    {
+        $order = $ticket->order;
+
+        if (! $order || $order->subtotal_amount === null) {
+            return null;
+        }
+
+        $quantity = $order->tickets()->count();
+
+        if ($quantity < 1) {
+            return null;
+        }
+
+        $unit = round(((float) $order->subtotal_amount) / $quantity, 2);
+
+        $matching = $actives->filter(fn (TicketType $type) => abs(((float) $type->price) - $unit) < 0.01)
+            ->values();
+
+        return $matching->count() === 1 ? $matching->first() : null;
     }
 
     /** Aide l'exploitant à choisir en listant ce qui existe. */
