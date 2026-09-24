@@ -26,6 +26,22 @@ class EbillingWebhookTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * Le rappel exige désormais une source vérifiée : il refuse par défaut.
+     * Ces tests portent sur ce que le rappel FAIT une fois admis ; le contrôle
+     * de la source a ses propres tests (EbillingWebhookAuthTest). On ouvre donc
+     * ici par l'adresse, celle d'où partent les requêtes de test.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        config([
+            'services.ebilling.webhook_secret' => null,
+            'services.ebilling.webhook_allowed_ips' => '127.0.0.1',
+        ]);
+    }
+
     private function makePayment(): Payment
     {
         $organizer = Organizer::create([

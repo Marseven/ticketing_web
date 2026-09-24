@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Support\Redact;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\Order;
@@ -89,7 +90,7 @@ class WebhookController extends Controller
      */
     public function airtel(Request $request): JsonResponse
     {
-        Log::info('Webhook Airtel reçu', $request->all());
+        Log::info('Webhook Airtel reçu', Redact::payload($request->all()));
 
         // Valider les données du webhook Airtel
         $reference = $request->input('reference');
@@ -191,7 +192,7 @@ class WebhookController extends Controller
      */
     public function moov(Request $request): JsonResponse
     {
-        Log::info('Webhook Moov reçu', $request->all());
+        Log::info('Webhook Moov reçu', Redact::payload($request->all()));
 
         // Valider les données du webhook Moov
         $reference = $request->input('reference');
@@ -293,7 +294,7 @@ class WebhookController extends Controller
      */
     public function card(Request $request): JsonResponse
     {
-        Log::info('Webhook Carte reçu', $request->all());
+        Log::info('Webhook Carte reçu', Redact::payload($request->all()));
 
         // Valider les données du webhook Carte
         $reference = $request->input('reference');
@@ -395,7 +396,7 @@ class WebhookController extends Controller
         Log::info('Webhook E-Billing reçu', [
             'ip' => $request->ip(),
             'ip_candidates' => $this->ebillingIpCandidates($request),
-            'payload' => $request->all(),
+            'payload' => Redact::payload($request->all()),
         ]);
 
         if (!$this->isAuthorizedEBillingRequest($request)) {
@@ -554,77 +555,103 @@ class WebhookController extends Controller
     }
 
     /**
-     * Verify the inbound E-Billing webhook is authorized.
+     * Le rappel d'encaissement vient-il bien d'e-billing ?
      *
-     * Two complementary checks, both configured via config/services.php:
-     *   - services.ebilling.webhook_allowed_ips: comma-separated whitelist
-     *   - services.ebilling.webhook_secret: shared secret expected in the
-     *     "X-Webhook-Secret" header (or "?token=" query param fallback)
+     * Deux réglages, dans config/services.php :
+     *   - services.ebilling.webhook_secret      : secret partagé, attendu en
+     *     en-tête « X-Webhook-Secret » ou en paramètre « ?token= »
+     *   - services.ebilling.webhook_allowed_ips : liste blanche d'adresses
      *
-     * When neither is configured, the call is accepted but logged as a
-     * warning so the gap is auditable. When at least one is set, every
-     * configured check must pass.
+     * Deux corrections par rapport à la version précédente.
+     *
+     * 1. ⚠️ Il s'OUVRAIT quand rien n'était configuré : l'absence de réglage
+     *    valait autorisation. Sur une installation où la variable manque — un
+     *    nouveau serveur, un `.env` recopié à la hâte — n'importe qui pouvait
+     *    déclarer un paiement réglé et se faire émettre des billets. Il refuse
+     *    désormais. Le coût est nul : `payments:check-pending` interroge la
+     *    passerelle toutes les cinq minutes et rattrape ce que le rappel
+     *    n'aurait pas confirmé.
+     *
+     * 2. Il fabriquait ses adresses candidates à partir de l'en-tête BRUT
+     *    « X-Forwarded-For », écrit par l'appelant : il suffisait d'y placer
+     *    une adresse autorisée. On s'en remet désormais à `$request->ips()`.
+     *
+     * Le jeton et l'adresse restent deux voies ALTERNATIVES, volontairement :
+     * une notification de paiement ne doit jamais être bloquée parce qu'une
+     * facture avait été créée avant que le jeton n'existe, ou parce qu'un
+     * intermédiaire a raboté l'URL. C'est le jeton qui protège réellement ;
+     * l'adresse est là pour ne rien perdre.
      */
     private function isAuthorizedEBillingRequest(Request $request): bool
     {
-        $allowedIpsCsv = (string) config('services.ebilling.webhook_allowed_ips', '');
-        $secret = config('services.ebilling.webhook_secret');
+        $secret = (string) config('services.ebilling.webhook_secret', '');
+        $allowedIps = array_filter(array_map(
+            'trim',
+            explode(',', (string) config('services.ebilling.webhook_allowed_ips', ''))
+        ));
 
-        $allowedIps = array_filter(array_map('trim', explode(',', $allowedIpsCsv)));
-
-        // Aucun contrôle configuré → ouvert (mais loggé pour audit).
-        if (empty($allowedIps) && empty($secret)) {
-            Log::warning('⚠️ Webhook E-Billing reçu sans contrôle d\'accès configuré', [
+        // Rien de configuré → refus. L'absence de réglage n'est pas une
+        // autorisation.
+        if ($secret === '' && empty($allowedIps)) {
+            Log::error('⛔ Webhook E-Billing refusé : aucun contrôle d\'accès configuré', [
                 'ip' => $request->ip(),
-                'hint' => 'Définir EBILLING_WEBHOOK_SECRET dans .env (transmis via notification_url)',
+                'hint' => 'Définir EBILLING_WEBHOOK_SECRET dans .env et le transmettre via notification_url.',
             ]);
-            return true;
+
+            return false;
         }
 
-        // Un secret valide (en-tête X-Webhook-Secret OU query "token" porté par
-        // le notification_url) suffit à autoriser, quelle que soit l'IP — les IP
-        // de rappel e-billing ne sont pas fixes.
-        if (!empty($secret)) {
+        // Le jeton, que nous plaçons nous-mêmes dans l'URL de notification
+        // (cf. PaymentController) : e-billing n'a rien à configurer, il rappelle
+        // l'adresse qu'on lui a donnée.
+        if ($secret !== '') {
             $provided = $request->header('X-Webhook-Secret') ?: $request->query('token');
+
             if (is_string($provided) && hash_equals($secret, $provided)) {
                 return true;
             }
         }
 
-        // Sinon, autoriser si une des IP de la requête (adresse distante OU
-        // chaîne X-Forwarded-For, utile derrière le proxy mutualisé Hostinger)
-        // figure dans la liste blanche.
-        if (!empty($allowedIps) && array_intersect($this->ebillingIpCandidates($request), $allowedIps)) {
+        // À défaut, l'adresse. C'est une voie ALTERNATIVE et non un second
+        // verrou : une notification de paiement ne doit jamais être bloquée
+        // parce qu'une facture avait été créée avant que le jeton n'existe, ou
+        // parce qu'un intermédiaire a raboté l'URL.
+        //
+        // ⚠️ Elle ne vaut que ce que vaut l'adresse constatée. L'application
+        // fait confiance à tous les proxies, donc un en-tête « X-Forwarded-For »
+        // fourni par l'appelant peut devenir son adresse : cette voie se
+        // falsifie. C'est le jeton qui protège réellement — la liste d'adresses
+        // est là pour ne rien perdre, pas pour arrêter un attaquant.
+        if (! empty($allowedIps)
+            && array_intersect($this->ebillingIpCandidates($request), $allowedIps)) {
             return true;
         }
 
-        Log::error('⛔ Webhook E-Billing rejeté', [
+        Log::error('⛔ Webhook E-Billing refusé : ni jeton valide ni adresse connue', [
             'ip' => $request->ip(),
-            'ip_candidates' => $this->ebillingIpCandidates($request),
-            'secret_configured' => !empty($secret),
             'token_fourni' => $request->headers->has('X-Webhook-Secret') || $request->query->has('token'),
-            'allowed_ips_configured' => !empty($allowedIps),
+            'hint' => 'Un secret partagé est préférable : une liste d\'adresses seule reste fragile.',
         ]);
+
         return false;
     }
 
     /**
-     * IP candidates de la requête : adresse distante + chaîne X-Forwarded-For.
-     * Permet de retrouver l'IP réelle d'e-billing même derrière un proxy /
-     * hébergement mutualisé (où $request->ip() peut être l'IP du proxy).
+     * Les adresses de la requête retenues pour la liste blanche.
+     *
+     * ⚠️ Cette méthode ajoutait auparavant les valeurs BRUTES de l'en-tête
+     * « X-Forwarded-For ». Cet en-tête est écrit par l'appelant : il suffisait
+     * d'y placer une adresse autorisée pour franchir le contrôle. On s'en
+     * remet désormais à `$request->ips()`, que le cadre calcule en fonction des
+     * proxies déclarés de confiance.
+     *
+     * @return array<int, string>
      */
     private function ebillingIpCandidates(Request $request): array
     {
-        $ips = $request->ips();
-        $ips[] = $request->ip();
-        $xff = (string) $request->header('X-Forwarded-For', '');
-        foreach (explode(',', $xff) as $ip) {
-            $ip = trim($ip);
-            if ($ip !== '') {
-                $ips[] = $ip;
-            }
-        }
-        return array_values(array_unique(array_filter($ips)));
+        return array_values(array_unique(array_filter(
+            array_merge($request->ips(), [$request->ip()])
+        )));
     }
 
     /**
@@ -822,7 +849,7 @@ class WebhookController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
         }
 
-        Log::info('Webhook SHAP Payout reçu', $request->all());
+        Log::info('Webhook SHAP Payout reçu', Redact::payload($request->all()));
 
         try {
             $payoutService = app(\App\Services\PayoutService::class);

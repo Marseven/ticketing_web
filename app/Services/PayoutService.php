@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\Redact;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Event;
@@ -480,7 +481,7 @@ class PayoutService
             Log::info('📨 SHAP Webhook - Payout Callback Received', [
                 'external_reference' => $callbackData['external_reference'] ?? null,
                 'status' => $callbackData['status'] ?? null,
-                'full_callback_data' => $callbackData,
+                'full_callback_data' => Redact::payload($callbackData),
                 'timestamp' => now()->toIso8601String()
             ]);
 
@@ -489,7 +490,7 @@ class PayoutService
             if (!$payout) {
                 Log::warning('⚠️ SHAP Webhook - Payout Not Found', [
                     'external_reference' => $callbackData['external_reference'] ?? null,
-                    'callback_data' => $callbackData
+                    'callback_data' => Redact::payload($callbackData)
                 ]);
                 return;
             }
@@ -521,7 +522,7 @@ class PayoutService
                 'current_status' => $payout->status,
                 'callback_status' => $callbackData['status'] ?? null,
                 'amount' => $payout->amount,
-                'callback_data' => $callbackData
+                'callback_data' => Redact::payload($callbackData)
             ]);
 
             if ($callbackData['status'] === 'success') {
@@ -564,7 +565,7 @@ class PayoutService
                     'amount' => $payout->amount,
                     'callback_status' => $callbackData['status'] ?? null,
                     'error_message' => 'Payout échoué côté SHAP',
-                    'callback_data' => $callbackData
+                    'callback_data' => Redact::payload($callbackData)
                 ]);
 
                 if ($payout->organizer) {
@@ -574,7 +575,7 @@ class PayoutService
 
         } catch (\Exception $e) {
             Log::error('💥 Exception - SHAP Webhook Callback Processing Failed', [
-                'callback_data' => $callbackData,
+                'callback_data' => Redact::payload($callbackData),
                 'error_message' => $e->getMessage(),
                 'error_file' => $e->getFile(),
                 'error_line' => $e->getLine(),

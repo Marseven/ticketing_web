@@ -61,6 +61,7 @@ class PaymentsDoctor extends Command
             'SHAP_BASE_URL' => config('services.shap.base_url'),
         ]);
 
+        $ok = $this->webhookGuards() && $ok;
         $ok = $this->serviceBoots() && $ok;
 
         if ($this->option('live')) {
@@ -83,6 +84,48 @@ class PaymentsDoctor extends Command
         $this->line('  Compléter le .env, puis : php artisan optimize:clear && php artisan optimize');
 
         return self::FAILURE;
+    }
+
+    /**
+     * Les rappels de paiement sont-ils protégés ?
+     *
+     * Ils refusent désormais par défaut : sans secret configuré, e-billing ne
+     * peut plus confirmer un encaissement. Ce n'est pas une perte d'argent —
+     * `payments:check-pending` rattrape en cinq minutes — mais c'est un retard
+     * silencieux, et c'est exactement le genre d'oubli qu'on ne découvre qu'au
+     * moment où un client s'inquiète. Autant le voir ici.
+     */
+    private function webhookGuards(): bool
+    {
+        $this->newLine();
+        $this->line('Rappels de paiement (protection)');
+
+        $encaissement = (string) config('services.ebilling.webhook_secret', '');
+        $adresses = trim((string) config('services.ebilling.webhook_allowed_ips', ''));
+        $versement = (string) config('services.shap.webhook_secret', '');
+
+        $ok = true;
+
+        if ($encaissement !== '') {
+            $this->line('  présente EBILLING_WEBHOOK_SECRET (' . $this->tail($encaissement) . ')');
+        } elseif ($adresses !== '') {
+            $this->line('  EBILLING_WEBHOOK_SECRET absent — repli sur la liste d\'adresses');
+            $this->line('    ⚠ Une liste d\'adresses seule reste fragile : préférer un secret partagé.');
+        } else {
+            $this->error('  MANQUANT EBILLING_WEBHOOK_SECRET — le rappel d\'encaissement est REFUSÉ');
+            $this->line('    Les paiements ne seront confirmés que par payments:check-pending (5 min).');
+            $ok = false;
+        }
+
+        if ($versement !== '') {
+            $this->line('  présente SHAP_WEBHOOK_SECRET (' . $this->tail($versement) . ')');
+        } else {
+            $this->line('  SHAP_WEBHOOK_SECRET absent — le rappel de versement est refusé');
+            $this->line('    Sans conséquence tant que l\'URL de rappel n\'est pas déclarée chez SHAP :');
+            $this->line('    payout:check-status réconcilie toutes les 5 minutes.');
+        }
+
+        return $ok;
     }
 
     /**

@@ -25,6 +25,10 @@ class PaymentsDoctorTest extends TestCase
             'services.ebilling.server_url' => 'https://exemple.test/bills',
             'services.ebilling.post_url' => 'https://exemple.test/post',
             'services.ebilling.auth_mode' => 'basic',
+            // Le jeton du rappel fait partie d'une configuration complète : il
+            // protège la confirmation d'encaissement, qui fait émettre les
+            // billets.
+            'services.ebilling.webhook_secret' => 'jeton-de-rappel',
             'services.shap.api_id' => 'shap-id',
             'services.shap.api_secret' => 'shap-secret',
             'services.shap.base_url' => 'https://exemple.test/shap/',

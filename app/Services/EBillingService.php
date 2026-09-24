@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\Redact;
 use App\Exceptions\PaymentGatewayUnavailable;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
@@ -227,7 +228,7 @@ class EBillingService
             Log::info('E-Billing createBill - Response', [
                 'status' => $status,
                 'response_raw' => $responseBody,
-                'response_json' => $responseData,
+                'response_json' => Redact::payload($responseData),
                 'response_headers' => $response->headers(),
                 'content_type' => $response->header('Content-Type'),
             ]);
@@ -313,7 +314,7 @@ class EBillingService
                 'status' => $status,
                 'duration_ms' => $duration,
                 'response_raw' => $responseBody,
-                'response_json' => $responseData,
+                'response_json' => Redact::payload($responseData),
                 'response_headers' => $response->headers(),
                 'content_type' => $response->header('Content-Type'),
             ]);
@@ -392,7 +393,7 @@ class EBillingService
             Log::info('E-Billing API Response - Check KYC', [
                 'status' => $status,
                 'response_raw' => $responseBody,
-                'response_json' => $responseData,
+                'response_json' => Redact::payload($responseData),
                 'response_headers' => $response->headers(),
                 'content_type' => $response->header('Content-Type'),
             ]);
@@ -447,7 +448,7 @@ class EBillingService
 
             Log::info('E-Billing API Response - Get Bill Status', [
                 'status' => $status,
-                'response_json' => $responseData,
+                'response_json' => Redact::payload($responseData),
             ]);
 
             if ($status === 200) {
