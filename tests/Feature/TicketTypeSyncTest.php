@@ -138,6 +138,61 @@ class TicketTypeSyncTest extends TestCase
         $this->assertSame(2, $this->event->ticketTypes()->where('status', 'active')->count());
     }
 
+    public function test_the_price_paid_survives_a_lost_category(): void
+    {
+        // Un billet payé 1 000 F s'affichait « Gratuit » dès que sa catégorie
+        // avait été effacée. Le montant est sur la ligne de commande.
+        \App\Models\OrderItem::create([
+            'order_id' => $this->ticket->order_id, 'event_id' => $this->event->id,
+            'ticket_type_id' => $this->standard->id,
+            'unit_price' => 1000, 'qty' => 1, 'line_total' => 1000,
+        ]);
+
+        $this->ticket->forceFill(['ticket_type_id' => 999999])->save();
+
+        $this->assertSame(1000.0, $this->ticket->fresh()->price_paid);
+    }
+
+    public function test_the_price_paid_beats_a_catalogue_price_changed_since(): void
+    {
+        // L'organisateur a monté son tarif après la vente : le billet garde
+        // le montant réellement payé.
+        \App\Models\OrderItem::create([
+            'order_id' => $this->ticket->order_id, 'event_id' => $this->event->id,
+            'ticket_type_id' => $this->standard->id,
+            'unit_price' => 1000, 'qty' => 1, 'line_total' => 1000,
+        ]);
+
+        $this->standard->update(['price' => 5000]);
+
+        $this->assertSame(1000.0, $this->ticket->fresh()->price_paid);
+    }
+
+    public function test_the_repair_command_reattaches_an_orphaned_ticket(): void
+    {
+        $this->ticket->forceFill(['ticket_type_id' => 999999])->save();
+
+        $this->artisan('tickets:reattach-types')->assertSuccessful();
+
+        $this->assertSame($this->standard->id, $this->ticket->fresh()->ticket_type_id);
+    }
+
+    public function test_the_repair_command_leaves_ambiguous_events_alone(): void
+    {
+        TicketType::create([
+            'event_id' => $this->event->id, 'name' => 'VIP', 'price' => 5000,
+            'currency' => 'XAF', 'status' => 'active', 'available_quantity' => 20,
+        ]);
+
+        $this->ticket->forceFill(['ticket_type_id' => 999999])->save();
+
+        $this->artisan('tickets:reattach-types')->assertSuccessful();
+
+        // Deux catégories : attribuer un tarif au hasard sur un billet payé
+        // serait pire que de s'abstenir.
+        $this->assertSame(999999, $this->ticket->fresh()->ticket_type_id);
+    }
+
     public function test_the_search_no_longer_breaks_on_a_ticket_without_a_category(): void
     {
         // Le cas déjà présent en base : un billet dont la catégorie a été

@@ -86,6 +86,31 @@ class Ticket extends Model
     }
 
     /**
+     * Ce que cette place a coûté.
+     *
+     * La LIGNE DE COMMANDE fait foi : avec la tarification variable, le prix
+     * catalogue d'aujourd'hui n'est pas celui payé en prévente, et un
+     * organisateur qui change son tarif ne doit pas réécrire l'histoire des
+     * billets déjà vendus.
+     *
+     * Le repli sur la ligne unique d'une commande couvre les billets dont la
+     * catégorie a été effacée par une ancienne mise à jour : le prix reste
+     * connu même quand le lien est rompu. Sans lui, un billet payé 1 000 F
+     * s'affichait « Gratuit ».
+     */
+    public function getPricePaidAttribute(): ?float
+    {
+        $lines = $this->order?->items;
+
+        $line = $lines?->firstWhere('ticket_type_id', $this->ticket_type_id)
+            ?? ($lines?->count() === 1 ? $lines->first() : null);
+
+        $price = $line?->unit_price ?? $this->ticketType?->price;
+
+        return $price === null ? null : (float) $price;
+    }
+
+    /**
      * Billets au nom d'une personne.
      *
      * Le nom vit à deux endroits selon le parcours : sur le COMPTE quand

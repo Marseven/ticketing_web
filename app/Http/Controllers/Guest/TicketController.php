@@ -387,7 +387,10 @@ class TicketController extends Controller
                 ],
                 'ticket_type' => [
                     'name' => $ticket->ticketType?->name,
-                    'price' => $ticket->ticketType?->price,
+                    // Le prix PAYÉ, pas le tarif du jour : un billet dont la
+                    // catégorie a été effacée s'affichait « Gratuit » alors
+                    // qu'il avait bien été réglé.
+                    'price' => $ticket->price_paid,
                 ],
                 'buyer' => [
                     'name' => $ticket->buyer?->name ?? $ticket->order?->guest_name,

@@ -260,19 +260,12 @@ class TicketValidationService
     }
 
     /**
-     * Ce que cette place a coûté.
-     *
-     * La ligne de commande fait foi : avec la tarification variable, le prix
-     * catalogue d'aujourd'hui n'est pas celui payé en prévente. À défaut de
-     * ligne (billet physique, invitation), on retombe sur le prix du type.
+     * Ce que cette place a coûté. La règle vit sur le modèle, partagée avec
+     * la récupération de billet : les deux écrans doivent annoncer le même
+     * montant.
      */
     private function pricePaid(Ticket $ticket): ?float
     {
-        $line = $ticket->order?->items
-            ?->firstWhere('ticket_type_id', $ticket->ticket_type_id);
-
-        $price = $line?->unit_price ?? $ticket->ticketType?->price;
-
-        return $price === null ? null : (float) $price;
+        return $ticket->price_paid;
     }
 }
