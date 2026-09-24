@@ -68,6 +68,17 @@ class ReattachTicketTypes extends Command
         $ambiguous = 0;
 
         foreach ($orphans as $ticket) {
+            // ⚠️ Une catégorie forcée doit appartenir à l'événement du billet.
+            // Sans ce garde-fou, un « --type » sans « --ticket » collerait la
+            // même catégorie à des billets d'autres événements.
+            if ($forced && $forced->event_id !== $ticket->event_id) {
+                $this->line("  <fg=yellow>·</> {$ticket->code} · {$ticket->event?->title} — "
+                    . "la catégorie « {$forced->name} » appartient à un autre événement, ignoré");
+                $ambiguous++;
+
+                continue;
+            }
+
             $type = $forced ?? $this->resolve($ticket);
 
             if (! $type) {

@@ -272,6 +272,34 @@ class TicketTypeSyncTest extends TestCase
         $this->assertSame($champion->id, $this->ticket->fresh()->ticket_type_id);
     }
 
+    public function test_a_forced_category_from_another_event_is_ignored(): void
+    {
+        // Sans ce garde-fou, un « --type » appliqué à tous les billets
+        // orphelins collerait la catégorie d'un événement sur ceux d'un autre.
+        $autreOrganisateur = Organizer::create([
+            'name' => 'Autre', 'slug' => 'a-' . uniqid(),
+            'status' => 'active', 'is_active' => true,
+        ]);
+
+        $autreEvenement = Event::create([
+            'organizer_id' => $autreOrganisateur->id, 'title' => 'Autre événement',
+            'slug' => 'autre-' . uniqid(), 'description' => 'x',
+            'status' => 'published', 'approval_status' => 'approved',
+        ]);
+
+        $categorieEtrangere = TicketType::create([
+            'event_id' => $autreEvenement->id, 'name' => 'Étrangère', 'price' => 200,
+            'currency' => 'XAF', 'status' => 'active', 'available_quantity' => 50,
+        ]);
+
+        $this->ticket->forceFill(['ticket_type_id' => 999999])->save();
+
+        $this->artisan('tickets:reattach-types', ['--type' => $categorieEtrangere->id])
+            ->assertSuccessful();
+
+        $this->assertSame(999999, $this->ticket->fresh()->ticket_type_id);
+    }
+
     public function test_a_forced_category_that_does_not_exist_is_refused(): void
     {
         $this->ticket->forceFill(['ticket_type_id' => 999999])->save();
