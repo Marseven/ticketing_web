@@ -1271,11 +1271,18 @@ class OrganizerController extends Controller
             }
 
             // Créer les types de billets
+            //
+            // ⚠️ `description` est déclaré `nullable` à la validation, mais il
+            // était lu sans garde : une catégorie sans description faisait
+            // tomber toute la création en erreur 500, et l'organisateur ne
+            // voyait qu'un « Erreur lors de la création de l'événement » sans
+            // rien pour comprendre. Un champ facultatif doit pouvoir être
+            // absent.
             foreach ($request->ticket_types as $ticketTypeData) {
                 \App\Models\TicketType::create([
                     'event_id' => $event->id,
                     'name' => $ticketTypeData['name'],
-                    'description' => $ticketTypeData['description'],
+                    'description' => $ticketTypeData['description'] ?? null,
                     'price' => $ticketTypeData['price'],
                     'available_quantity' => $ticketTypeData['capacity'],
                     'status' => ($ticketTypeData['is_active'] ?? true) ? 'active' : 'inactive'
