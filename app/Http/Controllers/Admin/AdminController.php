@@ -1076,18 +1076,15 @@ class AdminController extends Controller
 
             $event->update($updateData);
 
-            // Mettre à jour les horaires
+            // Mettre à jour les horaires.
+            //
+            // ⚠️ Ne PAS supprimer puis recréer : les billets déjà vendus
+            // pointent sur une séance, et des identifiants neufs les
+            // orphelinaient. Un simple changement de titre suffisait alors à
+            // rendre tous les billets introuvables à la récupération.
             if ($request->has('schedules')) {
-                $event->schedules()->delete();
-                if (!empty($request->schedules)) {
-                    foreach ($request->schedules as $schedule) {
-                        $event->schedules()->create([
-                            'starts_at' => $schedule['starts_at'],
-                            'ends_at' => $schedule['ends_at'],
-                            'status' => 'active',
-                        ]);
-                    }
-                }
+                app(\App\Services\EventScheduleSync::class)
+                    ->sync($event, $request->input('schedules', []));
             }
 
             // Mettre à jour les types de billets

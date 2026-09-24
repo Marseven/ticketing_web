@@ -1501,20 +1501,15 @@ class OrganizerController extends Controller
             // Mettre à jour l'événement principal
             $event->update($updateData);
 
-            // Mettre à jour les horaires
+            // Mettre à jour les horaires.
+            //
+            // ⚠️ Ne PAS supprimer puis recréer : les billets déjà vendus
+            // pointent sur une séance, et des identifiants neufs les
+            // orphelinaient — le billet devenait introuvable à la
+            // récupération, y compris pour un événement à venir.
             if ($request->has('schedules')) {
-                // Supprimer les anciens horaires
-                $event->schedules()->delete();
-                
-                // Créer les nouveaux horaires
-                foreach ($request->schedules as $scheduleData) {
-                    \App\Models\Schedule::create([
-                        'event_id' => $event->id,
-                        'starts_at' => $scheduleData['starts_at'],
-                        'ends_at' => $scheduleData['ends_at'],
-                        'door_time' => $scheduleData['door_time'] ?? null
-                    ]);
-                }
+                app(\App\Services\EventScheduleSync::class)
+                    ->sync($event, $request->input('schedules', []));
             }
 
             // Mettre à jour les types de billets

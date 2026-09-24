@@ -297,8 +297,15 @@ class TicketController extends Controller
         })->where(function ($q) use ($stillUsable) {
             $q->whereHas('schedule', $stillUsable)
               ->orWhere(function ($undated) use ($stillUsable) {
-                  // Billet sans date propre : on se rabat sur les dates de l'événement.
-                  $undated->whereNull('schedule_id')->whereHas('event.schedules', $stillUsable);
+                  // Billet sans séance exploitable : on se rabat sur les dates
+                  // de l'événement. Deux cas — le billet n'a jamais eu de date
+                  // propre, ou sa séance a disparu. Des mises à jour
+                  // d'événement supprimaient puis recréaient les séances, ce
+                  // qui laissait des billets pointant vers une ligne effacée :
+                  // ils devenaient introuvables alors que l'événement était à
+                  // venir. La cause est corrigée, ce repli rattrape ceux qui
+                  // sont déjà dans cet état.
+                  $undated->whereDoesntHave('schedule')->whereHas('event.schedules', $stillUsable);
               });
         });
 
