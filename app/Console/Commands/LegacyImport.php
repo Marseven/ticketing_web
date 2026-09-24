@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 /**
- * Import des données legacy MyTicketO (base leweb_* via connexion `legacy`)
+ * Import des données legacy (base leweb_* via connexion `legacy`)
  * vers le schéma actuel. Idempotent (upsert par legacy_id), périmètre ACTIF
  * par défaut (événements à venir). Les codes de billets sont préservés à
  * l'identique pour que les billets déjà vendus restent scannables.
@@ -34,7 +34,7 @@ class LegacyImport extends Command
         {--physical-events= : IDs d\'événements legacy (séparés par des virgules) dont les billets sont physiques imprimés — ex : 156}
         {--dry-run : Simuler sans écrire}';
 
-    protected $description = 'Importer les données legacy MyTicketO vers le schéma actuel';
+    protected $description = 'Importer les données legacy vers le schéma actuel';
 
     private bool $dry = false;
     private array $map = [
@@ -87,7 +87,7 @@ class LegacyImport extends Command
             return self::FAILURE;
         }
 
-        $this->info(($this->dry ? '[DRY-RUN] ' : '') . 'Import legacy MyTicketO…');
+        $this->info(($this->dry ? '[DRY-RUN] ' : '') . 'Import legacy…');
 
         $eventIds = $this->activeLegacyEventIds();
         $this->line('Événements à importer : ' . count($eventIds));
@@ -607,7 +607,11 @@ class LegacyImport extends Command
     {
         // Basé sur l'id legacy (unique par table) pour garantir l'unicité de
         // l'email même quand plusieurs comptes partagent le même téléphone.
-        return "{$prefix}-{$id}@legacy.myticket-o.net";
+        //
+        // Domaine `.invalid` : réservé par la RFC 2606, donc jamais routable.
+        // Ces adresses ne désignent personne et ne doivent jamais recevoir de
+        // courrier — un domaine réel, même le nôtre, finirait par en encaisser.
+        return "{$prefix}-{$id}@legacy.invalid";
     }
 
     private function clean($v): ?string

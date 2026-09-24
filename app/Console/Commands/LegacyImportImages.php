@@ -8,22 +8,23 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 /**
- * Récupère les images des événements importés depuis MyTicketO et les place
+ * Récupère les images des événements importés depuis l'ancienne plateforme et les place
  * dans le stockage Primea (storage/app/public/images/events), où l'accessor
  * Event::image les attend. Idempotent : saute les fichiers déjà présents.
  *
  * Deux sources, dans l'ordre :
  *   1. --source=<dir> : dossier local (ex : public_html/images du legacy).
- *   2. --base-url     : téléchargement HTTP (défaut : site MyTicketO en ligne).
+ *   2. --base-url     : téléchargement HTTP, à indiquer explicitement — aucune
+ *                       adresse d'origine n'est codée en dur ici.
  */
 class LegacyImportImages extends Command
 {
     protected $signature = 'legacy:import-images
         {--source= : Dossier local source (prioritaire sur l\'URL)}
-        {--base-url=https://myticket-o.net/assets/images/event : URL de base pour télécharger les images manquantes}
+        {--base-url= : URL de base pour télécharger les images manquantes (obligatoire pour ce mode)}
         {--force : Re-copier/télécharger même si le fichier existe déjà}';
 
-    protected $description = 'Copier/télécharger les images des événements legacy MyTicketO dans le stockage Primea';
+    protected $description = 'Copier/télécharger les images des événements legacy dans le stockage Primea';
 
     public function handle(): int
     {

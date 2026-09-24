@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Copie/télécharge les images des événements legacy MyTicketO dans le stockage
+ * Copie/télécharge les images des événements legacy dans le stockage
  * Primea, en arrière-plan (téléchargement de ~100 fichiers → pas de timeout web).
  * État publié dans le cache FICHIER (hors transaction, lisible en direct).
  */

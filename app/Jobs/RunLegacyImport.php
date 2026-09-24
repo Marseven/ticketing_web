@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Exécute l'import legacy MyTicketO en arrière-plan (gros volumes → pas de
+ * Exécute l'import legacy en arrière-plan (gros volumes → pas de
  * timeout web). La progression/état est publiée dans le cache (partagé via le
  * cache base de données), lu par LegacyImportController::status().
  */

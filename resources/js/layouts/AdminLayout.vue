@@ -580,7 +580,7 @@ export default {
         '/admin/events': 'Gestion des Événements',
         '/admin/events-approval': 'Validation des Événements',
         '/admin/physical-tickets': 'Billets Physiques',
-        '/admin/legacy-import': 'Import MyTicketO',
+        '/admin/legacy-import': 'Import des données legacy',
         '/admin/branding': 'Identité de marque',
         '/admin/orders': 'Suivi des Achats',
         '/admin/payments': 'Suivi des Paiements',

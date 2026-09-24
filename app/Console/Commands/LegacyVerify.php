@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Vérification automatisée de la migration legacy MyTicketO → Primea.
+ * Vérification automatisée de la migration legacy → Primea.
  * À lancer APRÈS l'import (notamment lors de la bascule finale) pour garantir
  * qu'aucune donnée n'a été perdue et — le plus critique — que TOUT billet
  * legacy reste scannable (son `ref` existe comme `code` en Primea).

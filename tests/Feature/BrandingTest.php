@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 /**
- * Branding piloté par config : défauts MyTicketO, surcharge en base (scope
+ * Branding piloté par config : défauts Primea, surcharge en base (scope
  * system, clés branding.*), exposé publiquement pour le SPA.
  */
 class BrandingTest extends TestCase

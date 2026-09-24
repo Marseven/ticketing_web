@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Setting;
 use App\Services\TotpService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -70,10 +71,15 @@ class TwoFactorController extends Controller
             'two_factor_confirmed_at' => null,
         ])->save();
 
+        // Le nom affiché dans l'application d'authentification vient de la
+        // MARQUE configurée, pas de `APP_NAME` : cette variable
+        // d'environnement sert au serveur (journaux, files, e-mails
+        // techniques) et peut porter tout autre chose. C'est elle qui faisait
+        // apparaître un nom de marque abandonné dans Google Authenticator.
         $uri = $this->totp->provisioningUri(
             $secret,
             $user->email ?: (string) $user->phone,
-            config('app.name', 'Primea')
+            Setting::branding()['app_name'] ?? 'Primea'
         );
 
         return response()->json([

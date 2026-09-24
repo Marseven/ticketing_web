@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Schema;
  *
  * CONSERVE : utilisateurs, admins, organisateurs, rôles/privilèges, user_types,
  * réglages (settings/branding), bannières. Supprime aussi les tables legacy
- * leweb_* (import MyTicketO abandonné).
+ * leweb_* (import legacy abandonné).
  */
 class CatalogReset extends Command
 {
@@ -70,7 +70,7 @@ class CatalogReset extends Command
                     $this->line("  vidé : {$t} ({$n})");
                 }
             }
-            // Tables legacy MyTicketO (import abandonné)
+            // Tables legacy (import abandonné)
             foreach ($this->legacyTables as $t) {
                 DB::statement("DROP TABLE IF EXISTS `{$t}`");
             }

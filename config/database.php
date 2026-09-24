@@ -63,7 +63,7 @@ return [
             ]) : [],
         ],
 
-        // Connexion vers les tables legacy MyTicketO (leweb_*).
+        // Connexion vers les tables legacy (leweb_*).
         // Par défaut = la MÊME base que l'application : le dump `.sql` est
         // chargé via l'interface admin (les tables leweb_* n'entrent pas en
         // collision avec les tables de l'app). On peut aussi pointer une base

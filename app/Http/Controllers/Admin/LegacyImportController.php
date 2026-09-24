@@ -80,7 +80,7 @@ class LegacyImportController extends Controller
     }
 
     /**
-     * Charger le dump .sql MyTicketO (tables leweb_*) dans la base.
+     * Charger le dump .sql de l'ancienne base (tables leweb_*) dans la base.
      * Les tables leweb_* ne collisionnent pas avec les tables de l'app.
      */
     public function uploadDump(Request $request): JsonResponse
@@ -93,7 +93,7 @@ class LegacyImportController extends Controller
         if ($sql === false || stripos($sql, 'leweb_') === false) {
             return response()->json([
                 'success' => false,
-                'message' => 'Le fichier ne ressemble pas à un dump MyTicketO (tables leweb_* introuvables).',
+                'message' => 'Le fichier ne ressemble pas au dump attendu (tables leweb_* introuvables).',
             ], 422);
         }
 
@@ -333,7 +333,7 @@ class LegacyImportController extends Controller
     /**
      * Copier/télécharger les images des événements importés dans le stockage
      * Primea. Async (queue) : ~100 fichiers, pas de timeout web. Télécharge
-     * depuis MyTicketO en ligne par défaut (source locale optionnelle).
+     * depuis l'ancien site par défaut (source locale optionnelle).
      */
     public function importImages(Request $request): JsonResponse
     {

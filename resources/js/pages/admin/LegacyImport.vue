@@ -1,14 +1,14 @@
 <template>
   <div class="legacy-import p-6">
     <div class="mb-6">
-      <h1 class="text-2xl font-bold text-primea-blue">Import données MyTicketO</h1>
-      <p class="text-gray-600 mt-1">Importer les données de l'ancienne plateforme MyTicketO (base legacy) vers cette plateforme.</p>
+      <h1 class="text-2xl font-bold text-primea-blue">Import des données legacy</h1>
+      <p class="text-gray-600 mt-1">Importer les données de l'ancienne plateforme (base legacy) vers celle-ci.</p>
     </div>
 
     <!-- Étape 1 : charger le dump -->
     <div class="mb-6 bg-white rounded-lg shadow p-5">
-      <h2 class="text-lg font-bold text-primea-blue mb-1">1. Charger le dump MyTicketO</h2>
-      <p class="text-sm text-gray-500 mb-3">Sélectionnez le fichier <code>.sql</code> exporté de l'ancienne base MyTicketO.</p>
+      <h2 class="text-lg font-bold text-primea-blue mb-1">1. Charger le dump de l'ancienne base</h2>
+      <p class="text-sm text-gray-500 mb-3">Sélectionnez le fichier <code>.sql</code> exporté de l'ancienne base.</p>
 
       <div class="flex items-center gap-3 mb-3">
         <span class="w-2.5 h-2.5 rounded-full" :class="legacy.loaded ? 'bg-green-500' : 'bg-gray-300'"></span>
@@ -47,7 +47,7 @@
 
       <!-- Legacy -->
       <div class="bg-white rounded-lg shadow p-5">
-        <h2 class="text-lg font-bold text-primea-blue mb-3">Disponible côté MyTicketO (legacy)</h2>
+        <h2 class="text-lg font-bold text-primea-blue mb-3">Disponible dans la base legacy</h2>
         <div v-if="legacy.connected" class="grid grid-cols-2 gap-2 text-sm">
           <div class="flex justify-between border-b border-gray-100 py-1"><span class="text-gray-600">Événements</span><span class="font-semibold">{{ legacy.events }}</span></div>
           <div class="flex justify-between border-b border-gray-100 py-1"><span class="text-gray-600">Organisateurs</span><span class="font-semibold">{{ legacy.owners }}</span></div>
@@ -159,7 +159,7 @@
     <div class="bg-white rounded-lg shadow p-5 mb-6">
       <h2 class="text-lg font-bold text-primea-blue mb-1">3. Importer les images des événements</h2>
       <p class="text-sm text-gray-500 mb-3">
-        Récupère les affiches depuis MyTicketO en ligne et les copie dans le stockage de la plateforme.
+        Récupère les affiches depuis l'ancien site et les copie dans le stockage de la plateforme.
       </p>
 
       <div class="flex flex-wrap items-center gap-4 mb-4 text-sm">
@@ -350,8 +350,8 @@ const preview = async () => {
 
 const confirmRun = async () => {
   const warn = opts.fresh
-    ? 'Cette action va SUPPRIMER toutes les données actuelles (événements, ventes, organisateurs, clients) puis importer celles de MyTicketO.'
-    : 'Cette action va importer les données de MyTicketO (sans purger l\'existant).'
+    ? 'Cette action va SUPPRIMER toutes les données actuelles (événements, ventes, organisateurs, clients) puis importer celles de l\'ancienne plateforme.'
+    : 'Cette action va importer les données de l\'ancienne plateforme (sans purger l\'existant).'
 
   const { value } = await Swal.fire({
     title: 'Confirmer l\'import',

@@ -9,7 +9,7 @@ return new class extends Migration
     /**
      * Run the migrations.
      *
-     * Colonnes de correspondance pour l'import des données legacy MyTicketO
+     * Colonnes de correspondance pour l'import des données legacy
      * (bases leweb_*). `legacy_id` garde l'ancien identifiant pour recâbler
      * les FK et rendre l'import idempotent (upsert). `legacy_md5` conserve
      * le hachage MD5 legacy le temps d'un rehash bcrypt transparent au 1er

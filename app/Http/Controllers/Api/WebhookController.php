@@ -717,7 +717,7 @@ class WebhookController extends Controller
 
     /**
      * États d'une facture e-billing qui valent paiement encaissé.
-     * Vocabulaire repris de l'intégration MyTicketO en production.
+     * Vocabulaire repris de l'ancienne intégration en production.
      */
     private const EBILLING_PAID_STATES = ['processed', 'paid'];
 
