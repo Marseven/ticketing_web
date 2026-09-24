@@ -69,6 +69,12 @@ return [
         'api_id' => env('API_PAYOUT_ID', ''),
         'api_secret' => env('API_PAYOUT_SECRET', ''),
         'base_url' => env('SHAP_BASE_URL', 'https://test.billing-easy.net/shap/api/v1/merchant/'),
+
+        // Secret partagé attendu sur le rappel de versement, en en-tête
+        // « X-Webhook-Secret » ou en paramètre « ?token= ». Sans lui, le
+        // rappel est REFUSÉ : il fait sortir de l'argent, et le sondage
+        // `payout:check-status` réconcilie de toute façon toutes les 5 min.
+        'webhook_secret' => env('SHAP_WEBHOOK_SECRET'),
     ],
 
 ];

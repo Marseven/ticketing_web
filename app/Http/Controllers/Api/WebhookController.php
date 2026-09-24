@@ -514,6 +514,46 @@ class WebhookController extends Controller
     }
 
     /**
+     * Le rappel de versement vient-il bien de SHAP ?
+     *
+     * Ce point d'entrée fait SORTIR de l'argent : un appel « échec » recrédite
+     * le solde de l'organisateur. Laissé ouvert, il permettait à quiconque
+     * connaissant une `external_reference` — un organisateur la lit dans son
+     * propre espace — de gonfler un solde à volonté puis de le retirer.
+     *
+     * Il est donc REFUSÉ PAR DÉFAUT, contrairement au rappel d'encaissement :
+     * aucune configuration ne vaut aucun accès. C'est sans risque, car l'URL de
+     * rappel n'est jamais transmise à SHAP et la réconciliation réelle passe
+     * par `payout:check-status`, exécuté toutes les cinq minutes.
+     */
+    private function isAuthorizedShapRequest(Request $request): bool
+    {
+        $secret = (string) config('services.shap.webhook_secret', '');
+
+        if ($secret === '') {
+            Log::warning('⛔ Rappel SHAP refusé : aucun secret configuré', [
+                'ip' => $request->ip(),
+                'hint' => 'Définir SHAP_WEBHOOK_SECRET dans .env pour autoriser ce rappel.',
+            ]);
+
+            return false;
+        }
+
+        $provided = $request->header('X-Webhook-Secret') ?: $request->query('token');
+
+        if (is_string($provided) && hash_equals($secret, $provided)) {
+            return true;
+        }
+
+        Log::error('⛔ Rappel SHAP refusé : secret absent ou invalide', [
+            'ip' => $request->ip(),
+            'token_fourni' => $request->headers->has('X-Webhook-Secret') || $request->query->has('token'),
+        ]);
+
+        return false;
+    }
+
+    /**
      * Verify the inbound E-Billing webhook is authorized.
      *
      * Two complementary checks, both configured via config/services.php:
@@ -778,6 +818,10 @@ class WebhookController extends Controller
      */
     public function shapPayout(Request $request): JsonResponse
     {
+        if (! $this->isAuthorizedShapRequest($request)) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+        }
+
         Log::info('Webhook SHAP Payout reçu', $request->all());
 
         try {
