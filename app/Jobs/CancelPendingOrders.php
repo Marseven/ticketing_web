@@ -27,8 +27,9 @@ class CancelPendingOrders implements ShouldQueue
     {
         Log::info('🔍 Démarrage du job CancelPendingOrders');
 
-        // Récupérer les commandes en attente depuis plus d'1 heure
-        $oneHourAgo = Carbon::now()->subHour();
+        // Même délai que celui qui gouverne le décompte des places
+        // (`Order::HOLD_MINUTES`) : les deux doivent dire la même chose.
+        $oneHourAgo = Carbon::now()->subMinutes(Order::HOLD_MINUTES);
 
         $pendingOrders = Order::with('tickets')
             ->where('status', 'pending')

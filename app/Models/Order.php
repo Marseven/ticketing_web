@@ -11,6 +11,16 @@ class Order extends Model
 {
     use HasFactory;
 
+    /**
+     * Durée pendant laquelle une commande en attente retient ses places.
+     *
+     * Au-delà, le paiement ne viendra plus : `CancelPendingOrders` l'annule.
+     * Mais le DÉCOMPTE ne doit pas dépendre de ce ménage — si le cron traîne
+     * ou tombe, des places resteraient bloquées indéfiniment et l'événement
+     * s'afficherait complet alors qu'il reste de la place.
+     */
+    public const HOLD_MINUTES = 60;
+
     protected $fillable = [
         'organizer_id',
         'buyer_id',

@@ -239,11 +239,23 @@ class TicketType extends Model
         // une place pendant le règlement est la LIGNE DE COMMANDE d'une
         // commande encore en attente — plus un billet `pending`. Les deux sont
         // comptés : les commandes d'avant ce changement ont leurs billets.
+        // ⚠️ Seules les réservations ENCORE VIVANTES retiennent une place. Une
+        // commande en attente depuis plus d'une heure ne sera pas payée : la
+        // compter bloquait des places pour de bon dès que le ménage tardait,
+        // et l'événement s'affichait complet alors qu'il restait de la place.
+        $cutoff = now()->subMinutes(\App\Models\Order::HOLD_MINUTES);
+
         $pendingOrders = (int) \App\Models\OrderItem::where('ticket_type_id', $this->id)
-            ->whereHas('order', fn ($q) => $q->where('status', 'pending'))
+            ->whereHas('order', fn ($q) => $q->where('status', 'pending')
+                ->where('created_at', '>=', $cutoff))
             ->sum('qty');
 
-        return $pendingOrders + $this->tickets()->where('status', 'pending')->count();
+        $pendingTickets = $this->tickets()
+            ->where('status', 'pending')
+            ->where('created_at', '>=', $cutoff)
+            ->count();
+
+        return $pendingOrders + $pendingTickets;
     }
 
     /**

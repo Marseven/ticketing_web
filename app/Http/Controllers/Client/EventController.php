@@ -29,10 +29,16 @@ class EventController extends Controller
             return collect();
         }
 
+        // Même règle que `TicketType::reserved_quantity` : une réservation
+        // expirée ne retient plus rien, sinon l'affichage annoncerait complet
+        // sur des places que la caisse accepterait de vendre.
+        $cutoff = now()->subMinutes(\App\Models\Order::HOLD_MINUTES);
+
         $fromOrders = \DB::table('order_items')
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
             ->whereIn('order_items.ticket_type_id', $ticketTypeIds)
             ->where('orders.status', 'pending')
+            ->where('orders.created_at', '>=', $cutoff)
             ->select('order_items.ticket_type_id', \DB::raw('SUM(order_items.qty) as held'))
             ->groupBy('order_items.ticket_type_id')
             ->pluck('held', 'ticket_type_id');
@@ -40,6 +46,7 @@ class EventController extends Controller
         $fromTickets = \DB::table('tickets')
             ->whereIn('ticket_type_id', $ticketTypeIds)
             ->where('status', 'pending')
+            ->where('created_at', '>=', $cutoff)
             ->select('ticket_type_id', \DB::raw('COUNT(*) as held'))
             ->groupBy('ticket_type_id')
             ->pluck('held', 'ticket_type_id');

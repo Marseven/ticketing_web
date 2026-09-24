@@ -144,4 +144,78 @@ class SeatAvailabilityTest extends TestCase
 
         $this->assertNotSame(400, $response->status(), 'la place restante doit rester vendable');
     }
+
+    /**
+     * Vieillit une réservation au-delà du délai de rétention.
+     */
+    private function expire(Ticket $ticket): void
+    {
+        $past = now()->subMinutes(Order::HOLD_MINUTES + 5);
+
+        $ticket->order->forceFill(['created_at' => $past])->save();
+        $ticket->forceFill(['created_at' => $past])->save();
+    }
+
+    public function test_an_expired_hold_releases_its_seat(): void
+    {
+        // Une commande en attente depuis plus d'une heure ne sera pas payée.
+        // Tant qu'on la comptait, la place restait bloquée pour de bon dès que
+        // le ménage tardait : l'événement s'affichait complet alors qu'il
+        // restait des places — constaté en production sur les 4 dernières.
+        $type = $this->ticketTypeWithSeats(2);
+        $this->expire($this->makeTicket($type, 'pending'));
+
+        $type = $type->fresh();
+
+        $this->assertSame(0, $type->reserved_quantity, 'une réservation périmée ne retient plus rien');
+        $this->assertSame(2, $type->remaining_quantity);
+        $this->assertTrue($type->hasQuantityAvailable(2));
+    }
+
+    public function test_a_recent_hold_still_holds_its_seat(): void
+    {
+        // Le pendant du test précédent : le paiement en cours reste protégé,
+        // sinon on rouvre la survente qu'on venait de fermer.
+        $type = $this->ticketTypeWithSeats(2);
+        $this->makeTicket($type, 'pending');
+
+        $this->assertSame(1, $type->fresh()->reserved_quantity);
+    }
+
+    public function test_the_public_listing_agrees_with_the_checkout(): void
+    {
+        // L'affichage et la caisse doivent dire la même chose : annoncer
+        // « complet » sur une place que la caisse accepterait de vendre est
+        // exactement le bug remonté.
+        $type = $this->ticketTypeWithSeats(1);
+        $this->expire($this->makeTicket($type, 'pending'));
+
+        $listing = $this->getJson('/api/client/events');
+        $listing->assertOk();
+
+        $event = collect($listing->json('events'))
+            ->firstWhere('slug', $type->event->slug);
+
+        $this->assertNotNull($event, 'l\'événement doit être listé');
+        $this->assertFalse((bool) ($event['is_sold_out'] ?? false), 'il reste une place à vendre');
+    }
+
+    public function test_guest_checkout_accepts_a_seat_held_by_an_expired_payment(): void
+    {
+        $type = $this->ticketTypeWithSeats(1);
+        $this->expire($this->makeTicket($type, 'pending'));
+
+        $response = $this->postJson('/api/v1/guest/orders', [
+            'event_slug' => $type->event->slug,
+            'ticket_type_id' => $type->id,
+            'quantity' => 1,
+            'guest_name' => 'Test Acheteur',
+            'guest_email' => '{{EMAIL_002}}',
+            'guest_phone' => '{{PHONE_006}}',
+            'payment_method' => 'airtel',
+        ]);
+
+        $this->assertNotSame('SOLD_OUT', $response->json('error_code'),
+            'la dernière place ne doit pas rester bloquée par une commande morte');
+    }
 }
