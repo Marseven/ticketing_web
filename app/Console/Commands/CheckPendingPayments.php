@@ -54,6 +54,21 @@ class CheckPendingPayments extends Command
 
             $orderStatus = $payment->order?->status;
 
+            // En simulation, on montre CHAQUE facture et l'état rendu par la
+            // passerelle. Sans cela, « toujours en attente » est indiscernable
+            // de « la passerelle n'a pas répondu » ou de « aucun identifiant de
+            // facture » — trois situations qui n'appellent pas la même suite.
+            if ($dryRun) {
+                $this->line(sprintf(
+                    '  %-14s commande=%-10s %10s  facture=%s  état=%s',
+                    $payment->order?->reference ?? '—',
+                    $orderStatus ?? '—',
+                    number_format((float) $payment->amount, 0, ',', ' '),
+                    $states->billId($payment) ?: 'ABSENTE',
+                    $state ?? 'SANS RÉPONSE',
+                ));
+            }
+
             if ($states->isPaid($state) && $orderStatus !== 'pending') {
                 // Le client a payé APRÈS l'annulation de sa commande — la place
                 // a pu être revendue entre-temps. Émettre un billet ici
