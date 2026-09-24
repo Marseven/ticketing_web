@@ -120,7 +120,11 @@ class SeatAvailabilityTest extends TestCase
         ]);
 
         $response->assertStatus(400);
-        $this->assertStringContainsString('0 billets disponibles', $response->json('message'));
+
+        // « Seulement 0 billets disponibles » se lisait mal : quand il ne reste
+        // rien, on le dit simplement, avec un code que l'écran reconnaît.
+        $response->assertJsonPath('error_code', 'SOLD_OUT');
+        $this->assertStringContainsString('complète', $response->json('message'));
     }
 
     public function test_guest_checkout_accepts_when_a_seat_is_free(): void

@@ -123,8 +123,8 @@
                     :key="ticketType.id"
                     class="bg-white p-4 rounded-xl border-2 border-gray-200 hover:border-primea-blue transition-all duration-200 cursor-pointer"
                     :style="{ borderLeftWidth: '4px', borderLeftColor: ticketColors[index % ticketColors.length] }"
-                    :class="salesNotOpenYet ? 'cursor-default' : ''"
-                    @click="salesNotOpenYet ? null : goToBookingWithType(ticketType.id)"
+                    :class="(salesNotOpenYet || isTypeSoldOut(ticketType)) ? '!cursor-default opacity-70' : ''"
+                    @click="(salesNotOpenYet || isTypeSoldOut(ticketType)) ? null : goToBookingWithType(ticketType.id)"
                   >
                     <div class="flex items-start justify-between gap-4">
                       <div class="flex-1 min-w-0">
@@ -144,8 +144,9 @@
                           <span v-else class="text-green-600">GRATUIT</span>
                         </div>
                         <div class="text-xs text-gray-500">XAF</div>
-                        <div v-if="!salesNotOpenYet" class="text-xs font-semibold text-primea-blue mt-1">Réserver →</div>
-                        <div v-else class="text-xs font-semibold text-gray-400 mt-1">Bientôt en vente</div>
+                        <div v-if="isTypeSoldOut(ticketType)" class="text-xs font-bold text-red-600 mt-1">Complet</div>
+                        <div v-else-if="salesNotOpenYet" class="text-xs font-semibold text-gray-400 mt-1">Bientôt en vente</div>
+                        <div v-else class="text-xs font-semibold text-primea-blue mt-1">Réserver →</div>
                       </div>
                     </div>
                   </div>
@@ -287,8 +288,23 @@
       </div>
     </div>
 
+    <!-- Complet : l'information doit se voir sans chercher, sinon les gens
+         parcourent la page entière avant de comprendre qu'il n'y a plus rien. -->
+    <div v-if="event && !loading && !error && isSoldOut && !isEventPassed" class="max-w-7xl mx-auto px-4 pb-8">
+      <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-6 text-center">
+        <p class="text-sm font-semibold uppercase tracking-wide text-red-500">
+          Billetterie
+        </p>
+        <p class="text-2xl font-bold text-red-700 mt-1">Complet</p>
+        <p class="text-sm text-gray-600 mt-3 max-w-xl mx-auto leading-relaxed">
+          Toutes les places de cet événement ont été vendues. Si des places se libèrent,
+          elles réapparaîtront ici automatiquement.
+        </p>
+      </div>
+    </div>
+
     <!-- Billetterie à venir : on annonce l'ouverture, on ne vend pas encore -->
-    <div v-if="event && !loading && !error && salesNotOpenYet" class="max-w-7xl mx-auto px-4 pb-8">
+    <div v-if="event && !loading && !error && salesNotOpenYet && !isSoldOut" class="max-w-7xl mx-auto px-4 pb-8">
       <div class="bg-primea-blue/5 border-2 border-primea-blue/20 rounded-2xl p-6 text-center">
         <p class="text-sm font-semibold uppercase tracking-wide text-primea-blue/70">
           Ouverture de la billetterie
@@ -501,9 +517,29 @@ export default {
     const { salesNotOpenYet, countdown: salesCountdown, openingLabel: salesOpeningLabel } =
       useSalesOpening(() => event.value)
 
+    /**
+     * Complet : le serveur tranche. Il compte aussi les places retenues par
+     * un paiement en cours, ce que le navigateur ne peut pas savoir.
+     */
+    const isSoldOut = computed(() => {
+      if (event.value?.is_sold_out !== undefined) return event.value.is_sold_out === true
+
+      return !isEventPassed.value && availableTickets.value === 0
+    })
+
+    /** Une catégorie précise est-elle épuisée ? */
+    const isTypeSoldOut = (ticketType) => {
+      if (ticketType?.is_sold_out !== undefined) return ticketType.is_sold_out === true
+
+      return ticketType?.remaining_quantity !== null
+        && ticketType?.remaining_quantity !== undefined
+        && ticketType.remaining_quantity <= 0
+    }
+
     const canPurchaseTickets = computed(() => {
       return !isEventPassed.value
         && !salesNotOpenYet.value
+        && !isSoldOut.value
         && availableTickets.value > 0
     })
 
@@ -622,6 +658,8 @@ export default {
       availableTickets,
       showRemainingSeats,
       canPurchaseTickets,
+      isSoldOut,
+      isTypeSoldOut,
       salesNotOpenYet,
       salesCountdown,
       salesOpeningLabel,

@@ -233,9 +233,19 @@ class OrderController extends Controller
 
                 if ($availableQuantity < $validated['quantity']) {
                     \DB::rollBack();
-                    return response()->json([
+
+                    // « Seulement 0 billets disponibles » se lit mal : quand il
+                    // ne reste rien, on le dit simplement, et on donne un code
+                    // que l'écran peut reconnaître pour basculer en « complet ».
+                    return response()->json($availableQuantity <= 0 ? [
                         'success' => false,
-                        'message' => "Seulement {$availableQuantity} billets disponibles pour ce type"
+                        'message' => 'Cette catégorie est complète.',
+                        'error_code' => 'SOLD_OUT',
+                    ] : [
+                        'success' => false,
+                        'message' => "Il ne reste que {$availableQuantity} place(s) dans cette catégorie.",
+                        'error_code' => 'NOT_ENOUGH_SEATS',
+                        'remaining' => $availableQuantity,
                     ], 400);
                 }
             }

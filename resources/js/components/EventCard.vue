@@ -23,8 +23,16 @@
         </span>
       </div>
 
+      <!-- Complet : l'information la plus utile de la carte, elle passe avant
+           le compte à rebours d'ouverture. -->
+      <div v-if="isSoldOut && !isEventPassed" class="absolute top-4 right-4">
+        <span class="bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide shadow-lg">
+          Complet
+        </span>
+      </div>
+
       <!-- Billetterie pas encore ouverte : on annonce, on ne vend pas -->
-      <div v-if="salesNotOpenYet" class="absolute top-4 right-4">
+      <div v-else-if="salesNotOpenYet" class="absolute top-4 right-4">
         <span class="bg-primea-blue text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-lg">
           En vente {{ shortCountdown }}
         </span>
@@ -40,9 +48,18 @@
           <div v-else class="text-lg font-bold text-green-400">Gratuit</div>
         </div>
 
+        <!-- Plus rien à vendre : on le dit à la place du bouton, sinon la
+             carte semble simplement cassée. -->
+        <div
+          v-if="isSoldOut && !isEventPassed"
+          class="bg-red-600/90 backdrop-blur-sm rounded-lg px-4 py-2 text-white text-sm font-bold uppercase tracking-wide"
+        >
+          Complet
+        </div>
+
         <!-- Avant l'ouverture, rien à acheter : on dit quand ça commence. -->
         <div
-          v-if="salesNotOpenYet"
+          v-else-if="salesNotOpenYet"
           class="bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 text-primea-blue text-xs font-semibold text-center"
         >
           <div class="uppercase tracking-wide opacity-70">Billetterie</div>
@@ -128,13 +145,13 @@
             </svg>
             Événement terminé
           </div>
-          <div v-else-if="availableTickets < 20 && availableTickets > 0" class="text-amber-600 text-sm font-medium flex items-center gap-1">
+          <div v-else-if="showRemainingSeats && availableTickets < 20 && availableTickets > 0" class="text-amber-600 text-sm font-medium flex items-center gap-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             {{ availableTickets }} place{{ availableTickets > 1 ? 's' : '' }} restante{{ availableTickets > 1 ? 's' : '' }}
           </div>
-          <div v-else-if="availableTickets === 0 && !isEventPassed" class="text-red-600 text-sm font-medium">Complet</div>
+
         </div>
       </div>
     </div>
@@ -335,9 +352,28 @@ export default {
     // est visible et annoncé, mais personne ne peut encore acheter.
     const { salesNotOpenYet, shortCountdown } = useSalesOpening(() => props.event)
 
+    /**
+     * Complet : le serveur tranche.
+     *
+     * Il compte aussi les places retenues par un paiement en cours, ce que le
+     * navigateur ne peut pas savoir. À défaut du drapeau (réponse d'une
+     * version antérieure), on retombe sur le décompte local.
+     */
+    const isSoldOut = computed(() => {
+      if (props.event.is_sold_out !== undefined) return props.event.is_sold_out === true
+
+      return !isEventPassed.value && availableTickets.value === 0
+    })
+
+    // L'organisateur peut choisir de ne pas montrer le nombre de places.
+    // « Complet » reste affiché : ce n'est pas un compte, c'est l'information
+    // qui évite à quelqu'un de cliquer pour rien.
+    const showRemainingSeats = computed(() => props.event.show_remaining_seats === true)
+
     const canPurchase = computed(() => {
       return !isEventPassed.value
         && !salesNotOpenYet.value
+        && !isSoldOut.value
         && availableTickets.value > 0
     })
 
@@ -455,6 +491,8 @@ export default {
       canPurchase,
       salesNotOpenYet,
       shortCountdown,
+      isSoldOut,
+      showRemainingSeats,
       organizerName,
       formatDate,
       formatTime,

@@ -11,6 +11,46 @@ class EventController extends Controller
     /**
      * Display a listing of events.
      */
+    /**
+     * Places retenues par un paiement en cours, par type de billet.
+     *
+     * Une place est prise par une LIGNE DE COMMANDE d'une commande encore en
+     * attente (les billets ne naissent qu'au paiement), ou par un billet
+     * `pending` hérité d'avant ce changement. Même décompte que
+     * `TicketType::occupied_quantity`, mais en deux requêtes au lieu d'une par
+     * type : une liste d'événements en contient des dizaines.
+     *
+     * @param  array<int>  $ticketTypeIds
+     * @return \Illuminate\Support\Collection<int, int>
+     */
+    private function reservedQuantities(array $ticketTypeIds): \Illuminate\Support\Collection
+    {
+        if (empty($ticketTypeIds)) {
+            return collect();
+        }
+
+        $fromOrders = \DB::table('order_items')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->whereIn('order_items.ticket_type_id', $ticketTypeIds)
+            ->where('orders.status', 'pending')
+            ->select('order_items.ticket_type_id', \DB::raw('SUM(order_items.qty) as held'))
+            ->groupBy('order_items.ticket_type_id')
+            ->pluck('held', 'ticket_type_id');
+
+        $fromTickets = \DB::table('tickets')
+            ->whereIn('ticket_type_id', $ticketTypeIds)
+            ->where('status', 'pending')
+            ->select('ticket_type_id', \DB::raw('COUNT(*) as held'))
+            ->groupBy('ticket_type_id')
+            ->pluck('held', 'ticket_type_id');
+
+        return collect($ticketTypeIds)
+            ->mapWithKeys(fn ($id) => [
+                $id => (int) ($fromOrders[$id] ?? 0) + (int) ($fromTickets[$id] ?? 0),
+            ])
+            ->filter();
+    }
+
     public function index(Request $request)
     {
         // Phase 0 perf : cache court (60 s) de la liste publique, clé = filtres + page.
@@ -90,8 +130,14 @@ class EventController extends Controller
                 ->groupBy('ticket_type_id')
                 ->pluck('sold_count', 'ticket_type_id');
 
+            // Places retenues par un paiement en cours. Les ignorer revenait à
+            // annoncer « 2 places restantes » sur des places déjà prises, puis
+            // à refuser l'achat au dernier moment — l'affichage et la règle de
+            // vente doivent s'appuyer sur le même décompte.
+            $reservedQuantities = $this->reservedQuantities($ticketTypeIds);
+
             // Enrichir les données pour le frontend
-            $enrichedEvents = collect($events->items())->map(function($event) use ($soldQuantities) {
+            $enrichedEvents = collect($events->items())->map(function($event) use ($soldQuantities, $reservedQuantities) {
                 // Créer un tableau vide au lieu d'utiliser toArray() qui peut avoir des problèmes avec les accessors
                 $eventArray = [
                     'id' => $event->id,
@@ -113,6 +159,11 @@ class EventController extends Controller
                     // et un booléen y serait périmé pile à l'instant qui compte.
                     // Le navigateur compare la date à son horloge, à la seconde.
                     'sales_start_at' => $event->sales_start_at?->toIso8601String(),
+                    // Choix de l'organisateur : montrer ou non le nombre de
+                    // places restantes. Absent de la liste, la carte
+                    // l'affichait quand même — le réglage était ignoré là où
+                    // il compte le plus.
+                    'show_remaining_seats' => (bool) $event->show_remaining_seats,
                     'created_at' => $event->created_at,
                     'updated_at' => $event->updated_at,
                     'organizer' => $event->organizer ? [
@@ -160,12 +211,14 @@ class EventController extends Controller
                 }
 
                 if ($ticketTypesQuery->count() > 0) {
-                    $ticketTypes = $ticketTypesQuery->map(function($ticketType) use ($soldQuantities, $currentPriceMap, $nextTierMap, $event) {
+                    $ticketTypes = $ticketTypesQuery->map(function($ticketType) use ($soldQuantities, $reservedQuantities, $currentPriceMap, $nextTierMap, $event) {
                         // Utiliser les quantités pré-chargées
-                        $soldQuantity = $soldQuantities[$ticketType->id] ?? 0;
+                        $soldQuantity = (int) ($soldQuantities[$ticketType->id] ?? 0);
+                        $occupied = $soldQuantity + (int) ($reservedQuantities[$ticketType->id] ?? 0);
 
-                        $remainingQuantity = $ticketType->available_quantity ?
-                            max(0, $ticketType->available_quantity - $soldQuantity) : null;
+                        $remainingQuantity = $ticketType->available_quantity !== null
+                            ? max(0, $ticketType->available_quantity - $occupied)
+                            : null;
 
                         $basePrice = (float) $ticketType->price;
                         $currentPrice = $currentPriceMap[$ticketType->id] ?? $basePrice;
@@ -182,12 +235,20 @@ class EventController extends Controller
                             'available_quantity' => $ticketType->available_quantity,
                             'sold_quantity' => $soldQuantity,
                             'remaining_quantity' => $remainingQuantity,
-                            'is_available' => true, // Simplifié pour l'instant
+                            // Une capacité nulle vaut « illimité » : jamais complet.
+                            'is_sold_out' => $remainingQuantity !== null && $remainingQuantity <= 0,
+                            'is_available' => $remainingQuantity === null || $remainingQuantity > 0,
                             'status' => $ticketType->status,
                         ];
                     });
 
                     $eventArray['ticket_types'] = $ticketTypes->toArray();
+
+                    // Complet = toutes les catégories le sont. Le calculer ici
+                    // plutôt que dans le navigateur garantit que la pastille
+                    // affichée et le refus à l'achat disent la même chose.
+                    $eventArray['is_sold_out'] = $ticketTypes->isNotEmpty()
+                        && $ticketTypes->every(fn ($type) => $type['is_sold_out']);
 
                     // Calculer min et max prix correctement
                     $prices = $ticketTypes->pluck('price')->filter(function($price) {
@@ -378,12 +439,19 @@ class EventController extends Controller
                     ->groupBy('ticket_type_id')
                     ->pluck('sold_count', 'ticket_type_id');
 
-                $ticketTypes = $ticketTypesQuery->map(function($ticketType) use ($soldQuantities) {
-                    // Utiliser les quantités pré-chargées
-                    $soldQuantity = $soldQuantities[$ticketType->id] ?? 0;
+                // Mêmes places retenues que dans la liste et que dans le
+                // refus à l'achat : l'affichage ne doit pas promettre une
+                // place que la caisse va refuser.
+                $reservedQuantities = $this->reservedQuantities($ticketTypeIds);
 
-                    $remainingQuantity = $ticketType->available_quantity ?
-                        max(0, $ticketType->available_quantity - $soldQuantity) : null;
+                $ticketTypes = $ticketTypesQuery->map(function($ticketType) use ($soldQuantities, $reservedQuantities) {
+                    // Utiliser les quantités pré-chargées
+                    $soldQuantity = (int) ($soldQuantities[$ticketType->id] ?? 0);
+                    $occupied = $soldQuantity + (int) ($reservedQuantities[$ticketType->id] ?? 0);
+
+                    $remainingQuantity = $ticketType->available_quantity !== null
+                        ? max(0, $ticketType->available_quantity - $occupied)
+                        : null;
 
                     return [
                         'id' => $ticketType->id,
@@ -394,12 +462,17 @@ class EventController extends Controller
                         'available_quantity' => $ticketType->available_quantity,
                         'sold_quantity' => $soldQuantity,
                         'remaining_quantity' => $remainingQuantity,
-                        'is_available' => true,
+                        // Une capacité nulle vaut « illimité » : jamais complet.
+                        'is_sold_out' => $remainingQuantity !== null && $remainingQuantity <= 0,
+                        'is_available' => $remainingQuantity === null || $remainingQuantity > 0,
                         'status' => $ticketType->status,
                     ];
                 });
 
                 $enrichedEvent['ticket_types'] = $ticketTypes->toArray();
+
+                // Complet = toutes les catégories le sont.
+                $enrichedEvent['is_sold_out'] = $ticketTypes->every(fn ($type) => $type['is_sold_out']);
 
                 // Calculer min et max prix correctement
                 $prices = $ticketTypes->pluck('price')->filter(function($price) {
@@ -410,6 +483,9 @@ class EventController extends Controller
                 $enrichedEvent['max_price'] = $prices->count() > 0 ? $prices->max() : 0;
             } else {
                 $enrichedEvent['ticket_types'] = [];
+                // Sans aucune catégorie, l'événement n'est pas « complet » :
+                // il n'a simplement rien à vendre.
+                $enrichedEvent['is_sold_out'] = false;
                 $enrichedEvent['min_price'] = 0;
                 $enrichedEvent['max_price'] = 0;
             }

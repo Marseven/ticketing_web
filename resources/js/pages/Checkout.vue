@@ -125,7 +125,10 @@
             <!-- Colonne droite - Formulaire d'achat -->
             <div class="bg-white rounded-primea-xl shadow-primea p-8">
               <h3 class="text-2xl font-bold text-primea-blue mb-6">
-                {{ isEventPassed ? 'Achat impossible' : (salesNotOpenYet ? 'Billetterie à venir' : 'Votre achat') }}
+                <template v-if="isEventPassed">Achat impossible</template>
+                <template v-else-if="isSoldOut">Complet</template>
+                <template v-else-if="salesNotOpenYet">Billetterie à venir</template>
+                <template v-else>Votre achat</template>
               </h3>
 
               <!-- Message événement passé -->
@@ -141,11 +144,29 @@
                 </router-link>
               </div>
               
+              <!-- Complet : quelqu'un arrivé par un lien direct doit
+                   comprendre tout de suite, sans faire défiler un formulaire
+                   qui ne mène nulle part. -->
+              <div v-if="!isEventPassed && isSoldOut" class="bg-red-50 border border-red-200 rounded-primea-lg p-6 text-center">
+                <ExclamationCircleIcon class="w-16 h-16 text-red-500 mx-auto mb-4" />
+                <h4 class="text-lg font-semibold text-red-800 mb-2">Événement complet</h4>
+                <p class="text-red-600 mb-4">
+                  Toutes les places ont été vendues. Si des places se libèrent, elles
+                  réapparaîtront ici automatiquement.
+                </p>
+                <router-link
+                  to="/events"
+                  class="inline-flex items-center gap-2 bg-primea-blue text-white px-6 py-3 rounded-primea-lg font-semibold hover:bg-primea-blue/90 transition-colors"
+                >
+                  Voir d'autres événements
+                </router-link>
+              </div>
+
               <!-- Billetterie annoncée mais pas encore ouverte : l'événement est
                    visible, l'achat attend l'heure dite. Le décompte se met à
                    jour tout seul et le formulaire apparaît à l'échéance. -->
               <div
-                v-if="!isEventPassed && salesNotOpenYet"
+                v-if="!isEventPassed && salesNotOpenYet && !isSoldOut"
                 class="bg-primea-blue/5 border-2 border-primea-blue/20 rounded-primea-lg p-6 text-center"
               >
                 <p class="text-sm text-gray-600">La billetterie ouvre</p>
@@ -175,7 +196,7 @@
                 </p>
               </div>
 
-              <form v-if="!isEventPassed && !salesNotOpenYet" @submit.prevent="processOrder" class="space-y-6">
+              <form v-if="!isEventPassed && !salesNotOpenYet && !isSoldOut" @submit.prevent="processOrder" class="space-y-6">
 
                 <!-- Sélection de la date (multi-dates) Desktop -->
                 <div v-if="hasMultipleDates">
@@ -649,7 +670,7 @@
           <!-- Billetterie pas encore ouverte (mobile) : même règle que sur
                grand écran, l'achat attend l'heure annoncée. -->
           <div
-            v-if="!isEventPassed && salesNotOpenYet"
+            v-if="!isEventPassed && salesNotOpenYet && !isSoldOut"
             class="bg-primea-blue/5 border-2 border-primea-blue/20 rounded-xl p-5 text-center mx-auto w-[86%]"
           >
             <p class="text-xs text-gray-600">La billetterie ouvre</p>
@@ -679,8 +700,20 @@
             </p>
           </div>
 
+          <!-- Complet, version mobile -->
+          <div v-if="!isEventPassed && isSoldOut" class="bg-red-50 border border-red-200 rounded-lg p-5 text-center w-[86%] mx-auto">
+            <p class="text-base font-bold text-red-800 mb-1">Événement complet</p>
+            <p class="text-sm text-red-600 mb-4">Toutes les places ont été vendues.</p>
+            <router-link
+              to="/events"
+              class="inline-flex items-center justify-center gap-2 bg-primea-blue text-white px-5 py-3 rounded-lg font-semibold text-sm"
+            >
+              Voir d'autres événements
+            </router-link>
+          </div>
+
           <!-- Order Form -->
-          <form v-if="!isEventPassed && !salesNotOpenYet" @submit.prevent="processOrder" class="space-y-5 w-[76%] mx-auto">
+          <form v-if="!isEventPassed && !salesNotOpenYet && !isSoldOut" @submit.prevent="processOrder" class="space-y-5 w-[76%] mx-auto">
 
             <!-- Ticket Type Selection -->
             <div>
@@ -1185,6 +1218,19 @@ export default {
         seconds,
         expired: false
       }
+    })
+
+    /**
+     * Complet : le serveur tranche, car il compte aussi les places retenues
+     * par un paiement en cours. À défaut du drapeau, plus aucune catégorie
+     * disponible revient au même.
+     */
+    const isSoldOut = computed(() => {
+      if (isEventPassed.value) return false
+
+      if (event.value?.is_sold_out !== undefined) return event.value.is_sold_out === true
+
+      return !!event.value?.ticket_types?.length && availableTicketTypes.value.length === 0
     })
 
     const availableTicketTypes = computed(() => {
@@ -2026,6 +2072,7 @@ export default {
       eventTime,
       eventDate,
       isEventPassed,
+      isSoldOut,
       salesNotOpenYet,
       salesCountdown,
       salesOpeningLabel,
