@@ -180,4 +180,70 @@ class CheckPendingPaymentsTest extends TestCase
         Mockery::close();
         parent::tearDown();
     }
+
+    public function test_a_cancelled_order_is_left_out_of_the_routine_pass(): void
+    {
+        // Le passage automatique reste prudent : il n'encaisse que ce qui est
+        // encore en cours. Sans option, rien ne bouge sur une commande close.
+        Notification::fake();
+        $payment = $this->makePendingPayment();
+        $payment->order->update(['status' => 'cancelled']);
+        $this->gatewayReturns('processed');
+
+        $this->artisan('payments:check-pending')->assertSuccessful();
+
+        $this->assertSame('initiated', $payment->fresh()->status);
+        $this->assertSame('cancelled', $payment->order->fresh()->status);
+    }
+
+    public function test_a_bill_paid_after_cancellation_is_reported_never_cashed(): void
+    {
+        // L'angle mort découvert le 24/09/2026 : la commande annulée au bout
+        // d'une heure sortait du champ de la vérification. Le client pouvait
+        // payer ensuite — débité, sans billet, et plus personne pour poser la
+        // question à e-billing. On interroge donc aussi les commandes closes.
+        //
+        // Mais on n'encaisse pas pour autant : la place a pu être revendue
+        // entre-temps, et émettre un billet ici survendrait la salle. On
+        // signale, un humain tranche entre billet et remboursement.
+        Notification::fake();
+        $payment = $this->makePendingPayment();
+        $payment->order->update(['status' => 'cancelled']);
+        $this->gatewayReturns('processed');
+
+        $this->artisan('payments:check-pending --include-closed')
+            ->expectsOutputToContain('à traiter à la main')
+            ->assertSuccessful();
+
+        $payment->refresh();
+        $this->assertSame('initiated', $payment->status, 'le paiement n\'est pas encaissé tout seul');
+        $this->assertSame('cancelled', $payment->order->fresh()->status);
+        $this->assertSame(0, $payment->order->tickets()->count(), 'aucun billet émis sur une place peut-être revendue');
+    }
+
+    public function test_a_dead_bill_on_a_cancelled_order_stops_raising_the_alarm(): void
+    {
+        // Le cas le plus courant : la commande a expiré, la facture aussi.
+        // Le marquer `failed` éteint le voyant sans rien inventer.
+        Notification::fake();
+        $payment = $this->makePendingPayment();
+        $payment->order->update(['status' => 'cancelled']);
+        $this->gatewayReturns('expired');
+
+        $this->artisan('payments:check-pending --include-closed')->assertSuccessful();
+
+        $this->assertSame('failed', $payment->fresh()->status);
+    }
+
+    public function test_the_dry_run_touches_nothing_on_a_cancelled_order(): void
+    {
+        Notification::fake();
+        $payment = $this->makePendingPayment();
+        $payment->order->update(['status' => 'cancelled']);
+        $this->gatewayReturns('processed');
+
+        $this->artisan('payments:check-pending --include-closed --dry-run')->assertSuccessful();
+
+        $this->assertSame('initiated', $payment->fresh()->status);
+    }
 }

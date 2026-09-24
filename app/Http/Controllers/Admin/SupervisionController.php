@@ -219,14 +219,31 @@ class SupervisionController extends Controller
     private function checkStuckPayments(): array
     {
         return $this->check('stuck_payments', 'Paiements en souffrance', function () {
-            $stuck = Payment::where('status', 'initiated')
+            // Deux populations à ne pas confondre. Un paiement dont la
+            // commande attend encore se rattrape tout seul au prochain
+            // passage. Un paiement dont la commande a été ANNULÉE, non : la
+            // vérification périodique l'ignorait, et il pouvait rester là,
+            // réglé ou non, sans que personne ne pose la question.
+            $base = fn () => Payment::where('status', 'initiated')
                 ->where('created_at', '<=', now()->subMinutes(self::STUCK_PAYMENT_MINUTES))
-                ->where('created_at', '>=', now()->subDays(2))
+                ->where('created_at', '>=', now()->subDays(2));
+
+            $waiting = (clone $base())
+                ->whereHas('order', fn ($q) => $q->where('status', 'pending'))
                 ->count();
 
-            return $stuck === 0
+            $closed = (clone $base())
+                ->whereHas('order', fn ($q) => $q->where('status', '!=', 'pending'))
+                ->count();
+
+            if ($closed > 0) {
+                return ['error', "{$closed} paiement(s) laissé(s) sur une commande annulée",
+                    'Demander leur état à e-billing : « php artisan payments:check-pending --include-closed --dry-run ».'];
+            }
+
+            return $waiting === 0
                 ? ['ok', 'Aucun paiement bloqué', null]
-                : ['warning', "{$stuck} paiement(s) sans réponse depuis plus de " . self::STUCK_PAYMENT_MINUTES . ' min',
+                : ['warning', "{$waiting} paiement(s) sans réponse depuis plus de " . self::STUCK_PAYMENT_MINUTES . ' min',
                    'Relancer « php artisan payments:check-pending ».'];
         });
     }

@@ -24,6 +24,7 @@ class CheckPendingPayments extends Command
         {--minutes=2 : ne regarder que les paiements initiés depuis au moins ce délai}
         {--hours=48 : ne pas remonter au-delà de cette ancienneté}
         {--limit=100 : nombre maximum de paiements interrogés}
+        {--include-closed : interroger aussi les paiements dont la commande a été annulée}
         {--dry-run : lister sans rien encaisser}';
 
     protected $description = 'Interroge e-billing sur les paiements en attente et encaisse ceux qui sont réglés';
@@ -44,11 +45,38 @@ class CheckPendingPayments extends Command
         $settled = 0;
         $dead = 0;
         $stillWaiting = 0;
+        $orphans = 0;
 
         foreach ($payments as $payment) {
             // En direct : on veut l'état courant de la facture, pas celui qui
             // avait été enregistré au moment d'une notification précédente.
             $state = $states->for($payment, preferStored: false);
+
+            $orderStatus = $payment->order?->status;
+
+            if ($states->isPaid($state) && $orderStatus !== 'pending') {
+                // Le client a payé APRÈS l'annulation de sa commande — la place
+                // a pu être revendue entre-temps. Émettre un billet ici
+                // survendrait la salle ; ne rien dire volerait le client. On
+                // signale, et un humain tranche (billet ou remboursement).
+                $this->error("  {$payment->order?->reference} : PAYÉ sur commande {$orderStatus}"
+                    . " — {$payment->amount} — à traiter à la main");
+
+                Log::critical('Paiement réglé sur une commande close', [
+                    'payment_id' => $payment->id,
+                    'reference' => $payment->order?->reference,
+                    'order_status' => $orderStatus,
+                    'amount' => $payment->amount,
+                    'ebilling_state' => $state,
+                ]);
+
+                if (! $dryRun) {
+                    $payment->update(['ebilling_state' => $state]);
+                }
+
+                $orphans++;
+                continue;
+            }
 
             if ($states->isPaid($state)) {
                 $this->line("  {$payment->order?->reference} : payé ({$state})");
@@ -80,7 +108,13 @@ class CheckPendingPayments extends Command
         }
 
         $this->newLine();
-        $this->info(($dryRun ? '[simulation] ' : '') . "Encaissés : {$settled} · Abandonnés : {$dead} · Toujours en attente : {$stillWaiting}");
+        $this->info(($dryRun ? '[simulation] ' : '') . "Encaissés : {$settled} · Abandonnés : {$dead}"
+            . " · Toujours en attente : {$stillWaiting} · À traiter à la main : {$orphans}");
+
+        if ($orphans > 0) {
+            $this->newLine();
+            $this->error("⚠️  {$orphans} paiement(s) réglé(s) sur une commande annulée : ni billet ni remboursement.");
+        }
 
         return self::SUCCESS;
     }
@@ -96,7 +130,11 @@ class CheckPendingPayments extends Command
             ->where('status', 'initiated')
             ->where('created_at', '<=', now()->subMinutes((int) $this->option('minutes')))
             ->where('created_at', '>=', now()->subHours((int) $this->option('hours')))
-            ->whereHas('order', fn ($q) => $q->where('status', 'pending'))
+            ->when(
+                ! $this->option('include-closed'),
+                fn ($q) => $q->whereHas('order', fn ($o) => $o->where('status', 'pending')),
+                fn ($q) => $q->whereHas('order'),
+            )
             ->orderBy('id')
             ->limit((int) $this->option('limit'))
             ->get();
