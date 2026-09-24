@@ -393,9 +393,16 @@ class WebhookController extends Controller
      */
     public function ebilling(Request $request): JsonResponse
     {
+        // `jeton_fourni` règle une question qu'on ne peut pas trancher depuis
+        // le code : nous plaçons bien un jeton dans l'URL de notification à la
+        // création de la facture, mais rien ne dit qu'e-billing le renvoie sur
+        // le rappel automatique qui suit la confirmation de l'opérateur. Tant
+        // qu'on l'ignore, exiger ce jeton reviendrait à parier sur le compte
+        // des clients. Le journal répond au bout de quelques paiements réels.
         Log::info('Webhook E-Billing reçu', [
             'ip' => $request->ip(),
             'ip_candidates' => $this->ebillingIpCandidates($request),
+            'jeton_fourni' => $request->headers->has('X-Webhook-Secret') || $request->query->has('token'),
             'payload' => Redact::payload($request->all()),
         ]);
 
