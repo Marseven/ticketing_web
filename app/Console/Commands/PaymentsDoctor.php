@@ -89,8 +89,7 @@ class PaymentsDoctor extends Command
     /**
      * Les rappels de paiement sont-ils protégés ?
      *
-     * Ils refusent désormais par défaut : sans secret configuré, e-billing ne
-     * peut plus confirmer un encaissement. Ce n'est pas une perte d'argent —
+     * Ils refusent désormais par défaut. Ce n'est pas une perte d'argent —
      * `payments:check-pending` rattrape en cinq minutes — mais c'est un retard
      * silencieux, et c'est exactement le genre d'oubli qu'on ne découvre qu'au
      * moment où un client s'inquiète. Autant le voir ici.
@@ -100,20 +99,26 @@ class PaymentsDoctor extends Command
         $this->newLine();
         $this->line('Rappels de paiement (protection)');
 
-        $encaissement = (string) config('services.ebilling.webhook_secret', '');
-        $adresses = trim((string) config('services.ebilling.webhook_allowed_ips', ''));
+        $adresses = array_filter(array_map(
+            'trim',
+            explode(',', (string) config('services.ebilling.webhook_allowed_ips', ''))
+        ));
         $versement = (string) config('services.shap.webhook_secret', '');
 
         $ok = true;
 
-        if ($encaissement !== '') {
-            $this->line('  présente EBILLING_WEBHOOK_SECRET (' . $this->tail($encaissement) . ')');
-        } elseif ($adresses !== '') {
-            $this->line('  EBILLING_WEBHOOK_SECRET absent — repli sur la liste d\'adresses');
-            $this->line('    ⚠ Une liste d\'adresses seule reste fragile : préférer un secret partagé.');
+        // E-billing rappelle l'URL déclarée dans son compte marchand, sans
+        // aucun paramètre : il n'existe pas de secret partagé à attendre de lui.
+        // L'adresse est le seul contrôle possible — conseiller un secret
+        // enverrait chercher une solution qui n'existe pas.
+        if ($adresses !== []) {
+            $this->line('  ' . count($adresses) . ' adresse(s) autorisée(s) pour le rappel d\'encaissement');
         } else {
-            $this->error('  MANQUANT EBILLING_WEBHOOK_SECRET — le rappel d\'encaissement est REFUSÉ');
-            $this->line('    Les paiements ne seront confirmés que par payments:check-pending (5 min).');
+            $this->error('  MANQUANT EBILLING_WEBHOOK_ALLOWED_IPS — le rappel d\'encaissement est REFUSÉ');
+            $this->line('    E-billing n\'accepte aucun paramètre dans l\'URL de notification :');
+            $this->line('    l\'adresse est le seul moyen d\'attester l\'origine.');
+            $this->line('    Sans elle, les paiements ne sont confirmés que par');
+            $this->line('    payments:check-pending, avec cinq minutes de retard.');
             $ok = false;
         }
 
