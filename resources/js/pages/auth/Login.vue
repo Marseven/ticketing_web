@@ -32,7 +32,7 @@
           </div>
 
           <!-- Login Form -->
-          <form @submit.prevent="handleLogin" class="space-y-5 md:space-y-6">
+          <form v-if="!twoFactor.challenge" @submit.prevent="handleLogin" class="space-y-5 md:space-y-6">
 
             <!-- Email/Phone Tabs -->
             <div class="mb-4 md:mb-6">
@@ -161,6 +161,66 @@
 
           </form>
 
+          <!-- Second facteur : le mot de passe a été accepté, mais aucune
+               session n'existe encore. Elle ne naîtra qu'avec un code valide. -->
+          <div v-else class="space-y-5">
+            <div class="text-center">
+              <div class="mx-auto w-14 h-14 rounded-2xl bg-primea-blue/10 flex items-center justify-center mb-4">
+                <svg class="w-7 h-7 text-primea-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <h2 class="text-xl font-bold text-primea-blue mb-1">Vérification en deux étapes</h2>
+              <p class="text-sm text-gray-600">
+                {{ twoFactor.useRecovery
+                  ? 'Saisissez l\'un de vos codes de secours.'
+                  : 'Saisissez le code affiché par votre application d\'authentification.' }}
+              </p>
+            </div>
+
+            <form @submit.prevent="submitTwoFactor" class="space-y-4">
+              <input
+                v-if="!twoFactor.useRecovery"
+                v-model="twoFactor.code"
+                type="text"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                maxlength="6"
+                placeholder="000000"
+                aria-label="Code à six chiffres"
+                class="w-full px-4 py-3 text-center text-2xl tracking-[0.4em] font-semibold rounded-xl border border-gray-200 focus:border-primea-blue focus:ring-2 focus:ring-primea-blue/20 outline-none"
+              />
+
+              <input
+                v-else
+                v-model="twoFactor.recoveryCode"
+                type="text"
+                autocomplete="off"
+                placeholder="XXXXX-XXXXX"
+                aria-label="Code de secours"
+                class="w-full px-4 py-3 text-center text-lg tracking-widest font-medium uppercase rounded-xl border border-gray-200 focus:border-primea-blue focus:ring-2 focus:ring-primea-blue/20 outline-none"
+              />
+
+              <button
+                type="submit"
+                :disabled="verifyingCode"
+                class="w-full py-3 rounded-xl bg-primea-blue text-white font-semibold min-h-[48px] disabled:opacity-60 transition"
+              >
+                {{ verifyingCode ? 'Vérification…' : 'Valider' }}
+              </button>
+            </form>
+
+            <div class="flex items-center justify-between text-sm">
+              <button type="button" class="text-primea-blue hover:underline" @click="toggleRecovery">
+                {{ twoFactor.useRecovery ? 'Utiliser mon application' : 'Utiliser un code de secours' }}
+              </button>
+              <button type="button" class="text-gray-500 hover:underline" @click="cancelTwoFactor">
+                Annuler
+              </button>
+            </div>
+          </div>
+
           <!-- Create Account Link -->
           <div class="mt-6 md:mt-8 pt-6 border-t border-gray-200 text-center">
             <p class="text-sm text-gray-600">
@@ -244,6 +304,88 @@ export default {
       success.value = ''
     }
 
+    // Le second facteur vit à part du formulaire : tant que `challenge` est
+    // vide, rien n'a été demandé et l'écran ne change pas.
+    const twoFactor = ref({ challenge: '', code: '', recoveryCode: '', useRecovery: false })
+    const verifyingCode = ref(false)
+
+    /**
+     * Où atterrir une fois la session réellement ouverte. Partagé par la
+     * connexion simple et par le second facteur, pour que les deux mènent au
+     * même endroit.
+     */
+    const goAfterLogin = (result) => {
+      if (result.email_verification_required) {
+        info.value = result.message || 'N\'oubliez pas de vérifier votre adresse email.'
+      }
+
+      const redirectUrl = route.query.redirect
+
+      if (redirectUrl) {
+        router.push(redirectUrl)
+        return
+      }
+
+      switch (result.access_level || 'client') {
+        case 'admin':
+          router.push('/admin/dashboard')
+          break
+        case 'organizer':
+          router.push('/organizer/dashboard')
+          break
+        default:
+          router.push('/')
+      }
+    }
+
+    const toggleRecovery = () => {
+      twoFactor.value.useRecovery = !twoFactor.value.useRecovery
+      error.value = ''
+    }
+
+    const cancelTwoFactor = () => {
+      twoFactor.value = { challenge: '', code: '', recoveryCode: '', useRecovery: false }
+      error.value = ''
+    }
+
+    /**
+     * C'est ici que la session naît : le mot de passe seul n'a rien ouvert.
+     */
+    const submitTwoFactor = async () => {
+      error.value = ''
+      verifyingCode.value = true
+
+      try {
+        const result = await authStore.completeTwoFactor({
+          challenge: twoFactor.value.challenge,
+          code: twoFactor.value.useRecovery ? null : twoFactor.value.code,
+          recoveryCode: twoFactor.value.useRecovery ? twoFactor.value.recoveryCode : null
+        })
+
+        if (result.success) {
+          cancelTwoFactor()
+          goAfterLogin(result)
+          return
+        }
+
+        error.value = result.message || 'Code incorrect'
+      } catch (apiError) {
+        const data = apiError.response?.data
+
+        // Défi brûlé ou expiré : il faut repartir du mot de passe, sinon
+        // l'utilisateur s'acharne sur un écran qui n'ouvrira plus rien.
+        if (['CHALLENGE_EXPIRED', 'CHALLENGE_BURNED'].includes(data?.error_code)) {
+          cancelTwoFactor()
+          error.value = data.message || 'Session expirée, reconnectez-vous.'
+          return
+        }
+
+        error.value = data?.message || 'Code incorrect'
+      } finally {
+        verifyingCode.value = false
+      }
+    }
+
     const handleLogin = async () => {
       try {
         loading.value = true
@@ -263,32 +405,20 @@ export default {
             password: loginForm.value.password
           })
 
+          // Mot de passe accepté, mais la session n'existe pas encore : le
+          // serveur n'a rendu qu'un défi.
+          if (result.two_factor_required) {
+            twoFactor.value = {
+              challenge: result.challenge,
+              code: '',
+              recoveryCode: '',
+              useRecovery: false
+            }
+            return
+          }
+
           if (result.success) {
-            // Show info message if email is not verified
-            if (result.email_verification_required) {
-              info.value = result.message || 'N\'oubliez pas de vérifier votre adresse email.'
-            }
-
-            // Check if there's a redirect URL in query params
-            const redirectUrl = route.query.redirect
-
-            if (redirectUrl) {
-              router.push(redirectUrl)
-            } else {
-              // Redirect based on access level
-              const accessLevel = result.access_level || 'client'
-
-              switch (accessLevel) {
-                case 'admin':
-                  router.push('/admin/dashboard')
-                  break
-                case 'organizer':
-                  router.push('/organizer/dashboard')
-                  break
-                default:
-                  router.push('/')
-              }
-            }
+            goAfterLogin(result)
           } else {
             error.value = result.message || 'Identifiants incorrects'
             return
@@ -338,7 +468,12 @@ export default {
       loginForm,
       togglePasswordVisibility,
       switchLoginType,
-      handleLogin
+      handleLogin,
+      twoFactor,
+      verifyingCode,
+      submitTwoFactor,
+      toggleRecovery,
+      cancelTwoFactor
     }
   }
 }

@@ -44,6 +44,58 @@ export const useAuthStore = defineStore('auth', () => {
     return inflight
   }
   
+  /**
+   * Installer la session à partir d'une réponse du serveur.
+   *
+   * Partagé par la connexion simple et par la validation du second facteur :
+   * deux copies auraient fini par diverger, et c'est ainsi qu'on se retrouve
+   * avec un rôle correct d'un côté et pas de l'autre.
+   */
+  const applySession = (data) => {
+    token.value = data.token
+    user.value = data.user
+
+    const accessLevel = data.access_level ||
+                      (user.value?.is_admin ? 'admin' :
+                       user.value?.is_organizer ? 'organizer' : 'client')
+
+    authUtils.saveAuth(token.value, user.value, accessLevel)
+
+    userRole.value = accessLevel
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
+
+    return {
+      success: true,
+      user: data.user,
+      access_level: accessLevel,
+      message: data.message,
+      email_verification_required: data.email_verification_required
+    }
+  }
+
+  /**
+   * Second facteur : c'est ici que la session naît réellement.
+   */
+  const completeTwoFactor = async ({ challenge, code, recoveryCode }) => {
+    const response = await axios.post('/api/v1/auth/two-factor/challenge', {
+      challenge,
+      code: code || null,
+      recovery_code: recoveryCode || null
+    }, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+
+    if (!response.data.success) {
+      return { success: false, message: response.data.message }
+    }
+
+    return applySession(response.data)
+  }
+
   const login = async (credentials) => {
     try {
       // Convertir phone en login pour l'API
@@ -60,28 +112,20 @@ export const useAuthStore = defineStore('auth', () => {
         }
       })
       
-      if (response.data.success) {
-        token.value = response.data.token
-        user.value = response.data.user
-
-        // Déterminer le rôle et l'access level
-        const accessLevel = response.data.access_level ||
-                          (user.value?.is_admin ? 'admin' :
-                           user.value?.is_organizer ? 'organizer' : 'client')
-
-        // Utiliser authUtils pour stocker les informations
-        authUtils.saveAuth(token.value, user.value, accessLevel)
-
-        userRole.value = accessLevel
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
-
+      // Double authentification : le serveur répond `success: true` mais SANS
+      // jeton. Sans ce test, on ouvrait une session vide — `token` à
+      // `undefined` — et l'utilisateur se croyait connecté.
+      if (response.data.two_factor_required) {
         return {
-          success: true,
-          user: response.data.user,
-          access_level: accessLevel,
-          message: response.data.message,
-          email_verification_required: response.data.email_verification_required
+          success: false,
+          two_factor_required: true,
+          challenge: response.data.challenge,
+          message: response.data.message
         }
+      }
+
+      if (response.data.success) {
+        return applySession(response.data)
       } else {
         return {
           success: false,
@@ -172,6 +216,7 @@ export const useAuthStore = defineStore('auth', () => {
     isSuperAdmin,
     activeTicketsCount,
     login,
+    completeTwoFactor,
     register,
     logout,
     fetchUser,

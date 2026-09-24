@@ -140,16 +140,95 @@
             </label>
           </div>
           
-          <div class="flex items-center justify-between">
-            <div>
-              <h4 class="font-medium text-gray-900">Authentification 2FA</h4>
-              <p class="text-sm text-gray-600">Sécurité renforcée avec un code à usage unique</p>
+          <!-- Double authentification. Ce n'est pas une préférence que l'on
+               coche : il faut prouver que le téléphone lit bien le secret,
+               sinon on s'enferme dehors. D'où un parcours à part. -->
+          <div class="border border-gray-200 rounded-xl p-4">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h4 class="font-medium text-gray-900">Authentification à deux facteurs</h4>
+                <p class="text-sm text-gray-600 mt-0.5">
+                  Un code à usage unique, lu dans Google Authenticator, en plus du mot de passe.
+                </p>
+                <p v-if="twoFactor.enabled" class="text-sm text-green-700 font-medium mt-2">
+                  Active · {{ twoFactor.recovery_codes_left }} code(s) de secours restant(s)
+                </p>
+                <p v-else class="text-sm text-gray-500 mt-2">Inactive</p>
+              </div>
+
+              <button
+                v-if="!twoFactor.enabled && !twoFactorSetup.secret"
+                type="button"
+                @click="startTwoFactor"
+                :disabled="twoFactorBusy"
+                class="shrink-0 px-4 py-2 rounded-lg bg-primea-blue text-white text-sm font-semibold min-h-[44px] disabled:opacity-60"
+              >
+                {{ twoFactorBusy ? 'Patientez…' : 'Activer' }}
+              </button>
+
+              <button
+                v-else-if="twoFactor.enabled"
+                type="button"
+                @click="disableTwoFactor"
+                :disabled="twoFactorBusy"
+                class="shrink-0 px-4 py-2 rounded-lg border border-red-300 text-red-700 text-sm font-semibold min-h-[44px] disabled:opacity-60"
+              >
+                Désactiver
+              </button>
             </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" v-model="preferences.two_factor_enabled" class="sr-only peer">
-              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
-                   :style="preferences.two_factor_enabled ? { backgroundColor: '#fab511' } : {}"></div>
-            </label>
+
+            <!-- Étape d'activation : QR code puis premier code. -->
+            <div v-if="twoFactorSetup.secret" class="mt-5 pt-5 border-t border-gray-200 space-y-4">
+              <p class="text-sm text-gray-700">
+                Scannez ce QR code avec Google Authenticator, puis saisissez le code affiché.
+              </p>
+
+              <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                <div v-if="twoFactorSetup.qr_svg" v-html="twoFactorSetup.qr_svg" class="shrink-0"></div>
+
+                <div class="text-sm">
+                  <p class="text-gray-600 mb-1">Ou saisissez la clé à la main :</p>
+                  <code class="block bg-gray-100 rounded-lg px-3 py-2 font-mono break-all">{{ twoFactorSetup.secret }}</code>
+                </div>
+              </div>
+
+              <div class="flex flex-col sm:flex-row gap-3">
+                <input
+                  v-model="twoFactorSetup.code"
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="6"
+                  placeholder="000000"
+                  aria-label="Code à six chiffres"
+                  class="flex-1 px-4 py-3 text-center text-xl tracking-[0.3em] font-semibold rounded-xl border border-gray-200 focus:border-primea-blue focus:ring-2 focus:ring-primea-blue/20 outline-none"
+                />
+                <button
+                  type="button"
+                  @click="confirmTwoFactor"
+                  :disabled="twoFactorBusy"
+                  class="px-5 py-3 rounded-xl bg-primea-blue text-white font-semibold min-h-[48px] disabled:opacity-60"
+                >
+                  Confirmer
+                </button>
+              </div>
+            </div>
+
+            <!-- Codes de secours : montrés une seule fois. -->
+            <div v-if="recoveryCodes.length" class="mt-5 pt-5 border-t border-gray-200">
+              <p class="text-sm font-medium text-gray-900 mb-1">Vos codes de secours</p>
+              <p class="text-sm text-gray-600 mb-3">
+                Notez-les maintenant : ils ne seront plus affichés. Chacun ne sert qu'une fois,
+                et c'est le seul moyen d'entrer si vous perdez votre téléphone.
+              </p>
+              <div class="grid grid-cols-2 gap-2">
+                <code v-for="code in recoveryCodes" :key="code"
+                      class="bg-gray-100 rounded-lg px-3 py-2 font-mono text-sm text-center">{{ code }}</code>
+              </div>
+              <button type="button" @click="recoveryCodes = []"
+                      class="mt-3 text-sm text-primea-blue hover:underline">
+                J'ai noté ces codes
+              </button>
+            </div>
           </div>
           
           <div>
@@ -310,7 +389,6 @@ export default {
     
     const preferences = reactive({
       email_notifications: true,
-      two_factor_enabled: false,
       language: 'fr',
       timezone: 'Africa/Libreville'
     })
@@ -458,21 +536,134 @@ export default {
             new_password: '',
             new_password_confirmation: ''
           })
-          Swal.fire({ icon: 'success', title: 'Succès', text: 'Mot de passe changé avec succès (simulé)', confirmButtonColor: '#272d63' })
+          // Croire son mot de passe changé alors qu'il ne l'est pas est
+          // pire que l'échec lui-même : on continue avec l'ancien en le
+          // pensant remplacé.
+          const body = await response.json().catch(() => ({}))
+          oops(body.message || 'Le mot de passe n\'a pas été changé.')
         }
       } catch (error) {
-        console.log('API non disponible, changement simulé')
-        Object.assign(passwordForm, {
-          current_password: '',
-          new_password: '',
-          new_password_confirmation: ''
-        })
-        Swal.fire({ icon: 'success', title: 'Succès', text: 'Mot de passe changé avec succès (simulé)', confirmButtonColor: '#272d63' })
+        oops('Serveur injoignable : le mot de passe n\'a pas été changé.')
       } finally {
         changingPassword.value = false
       }
     }
     
+    // ---- Double authentification -------------------------------------
+    const twoFactor = reactive({ enabled: false, recovery_codes_left: 0 })
+    const twoFactorSetup = reactive({ secret: '', qr_svg: '', code: '' })
+    const recoveryCodes = ref([])
+    const twoFactorBusy = ref(false)
+
+    const authHeaders = () => ({
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    })
+
+    const oops = (text) => Swal.fire({ icon: 'error', title: 'Échec', text, confirmButtonColor: '#272d63' })
+
+    const loadTwoFactor = async () => {
+      try {
+        const response = await fetch('/api/v1/profile/two-factor', { headers: authHeaders() })
+        if (!response.ok) return
+        const { data } = await response.json()
+        Object.assign(twoFactor, data)
+      } catch (e) {
+        // Un état inconnu n'empêche pas d'utiliser le reste de la page.
+      }
+    }
+
+    const startTwoFactor = async () => {
+      twoFactorBusy.value = true
+      try {
+        const response = await fetch('/api/v1/profile/two-factor', { method: 'POST', headers: authHeaders() })
+        const body = await response.json()
+
+        if (!response.ok) {
+          oops(body.message || 'Impossible de générer le QR code.')
+          return
+        }
+
+        Object.assign(twoFactorSetup, { secret: body.data.secret, qr_svg: body.data.qr_svg || '', code: '' })
+      } catch (e) {
+        oops('Serveur injoignable.')
+      } finally {
+        twoFactorBusy.value = false
+      }
+    }
+
+    const confirmTwoFactor = async () => {
+      twoFactorBusy.value = true
+      try {
+        const response = await fetch('/api/v1/profile/two-factor/confirm', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ code: twoFactorSetup.code })
+        })
+        const body = await response.json()
+
+        if (!response.ok) {
+          oops(body.message || 'Code incorrect.')
+          return
+        }
+
+        recoveryCodes.value = body.data.recovery_codes
+        Object.assign(twoFactorSetup, { secret: '', qr_svg: '', code: '' })
+        await loadTwoFactor()
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Activée',
+          text: 'Un code vous sera demandé à chaque connexion.',
+          confirmButtonColor: '#272d63'
+        })
+      } catch (e) {
+        oops('Serveur injoignable.')
+      } finally {
+        twoFactorBusy.value = false
+      }
+    }
+
+    const disableTwoFactor = async () => {
+      // Le mot de passe est exigé côté serveur : sans lui, un jeton volé
+      // désarmerait la protection censée le rendre inoffensif.
+      const { value: password } = await Swal.fire({
+        title: 'Confirmez votre mot de passe',
+        input: 'password',
+        inputPlaceholder: 'Mot de passe',
+        showCancelButton: true,
+        cancelButtonText: 'Annuler',
+        confirmButtonText: 'Désactiver',
+        confirmButtonColor: '#272d63'
+      })
+
+      if (!password) return
+
+      twoFactorBusy.value = true
+      try {
+        const response = await fetch('/api/v1/profile/two-factor', {
+          method: 'DELETE',
+          headers: authHeaders(),
+          body: JSON.stringify({ password })
+        })
+        const body = await response.json()
+
+        if (!response.ok) {
+          oops(body.message || 'Désactivation refusée.')
+          return
+        }
+
+        recoveryCodes.value = []
+        await loadTwoFactor()
+        Swal.fire({ icon: 'success', title: 'Désactivée', confirmButtonColor: '#272d63' })
+      } catch (e) {
+        oops('Serveur injoignable.')
+      } finally {
+        twoFactorBusy.value = false
+      }
+    }
+
     const updatePreferences = async () => {
       updatingPreferences.value = true
       try {
@@ -486,14 +677,17 @@ export default {
           body: JSON.stringify(preferences)
         })
         
+        // ⚠️ Annoncer « succès (simulé) » sur un échec faisait croire à
+        // l'administrateur que ses réglages étaient enregistrés alors que
+        // rien ne partait. Un refus doit se voir.
         if (response.ok) {
-          Swal.fire({ icon: 'success', title: 'Succès', text: 'Préférences sauvegardées avec succès', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'success', title: 'Succès', text: 'Préférences sauvegardées', confirmButtonColor: '#272d63' })
         } else {
-          Swal.fire({ icon: 'success', title: 'Succès', text: 'Préférences sauvegardées avec succès (simulé)', confirmButtonColor: '#272d63' })
+          const body = await response.json().catch(() => ({}))
+          oops(body.message || 'Les préférences n\'ont pas pu être enregistrées.')
         }
       } catch (error) {
-        console.log('API non disponible, sauvegarde simulée')
-        Swal.fire({ icon: 'success', title: 'Succès', text: 'Préférences sauvegardées avec succès (simulé)', confirmButtonColor: '#272d63' })
+        oops('Serveur injoignable : les préférences n\'ont pas été enregistrées.')
       } finally {
         updatingPreferences.value = false
       }
@@ -602,6 +796,7 @@ export default {
     // Lifecycle
     onMounted(() => {
       loadProfile()
+      loadTwoFactor()
     })
 
     return {
@@ -615,6 +810,13 @@ export default {
       profileForm,
       passwordForm,
       preferences,
+      twoFactor,
+      twoFactorSetup,
+      twoFactorBusy,
+      recoveryCodes,
+      startTwoFactor,
+      confirmTwoFactor,
+      disableTwoFactor,
       activeSessions,
       updateProfile,
       changePassword,
