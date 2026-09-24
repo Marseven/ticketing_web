@@ -397,8 +397,11 @@ class AdminController extends Controller
             'is_admin' => 'sometimes|boolean',
             'is_organizer' => 'sometimes|boolean',
             'is_active' => 'sometimes|boolean',
+            'status' => 'sometimes|in:active,inactive,suspended',
             'avatar_url' => 'nullable|url',
             'avatar_file' => 'nullable|string',
+            // Facultatif : ne change le mot de passe que s'il est renseigné.
+            'password' => 'nullable|string|min:8|confirmed',
         ]);
 
         if ($validator->fails()) {
@@ -419,12 +422,42 @@ class AdminController extends Controller
                 $updateData['status'] = $request->boolean('is_active') ? 'active' : 'inactive';
             }
 
+            // L'écran envoie le statut en toutes lettres. Il n'était lu nulle
+            // part : changer le statut dans le formulaire ne faisait rien, et
+            // rien ne le signalait.
+            if ($request->filled('status')) {
+                $updateData['status'] = $request->input('status');
+            }
+
             $user->update($updateData);
+
+            if ($request->filled('password')) {
+                $user->forceFill(['password' => bcrypt($request->password)])->save();
+
+                // Les sessions ouvertes doivent tomber : changer le mot de
+                // passe de quelqu'un sert souvent à lui couper l'accès, et le
+                // laisser connecté viderait le geste de son sens.
+                $user->tokens()->delete();
+
+                Log::info('Mot de passe modifié par un administrateur', [
+                    'target_user_id' => $user->id,
+                    'by_admin_id' => $request->user()?->id,
+                ]);
+            }
 
             // Gestion des rôles
             if ($request->has('is_admin') || $request->has('is_organizer')) {
-                // Supprimer tous les rôles existants
-                $user->roles()->detach();
+                // ⚠️ Ne retirer QUE les rôles que ce formulaire gère. Tout
+                // détacher faisait perdre le rôle de super administrateur à
+                // quiconque était modifié ici : une simple correction de nom
+                // lui coûtait l'accès à la supervision.
+                $managed = \App\Models\Role::whereIn('slug', [
+                    \App\Models\Role::ADMIN,
+                    \App\Models\Role::ORGANIZER,
+                    \App\Models\Role::CLIENT,
+                ])->pluck('id');
+
+                $user->roles()->detach($managed);
                 
                 // Assigner les nouveaux rôles
                 if ($request->boolean('is_admin')) {
@@ -445,7 +478,9 @@ class AdminController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Utilisateur mis à jour avec succès',
+                'message' => $request->filled('password')
+                    ? 'Utilisateur mis à jour. Le nouveau mot de passe est actif et les sessions ouvertes ont été fermées.'
+                    : 'Utilisateur mis à jour avec succès',
                 'data' => ['user' => $user->fresh()->load('roles')]
             ]);
 

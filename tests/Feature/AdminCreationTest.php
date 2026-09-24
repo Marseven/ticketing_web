@@ -136,6 +136,109 @@ class AdminCreationTest extends TestCase
             ->assertStatus(422);
     }
 
+    // ---------------------------------------------------------------
+    //  Modification
+    // ---------------------------------------------------------------
+
+    private function target(): User
+    {
+        $user = User::create([
+            'name' => 'Leofa Abila', 'email' => 'leofa@primea.test',
+            'password' => bcrypt('AncienMotDePasse1!'), 'status' => 'active',
+        ]);
+        $user->user_type_id = UserType::where('name', 'admin')->value('id');
+        $user->save();
+        $user->roles()->syncWithoutDetaching([Role::where('slug', Role::ADMIN)->value('id')]);
+
+        return $user->fresh('roles');
+    }
+
+    private function update(User $user, array $payload)
+    {
+        return $this->putJson('/api/v1/admin/users/' . $user->id, array_merge([
+            'name' => $user->name,
+            'email' => $user->email,
+            'is_admin' => true,
+        ], $payload));
+    }
+
+    public function test_the_password_can_be_changed_from_the_edit_form(): void
+    {
+        $user = $this->target();
+
+        $this->update($user, [
+            'password' => 'NouveauMotDePasse1!',
+            'password_confirmation' => 'NouveauMotDePasse1!',
+        ])->assertSuccessful();
+
+        $this->assertTrue(Hash::check('NouveauMotDePasse1!', $user->fresh()->password));
+    }
+
+    public function test_leaving_the_password_empty_changes_nothing(): void
+    {
+        $user = $this->target();
+
+        $this->update($user, ['name' => 'Leofa A.'])->assertSuccessful();
+
+        $this->assertTrue(Hash::check('AncienMotDePasse1!', $user->fresh()->password));
+        $this->assertSame('Leofa A.', $user->fresh()->name);
+    }
+
+    public function test_changing_the_password_closes_open_sessions(): void
+    {
+        // Changer le mot de passe de quelqu'un sert souvent à lui couper
+        // l'accès : le laisser connecté viderait le geste de son sens.
+        $user = $this->target();
+        $user->createToken('session-ouverte');
+
+        $this->assertSame(1, $user->tokens()->count());
+
+        $this->update($user, [
+            'password' => 'NouveauMotDePasse1!',
+            'password_confirmation' => 'NouveauMotDePasse1!',
+        ])->assertSuccessful();
+
+        $this->assertSame(0, $user->fresh()->tokens()->count());
+    }
+
+    public function test_editing_does_not_strip_the_super_admin_role(): void
+    {
+        // Tout détacher faisait perdre la supervision à un super
+        // administrateur pour une simple correction de nom.
+        $super = Role::firstOrCreate(
+            ['slug' => Role::SUPER_ADMIN],
+            ['name' => 'Super Admin', 'level' => 100]
+        );
+
+        $user = $this->target();
+        $user->roles()->syncWithoutDetaching([$super->id]);
+
+        $this->update($user, ['name' => 'Leofa Abila junior'])->assertSuccessful();
+
+        $this->assertTrue($user->fresh()->isSuperAdmin());
+    }
+
+    public function test_the_status_chosen_in_the_form_is_applied(): void
+    {
+        // L'écran proposait le statut, le serveur ne le lisait pas : le
+        // changement disparaissait sans un mot.
+        $user = $this->target();
+
+        $this->update($user, ['status' => 'suspended'])->assertSuccessful();
+
+        $this->assertSame('suspended', $user->fresh()->status);
+    }
+
+    public function test_a_short_password_is_refused_on_edit(): void
+    {
+        $user = $this->target();
+
+        $this->update($user, ['password' => 'court', 'password_confirmation' => 'court'])
+            ->assertStatus(422);
+
+        $this->assertTrue(Hash::check('AncienMotDePasse1!', $user->fresh()->password));
+    }
+
     public function test_a_password_is_never_stored_in_clear(): void
     {
         Notification::fake();

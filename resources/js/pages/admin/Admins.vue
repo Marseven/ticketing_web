@@ -210,20 +210,26 @@
               <p class="text-xs text-gray-500 mt-1">Rôles disponibles : Admin, Support (Super Admin exclu)</p>
             </div>
 
-            <div v-if="!isEditMode">
+            <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                Mot de passe <span class="font-normal text-gray-500">(facultatif)</span>
+                {{ isEditMode ? 'Nouveau mot de passe' : 'Mot de passe' }}
+                <span class="font-normal text-gray-500">(facultatif)</span>
               </label>
               <input v-model="formData.password" type="password" autocomplete="new-password" minlength="8"
-                     placeholder="Laisser vide pour envoyer un lien par courriel"
+                     :placeholder="isEditMode ? 'Laisser vide pour ne pas le changer' : 'Laisser vide pour envoyer un lien par courriel'"
                      class="w-full border rounded-lg px-3 py-2" />
               <p class="text-xs text-gray-500 mt-1">
-                Huit caractères minimum. Laissé vide, la personne définit elle-même son mot de passe
-                depuis le lien qu'elle reçoit — c'est préférable, il ne transite alors par personne d'autre.
+                <template v-if="isEditMode">
+                  Huit caractères minimum. Le renseigner déconnecte la personne de ses sessions ouvertes.
+                </template>
+                <template v-else>
+                  Huit caractères minimum. Laissé vide, la personne définit elle-même son mot de passe
+                  depuis le lien qu'elle reçoit — c'est préférable, il ne transite alors par personne d'autre.
+                </template>
               </p>
             </div>
 
-            <div v-if="!isEditMode && formData.password">
+            <div v-if="formData.password">
               <label class="block text-sm font-medium text-gray-700 mb-2">Confirmer le mot de passe *</label>
               <input v-model="formData.password_confirmation" type="password" autocomplete="new-password"
                      class="w-full border rounded-lg px-3 py-2" />
@@ -241,7 +247,10 @@
 
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p class="text-sm text-blue-800">
-                <template v-if="isEditMode">Les modifications seront appliquées immédiatement.</template>
+                <template v-if="isEditMode && formData.password">
+                  Le nouveau mot de passe sera actif immédiatement, et les sessions ouvertes fermées.
+                </template>
+                <template v-else-if="isEditMode">Les modifications seront appliquées immédiatement.</template>
                 <template v-else-if="formData.password">Le compte sera utilisable immédiatement avec ce mot de passe.</template>
                 <template v-else>Un courriel sera envoyé à la personne pour qu'elle définisse son mot de passe.</template>
               </p>
@@ -490,6 +499,9 @@ export default {
         name: admin.name,
         email: admin.email,
         status: admin.status,
+        // Vides : on ne change le mot de passe que s'il est saisi.
+        password: '',
+        password_confirmation: '',
       };
       this.showFormModal = true;
     },
