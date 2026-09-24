@@ -281,6 +281,11 @@ class AdminController extends Controller
             'is_organizer' => 'boolean',
             'avatar_url' => 'nullable|url',
             'avatar_file' => 'nullable|string',
+            // Mot de passe facultatif : quand l'administrateur le définit, le
+            // compte est utilisable immédiatement. Sinon on envoie un lien de
+            // création, ce qui reste préférable — le mot de passe transite
+            // alors par la personne concernée et par personne d'autre.
+            'password' => 'nullable|string|min:8|confirmed',
         ]);
 
         if ($validator->fails()) {
@@ -294,16 +299,34 @@ class AdminController extends Controller
         try {
             DB::beginTransaction();
 
-            // Créer l'utilisateur sans mot de passe
+            $chosenPassword = $request->filled('password');
+
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
-                'password' => bcrypt(\Str::random(32)), // Mot de passe temporaire aléatoire
+                // Sans mot de passe choisi, on en pose un aléatoire que
+                // personne ne connaît : le compte n'est utilisable qu'après
+                // le lien de création envoyé par courriel.
+                'password' => bcrypt($chosenPassword ? $request->password : \Str::random(32)),
                 'is_organizer' => $request->boolean('is_organizer'),
                 'email_verified_at' => now(),
                 'avatar_url' => $request->avatar_url,
                 'avatar_file' => $request->avatar_file,
             ]);
+
+            // ⚠️ Le TYPE d'utilisateur, et pas seulement le rôle : la liste des
+            // administrateurs filtre dessus. Un compte créé sans type
+            // n'apparaissait nulle part, alors qu'il existait bel et bien.
+            $typeName = $request->boolean('is_admin')
+                ? 'admin'
+                : ($request->boolean('is_organizer') ? 'client' : 'client');
+
+            $userType = \App\Models\UserType::where('name', $typeName)->first();
+
+            if ($userType) {
+                $user->user_type_id = $userType->id;
+                $user->save();
+            }
 
             // Assigner les rôles
             if ($request->boolean('is_admin')) {
@@ -319,25 +342,35 @@ class AdminController extends Controller
                 $user->assignRole(\App\Models\Role::CLIENT);
             }
 
-            // Générer un token de réinitialisation
-            $token = \Str::random(64);
-            
-            // Enregistrer le token
-            DB::table('password_reset_tokens')->insert([
-                'email' => $user->email,
-                'token' => hash('sha256', $token),
-                'created_at' => now(),
-            ]);
+            if (! $chosenPassword) {
+                $token = \Str::random(64);
 
-            // Envoyer l'email de bienvenue avec lien de réinitialisation
-            $user->notify(new \App\Notifications\PasswordResetNotification($token, true));
+                DB::table('password_reset_tokens')->insert([
+                    'email' => $user->email,
+                    'token' => hash('sha256', $token),
+                    'created_at' => now(),
+                ]);
+
+                // Le courriel ne doit pas faire échouer la création : le
+                // compte existe, et un lien peut toujours être renvoyé.
+                try {
+                    $user->notify(new \App\Notifications\PasswordResetNotification($token, true));
+                } catch (\Throwable $e) {
+                    Log::warning('Courriel de création de mot de passe non envoyé', [
+                        'user_id' => $user->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Utilisateur créé avec succès. Un email lui a été envoyé pour définir son mot de passe.',
-                'data' => ['user' => $user->load('roles')]
+                'message' => $chosenPassword
+                    ? 'Compte créé. Le mot de passe que vous avez défini est actif immédiatement.'
+                    : 'Compte créé. Un courriel a été envoyé pour définir le mot de passe.',
+                'data' => ['user' => $user->fresh()->load('roles', 'userType')]
             ]);
 
         } catch (\Exception $e) {
@@ -2071,10 +2104,18 @@ class AdminController extends Controller
     public function admins(Request $request): JsonResponse
     {
         try {
-            // Filtrer par user_type 'admin' au lieu de role slug
+            // Un administrateur se reconnaît à son TYPE ou à son RÔLE : la
+            // création posait le rôle sans le type, et les comptes créés
+            // ainsi n'apparaissaient nulle part alors qu'ils existaient. Les
+            // deux sont donc interrogés, ce qui rattrape l'existant sans
+            // migration.
             $query = User::with(['roles', 'userType'])
-                ->whereHas('userType', function ($q) {
-                    $q->where('name', 'admin');
+                ->where(function ($q) {
+                    $q->whereHas('userType', fn ($t) => $t->where('name', 'admin'))
+                      ->orWhereHas('roles', fn ($r) => $r->whereIn('slug', [
+                          \App\Models\Role::ADMIN,
+                          \App\Models\Role::SUPER_ADMIN,
+                      ]));
                 });
 
             if ($request->filled('search')) {

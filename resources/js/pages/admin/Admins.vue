@@ -210,6 +210,25 @@
               <p class="text-xs text-gray-500 mt-1">Rôles disponibles : Admin, Support (Super Admin exclu)</p>
             </div>
 
+            <div v-if="!isEditMode">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Mot de passe <span class="font-normal text-gray-500">(facultatif)</span>
+              </label>
+              <input v-model="formData.password" type="password" autocomplete="new-password" minlength="8"
+                     placeholder="Laisser vide pour envoyer un lien par courriel"
+                     class="w-full border rounded-lg px-3 py-2" />
+              <p class="text-xs text-gray-500 mt-1">
+                Huit caractères minimum. Laissé vide, la personne définit elle-même son mot de passe
+                depuis le lien qu'elle reçoit — c'est préférable, il ne transite alors par personne d'autre.
+              </p>
+            </div>
+
+            <div v-if="!isEditMode && formData.password">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Confirmer le mot de passe *</label>
+              <input v-model="formData.password_confirmation" type="password" autocomplete="new-password"
+                     class="w-full border rounded-lg px-3 py-2" />
+            </div>
+
             <div v-if="isEditMode">
               <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
               <select v-model="formData.status"
@@ -222,7 +241,9 @@
 
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p class="text-sm text-blue-800">
-                {{ isEditMode ? 'Les modifications seront appliquées immédiatement.' : 'Un email sera envoyé à l\'utilisateur pour définir son mot de passe.' }}
+                <template v-if="isEditMode">Les modifications seront appliquées immédiatement.</template>
+                <template v-else-if="formData.password">Le compte sera utilisable immédiatement avec ce mot de passe.</template>
+                <template v-else>Un courriel sera envoyé à la personne pour qu'elle définisse son mot de passe.</template>
               </p>
             </div>
           </div>
@@ -346,6 +367,9 @@ export default {
         email: '',
         role_id: '',
         status: 'active',
+        // Facultatif : vide, la personne reçoit un lien pour le définir.
+        password: '',
+        password_confirmation: '',
       },
       pagination: {
         current_page: 1,
@@ -453,6 +477,8 @@ export default {
         email: '',
         role_id: '',
         status: 'active',
+        password: '',
+        password_confirmation: '',
       };
       this.showFormModal = true;
     },
@@ -477,6 +503,13 @@ export default {
       this.submitting = true;
       try {
         const data = { ...this.formData, is_admin: true };
+
+        // Un mot de passe vide n'a pas à être envoyé : c'est le signal que la
+        // personne le définira elle-même depuis le lien reçu.
+        if (!data.password) {
+          delete data.password;
+          delete data.password_confirmation;
+        }
 
         // Pour la création, s'assurer que role_id est présent
         if (!this.isEditMode && !data.role_id) {
