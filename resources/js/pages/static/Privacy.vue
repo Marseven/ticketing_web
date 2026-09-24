@@ -257,6 +257,15 @@
             consentement préalable. <strong>Nous n'utilisons pas de cookies publicitaires ni de
             traceurs à des fins de marketing.</strong>
           </p>
+          <p>
+            Nous mesurons la fréquentation du site avec notre propre outil, sans faire appel à
+            un service tiers. Cette mesure <strong>ne dépose aucun cookie</strong> et
+            <strong>ne conserve aucune adresse IP</strong>. Une empreinte technique, calculée à
+            partir de votre connexion et renouvelée chaque jour, sert uniquement à ne pas
+            compter plusieurs fois la même visite dans la journée ; elle ne permet pas de vous
+            identifier ni de vous suivre d'un jour à l'autre. Nous mesurons des visites, pas des
+            personnes.
+          </p>
         </section>
 
         <!-- Section 11 -->

@@ -7,6 +7,13 @@ return [
     | Mesure d'audience
     |--------------------------------------------------------------------------
     |
+    | ⚠️ La plateforme mesure DÉJÀ sa fréquentation elle-même, sans cookie et
+    | sans service extérieur : voir la page Supervision de l'administration.
+    | Ce réglage ne concerne qu'un service TIERS, en complément. Il reste sur
+    | « none » par défaut, d'autant que les bloqueurs de publicité coupent les
+    | domaines d'analytics connus — un outil tiers sous-compte donc une part
+    | notable des visiteurs, là où la mesure maison passe par notre domaine.
+    |
     | Fournisseur de statistiques de fréquentation. Quatre valeurs possibles :
     |
     |   none      aucune mesure (valeur par défaut)
