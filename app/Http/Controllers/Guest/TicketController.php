@@ -95,17 +95,17 @@ class TicketController extends Controller
             'used_at' => $ticket->used_at?->toISOString(),
             'qr_code_content' => $qrCodeContent,
             'event' => [
-                'title' => $ticket->event->title,
-                'slug' => $ticket->event->slug,
-                'venue_name' => $ticket->event->venue_name,
-                'date' => $ticket->event->schedules->first()?->starts_at,
+                'title' => $ticket->event?->title,
+                'slug' => $ticket->event?->slug,
+                'venue_name' => $ticket->event?->venue_name,
+                'date' => $ticket->event?->schedules->first()?->starts_at,
             ],
             'ticket_type' => [
-                'name' => $ticket->ticketType->name,
-                'description' => $ticket->ticketType->description,
+                'name' => $ticket->ticketType?->name,
+                'description' => $ticket->ticketType?->description,
             ],
             'order' => [
-                'reference' => $ticket->order->reference,
+                'reference' => $ticket->order?->reference,
             ],
         ];
 
@@ -195,10 +195,10 @@ class TicketController extends Controller
                 'status' => $ticket->status,
                 'issued_at' => $ticket->issued_at?->toISOString(),
                 'used_at' => $ticket->used_at?->toISOString(),
-                'event_title' => $ticket->event->title,
-                'event_slug' => $ticket->event->slug,
-                'event_date' => $ticket->event->schedules->first()?->starts_at,
-                'order_reference' => $ticket->order->reference,
+                'event_title' => $ticket->event?->title,
+                'event_slug' => $ticket->event?->slug,
+                'event_date' => $ticket->event?->schedules->first()?->starts_at,
+                'order_reference' => $ticket->order?->reference,
                 'ticket_url' => "/api/guest/tickets/{$ticket->code}",
             ];
         });
@@ -224,7 +224,36 @@ class TicketController extends Controller
         return app(\App\Services\TicketQrCode::class)->dataUri($ticket->code);
     }
 
+    /**
+     * Recherche publique d'un billet.
+     *
+     * ⚠️ Rien de technique ne doit ressortir ici : la page est publique, et un
+     * message d'erreur brut est arrivé jusqu'à un acheteur (« Attempt to read
+     * property "name" on null »). Le détail part au journal, l'écran reçoit
+     * une phrase compréhensible.
+     */
     public function search(Request $request)
+    {
+        try {
+            return $this->runSearch($request);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e; // les messages de validation sont écrits pour être lus
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Recherche de billet en échec', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile() . ':' . $e->getLine(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error_code' => 'SEARCH_FAILED',
+                'message' => 'La recherche est momentanément indisponible. '
+                    . 'Réessayez dans quelques instants, ou contactez-nous avec votre référence de commande.',
+            ], 500);
+        }
+    }
+
+    private function runSearch(Request $request)
     {
         $request->validate([
             'name' => 'nullable|string|max:255',
@@ -345,30 +374,30 @@ class TicketController extends Controller
                 // n'a plus besoin d'un service tiers pour afficher le billet.
                 'qr_code' => $this->qrDataUri($ticket),
                 'event' => [
-                    'id' => $ticket->event->id,
-                    'title' => $ticket->event->title,
-                    'slug' => $ticket->event->slug,
+                    'id' => $ticket->event?->id,
+                    'title' => $ticket->event?->title,
+                    'slug' => $ticket->event?->slug,
                     'venue_name' => $ticket->event->venue?->name,
-                    'image_url' => $ticket->event->image,
+                    'image_url' => $ticket->event?->image,
                 ],
                 'schedule' => [
                     // La date du billet, pas la première de l'événement : un
                     // événement multi-dates en a plusieurs.
-                    'starts_at' => $ticket->schedule?->starts_at ?? $ticket->event->schedules->first()?->starts_at,
+                    'starts_at' => $ticket->schedule?->starts_at ?? $ticket->event?->schedules->first()?->starts_at,
                 ],
                 'ticket_type' => [
-                    'name' => $ticket->ticketType->name,
-                    'price' => $ticket->ticketType->price,
+                    'name' => $ticket->ticketType?->name,
+                    'price' => $ticket->ticketType?->price,
                 ],
                 'buyer' => [
-                    'name' => $ticket->buyer?->name ?? $ticket->order->guest_name,
-                    'email' => $ticket->buyer?->email ?? $ticket->order->guest_email,
-                    'phone' => $ticket->buyer?->phone ?? $ticket->order->guest_phone,
+                    'name' => $ticket->buyer?->name ?? $ticket->order?->guest_name,
+                    'email' => $ticket->buyer?->email ?? $ticket->order?->guest_email,
+                    'phone' => $ticket->buyer?->phone ?? $ticket->order?->guest_phone,
                 ],
                 'order' => [
-                    'reference' => $ticket->order->reference,
-                    'total_amount' => $ticket->order->total_amount,
-                    'status' => $ticket->order->status,
+                    'reference' => $ticket->order?->reference,
+                    'total_amount' => $ticket->order?->total_amount,
+                    'status' => $ticket->order?->status,
                 ],
             ];
         });

@@ -806,6 +806,7 @@ class AdminController extends Controller
             'schedules.*.starts_at' => 'required|date',
             'schedules.*.ends_at' => 'required|date|after:schedules.*.starts_at',
             'ticket_types' => 'nullable|array',
+            'ticket_types.*.id' => 'nullable|integer',
             'ticket_types.*.name' => 'required|string|max:255',
             'ticket_types.*.price' => 'required|numeric|min:0',
             'ticket_types.*.capacity' => 'required|integer|min:1',
@@ -978,6 +979,7 @@ class AdminController extends Controller
             'schedules.*.starts_at' => 'required|date',
             'schedules.*.ends_at' => 'required|date|after:schedules.*.starts_at',
             'ticket_types' => 'nullable|array',
+            'ticket_types.*.id' => 'nullable|integer',
             'ticket_types.*.name' => 'required|string|max:255',
             'ticket_types.*.price' => 'required|numeric|min:0',
             'ticket_types.*.capacity' => 'required|integer|min:1',
@@ -1087,21 +1089,14 @@ class AdminController extends Controller
                     ->sync($event, $request->input('schedules', []));
             }
 
-            // Mettre à jour les types de billets
+            // Mettre à jour les types de billets.
+            //
+            // ⚠️ Ne PAS supprimer puis recréer : `tickets.ticket_type_id`
+            // pointe dessus. Les billets déjà vendus perdaient leur catégorie
+            // et leur tarif, et la page de récupération tombait en erreur.
             if ($request->has('ticket_types')) {
-                $event->ticketTypes()->delete();
-                if (!empty($request->ticket_types)) {
-                    foreach ($request->ticket_types as $ticketType) {
-                        $event->ticketTypes()->create([
-                            'name' => $ticketType['name'],
-                            'price' => $ticketType['price'],
-                            'available_quantity' => $ticketType['capacity'],
-                            'max_quantity' => $ticketType['capacity'],
-                            'description' => $ticketType['description'] ?? null,
-                            'status' => 'active',
-                        ]);
-                    }
-                }
+                app(\App\Services\TicketTypeSync::class)
+                    ->sync($event, $request->input('ticket_types', []));
             }
 
             DB::commit();

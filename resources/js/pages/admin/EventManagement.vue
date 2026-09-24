@@ -845,6 +845,10 @@ export default {
               ends_at: toDateTimeLocal(s.ends_at)
             })) || [{ starts_at: '', ends_at: '' }],
             ticket_types: (data.data.event.ticket_types || data.data.event.ticketTypes || []).map(t => ({
+              // L'identifiant voyage avec la catégorie : sans lui, le serveur
+              // ne peut l'associer que par nom, et un renommage romprait le
+              // lien avec les billets déjà vendus.
+              id: t.id,
               name: t.name,
               price: t.price,
               capacity: t.capacity || t.available_quantity || t.max_quantity || t.quantity || 0,

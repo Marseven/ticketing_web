@@ -1522,13 +1522,28 @@ class OrganizerController extends Controller
 
                 $submittedIds = collect($request->ticket_types)->pluck('id')->filter()->toArray();
 
-                // Supprimer les types de billets qui ne sont plus dans la liste
-                $deletedCount = $event->ticketTypes()->whereNotIn('id', $submittedIds)->count();
-                if ($deletedCount > 0) {
-                    $event->ticketTypes()->whereNotIn('id', $submittedIds)->delete();
-                    \Illuminate\Support\Facades\Log::info('Deleted ticket types', [
+                // Retirer les types de billets qui ne sont plus dans la liste.
+                //
+                // ⚠️ Une catégorie qui a DÉJÀ VENDU n'est pas supprimée mais
+                // désactivée : `tickets.ticket_type_id` pointe dessus, et un
+                // billet payé doit garder sa catégorie et son tarif. L'effacer
+                // n'est pas une mise à jour, c'est une perte de données.
+                $removed = $event->ticketTypes()->whereNotIn('id', $submittedIds)->get();
+
+                foreach ($removed as $type) {
+                    if ($type->tickets()->exists() || $type->orderItems()->exists()) {
+                        $type->update(['status' => 'inactive']);
+
+                        continue;
+                    }
+
+                    $type->delete();
+                }
+
+                if ($removed->isNotEmpty()) {
+                    \Illuminate\Support\Facades\Log::info('Types de billets retirés de la grille', [
                         'event_id' => $event->id,
-                        'deleted_count' => $deletedCount
+                        'count' => $removed->count(),
                     ]);
                 }
 

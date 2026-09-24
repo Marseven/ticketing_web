@@ -67,6 +67,15 @@ class TicketType extends Model
     /**
      * Get the tickets for this ticket type.
      */
+    /**
+     * Lignes de commande portant cette catégorie. Une commande en attente en
+     * retient des places, et une catégorie qui en a ne doit pas disparaître.
+     */
+    public function orderItems(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
     public function tickets(): HasMany
     {
         return $this->hasMany(Ticket::class, 'ticket_type_id');
