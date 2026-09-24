@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use App\Rules\PublicHttpUrl;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
@@ -130,7 +131,12 @@ class ImageController extends Controller
     public function validateUrl(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'url' => 'required|url',
+            // `url` dit seulement que l'adresse est bien formée : elle accepte
+            // « http://127.0.0.1:3306 » ou l'adresse de métadonnées d'un
+            // hébergeur. Comme on va CHERCHER cette adresse juste en dessous,
+            // l'appelant se servirait du serveur comme d'un relais vers ce
+            // qu'il ne peut pas joindre lui-même.
+            'url' => ['required', 'url', 'max:2048', new PublicHttpUrl()],
             'type' => 'required|string|in:' . implode(',', self::SUPPORTED_TYPES),
         ]);
 
@@ -144,11 +150,21 @@ class ImageController extends Controller
 
         try {
             $url = $request->url;
-            
-            // Vérifier si l'URL est accessible et contient une image
-            $headers = @get_headers($url, 1);
-            
-            if (!$headers || strpos($headers[0], '200') === false) {
+
+            // Sans suivre les redirections : une adresse publique qui renvoie
+            // vers « http://169.254.169.254/ » ferait retomber dans le cas que
+            // la règle vient d'écarter. Et avec un délai court, pour ne pas
+            // transformer l'attente en sonde de ports.
+            $response = \Illuminate\Support\Facades\Http::withoutRedirecting()
+                ->timeout(5)
+                ->connectTimeout(3)
+                ->head($url);
+
+            $headers = $response->successful()
+                ? ['Content-Type' => $response->header('Content-Type')]
+                : null;
+
+            if (!$headers) {
                 return response()->json([
                     'success' => false,
                     'message' => 'L\'URL n\'est pas accessible'

@@ -252,6 +252,20 @@ class PaymentController extends Controller
     public function processPayment(PaymentRequest $request, $orderId): JsonResponse
     {
 
+        // Ce point d'entrée n'avait aucune validation : l'opérateur et le
+        // numéro partaient tels quels vers la passerelle. Les mêmes règles que
+        // les autres chemins de paiement, pour que la caisse ne dépende pas de
+        // celui par lequel on y arrive.
+        $request->validate([
+            'gateway' => 'required|string|in:airtelmoney,moovmoney,ORABANK_NG',
+            'phone' => 'required|string|max:32',
+            'operator' => 'nullable|string|max:32',
+        ], [
+            'gateway.required' => 'Choisissez un moyen de paiement.',
+            'gateway.in' => 'Moyen de paiement inconnu.',
+            'phone.required' => 'Le numéro de téléphone est obligatoire.',
+        ]);
+
         $order = Order::findOrFail($orderId);
         
         // Vérifier que l'utilisateur a accès à cette commande
