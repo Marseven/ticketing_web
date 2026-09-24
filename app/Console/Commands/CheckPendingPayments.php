@@ -47,6 +47,7 @@ class CheckPendingPayments extends Command
         $dead = 0;
         $stillWaiting = 0;
         $orphans = 0;
+        $watched = 0;
 
         foreach ($payments as $payment) {
             // En direct : on veut l'état courant de la facture, pas celui qui
@@ -139,6 +140,26 @@ class CheckPendingPayments extends Command
                 continue;
             }
 
+            // Passé le délai de rétention, une facture dont la passerelle dit
+            // qu'elle n'est pas réglée n'aboutira plus : la commande est
+            // annulée et la place relâchée. La laisser « en attente » donnait
+            // une liste qui ne se vidait jamais.
+            //
+            // ⚠️ Uniquement si la passerelle a RÉPONDU. Un silence ne vaut pas
+            // un refus : c'est en prenant l'un pour l'autre qu'on a cru, ce
+            // soir même, que 16 factures n'étaient pas réglées alors que
+            // personne ne les avait jamais lues.
+            if ($expired && $state !== null) {
+                $wasOpen = $payment->status === 'initiated';
+
+                if (! $dryRun && $wasOpen) {
+                    $payment->update(['status' => 'failed', 'ebilling_state' => $state]);
+                }
+
+                $wasOpen ? $dead++ : $watched++;
+                continue;
+            }
+
             // Garder l'état observé : sans lui, la supervision ne peut pas
             // distinguer « facture abandonnée, sans conséquence » de « jamais
             // interrogée », et signalerait éternellement les deux.
@@ -151,7 +172,8 @@ class CheckPendingPayments extends Command
 
         $this->newLine();
         $this->info(($dryRun ? '[simulation] ' : '') . "Encaissés : {$settled} · Abandonnés : {$dead}"
-            . " · Toujours en attente : {$stillWaiting} · À traiter à la main : {$orphans}");
+            . " · Toujours en attente : {$stillWaiting} · Sous surveillance : {$watched}"
+            . " · À traiter à la main : {$orphans}");
 
         if ($orphans > 0) {
             $this->newLine();
@@ -169,7 +191,16 @@ class CheckPendingPayments extends Command
     {
         return Payment::query()
             ->with('order')
-            ->where('status', 'initiated')
+            // Un paiement clos chez nous reste surveillé tant que SA FACTURE
+            // peut encore être réglée : e-billing n'offre aucun moyen de la
+            // fermer, donc un règlement tardif resterait sinon invisible —
+            // l'angle mort qu'on vient justement de combler.
+            ->where(function ($q) {
+                $q->where('status', 'initiated')
+                    ->orWhere(fn ($f) => $f->where('status', 'failed')
+                        ->whereNotNull('ebilling_state')
+                        ->whereNotIn('ebilling_state', EbillingBillState::DEAD));
+            })
             ->where('created_at', '<=', now()->subMinutes((int) $this->option('minutes')))
             ->where('created_at', '>=', now()->subHours((int) $this->option('hours')))
             ->when(

@@ -290,4 +290,74 @@ class CheckPendingPaymentsTest extends TestCase
 
         $this->assertSame('initiated', $payment->fresh()->status);
     }
+
+    public function test_an_unpaid_bill_fails_once_the_hold_has_passed(): void
+    {
+        // Le client n'a pas payé et sa commande est annulée : laisser le
+        // paiement « en attente » donnait une liste qui ne se vidait jamais —
+        // 16 lignes bloquées dans le tableau de bord de production.
+        Notification::fake();
+        $payment = $this->makePendingPayment(ageMinutes: \App\Models\Order::HOLD_MINUTES + 5);
+        $this->gatewayReturns('unpaid');
+
+        $this->artisan('payments:check-pending')->assertSuccessful();
+
+        $this->assertSame('failed', $payment->fresh()->status);
+        $this->assertSame('unpaid', $payment->fresh()->ebilling_state);
+    }
+
+    public function test_an_unpaid_bill_keeps_waiting_within_the_hold(): void
+    {
+        Notification::fake();
+        $payment = $this->makePendingPayment(ageMinutes: 10);
+        $this->gatewayReturns('unpaid');
+
+        $this->artisan('payments:check-pending')->assertSuccessful();
+
+        $this->assertSame('initiated', $payment->fresh()->status, 'le client peut encore payer');
+    }
+
+    public function test_a_silent_gateway_never_concludes_a_failure(): void
+    {
+        // Le piège du 24/09/2026 : la passerelle répondait sans qu'on sache la
+        // lire, et 16 factures ont paru non réglées alors qu'aucune n'avait été
+        // lue. Un silence ne vaut pas un refus, même passé le délai.
+        Notification::fake();
+        $payment = $this->makePendingPayment(ageMinutes: \App\Models\Order::HOLD_MINUTES + 5);
+        $this->gatewayReturns(null);
+
+        $this->artisan('payments:check-pending')->assertSuccessful();
+
+        $this->assertSame('initiated', $payment->fresh()->status);
+    }
+
+    public function test_a_closed_payment_is_still_watched_while_its_bill_can_be_paid(): void
+    {
+        // e-billing n'offre aucun moyen de fermer une facture : celle d'une
+        // commande annulée reste payable. On continue donc de l'interroger,
+        // sans quoi un règlement tardif serait invisible.
+        Notification::fake();
+        $payment = $this->makePendingPayment(ageMinutes: \App\Models\Order::HOLD_MINUTES + 5);
+        $payment->forceFill(['status' => 'failed', 'ebilling_state' => 'unpaid'])->save();
+        $payment->order->update(['status' => 'cancelled']);
+        $this->gatewayReturns('processed');
+
+        $this->artisan('payments:check-pending --include-closed')
+            ->expectsOutputToContain('à traiter à la main')
+            ->assertSuccessful();
+
+        $this->assertSame(0, $payment->order->tickets()->count(), 'toujours pas d\'émission automatique');
+    }
+
+    public function test_a_definitively_dead_bill_is_no_longer_watched(): void
+    {
+        Notification::fake();
+        $payment = $this->makePendingPayment(ageMinutes: \App\Models\Order::HOLD_MINUTES + 5);
+        $payment->forceFill(['status' => 'failed', 'ebilling_state' => 'expired'])->save();
+        $this->gatewayReturns('processed');
+
+        $this->artisan('payments:check-pending --include-closed')->assertSuccessful();
+
+        $this->assertSame('expired', $payment->fresh()->ebilling_state, 'plus rien à demander sur cette facture');
+    }
 }
