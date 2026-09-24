@@ -564,80 +564,53 @@ class WebhookController extends Controller
     /**
      * Le rappel d'encaissement vient-il bien d'e-billing ?
      *
-     * Deux réglages, dans config/services.php :
-     *   - services.ebilling.webhook_secret      : secret partagé, attendu en
-     *     en-tête « X-Webhook-Secret » ou en paramètre « ?token= »
-     *   - services.ebilling.webhook_allowed_ips : liste blanche d'adresses
+     * **L'adresse est le seul contrôle possible.** E-billing n'accepte aucun
+     * paramètre dans l'URL de notification : le jeton qu'on y plaçait ne
+     * revenait jamais sur le rappel automatique qui suit la confirmation de
+     * l'opérateur. L'exiger aurait bloqué toutes les confirmations de paiement
+     * — clients débités, billets non émis. Le contrôle repose donc entièrement
+     * sur `services.ebilling.webhook_allowed_ips`.
      *
-     * Deux corrections par rapport à la version précédente.
+     * Deux défauts corrigés au passage.
      *
      * 1. ⚠️ Il s'OUVRAIT quand rien n'était configuré : l'absence de réglage
      *    valait autorisation. Sur une installation où la variable manque — un
      *    nouveau serveur, un `.env` recopié à la hâte — n'importe qui pouvait
-     *    déclarer un paiement réglé et se faire émettre des billets. Il refuse
-     *    désormais. Le coût est nul : `payments:check-pending` interroge la
-     *    passerelle toutes les cinq minutes et rattrape ce que le rappel
-     *    n'aurait pas confirmé.
+     *    déclarer un paiement réglé et se faire émettre des billets.
      *
-     * 2. Il fabriquait ses adresses candidates à partir de l'en-tête BRUT
-     *    « X-Forwarded-For », écrit par l'appelant : il suffisait d'y placer
-     *    une adresse autorisée. On s'en remet désormais à `$request->ips()`.
-     *
-     * Le jeton et l'adresse restent deux voies ALTERNATIVES, volontairement :
-     * une notification de paiement ne doit jamais être bloquée parce qu'une
-     * facture avait été créée avant que le jeton n'existe, ou parce qu'un
-     * intermédiaire a raboté l'URL. C'est le jeton qui protège réellement ;
-     * l'adresse est là pour ne rien perdre.
+     * 2. ⚠️ Il lisait l'en-tête « X-Forwarded-For » BRUT pour fabriquer ses
+     *    adresses candidates. Cet en-tête est écrit par l'appelant : il
+     *    suffisait d'y placer une adresse autorisée. Voir
+     *    `ebillingIpCandidates()`, qui ne retient plus que des valeurs
+     *    qu'un appelant ne peut pas choisir.
      */
     private function isAuthorizedEBillingRequest(Request $request): bool
     {
-        $secret = (string) config('services.ebilling.webhook_secret', '');
         $allowedIps = array_filter(array_map(
             'trim',
             explode(',', (string) config('services.ebilling.webhook_allowed_ips', ''))
         ));
 
-        // Rien de configuré → refus. L'absence de réglage n'est pas une
-        // autorisation.
-        if ($secret === '' && empty($allowedIps)) {
-            Log::error('⛔ Webhook E-Billing refusé : aucun contrôle d\'accès configuré', [
-                'ip' => $request->ip(),
-                'hint' => 'Définir EBILLING_WEBHOOK_SECRET dans .env et le transmettre via notification_url.',
+        // Aucune adresse déclarée → refus. Rien ne permettrait alors d'attester
+        // l'origine, et accepter reviendrait à distribuer des billets à qui
+        // connaît l'URL. Le coût d'un refus est borné :
+        // `payments:check-pending` interroge la passerelle toutes les cinq
+        // minutes et rattrape la confirmation.
+        if (empty($allowedIps)) {
+            Log::error('⛔ Webhook E-Billing refusé : aucune adresse autorisée configurée', [
+                'adresses_constatees' => $this->ebillingIpCandidates($request),
+                'hint' => 'Renseigner EBILLING_WEBHOOK_ALLOWED_IPS avec les adresses ci-dessus.',
             ]);
 
             return false;
         }
 
-        // Le jeton, que nous plaçons nous-mêmes dans l'URL de notification
-        // (cf. PaymentController) : e-billing n'a rien à configurer, il rappelle
-        // l'adresse qu'on lui a donnée.
-        if ($secret !== '') {
-            $provided = $request->header('X-Webhook-Secret') ?: $request->query('token');
-
-            if (is_string($provided) && hash_equals($secret, $provided)) {
-                return true;
-            }
-        }
-
-        // À défaut, l'adresse. C'est une voie ALTERNATIVE et non un second
-        // verrou : une notification de paiement ne doit jamais être bloquée
-        // parce qu'une facture avait été créée avant que le jeton n'existe, ou
-        // parce qu'un intermédiaire a raboté l'URL.
-        //
-        // ⚠️ Elle ne vaut que ce que vaut l'adresse constatée. L'application
-        // fait confiance à tous les proxies, donc un en-tête « X-Forwarded-For »
-        // fourni par l'appelant peut devenir son adresse : cette voie se
-        // falsifie. C'est le jeton qui protège réellement — la liste d'adresses
-        // est là pour ne rien perdre, pas pour arrêter un attaquant.
-        if (! empty($allowedIps)
-            && array_intersect($this->ebillingIpCandidates($request), $allowedIps)) {
+        if (array_intersect($this->ebillingIpCandidates($request), $allowedIps)) {
             return true;
         }
 
-        Log::error('⛔ Webhook E-Billing refusé : ni jeton valide ni adresse connue', [
-            'ip' => $request->ip(),
-            'token_fourni' => $request->headers->has('X-Webhook-Secret') || $request->query->has('token'),
-            'hint' => 'Un secret partagé est préférable : une liste d\'adresses seule reste fragile.',
+        Log::error('⛔ Webhook E-Billing refusé : adresse hors liste', [
+            'adresses_constatees' => $this->ebillingIpCandidates($request),
         ]);
 
         return false;
@@ -656,9 +629,55 @@ class WebhookController extends Controller
      */
     private function ebillingIpCandidates(Request $request): array
     {
-        return array_values(array_unique(array_filter(
-            array_merge($request->ips(), [$request->ip()])
-        )));
+        // `REMOTE_ADDR` est le pair TCP : infalsifiable. La DERNIÈRE entrée de
+        // « X-Forwarded-For » est celle qu'ajoute le proxy le plus proche, en
+        // notant de qui il a reçu la requête.
+        //
+        // Un appelant peut insérer des entrées dans cet en-tête, mais elles se
+        // placent AVANT celle du proxy : forger « X-Forwarded-For: 41.158.0.1 »
+        // produit « 41.158.0.1, <son adresse réelle> », et c'est la seconde
+        // qu'on lit. Les valeurs du milieu, entièrement sous son contrôle, sont
+        // ignorées.
+        //
+        // ⚠️ Ne jamais réintroduire ici `$request->ips()` ni `$request->ip()` :
+        // avec `trustProxies(at: '*')`, ils rendent l'en-tête tel que
+        // l'appelant l'a écrit.
+        $remote = (string) $request->server('REMOTE_ADDR', '');
+        $candidates = [$remote];
+
+        // Et l'en-tête n'est consulté QUE si la requête nous arrive d'un proxy
+        // local — boucle ou réseau privé. Une requête venue d'Internet a un
+        // `REMOTE_ADDR` public : si celui-ci n'est pas dans la liste, aucun
+        // en-tête ne doit pouvoir la rattraper. Sans cette condition, il
+        // suffisait d'écrire soi-même une adresse autorisée pour entrer.
+        if ($remote !== '' && $this->isLocalProxy($remote)) {
+            $forwarded = array_values(array_filter(array_map(
+                'trim',
+                explode(',', (string) $request->header('X-Forwarded-For', ''))
+            )));
+
+            if ($forwarded !== []) {
+                $candidates[] = end($forwarded);
+            }
+        }
+
+        return array_values(array_unique(array_filter($candidates)));
+    }
+
+    /**
+     * La requête nous arrive-t-elle d'un intermédiaire de l'hébergeur ?
+     *
+     * Seule une adresse de boucle ou de réseau privé peut l'être : un appelant
+     * depuis Internet ne peut pas se présenter avec une telle adresse au
+     * niveau TCP.
+     */
+    private function isLocalProxy(string $ip): bool
+    {
+        return filter_var(
+            $ip,
+            FILTER_VALIDATE_IP,
+            FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+        ) === false;
     }
 
     /**

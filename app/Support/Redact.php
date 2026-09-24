@@ -19,26 +19,39 @@ namespace App\Support;
  */
 class Redact
 {
+    /**
+     * ⚠️ La comparaison porte sur le nom EXACT de la clé. E-billing envoie ses
+     * champs SANS tiret bas — `payername`, `payeremail` — là où son API de
+     * création les nomme `payer_name`, `payer_email`. Les deux graphies doivent
+     * donc figurer, sans quoi la notification de paiement continuait d'écrire
+     * le nom et l'adresse de l'acheteur en clair dans le journal.
+     */
+
     /** Effacés entièrement : leur seule présence est déjà une fuite. */
     private const SECRETS = [
         'password', 'secret', 'token', 'authorization', 'api_key', 'apikey',
         'shared_key', 'client_secret', 'two_factor_secret', 'recovery_code',
+        'paymentsystemtoken', 'payment_system_token',
     ];
 
     /** Numéros : on garde les deux derniers chiffres. */
     private const PHONES = [
         'msisdn', 'phone', 'telephone', 'tel', 'payer_msisdn', 'payee_msisdn',
         'guest_phone', 'phone_number', 'payer_phone', 'instant_payout_phone',
-        'payout_phone_number',
+        'payout_phone_number', 'payermsisdn',
     ];
 
     /** Adresses électroniques : on garde le domaine. */
-    private const EMAILS = ['email', 'mail', 'payer_email', 'guest_email', 'contact_email'];
+    private const EMAILS = [
+        'email', 'mail', 'payer_email', 'guest_email', 'contact_email',
+        'payeremail',
+    ];
 
     /** Noms et adresses postales : on garde l'initiale. */
     private const NAMES = [
         'payer_name', 'payee_name', 'guest_name', 'customer_name', 'first_name',
         'last_name', 'payer_address', 'payer_city', 'address',
+        'payername', 'payeraddress', 'payercity',
     ];
 
     /**

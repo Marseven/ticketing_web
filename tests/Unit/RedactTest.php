@@ -108,4 +108,35 @@ class RedactTest extends TestCase
     {
         $this->assertSame('[masqué]', Redact::payload(['phone' => '7'])['phone']);
     }
+
+    public function test_the_fields_ebilling_actually_sends_are_masked(): void
+    {
+        // La console e-billing nomme ses champs SANS tiret bas — payername,
+        // payeremail — là où son API de création écrit payer_name, payer_email.
+        // Ne couvrir que la seconde graphie laissait le nom et l'adresse de
+        // l'acheteur en clair dans le journal, à chaque notification de
+        // paiement.
+        $notification = [
+            'billingid' => '5576436358',
+            'reference' => 'ORD-ABC123',
+            'amount' => 1026,
+            'state' => 'processed',
+            'payername' => 'Richard Mebodo',
+            'payeremail' => 'client@example.ga',
+            'paymentsystemtoken' => 'jeton-opérateur',
+            'paymentsystem' => 'airtelmoney',
+        ];
+
+        $out = Redact::payload($notification);
+
+        $this->assertSame('R•••', $out['payername']);
+        $this->assertSame('c•••@example.ga', $out['payeremail']);
+        $this->assertSame('[masqué]', $out['paymentsystemtoken']);
+
+        // Et ce qui sert au diagnostic reste lisible.
+        $this->assertSame('5576436358', $out['billingid']);
+        $this->assertSame('ORD-ABC123', $out['reference']);
+        $this->assertSame('processed', $out['state']);
+        $this->assertSame('airtelmoney', $out['paymentsystem']);
+    }
 }

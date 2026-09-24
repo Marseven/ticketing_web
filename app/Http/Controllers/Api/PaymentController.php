@@ -369,15 +369,17 @@ class PaymentController extends Controller
     {
         $eBillingService = new EBillingService();
         
-        // URL de notification (webhook). Si un secret est configuré, on le
-        // transmet en query "token" : e-billing rappelle cette URL telle quelle,
-        // ce qui permet au webhook de valider le secret (impossible via en-tête
-        // custom côté e-billing). Sans secret, l'URL reste inchangée.
+        // URL de notification (webhook).
+        //
+        // On y ajoutait un jeton en paramètre, pour que le webhook puisse
+        // vérifier l'origine du rappel. E-billing ne s'en sert pas : il rappelle
+        // l'URL déclarée dans le compte marchand, sans paramètre — vérifié dans
+        // sa console. Le jeton ne revenait donc jamais, et l'exiger aurait
+        // bloqué toutes les confirmations de paiement.
+        //
+        // L'origine se contrôle par l'adresse (EBILLING_WEBHOOK_ALLOWED_IPS),
+        // cf. WebhookController::isAuthorizedEBillingRequest.
         $notificationUrl = route('webhook.ebilling');
-        $webhookSecret = config('services.ebilling.webhook_secret');
-        if (!empty($webhookSecret)) {
-            $notificationUrl .= (str_contains($notificationUrl, '?') ? '&' : '?') . 'token=' . urlencode($webhookSecret);
-        }
 
         // Préparer les données pour E-Billing
         $eBillingData = [
