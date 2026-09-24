@@ -641,12 +641,7 @@ class OrderController extends Controller
                     'starts_at' => $schedule->starts_at->format('d/m/Y H:i:s')
                 ] : null,
                 'tickets' => $order->tickets->map(function($ticket) {
-                    // Générer le QR code en base64
-                    $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
-                        ->size(200)
-                        ->margin(1)
-                        ->generate($ticket->code);
-                    $qrCodeBase64 = 'data:image/png;base64,' . base64_encode($qrCode);
+                    $qrCodeBase64 = $this->qrCodeDataUri($ticket->code);
 
                     return [
                         'id' => $ticket->id,
@@ -891,11 +886,7 @@ class OrderController extends Controller
             ] : null,
             'tickets' => $order->tickets->map(function($ticket) {
                 // Générer le QR code en base64
-                $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
-                    ->size(200)
-                    ->margin(1)
-                    ->generate($ticket->code);
-                $qrCodeBase64 = 'data:image/png;base64,' . base64_encode($qrCode);
+                $qrCodeBase64 = $this->qrCodeDataUri($ticket->code);
 
                 return [
                     'id' => $ticket->id,
@@ -1222,6 +1213,37 @@ class OrderController extends Controller
             ]);
 
             abort(500, 'Erreur lors de la génération de la facture: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Le QR d'un billet, prêt à poser dans un `<img>`.
+     *
+     * En SVG et non en PNG : le rendu PNG de la bibliothèque exige l'extension
+     * `imagick`, absente de beaucoup d'hébergements. Là où elle manquait, la
+     * liste des commandes tombait ENTIÈREMENT en erreur 500 — le client ne
+     * voyait plus ses achats à cause d'une vignette. Le SVG est du PHP pur, et
+     * il s'affiche mieux en s'agrandissant.
+     *
+     * Et si la génération échoue malgré tout, on rend `null` : une vignette
+     * manquante vaut mieux qu'une page perdue.
+     */
+    private function qrCodeDataUri(string $code): ?string
+    {
+        try {
+            $svg = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
+                ->size(200)
+                ->margin(1)
+                ->generate($code);
+
+            return 'data:image/svg+xml;base64,' . base64_encode($svg);
+        } catch (\Throwable $e) {
+            \Log::warning('QR code du billet non généré', [
+                'code' => $code,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
         }
     }
 }
