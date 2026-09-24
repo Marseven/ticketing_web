@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import authUtils from './utils/auth';
+import { useAuthStore } from './stores/auth';
 import { useLoadingStore } from './stores/loading';
 
 // Composants chargés immédiatement (essentiels)
@@ -233,17 +234,45 @@ const router = createRouter({
 });
 
 // Navigation guards
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     // Vérifier et migrer les données d'authentification si nécessaire
-    const userRole = authUtils.checkAndMigrateAuth();
+    let userRole = authUtils.checkAndMigrateAuth();
     const token = authUtils.getToken();
-    
-    console.log('Navigation Guard - To:', to.path, 'Role:', userRole, 'Token:', !!token);
+
+    // ⚠️ Le rôle mémorisé dans le navigateur date de la dernière connexion.
+    // Un compte devenu administrateur depuis restait traité en client et se
+    // voyait renvoyé hors de l'administration à chaque clic. Avant de refuser
+    // l'accès à une page protégée, on demande donc le profil au serveur, qui
+    // seul fait foi. Le résultat est mémorisé, le coût n'est payé qu'une fois.
+    const needsRole = to.matched.some(record => record.meta.role);
+
+    if (token && needsRole) {
+        const authStore = useAuthStore();
+
+        if (!authStore.user) {
+            try {
+                // Délai borné : un réseau qui traîne ne doit JAMAIS suspendre
+                // la navigation. Passé ce temps on tranche avec ce qu'on sait,
+                // quitte à se tromper une fois — mieux vaut une page refusée
+                // qu'une application figée où plus aucun clic ne répond.
+                await Promise.race([
+                    authStore.initialize(),
+                    new Promise((resolve) => setTimeout(resolve, 4000)),
+                ]);
+                userRole = authUtils.getCurrentRole() || userRole;
+            } catch (e) {
+                // Serveur injoignable : on s'en tient à ce qu'on sait déjà,
+                // plutôt que de bloquer la navigation.
+            }
+        } else if (authStore.userRole) {
+            userRole = authStore.userRole;
+        }
+    }
+
     
     // Vérifier l'authentification
     if (to.matched.some(record => record.meta.requiresAuth)) {
         if (!token) {
-            console.log('No token, redirecting to login');
             next({ name: 'login', query: { redirect: to.fullPath } });
             return;
         }
@@ -252,10 +281,8 @@ router.beforeEach((to, from, next) => {
     // Vérifier le rôle pour les routes qui en nécessitent un
     if (to.matched.some(record => record.meta.role)) {
         const requiredRole = to.matched.find(record => record.meta.role)?.meta.role;
-        console.log('Required role:', requiredRole, 'User role:', userRole);
         
         if (userRole !== requiredRole) {
-            console.log('Role mismatch, redirecting based on role');
             // Si l'utilisateur essaie d'accéder à une page admin sans être admin
             if (requiredRole === 'admin' && userRole !== 'admin') {
                 next({ name: 'login', query: { redirect: to.fullPath } });

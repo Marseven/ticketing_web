@@ -23,11 +23,25 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   // Initialisation automatique au démarrage
+  /**
+   * Requête de profil en cours, partagée.
+   *
+   * Le démarrage de l'application et le garde de navigation demandent le
+   * profil en même temps. Sans promesse partagée, le second voyait
+   * `loading` à vrai, repartait aussitôt, et décidait avec l'ancien rôle :
+   * un administrateur était renvoyé vers la page de connexion juste avant
+   * que sa fiche n'arrive.
+   */
+  let inflight = null
+
   const initialize = async () => {
-    if (token.value && !user.value && !loading.value) {
-      await fetchUser()
+    if (!token.value || user.value) return
+
+    if (!inflight) {
+      inflight = fetchUser().finally(() => { inflight = null })
     }
-    // Authentification réelle uniquement
+
+    return inflight
   }
   
   const login = async (credentials) => {
@@ -117,11 +131,22 @@ export const useAuthStore = defineStore('auth', () => {
   
   const fetchUser = async () => {
     if (!token.value) return
-    
+
     loading.value = true
     try {
       const response = await axios.get('/api/me')
       user.value = response.data
+
+      // ⚠️ Rafraîchir le rôle mémorisé : le garde de navigation s'en sert, et
+      // il restait figé sur la valeur écrite à la connexion. Un compte devenu
+      // administrateur depuis continuait d'être traité en client et se voyait
+      // renvoyé hors de l'administration, jusqu'à une reconnexion complète.
+      const level = user.value?.is_admin
+        ? 'admin'
+        : (user.value?.is_organizer ? 'organizer' : 'client')
+
+      userRole.value = level
+      authUtils.saveAuth(token.value, user.value, level)
     } catch (error) {
       console.error('Erreur lors de la récupération de l\'utilisateur:', error)
       await logout()
