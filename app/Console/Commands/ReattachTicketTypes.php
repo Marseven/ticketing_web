@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Ticket;
+use App\Models\TicketType;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -17,15 +18,21 @@ use Illuminate\Support\Facades\Log;
  * tombait en erreur.
  *
  * La cause est corrigée ; cette commande remet d'aplomb les billets déjà dans
- * cet état. Elle ne touche qu'aux événements n'ayant qu'une seule catégorie
- * active : au-delà, on ne peut pas deviner laquelle a été achetée, et
- * attribuer un tarif au hasard sur un billet payé serait pire que de ne rien
- * faire.
+ * cet état, dans cet ordre :
+ *
+ *   1. la LIGNE DE COMMANDE, quand elle existe — ce n'est pas une supposition,
+ *      c'est ce que la personne a effectivement acheté ;
+ *   2. à défaut, la catégorie unique de l'événement ;
+ *   3. sinon on s'abstient : attribuer un tarif au hasard sur un billet payé
+ *      serait pire que de ne rien faire. `--ticket` et `--type` permettent
+ *      alors de trancher à la main, quand l'exploitant sait.
  */
 class ReattachTicketTypes extends Command
 {
     protected $signature = 'tickets:reattach-types
-        {--dry-run : lister sans rien modifier}';
+        {--dry-run : lister sans rien modifier}
+        {--ticket= : ne traiter que ce code de billet}
+        {--type= : forcer cette catégorie (identifiant), pour les cas que la commande ne peut pas trancher}';
 
     protected $description = 'Rattache les billets dont la catégorie a été supprimée à celle de leur événement';
 
@@ -36,7 +43,8 @@ class ReattachTicketTypes extends Command
         $orphans = Ticket::query()
             ->whereNotNull('ticket_type_id')
             ->whereDoesntHave('ticketType')
-            ->with('event.ticketTypes')
+            ->when($this->option('ticket'), fn ($q, $code) => $q->where('code', $code))
+            ->with(['event.ticketTypes', 'order.items'])
             ->get();
 
         if ($orphans->isEmpty()) {
@@ -48,48 +56,102 @@ class ReattachTicketTypes extends Command
         $this->info("{$orphans->count()} billet(s) rattaché(s) à une catégorie disparue.");
         $this->newLine();
 
+        $forced = $this->forcedType();
+
+        if ($this->option('type') && ! $forced) {
+            $this->error('Catégorie introuvable : ' . $this->option('type'));
+
+            return self::FAILURE;
+        }
+
         $repaired = 0;
         $ambiguous = 0;
 
-        foreach ($orphans->groupBy('event_id') as $eventId => $tickets) {
-            $event = $tickets->first()->event;
-            $types = $event?->ticketTypes->where('status', 'active')->values() ?? collect();
+        foreach ($orphans as $ticket) {
+            $type = $forced ?? $this->resolve($ticket);
 
-            if ($types->count() !== 1) {
-                $this->line("  <fg=yellow>?</> {$event?->title} : {$tickets->count()} billet(s), "
-                    . $types->count() . ' catégorie(s) active(s) — impossible de trancher, laissés tels quels');
-                $ambiguous += $tickets->count();
+            if (! $type) {
+                $this->line("  <fg=yellow>?</> {$ticket->code} · {$ticket->event?->title} — "
+                    . 'aucune certitude, laissé tel quel');
+                $this->showCandidates($ticket);
+                $ambiguous++;
 
                 continue;
             }
 
-            $type = $types->first();
-            $this->line("  <fg=green>✓</> {$event->title} : {$tickets->count()} billet(s) → « {$type->name} » à "
+            $this->line("  <fg=green>✓</> {$ticket->code} → « {$type->name} » à "
                 . (int) $type->price . ' ' . ($type->currency ?: 'XAF'));
 
             if (! $dryRun) {
-                DB::table('tickets')
-                    ->whereIn('id', $tickets->pluck('id'))
-                    ->update(['ticket_type_id' => $type->id]);
+                DB::table('tickets')->where('id', $ticket->id)->update(['ticket_type_id' => $type->id]);
 
-                Log::info('Billets rattachés à une catégorie', [
-                    'event_id' => $eventId,
+                Log::info('Billet rattaché à une catégorie', [
+                    'ticket' => $ticket->code,
                     'ticket_type_id' => $type->id,
-                    'tickets' => $tickets->count(),
+                    'forced' => (bool) $forced,
                 ]);
             }
 
-            $repaired += $tickets->count();
+            $repaired++;
         }
 
         $this->newLine();
         $this->info(($dryRun ? '[simulation] ' : '') . "Rattachés : {$repaired} · Laissés tels quels : {$ambiguous}");
 
         if ($ambiguous > 0) {
-            $this->line('Les billets laissés tels quels restent valables : leur prix est lu sur la '
-                . 'ligne de commande, qui garde le montant réellement payé.');
+            $this->newLine();
+            $this->line('Pour trancher un cas à la main, quand vous savez ce qui a été acheté :');
+            $this->line('  php artisan tickets:reattach-types --ticket=TKT-XXXXXXXX --type=<identifiant>');
         }
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Catégorie imposée par l'exploitant, quand la commande ne peut pas
+     * trancher seule.
+     */
+    private function forcedType(): ?TicketType
+    {
+        $id = $this->option('type');
+
+        return $id ? TicketType::find($id) : null;
+    }
+
+    /**
+     * Ce que la personne a réellement acheté.
+     *
+     * La ligne de commande fait foi : ce n'est pas une supposition. On ne se
+     * rabat sur la catégorie unique de l'événement qu'à défaut de ligne.
+     */
+    private function resolve(Ticket $ticket): ?TicketType
+    {
+        $lines = $ticket->order?->items;
+
+        if ($lines?->count()) {
+            $ids = $lines->pluck('ticket_type_id')->filter()->unique();
+
+            // Une seule catégorie dans la commande : aucun doute possible.
+            if ($ids->count() === 1) {
+                $type = TicketType::find($ids->first());
+
+                if ($type && $type->event_id === $ticket->event_id) {
+                    return $type;
+                }
+            }
+        }
+
+        $actives = $ticket->event?->ticketTypes->where('status', 'active')->values() ?? collect();
+
+        return $actives->count() === 1 ? $actives->first() : null;
+    }
+
+    /** Aide l'exploitant à choisir en listant ce qui existe. */
+    private function showCandidates(Ticket $ticket): void
+    {
+        foreach ($ticket->event?->ticketTypes ?? [] as $type) {
+            $this->line("        --type={$type->id} · {$type->name} · "
+                . (int) $type->price . ' ' . ($type->currency ?: 'XAF'));
+        }
     }
 }

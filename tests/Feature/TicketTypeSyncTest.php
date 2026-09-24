@@ -177,6 +177,59 @@ class TicketTypeSyncTest extends TestCase
         $this->assertSame($this->standard->id, $this->ticket->fresh()->ticket_type_id);
     }
 
+    public function test_the_order_line_settles_an_otherwise_ambiguous_event(): void
+    {
+        // Trois catégories, mais la commande dit laquelle a été achetée : ce
+        // n'est pas une supposition, c'est ce que la personne a payé.
+        $champion = TicketType::create([
+            'event_id' => $this->event->id, 'name' => "Champion d'Afrique", 'price' => 50000,
+            'currency' => 'XAF', 'status' => 'active', 'available_quantity' => 100,
+        ]);
+
+        TicketType::create([
+            'event_id' => $this->event->id, 'name' => 'Royaume des KINGS', 'price' => 300000,
+            'currency' => 'XAF', 'status' => 'active', 'available_quantity' => 30,
+        ]);
+
+        \App\Models\OrderItem::create([
+            'order_id' => $this->ticket->order_id, 'event_id' => $this->event->id,
+            'ticket_type_id' => $champion->id,
+            'unit_price' => 50000, 'qty' => 1, 'line_total' => 50000,
+        ]);
+
+        $this->ticket->forceFill(['ticket_type_id' => 999999])->save();
+
+        $this->artisan('tickets:reattach-types')->assertSuccessful();
+
+        $this->assertSame($champion->id, $this->ticket->fresh()->ticket_type_id);
+        $this->assertSame(50000.0, $this->ticket->fresh()->price_paid);
+    }
+
+    public function test_a_category_can_be_forced_by_hand(): void
+    {
+        // Le cas où l'exploitant sait, et la commande ne peut pas savoir.
+        $champion = TicketType::create([
+            'event_id' => $this->event->id, 'name' => "Champion d'Afrique", 'price' => 50000,
+            'currency' => 'XAF', 'status' => 'active', 'available_quantity' => 100,
+        ]);
+
+        $this->ticket->forceFill(['ticket_type_id' => 999999])->save();
+
+        $this->artisan('tickets:reattach-types', [
+            '--ticket' => 'TKT-VENDU',
+            '--type' => $champion->id,
+        ])->assertSuccessful();
+
+        $this->assertSame($champion->id, $this->ticket->fresh()->ticket_type_id);
+    }
+
+    public function test_a_forced_category_that_does_not_exist_is_refused(): void
+    {
+        $this->ticket->forceFill(['ticket_type_id' => 999999])->save();
+
+        $this->artisan('tickets:reattach-types', ['--type' => 424242])->assertFailed();
+    }
+
     public function test_the_repair_command_leaves_ambiguous_events_alone(): void
     {
         TicketType::create([
