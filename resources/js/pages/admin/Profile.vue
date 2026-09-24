@@ -482,14 +482,14 @@ export default {
           profile.value = { ...profile.value, ...profileForm }
           localStorage.setItem('userName', profileForm.name)
           localStorage.setItem('userEmail', profileForm.email)
-          Swal.fire({ icon: 'success', title: 'Succès', text: 'Profil mis à jour avec succès (simulé)', confirmButtonColor: '#272d63' })
+          const body = await response.json().catch(() => ({}))
+          oops(body.message || 'Le profil n\'a pas été mis à jour.')
         }
       } catch (error) {
-        console.log('API non disponible, mise à jour locale')
-        profile.value = { ...profile.value, ...profileForm }
-        localStorage.setItem('userName', profileForm.name)
-        localStorage.setItem('userEmail', profileForm.email)
-        Swal.fire({ icon: 'success', title: 'Succès', text: 'Profil mis à jour avec succès (simulé)', confirmButtonColor: '#272d63' })
+        // Écrire seulement dans le navigateur puis annoncer « succès » laissait
+        // croire le profil enregistré : au rechargement suivant, tout était
+        // revenu en arrière sans explication.
+        oops('Serveur injoignable : le profil n\'a pas été mis à jour.')
       } finally {
         updatingProfile.value = false
       }
@@ -510,7 +510,7 @@ export default {
       
       changingPassword.value = true
       try {
-        const response = await fetch('/api/v1/admin/profile/password', {
+        const response = await fetch('/api/v1/profile/password', {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -667,7 +667,7 @@ export default {
     const updatePreferences = async () => {
       updatingPreferences.value = true
       try {
-        const response = await fetch('/api/v1/admin/profile/preferences', {
+        const response = await fetch('/api/v1/profile/preferences', {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -711,7 +711,7 @@ export default {
       if (!result.isConfirmed) return
       
       try {
-        const response = await fetch(`/api/v1/admin/profile/sessions/${session.id}`, {
+        const response = await fetch(`/api/v1/profile/sessions/${session.id}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -743,7 +743,7 @@ export default {
       if (!result.isConfirmed) return
 
       try {
-        const response = await fetch('/api/v1/admin/profile/sessions/logout-all', {
+        const response = await fetch('/api/v1/profile/sessions/logout-others', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -751,16 +751,19 @@ export default {
           }
         })
 
+        const body = await response.json().catch(() => ({}))
+
         if (response.ok) {
           activeSessions.value = activeSessions.value.filter(s => s.current)
-          Swal.fire({ icon: 'success', title: 'Succès', text: 'Toutes les autres sessions ont été déconnectées', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'success', title: 'Succès', text: body.message || 'Sessions fermées.', confirmButtonColor: '#272d63' })
         } else {
-          activeSessions.value = activeSessions.value.filter(s => s.current)
-          Swal.fire({ icon: 'success', title: 'Succès', text: 'Toutes les autres sessions ont été déconnectées (simulé)', confirmButtonColor: '#272d63' })
+          // Annoncer la révocation sans l'avoir faite est le pire mensonge de
+          // cette page : on l'actionne justement quand on soupçonne un accès
+          // indésirable. La liste ne doit pas non plus se vider à l'écran.
+          oops(body.message || 'Les sessions n\'ont pas été fermées.')
         }
       } catch (error) {
-        activeSessions.value = activeSessions.value.filter(s => s.current)
-        Swal.fire({ icon: 'success', title: 'Succès', text: 'Toutes les autres sessions ont été déconnectées (simulé)', confirmButtonColor: '#272d63' })
+        oops('Serveur injoignable : les sessions n\'ont pas été fermées.')
       }
     }
     

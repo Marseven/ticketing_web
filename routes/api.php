@@ -126,6 +126,13 @@ Route::prefix('v1')->group(function () {
         Route::post('profile/two-factor/confirm', [App\Http\Controllers\Api\TwoFactorController::class, 'confirm']);
         Route::post('profile/two-factor/recovery-codes', [App\Http\Controllers\Api\TwoFactorController::class, 'regenerate']);
         Route::delete('profile/two-factor', [App\Http\Controllers\Api\TwoFactorController::class, 'destroy']);
+
+        // Sessions ouvertes (jetons Sanctum). L'écran les proposait déjà, sans
+        // qu'aucune route ne réponde : « déconnecter partout » annonçait un
+        // succès sans rien révoquer.
+        Route::get('profile/sessions', [App\Http\Controllers\Api\SessionsController::class, 'index']);
+        Route::delete('profile/sessions/{id}', [App\Http\Controllers\Api\SessionsController::class, 'destroy']);
+        Route::post('profile/sessions/logout-others', [App\Http\Controllers\Api\SessionsController::class, 'destroyOthers']);
     });
 
     // Routes publiques pour les paiements (status checking et initiation accessibles sans auth)
