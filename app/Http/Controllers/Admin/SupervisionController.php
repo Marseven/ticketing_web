@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\PageView;
 use App\Models\Payment;
+use App\Services\EbillingBillState;
 use App\Models\Ticket;
 use App\Services\EBillingService;
 use Carbon\CarbonImmutable;
@@ -233,11 +234,25 @@ class SupervisionController extends Controller
                 ->count();
 
             $closed = (clone $base())
-                ->whereHas('order', fn ($q) => $q->where('status', '!=', 'pending'))
+                ->whereHas('order', fn ($q) => $q->where('status', '!=', 'pending'));
+
+            // Réglée sur une commande close : de l'argent encaissé sans billet
+            // en face. C'est la seule situation qui réclame un humain.
+            $paidOnClosed = (clone $closed)
+                ->whereIn('ebilling_state', EbillingBillState::PAID)
                 ->count();
 
-            if ($closed > 0) {
-                return ['error', "{$closed} paiement(s) laissé(s) sur une commande annulée",
+            if ($paidOnClosed > 0) {
+                return ['error', "{$paidOnClosed} paiement(s) réglé(s) sur une commande annulée",
+                    'Client débité sans billet : trancher entre émission et remboursement.'];
+            }
+
+            // Jamais interrogée : on ne sait rien, ce qui n'est pas la même
+            // chose que « rien à signaler ».
+            $unchecked = (clone $closed)->whereNull('ebilling_state')->count();
+
+            if ($unchecked > 0) {
+                return ['warning', "{$unchecked} paiement(s) sur commande annulée, état inconnu",
                     'Demander leur état à e-billing : « php artisan payments:check-pending --include-closed --dry-run ».'];
             }
 

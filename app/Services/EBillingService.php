@@ -453,7 +453,15 @@ class EBillingService
             if ($status === 200) {
                 return [
                     'success' => true,
-                    'bill_status' => $responseData['e_bill']['state'] ?? null,
+                    // La passerelle rend la facture À PLAT (`state` à la
+                    // racine) et non sous `e_bill`. Chercher au seul endroit
+                    // supposé rendait un état nul sur des réponses 200
+                    // parfaitement valides : la panne se lisait alors comme
+                    // « facture pas encore réglée ».
+                    'bill_status' => $responseData['state']
+                        ?? $responseData['e_bill']['state']
+                        ?? $responseData['data']['state']
+                        ?? null,
                     'data' => $responseData
                 ];
             }

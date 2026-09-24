@@ -119,6 +119,13 @@ class CheckPendingPayments extends Command
                 continue;
             }
 
+            // Garder l'état observé : sans lui, la supervision ne peut pas
+            // distinguer « facture abandonnée, sans conséquence » de « jamais
+            // interrogée », et signalerait éternellement les deux.
+            if (! $dryRun && $state !== null) {
+                $payment->update(['ebilling_state' => $state]);
+            }
+
             $stillWaiting++;
         }
 
