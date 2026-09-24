@@ -65,7 +65,7 @@ class CheckPendingPayments extends Command
                     $orderStatus ?? '—',
                     number_format((float) $payment->amount, 0, ',', ' '),
                     $states->billId($payment) ?: 'ABSENTE',
-                    $state ?? 'SANS RÉPONSE',
+                    $state ?? 'SANS RÉPONSE — ' . ($states->lastFailure() ?? 'cause inconnue'),
                 ));
             }
 

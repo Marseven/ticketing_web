@@ -21,8 +21,21 @@ class EbillingBillState
     /** États qui disent que la facture ne sera pas réglée. */
     public const DEAD = ['failed', 'error', 'declined', 'cancelled', 'canceled', 'expired'];
 
+    /**
+     * Pourquoi le dernier appel n'a rien donné. Un état nul recouvrait trois
+     * causes très différentes — pas d'identifiant de facture, passerelle qui
+     * refuse, réponse illisible — et l'appelant n'avait aucun moyen de les
+     * distinguer. Diagnostiquer demandait d'aller fouiller les journaux.
+     */
+    private ?string $lastFailure = null;
+
     public function __construct(private EBillingService $ebilling)
     {
+    }
+
+    public function lastFailure(): ?string
+    {
+        return $this->lastFailure;
     }
 
     /**
@@ -40,9 +53,13 @@ class EbillingBillState
             return strtolower(trim($payment->ebilling_state));
         }
 
+        $this->lastFailure = null;
+
         $billId = $this->billId($payment);
 
         if (! $billId) {
+            $this->lastFailure = 'aucun identifiant de facture';
+
             return null;
         }
 
@@ -50,8 +67,29 @@ class EbillingBillState
             $result = $this->ebilling->getBillStatus($billId);
             $state = $result['bill_status'] ?? null;
 
-            return is_string($state) && $state !== '' ? strtolower(trim($state)) : null;
+            if (is_string($state) && $state !== '') {
+                return strtolower(trim($state));
+            }
+
+            // `getBillStatus` ne lève pas : il rend un tableau d'échec. Sans
+            // reprendre son motif ici, la panne devenait indiscernable d'une
+            // facture simplement pas encore réglée.
+            $this->lastFailure = $result['message'] ?? 'réponse sans état';
+
+            if (isset($result['status'])) {
+                $this->lastFailure .= ' (HTTP ' . $result['status'] . ')';
+            }
+
+            Log::warning('E-Billing ne conclut pas', [
+                'payment_id' => $payment->id,
+                'bill_id' => $billId,
+                'raison' => $this->lastFailure,
+            ]);
+
+            return null;
         } catch (\Throwable $e) {
+            $this->lastFailure = $e->getMessage();
+
             Log::warning('E-Billing injoignable', [
                 'payment_id' => $payment->id,
                 'error' => $e->getMessage(),
