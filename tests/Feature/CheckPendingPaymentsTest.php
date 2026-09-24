@@ -263,15 +263,30 @@ class CheckPendingPaymentsTest extends TestCase
         $this->assertSame('failed', $payment->fresh()->status);
     }
 
-    public function test_a_payment_without_a_bill_is_left_alone_while_the_order_lives(): void
+    public function test_a_payment_without_a_bill_fails_on_its_own_after_the_hold(): void
     {
-        // Tant que la commande court, le client peut encore relancer un
-        // paiement : rien ne justifie de clore le sien.
+        // Sans facture chez la passerelle, il n'y a rien à interroger : passé
+        // le délai de rétention, inutile d'attendre que la commande soit
+        // annulée pour le reconnaître.
         Notification::fake();
-        $payment = $this->makePendingPayment();
+        $payment = $this->makePendingPayment(ageMinutes: \App\Models\Order::HOLD_MINUTES + 5);
         $payment->forceFill(['billing_id' => null, 'transaction_id' => null, 'payload' => null])->save();
 
-        $this->artisan('payments:check-pending --include-closed')->assertSuccessful();
+        $this->artisan('payments:check-pending')->assertSuccessful();
+
+        $this->assertSame('failed', $payment->fresh()->status);
+        $this->assertSame('pending', $payment->order->fresh()->status, 'la commande garde son sort propre');
+    }
+
+    public function test_a_payment_without_a_bill_keeps_its_chance_within_the_hold(): void
+    {
+        // Dans la première heure, une seconde tentative peut encore créer la
+        // facture : rien ne justifie de clore le paiement.
+        Notification::fake();
+        $payment = $this->makePendingPayment(ageMinutes: 10);
+        $payment->forceFill(['billing_id' => null, 'transaction_id' => null, 'payload' => null])->save();
+
+        $this->artisan('payments:check-pending')->assertSuccessful();
 
         $this->assertSame('initiated', $payment->fresh()->status);
     }

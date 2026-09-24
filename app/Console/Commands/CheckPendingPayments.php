@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Order;
 use App\Models\Payment;
 use App\Services\EbillingBillState;
 use App\Services\PaymentConfirmation;
@@ -70,11 +71,16 @@ class CheckPendingPayments extends Command
             }
 
             // Aucun identifiant de facture : rien n'a jamais été créé chez la
-            // passerelle, donc le client n'a rien pu régler. Sur une commande
-            // déjà close, il n'y a plus rien à attendre — sans quoi ce paiement
-            // resterait indéfiniment d'« état inconnu », signalé par une
-            // supervision qu'aucun appel ne pourrait jamais apaiser.
-            if ($state === null && ! $states->billId($payment) && $orderStatus !== 'pending') {
+            // passerelle, donc le client n'a rien pu régler et aucun appel ne
+            // pourra jamais rien en dire. Passé le délai de rétention — le même
+            // qui gouverne l'annulation des commandes — il n'y a plus rien à
+            // attendre, que la commande soit close ou encore ouverte.
+            //
+            // On ne le fait pas plus tôt : dans la première heure, la création
+            // de facture peut encore aboutir sur une seconde tentative.
+            $expired = $payment->created_at?->lt(now()->subMinutes(Order::HOLD_MINUTES)) ?? true;
+
+            if ($state === null && ! $states->billId($payment) && ($expired || $orderStatus !== 'pending')) {
                 if (! $dryRun) {
                     $payment->update(['status' => 'failed']);
                 }
