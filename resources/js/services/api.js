@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { useLoadingStore } from '../stores/loading'
+import { handleUnauthorized } from '../utils/sessionExpired'
 
 // Configuration de base d'axios
 const api = axios.create({
@@ -47,10 +48,10 @@ api.interceptors.response.use(
     console.log('Erreur API:', error.response?.status, error.response?.data)
     
     if (error.response?.status === 401) {
-      // Token expiré ou invalide
-      localStorage.removeItem('auth_token')
-      localStorage.removeItem('user')
-      window.location.href = '/login'
+      // Toutes les clés sont effacées, et la redirection ne part qu'une
+      // fois : n'en retirer que deux laissait l'application se croire
+      // connectée et boucler sur la page de connexion.
+      handleUnauthorized(error.config?.url ?? '')
     } else if (error.response?.status === 419) {
       console.error('CSRF token mismatch. Vérifiez la configuration Sanctum.')
     }

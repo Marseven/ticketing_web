@@ -1,4 +1,5 @@
 import { useLoadingStore } from '../stores/loading'
+import { handleUnauthorized, isUnauthorized } from './sessionExpired'
 
 /**
  * Instrumente `window.fetch` pour que tout appel réseau déclenché par un
@@ -18,7 +19,16 @@ export function installFetchLoader() {
 
     store?.start()
     try {
-      return await nativeFetch(input, init)
+      const response = await nativeFetch(input, init)
+
+      // Session perdue : sans ce relais, une trentaine de pages appelant
+      // `fetch` directement restaient vides sans rien dire.
+      const url = typeof input === 'string' ? input : (input?.url ?? '')
+      if (isUnauthorized(response.status, url)) {
+        handleUnauthorized(url)
+      }
+
+      return response
     } finally {
       store?.stop()
     }

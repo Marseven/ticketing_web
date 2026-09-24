@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { useLoadingStore } from '../stores/loading'
+import { handleUnauthorized } from './sessionExpired'
 
 /**
  * Instrumente l'instance axios PAR DÉFAUT (utilisée directement par une dizaine
@@ -26,6 +27,11 @@ export function installAxiosLoader() {
     },
     (error) => {
       if (error.config?.__loader) useLoadingStore().stop()
+
+      if (error.response?.status === 401) {
+        handleUnauthorized(error.config?.url ?? '')
+      }
+
       return Promise.reject(error)
     }
   )
