@@ -194,6 +194,7 @@ import { useRouter } from 'vue-router'
 import PhoneInput from '../../components/PhoneInput.vue'
 import { authService } from '../../services/api.js'
 import { useAuthStore } from '../../stores/auth.js'
+import { errorMessage } from '../../utils/formErrors'
 
 export default {
   name: 'Register',
@@ -332,7 +333,7 @@ export default {
           } else if (status === 409) {
             // Conflict (email or phone already used)
             isConflictError.value = true
-            error.value = data.message || 'Cet email ou ce numéro de téléphone est déjà associé à un compte.'
+            error.value = errorMessage(data, 'Cet email ou ce numéro de téléphone est déjà associé à un compte.')
           } else if (status === 429) {
             // Too many attempts
             error.value = 'Trop de tentatives. Veuillez réessayer dans quelques minutes.'
@@ -340,14 +341,14 @@ export default {
             // Server error
             error.value = 'Erreur du serveur. Veuillez réessayer plus tard.'
           } else {
-            error.value = data.message || 'Une erreur est survenue lors de l\'inscription'
+            error.value = errorMessage(data, 'Une erreur est survenue lors de l\'inscription')
           }
         } else if (err.request) {
           // Request sent but no response
           error.value = 'Impossible de se connecter au serveur. Vérifiez votre connexion internet.'
         } else {
           // Error during request configuration
-          error.value = err.message || 'Une erreur est survenue. Veuillez réessayer.'
+          error.value = errorMessage(err, 'Une erreur est survenue. Veuillez réessayer.')
         }
       } finally {
         loading.value = false

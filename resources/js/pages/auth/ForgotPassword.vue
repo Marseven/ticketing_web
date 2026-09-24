@@ -104,6 +104,7 @@
 <script>
 import { ref } from 'vue'
 import axios from 'axios'
+import { errorMessage } from '../../utils/formErrors'
 
 export default {
   name: 'ForgotPassword',
@@ -130,10 +131,10 @@ export default {
         })
 
         if (response.data.success) {
-          success.value = response.data.message || 'Un email de réinitialisation a été envoyé à votre adresse email.'
+          success.value = response.errorMessage(data, 'Un email de réinitialisation a été envoyé à votre adresse email.')
           email.value = '' // Vider le champ
         } else {
-          error.value = response.data.message || 'Une erreur est survenue'
+          error.value = response.errorMessage(data, 'Une erreur est survenue')
         }
 
       } catch (err) {
@@ -149,21 +150,21 @@ export default {
             if (data.errors && data.errors.email) {
               error.value = data.errors.email[0]
             } else {
-              error.value = data.message || 'Email invalide'
+              error.value = errorMessage(data, 'Email invalide')
             }
           } else if (status === 404) {
             error.value = 'Aucun compte associé à cette adresse email'
           } else if (status === 429) {
             error.value = 'Trop de tentatives. Veuillez réessayer dans quelques minutes.'
           } else if (status >= 500) {
-            error.value = data.message || 'Le service d\'envoi d\'email est temporairement indisponible. Veuillez réessayer dans quelques minutes.'
+            error.value = errorMessage(data, 'Le service d\'envoi d\'email est temporairement indisponible. Veuillez réessayer dans quelques minutes.')
           } else {
-            error.value = data.message || 'Une erreur est survenue'
+            error.value = errorMessage(data, 'Une erreur est survenue')
           }
         } else if (err.request) {
           error.value = 'Impossible de se connecter au serveur. Vérifiez votre connexion internet.'
         } else {
-          error.value = err.message || 'Une erreur est survenue'
+          error.value = errorMessage(err, 'Une erreur est survenue')
         }
       } finally {
         loading.value = false

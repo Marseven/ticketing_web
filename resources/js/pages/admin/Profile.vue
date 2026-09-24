@@ -353,6 +353,7 @@
 <script>
 import { ref, reactive, onMounted } from 'vue'
 import Swal from 'sweetalert2'
+import { errorMessage } from '../../utils/formErrors'
 
 export default {
   name: 'Profile',
@@ -483,7 +484,7 @@ export default {
           localStorage.setItem('userName', profileForm.name)
           localStorage.setItem('userEmail', profileForm.email)
           const body = await response.json().catch(() => ({}))
-          oops(body.message || 'Le profil n\'a pas été mis à jour.')
+          oops(errorMessage(body, 'Le profil n\'a pas été mis à jour.'))
         }
       } catch (error) {
         // Écrire seulement dans le navigateur puis annoncer « succès » laissait
@@ -540,7 +541,7 @@ export default {
           // pire que l'échec lui-même : on continue avec l'ancien en le
           // pensant remplacé.
           const body = await response.json().catch(() => ({}))
-          oops(body.message || 'Le mot de passe n\'a pas été changé.')
+          oops(errorMessage(body, 'Le mot de passe n\'a pas été changé.'))
         }
       } catch (error) {
         oops('Serveur injoignable : le mot de passe n\'a pas été changé.')
@@ -581,7 +582,7 @@ export default {
         const body = await response.json()
 
         if (!response.ok) {
-          oops(body.message || 'Impossible de générer le QR code.')
+          oops(errorMessage(body, 'Impossible de générer le QR code.'))
           return
         }
 
@@ -604,7 +605,7 @@ export default {
         const body = await response.json()
 
         if (!response.ok) {
-          oops(body.message || 'Code incorrect.')
+          oops(errorMessage(body, 'Code incorrect.'))
           return
         }
 
@@ -650,7 +651,7 @@ export default {
         const body = await response.json()
 
         if (!response.ok) {
-          oops(body.message || 'Désactivation refusée.')
+          oops(errorMessage(body, 'Désactivation refusée.'))
           return
         }
 
@@ -684,7 +685,7 @@ export default {
           Swal.fire({ icon: 'success', title: 'Succès', text: 'Préférences sauvegardées', confirmButtonColor: '#272d63' })
         } else {
           const body = await response.json().catch(() => ({}))
-          oops(body.message || 'Les préférences n\'ont pas pu être enregistrées.')
+          oops(errorMessage(body, 'Les préférences n\'ont pas pu être enregistrées.'))
         }
       } catch (error) {
         oops('Serveur injoignable : les préférences n\'ont pas été enregistrées.')
@@ -755,12 +756,12 @@ export default {
 
         if (response.ok) {
           activeSessions.value = activeSessions.value.filter(s => s.current)
-          Swal.fire({ icon: 'success', title: 'Succès', text: body.message || 'Sessions fermées.', confirmButtonColor: '#272d63' })
+          Swal.fire({ icon: 'success', title: 'Succès', text: errorMessage(body, 'Sessions fermées.'), confirmButtonColor: '#272d63' })
         } else {
           // Annoncer la révocation sans l'avoir faite est le pire mensonge de
           // cette page : on l'actionne justement quand on soupçonne un accès
           // indésirable. La liste ne doit pas non plus se vider à l'écran.
-          oops(body.message || 'Les sessions n\'ont pas été fermées.')
+          oops(errorMessage(body, 'Les sessions n\'ont pas été fermées.'))
         }
       } catch (error) {
         oops('Serveur injoignable : les sessions n\'ont pas été fermées.')

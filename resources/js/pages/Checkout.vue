@@ -948,6 +948,7 @@
 <script>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import Swal from 'sweetalert2'
+import { errorMessage } from '../utils/formErrors'
 import { useRoute, useRouter } from 'vue-router'
 import { useEventsStore } from '../stores/events'
 import { useAuthStore } from '../stores/auth'
@@ -1436,7 +1437,7 @@ export default {
         startCountdown()
 
       } catch (err) {
-        eventError.value = err.message || 'Erreur lors du chargement de l\'événement'
+        eventError.value = errorMessage(err, 'Erreur lors du chargement de l\'événement')
       } finally {
         eventLoading.value = false
       }
@@ -1622,7 +1623,7 @@ export default {
 
           error.value = errorMessages.join('. ')
         } else {
-          error.value = err.message || 'Erreur lors du traitement de l\'achat'
+          error.value = errorMessage(err, 'Erreur lors du traitement de l\'achat')
         }
       } finally {
         loading.value = false
@@ -1646,7 +1647,7 @@ export default {
           : await guestService.createGuestOrder(orderData)
 
         if (!orderResponse.data.success) {
-          throw new Error(orderResponse.data.message || 'Erreur lors de la création de la commande')
+          throw new Error(orderResponse.errorMessage(data, 'Erreur lors de la création de la commande'))
         }
 
         const order = orderResponse.data.data.order
@@ -1681,7 +1682,7 @@ export default {
             : await guestService.createGuestOrder(orderData)
 
           if (!orderResponse.data.success) {
-            throw new Error(orderResponse.data.message || 'Erreur lors de la création de l\'achat')
+            throw new Error(orderResponse.errorMessage(data, 'Erreur lors de la création de l\'achat'))
           }
 
           order = orderResponse.data.data.order
@@ -1714,7 +1715,7 @@ export default {
         const paymentResult = await paymentResponse.json()
 
         if (!paymentResult.success) {
-          throw new Error(paymentResult.message || 'Erreur lors de l\'initiation du paiement')
+          throw new Error(errorMessage(paymentResult, 'Erreur lors de l\'initiation du paiement'))
         }
 
         // 3. Si E-Billing retourne une facture, envoyer le push USSD
@@ -1760,7 +1761,7 @@ export default {
             })
 
             // Construire un message utilisateur compréhensible
-            const rawMessage = pushResult.message || ''
+            const rawMessage = errorMessage(pushResult, '')
             const errorMessage = mapPaymentError(rawMessage, pushResult.error_code)
 
             throw new Error(errorMessage)
@@ -1797,7 +1798,7 @@ export default {
             : await guestService.createGuestOrder(orderData)
 
           if (!orderResponse.data.success) {
-            throw new Error(orderResponse.data.message || 'Erreur lors de la création de l\'achat')
+            throw new Error(orderResponse.errorMessage(data, 'Erreur lors de la création de l\'achat'))
           }
 
           order = orderResponse.data.data.order
@@ -1832,7 +1833,7 @@ export default {
           // Rediriger vers la page de paiement ORABANK
           window.location.href = paymentResult.data.redirect_url
         } else {
-          throw new Error(paymentResult.message || 'Erreur lors de l\'initiation du paiement Visa/Mastercard')
+          throw new Error(errorMessage(paymentResult, 'Erreur lors de l\'initiation du paiement Visa/Mastercard'))
         }
 
       } catch (err) {
@@ -1962,7 +1963,7 @@ export default {
           startPaymentPolling(currentPayment.value.payment_id)
         } else {
           const errorData = await response.json()
-          error.value = errorData.message || 'Erreur lors du renvoi du push'
+          error.value = errorMessage(errorData, 'Erreur lors du renvoi du push')
         }
       } catch (err) {
         error.value = 'Erreur de connexion'
