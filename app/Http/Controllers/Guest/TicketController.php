@@ -246,16 +246,6 @@ class TicketController extends Controller
             $scheduleQuery->whereRaw('COALESCE(ends_at, starts_at) >= ?', [$cutoff]);
         };
 
-        $query->whereHas('event', function ($eventQuery) {
-            $eventQuery->where('is_active', true)->where('status', '!=', 'cancelled');
-        })->where(function ($q) use ($stillUsable) {
-            $q->whereHas('schedule', $stillUsable)
-              ->orWhere(function ($undated) use ($stillUsable) {
-                  // Billet sans date propre : on se rabat sur les dates de l'événement.
-                  $undated->whereNull('schedule_id')->whereHas('event.schedules', $stillUsable);
-              });
-        });
-
         // Recherche par référence (code du ticket OU référence de la commande)
         if ($request->filled('reference')) {
             $ref = $request->input('reference');
@@ -267,57 +257,21 @@ class TicketController extends Controller
             });
         }
 
-        // Recherche par téléphone (normalisation pour matcher indépendamment du format)
+        // Recherche par téléphone : compte, commande ou paiement. La règle est
+        // portée par `Ticket::scopeForPhone` pour que l'administration
+        // cherche exactement de la même façon.
         if ($request->filled('phone')) {
-            $phone = $request->input('phone');
-            // Extraire uniquement les chiffres
-            $digits = preg_replace('/[^0-9]/', '', $phone);
-            // Prendre les 8 derniers chiffres (format Gabon standard sans indicatif)
-            $shortPhone = strlen($digits) >= 8 ? substr($digits, -8) : $digits;
-
-            $buyerPhone = \App\Support\PhoneNumber::sqlDigits('phone');
-            $guestPhone = \App\Support\PhoneNumber::sqlDigits('guest_phone');
-
-            // Trois numéros peuvent désigner la même personne : celui du compte
-            // (KYC), celui laissé à la commande, et celui qui a effectivement
-            // payé. Les trois ouvrent droit au billet.
-            $query->where(function($q) use ($shortPhone, $buyerPhone, $guestPhone) {
-                $q->whereHas('buyer', function($buyerQuery) use ($shortPhone, $buyerPhone) {
-                    $buyerQuery->whereRaw("{$buyerPhone} LIKE ?", ["%{$shortPhone}"]);
-                })
-                // Le compte est porté par le billet ou par la commande selon le
-                // parcours : les deux doivent être interrogés.
-                ->orWhereHas('order.buyer', function($buyerQuery) use ($shortPhone, $buyerPhone) {
-                    $buyerQuery->whereRaw("{$buyerPhone} LIKE ?", ["%{$shortPhone}"]);
-                })
-                ->orWhereHas('order', function($orderQuery) use ($shortPhone, $guestPhone) {
-                    $orderQuery->whereRaw("{$guestPhone} LIKE ?", ["%{$shortPhone}"]);
-                })
-                ->orWhereHas('order.payments', function($paymentQuery) use ($shortPhone) {
-                    $paymentQuery->where('payer_phone', 'LIKE', "%{$shortPhone}");
-                });
-            });
+            $query->forPhone($request->input('phone'));
         }
 
         // Recherche par nom : chaque mot saisi doit se retrouver dans le nom du
         // compte ou celui laissé à la commande, dans n'importe quel ordre
         // (« Leofa Abila » trouve « Abila Leofa »).
+        // Même règle que dans l'administration : le nom vit sur le compte ou
+        // sur la commande invité, et les mots comptent dans n'importe quel
+        // ordre. Voir `Ticket::scopeForName`.
         if ($request->filled('name')) {
-            $words = preg_split('/\s+/', trim($request->input('name')), -1, PREG_SPLIT_NO_EMPTY);
-
-            foreach (array_slice($words, 0, 4) as $word) {
-                $query->where(function($q) use ($word) {
-                    $q->whereHas('buyer', function($buyerQuery) use ($word) {
-                        $buyerQuery->where('name', 'LIKE', "%{$word}%");
-                    })
-                    ->orWhereHas('order.buyer', function($buyerQuery) use ($word) {
-                        $buyerQuery->where('name', 'LIKE', "%{$word}%");
-                    })
-                    ->orWhereHas('order', function($orderQuery) use ($word) {
-                        $orderQuery->where('guest_name', 'LIKE', "%{$word}%");
-                    });
-                });
-            }
+            $query->forName($request->input('name'));
         }
 
         // Recherche par email
@@ -333,11 +287,42 @@ class TicketController extends Controller
             });
         }
 
+        // La fenêtre de dates s'applique en DERNIER : le repli « événement
+        // passé » doit porter sur les mêmes critères de nom et de numéro, sinon
+        // il répondrait oui pour n'importe quelle recherche.
+        $withoutDateWindow = (clone $query);
+
+        $query->whereHas('event', function ($eventQuery) {
+            $eventQuery->where('is_active', true)->where('status', '!=', 'cancelled');
+        })->where(function ($q) use ($stillUsable) {
+            $q->whereHas('schedule', $stillUsable)
+              ->orWhere(function ($undated) use ($stillUsable) {
+                  // Billet sans date propre : on se rabat sur les dates de l'événement.
+                  $undated->whereNull('schedule_id')->whereHas('event.schedules', $stillUsable);
+              });
+        });
+
         $tickets = $query->get();
 
         if ($tickets->isEmpty()) {
+            // Le billet existe-t-il, mais pour un événement déjà passé ?
+            $past = $withoutDateWindow->latest('id')->first();
+
+            if ($past) {
+                $date = $past->schedule?->starts_at ?? $past->event?->schedules->first()?->starts_at;
+
+                return response()->json([
+                    'success' => false,
+                    'error_code' => 'EVENT_OVER',
+                    'message' => $date
+                        ? 'Ce billet concerne un événement déjà passé (' . $date->locale('fr')->isoFormat('D MMMM YYYY') . '). Les billets restent accessibles jusqu\'au lendemain de l\'événement.'
+                        : 'Ce billet concerne un événement déjà passé.',
+                ], 404);
+            }
+
             return response()->json([
                 'success' => false,
+                'error_code' => 'NOT_FOUND',
                 'message' => 'Aucun ticket trouvé avec ces critères de recherche'
             ], 404);
         }

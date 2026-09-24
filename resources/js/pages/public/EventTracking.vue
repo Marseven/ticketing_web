@@ -206,6 +206,11 @@
             <p class="text-sm"><span class="text-gray-500">Nom :</span> {{ detail.holder.name || '—' }}</p>
             <p class="text-sm"><span class="text-gray-500">E-mail :</span> {{ detail.holder.email || '—' }}</p>
             <p class="text-sm"><span class="text-gray-500">Téléphone :</span> {{ detail.holder.phone || '—' }}</p>
+            <!-- Le numéro qui a réglé la commande est souvent celui d'un
+                 proche : le distinguer évite de croire à une erreur de saisie. -->
+            <p v-if="detail.holder.payer_phone && detail.holder.payer_phone !== detail.holder.phone" class="text-sm">
+              <span class="text-gray-500">Téléphone du paiement :</span> {{ detail.holder.payer_phone }}
+            </p>
           </div>
 
           <div>

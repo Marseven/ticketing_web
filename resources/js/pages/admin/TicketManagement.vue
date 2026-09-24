@@ -64,6 +64,16 @@
         </div>
 
         <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
+          <input v-model="filters.phone" @input="debouncedSearch" type="tel" inputmode="tel"
+                 placeholder="Numéro de paiement ou du compte"
+                 class="w-full border rounded-lg px-3 py-2" />
+          <p class="text-xs text-gray-500 mt-1">
+            Cherche le numéro qui a payé, celui de la commande et celui du compte.
+          </p>
+        </div>
+
+        <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Événement</label>
           <select v-model="filters.event_id" @change="applyFilters" class="w-full border rounded-lg px-3 py-2">
             <option value="">Tous les événements</option>
@@ -146,6 +156,15 @@
               <td class="px-4 py-3">
                 <div>{{ t.holder?.name || '—' }}</div>
                 <div class="text-xs text-gray-500">{{ t.holder?.email || '' }}</div>
+                <!-- Le numéro qui a payé est souvent celui d'un proche : il est
+                     distingué, sinon on croit à une erreur de saisie. -->
+                <div v-if="t.payer_phone" class="text-xs text-gray-600 font-mono mt-0.5">
+                  {{ t.payer_phone }}
+                  <span class="text-gray-400 font-sans">· paiement</span>
+                </div>
+                <div v-else-if="t.holder_phone" class="text-xs text-gray-600 font-mono mt-0.5">
+                  {{ t.holder_phone }}
+                </div>
               </td>
               <td class="px-4 py-3">
                 <span class="inline-flex px-2 py-1 text-xs rounded-full" :class="sourceBadgeClass(t.source)">
@@ -203,6 +222,9 @@ const stats = reactive({ total: 0, issued: 0, used: 0, physical: 0, online: 0 })
 
 const filters = reactive({
   search: '',
+  // Numero de telephone : celui qui a paye, celui de la commande ou celui du
+  // compte. C'est le numero qu'on a sous la main quand la personne appelle.
+  phone: '',
   event_id: '',
   organizer_id: '',
   status: '',
@@ -264,6 +286,7 @@ const debouncedSearch = () => {
 const changePage = (p) => { filters.page = p; loadTickets() }
 const resetFilters = () => {
   filters.search = ''
+  filters.phone = ''
   filters.event_id = ''
   filters.organizer_id = ''
   filters.status = ''

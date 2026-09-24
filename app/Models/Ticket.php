@@ -85,6 +85,69 @@ class Ticket extends Model
         return $query->where('code', $code);
     }
 
+    /**
+     * Billets au nom d'une personne.
+     *
+     * Le nom vit à deux endroits selon le parcours : sur le COMPTE quand
+     * l'achat a été fait connecté, sur la COMMANDE quand il a été fait en
+     * invité — et l'invité est le cas le plus courant. Ne regarder que le
+     * compte ne trouvait donc presque rien.
+     *
+     * Chaque mot doit être présent, dans n'importe quel ordre : « MYANDA
+     * ROSELINE » doit retrouver « Roseline Myanda ». Quatre mots suffisent, au
+     * delà c'est du bruit.
+     */
+    public function scopeForName($query, ?string $name)
+    {
+        $words = preg_split('/\s+/', trim((string) $name), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        foreach (array_slice($words, 0, 4) as $word) {
+            $query->where(function ($q) use ($word) {
+                $q->whereHas('buyer', fn ($b) => $b->where('name', 'LIKE', "%{$word}%"))
+                    ->orWhereHas('order.buyer', fn ($b) => $b->where('name', 'LIKE', "%{$word}%"))
+                    ->orWhereHas('order', fn ($o) => $o->where('guest_name', 'LIKE', "%{$word}%"));
+            });
+        }
+
+        return $query;
+    }
+
+    /**
+     * Billets rattachés à un numéro de téléphone.
+     *
+     * Trois numéros peuvent désigner la même personne : celui du compte (KYC),
+     * celui laissé à la commande, et celui qui a effectivement PAYÉ — un
+     * acheteur règle souvent depuis le téléphone d'un proche. Les trois
+     * doivent retrouver le billet, sinon le client appelle et l'on ne sait pas
+     * répondre.
+     *
+     * La comparaison porte sur les huit derniers chiffres : les numéros sont
+     * saisis avec ou sans indicatif, avec ou sans espaces, et un `LIKE` brut
+     * sur la chaîne ne trouverait rien.
+     */
+    public function scopeForPhone($query, ?string $phone)
+    {
+        $digits = \App\Support\PhoneNumber::digits($phone);
+
+        if ($digits === '') {
+            return $query;
+        }
+
+        $tail = strlen($digits) >= 8 ? substr($digits, -8) : $digits;
+
+        $buyerPhone = \App\Support\PhoneNumber::sqlDigits('phone');
+        $guestPhone = \App\Support\PhoneNumber::sqlDigits('guest_phone');
+
+        return $query->where(function ($q) use ($tail, $buyerPhone, $guestPhone) {
+            $q->whereHas('buyer', fn ($b) => $b->whereRaw("{$buyerPhone} LIKE ?", ["%{$tail}"]))
+                // Le compte est porté par le billet ou par la commande selon
+                // le parcours : les deux doivent être interrogés.
+                ->orWhereHas('order.buyer', fn ($b) => $b->whereRaw("{$buyerPhone} LIKE ?", ["%{$tail}"]))
+                ->orWhereHas('order', fn ($o) => $o->whereRaw("{$guestPhone} LIKE ?", ["%{$tail}"]))
+                ->orWhereHas('order.payments', fn ($p) => $p->where('payer_phone', 'LIKE', "%{$tail}"));
+        });
+    }
+
     public function scopeForEvent($query, $eventId)
     {
         return $query->where('event_id', $eventId);

@@ -2526,17 +2526,47 @@ class AdminController extends Controller
     public function tickets(Request $request): JsonResponse
     {
         try {
-            $query = Ticket::with(['event', 'ticketType', 'order', 'buyer', 'schedule']);
+            $query = Ticket::with(['event', 'ticketType', 'order.payments', 'buyer', 'schedule']);
 
             if ($request->filled('search')) {
                 $s = $request->search;
-                $query->where(function ($q) use ($s) {
+
+                // Un numéro de téléphone tapé dans la recherche doit trouver
+                // le billet : celui du compte, celui laissé à la commande, ou
+                // celui qui a PAYÉ — un acheteur règle souvent depuis le
+                // téléphone d'un proche, et c'est ce numéro-là qu'on a sous la
+                // main quand la personne appelle.
+                //
+                // Le seuil de quatre chiffres évite qu'une recherche de code
+                // ne ramène au passage tous les numéros finissant pareil.
+                $digits = \App\Support\PhoneNumber::digits($s);
+                $looksLikePhone = strlen($digits) >= 4;
+
+                $query->where(function ($q) use ($s, $looksLikePhone) {
                     $q->where('code', 'like', "%{$s}%")
                       ->orWhere('batch_reference', 'like', "%{$s}%")
                       ->orWhereHas('order', fn ($o) => $o->where('reference', 'like', "%{$s}%"))
+                      // Le nom et l'adresse vivent sur le COMPTE quand l'achat
+                      // a été fait connecté, sur la COMMANDE quand il a été
+                      // fait en invité — et l'invité est le cas courant. Ne
+                      // regarder que le compte ne trouvait presque rien.
                       ->orWhereHas('buyer', fn ($b) => $b->where('name', 'like', "%{$s}%")
-                          ->orWhere('email', 'like', "%{$s}%"));
+                          ->orWhere('email', 'like', "%{$s}%"))
+                      ->orWhereHas('order', fn ($o) => $o->where('guest_name', 'like', "%{$s}%")
+                          ->orWhere('guest_email', 'like', "%{$s}%"))
+                      // « MYANDA ROSELINE » doit retrouver « Roseline Myanda ».
+                      ->orWhere(fn ($n) => $n->forName($s));
+
+                    if ($looksLikePhone) {
+                        $q->orWhere(fn ($p) => $p->forPhone($s));
+                    }
                 });
+            }
+
+            // Filtre dédié, pour chercher un numéro sans que le code du billet
+            // ne s'en mêle.
+            if ($request->filled('phone')) {
+                $query->forPhone($request->input('phone'));
             }
 
             if ($request->filled('event_id')) {
@@ -2579,6 +2609,11 @@ class AdminController extends Controller
                     ? ['name' => $t->buyer->name, 'email' => $t->buyer->email]
                     : ['name' => $t->order?->guest_name, 'email' => $t->order?->guest_email],
                 'order_reference' => $t->order?->reference,
+                // Numéro qui a réglé la commande, distinct de celui du compte :
+                // c'est celui qu'on a sous la main quand la personne appelle.
+                'payer_phone' => $t->order?->payments
+                    ?->firstWhere(fn ($p) => filled($p->payer_phone))?->payer_phone,
+                'holder_phone' => $t->buyer?->phone ?? $t->order?->guest_phone,
                 'schedule_date' => $t->schedule?->starts_at,
             ]);
 

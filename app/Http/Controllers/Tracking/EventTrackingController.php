@@ -140,6 +140,7 @@ class EventTrackingController extends Controller
             ->with([
                 'ticketType:id,name',
                 'order:id,reference,placed_at,guest_name,guest_email,guest_phone,buyer_id',
+                'order.payments:id,order_id,payer_phone',
                 'order.buyer:id,name,email,phone',
                 'buyer:id,name,email,phone',
                 'checkins' => fn ($q) => $q->where('result', 'valid')->latest('scanned_at')->with('scanner:id,name'),
@@ -185,6 +186,12 @@ class EventTrackingController extends Controller
                 'scanned_by' => $lastScan?->scanner?->name,
                 'holder_name' => $holder?->name ?? $t->order?->guest_name,
                 'holder_email' => $holder?->email ?? $t->order?->guest_email,
+                // Deux numéros, et il faut les distinguer : celui du compte ou
+                // de la commande, et celui qui a effectivement PAYÉ — un
+                // acheteur règle souvent depuis le téléphone d'un proche.
+                'holder_phone' => $holder?->phone ?? $t->order?->guest_phone,
+                'payer_phone' => $t->order?->payments
+                    ?->firstWhere(fn ($p) => filled($p->payer_phone))?->payer_phone,
                 'purchase_date' => $t->order?->placed_at,
                 'order_reference' => $t->order?->reference,
             ];
@@ -210,6 +217,7 @@ class EventTrackingController extends Controller
                 'ticketType:id,name',
                 'schedule:id,starts_at',
                 'order:id,reference,placed_at,total_amount,currency,status,guest_name,guest_email,guest_phone,buyer_id',
+                'order.payments:id,order_id,payer_phone',
                 'order.buyer:id,name,email,phone',
                 'buyer:id,name,email,phone',
                 'checkins' => fn ($q) => $q->latest('scanned_at')->with('scanner:id,name'),
@@ -236,6 +244,10 @@ class EventTrackingController extends Controller
                         'name' => $holder?->name ?? $ticket->order?->guest_name,
                         'email' => $holder?->email ?? $ticket->order?->guest_email,
                         'phone' => $holder?->phone ?? $ticket->order?->guest_phone,
+                        // Le numéro qui a payé peut différer de celui du
+                        // compte : les deux doivent se lire côte à côte.
+                        'payer_phone' => $ticket->order?->payments
+                            ?->firstWhere(fn ($p) => filled($p->payer_phone))?->payer_phone,
                     ],
                     'order' => $ticket->order ? [
                         'reference' => $ticket->order->reference,
