@@ -69,6 +69,20 @@ class CheckPendingPayments extends Command
                 ));
             }
 
+            // Aucun identifiant de facture : rien n'a jamais été créé chez la
+            // passerelle, donc le client n'a rien pu régler. Sur une commande
+            // déjà close, il n'y a plus rien à attendre — sans quoi ce paiement
+            // resterait indéfiniment d'« état inconnu », signalé par une
+            // supervision qu'aucun appel ne pourrait jamais apaiser.
+            if ($state === null && ! $states->billId($payment) && $orderStatus !== 'pending') {
+                if (! $dryRun) {
+                    $payment->update(['status' => 'failed']);
+                }
+
+                $dead++;
+                continue;
+            }
+
             if ($states->isPaid($state) && $orderStatus !== 'pending') {
                 // Le client a payé APRÈS l'annulation de sa commande — la place
                 // a pu être revendue entre-temps. Émettre un billet ici

@@ -246,4 +246,33 @@ class CheckPendingPaymentsTest extends TestCase
 
         $this->assertSame('initiated', $payment->fresh()->status);
     }
+
+    public function test_a_payment_without_a_bill_is_closed_with_its_order(): void
+    {
+        // La facture n'a jamais été créée chez la passerelle : il n'y a rien à
+        // interroger, ni maintenant ni jamais. Laissé tel quel, ce paiement
+        // alimentait une alerte « état inconnu » qu'aucune commande ne pouvait
+        // lever — trois cas de ce type en production.
+        Notification::fake();
+        $payment = $this->makePendingPayment();
+        $payment->forceFill(['billing_id' => null, 'transaction_id' => null, 'payload' => null])->save();
+        $payment->order->update(['status' => 'cancelled']);
+
+        $this->artisan('payments:check-pending --include-closed')->assertSuccessful();
+
+        $this->assertSame('failed', $payment->fresh()->status);
+    }
+
+    public function test_a_payment_without_a_bill_is_left_alone_while_the_order_lives(): void
+    {
+        // Tant que la commande court, le client peut encore relancer un
+        // paiement : rien ne justifie de clore le sien.
+        Notification::fake();
+        $payment = $this->makePendingPayment();
+        $payment->forceFill(['billing_id' => null, 'transaction_id' => null, 'payload' => null])->save();
+
+        $this->artisan('payments:check-pending --include-closed')->assertSuccessful();
+
+        $this->assertSame('initiated', $payment->fresh()->status);
+    }
 }
