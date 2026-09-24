@@ -136,6 +136,22 @@ class EBillingService
      *
      * @param  callable(PendingRequest):Response $call
      */
+    /**
+     * URL d'interrogation d'une facture.
+     *
+     * ⚠️ C'était `rtrim($this->serverUrl, '/e_bills')`, qui retire des
+     * CARACTÈRES et non un suffixe : tout ce qui se terminait par l'une des
+     * lettres de « /e_bills » était rongé au passage. Une base
+     * `…/api/ebills/e_bills` devenait `…/ap`, et l'appel partait dans le vide
+     * sans que rien ne le signale.
+     */
+    public function billStatusUrl(string $billId): string
+    {
+        $base = preg_replace('#/e_bills/*$#', '', $this->serverUrl);
+
+        return rtrim($base, '/') . '/e_bills/' . $billId;
+    }
+
     private function sendWithFallback(callable $call): Response
     {
         if ($this->usesOAuth()) {
@@ -415,7 +431,7 @@ class EBillingService
     public function getBillStatus(string $billId): array
     {
         try {
-            $url = rtrim($this->serverUrl, '/e_bills') . '/e_bills/' . $billId;
+            $url = $this->billStatusUrl($billId);
 
             Log::info('E-Billing API Call - Get Bill Status', [
                 'url' => $url,
