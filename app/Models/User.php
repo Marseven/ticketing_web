@@ -48,7 +48,23 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        // Le secret 2FA vaut le mot de passe : quiconque le lit peut générer
+        // les codes. Il ne doit jamais partir dans une réponse d'API, même
+        // par mégarde d'un contrôleur qui renverrait le modèle entier.
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
+
+    /**
+     * La double authentification est-elle réellement active ?
+     *
+     * Un secret seul ne suffit pas : tant que l'utilisateur n'a pas prouvé que
+     * son téléphone lit bien ce secret, exiger un code l'enfermerait dehors.
+     */
+    public function hasTwoFactorEnabled(): bool
+    {
+        return $this->two_factor_confirmed_at !== null && filled($this->two_factor_secret);
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -66,6 +82,11 @@ class User extends Authenticatable implements MustVerifyEmail
             'is_organizer' => 'boolean',
             'preferences' => 'array',
             'metadata' => 'array',
+            // Chiffrés en base : une copie de la base ne doit pas suffire à
+            // reconstituer les codes de quelqu'un.
+            'two_factor_secret' => 'encrypted',
+            'two_factor_recovery_codes' => 'encrypted:array',
+            'two_factor_confirmed_at' => 'datetime',
         ];
     }
 

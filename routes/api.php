@@ -78,6 +78,13 @@ Route::prefix('v1')->group(function () {
         Route::get('me', [App\Http\Controllers\Api\AuthController::class, 'me'])->middleware('auth:sanctum');
         Route::post('refresh', [App\Http\Controllers\Api\AuthController::class, 'refresh'])->middleware('auth:sanctum');
 
+        // Second facteur : franchi AVANT toute session. `login` ne rend qu'un
+        // défi quand le 2FA est actif ; c'est ici, et seulement ici, que le
+        // jeton est délivré. Limité en débit comme la connexion : six chiffres
+        // se devinent vite si l'on peut essayer sans fin.
+        Route::post('two-factor/challenge', [App\Http\Controllers\Api\AuthController::class, 'twoFactorChallenge'])
+            ->middleware('throttle:auth');
+
         // Routes de vérification d'email
         Route::get('email/verify/{id}/{hash}', [App\Http\Controllers\Api\AuthController::class, 'verifyEmail'])->name('verification.verify');
         Route::post('email/resend', [App\Http\Controllers\Api\AuthController::class, 'resendVerification'])->middleware('auth:sanctum');
@@ -110,6 +117,15 @@ Route::prefix('v1')->group(function () {
         Route::put('profile/password', [App\Http\Controllers\Api\ClientController::class, 'updatePassword']);
         Route::put('profile/preferences', [App\Http\Controllers\Api\ClientController::class, 'updatePreferences']);
         Route::delete('profile/account', [App\Http\Controllers\Api\ClientController::class, 'deleteAccount']);
+
+        // Double authentification — commune à tous les profils (client,
+        // organisateur, administration) : c'est le compte qu'elle protège,
+        // pas un espace en particulier.
+        Route::get('profile/two-factor', [App\Http\Controllers\Api\TwoFactorController::class, 'show']);
+        Route::post('profile/two-factor', [App\Http\Controllers\Api\TwoFactorController::class, 'store']);
+        Route::post('profile/two-factor/confirm', [App\Http\Controllers\Api\TwoFactorController::class, 'confirm']);
+        Route::post('profile/two-factor/recovery-codes', [App\Http\Controllers\Api\TwoFactorController::class, 'regenerate']);
+        Route::delete('profile/two-factor', [App\Http\Controllers\Api\TwoFactorController::class, 'destroy']);
     });
 
     // Routes publiques pour les paiements (status checking et initiation accessibles sans auth)

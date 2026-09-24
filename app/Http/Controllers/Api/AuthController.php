@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Services\TotpService;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -282,6 +285,34 @@ class AuthController extends Controller
             ], 403);
         }
 
+        // Double authentification : le mot de passe ne suffit plus.
+        //
+        // AUCUN jeton n'est émis ici. On rend un défi de courte durée, qui
+        // n'ouvre rien par lui-même : sans le code, la session n'existe pas.
+        // Émettre le jeton puis « demander » le code laisserait un accès
+        // complet à qui intercepterait la première réponse.
+        if ($user->hasTwoFactorEnabled()) {
+            return response()->json([
+                'success' => true,
+                'two_factor_required' => true,
+                'challenge' => $this->startTwoFactorChallenge($user),
+                'message' => 'Saisissez le code affiché par votre application d\'authentification.',
+            ]);
+        }
+
+        return $this->issueSession($user);
+    }
+
+    /**
+     * Ouvrir la session : jeton et profil.
+     *
+     * Partagé par la connexion simple et par la validation du second facteur,
+     * pour que les deux chemins délivrent exactement la même chose — deux
+     * copies auraient fini par diverger, et c'est le genre d'écart qui donne
+     * des droits à un endroit et pas à l'autre.
+     */
+    private function issueSession(User $user): JsonResponse
+    {
         // Supprimer les anciens tokens
         $user->tokens()->delete();
 
@@ -332,6 +363,123 @@ class AuthController extends Controller
             'access_level' => $isAdmin ? 'admin' : ($isOrganizer ? 'organizer' : 'client'),
             'email_verification_required' => !$emailVerified,
         ]);
+    }
+
+    /** Clé de cache d'un défi de second facteur. */
+    private function challengeKey(string $challenge): string
+    {
+        return 'two_factor_challenge:' . hash('sha256', $challenge);
+    }
+
+    /**
+     * Ouvrir un défi : cinq minutes pour saisir le code, pas davantage.
+     */
+    private function startTwoFactorChallenge(User $user): string
+    {
+        $challenge = Str::random(64);
+
+        Cache::put($this->challengeKey($challenge), [
+            'user_id' => $user->id,
+            'attempts' => 0,
+        ], now()->addMinutes(5));
+
+        return $challenge;
+    }
+
+    /**
+     * Second facteur : valider le code et ouvrir enfin la session.
+     *
+     * Six chiffres se devinent vite si l'on peut essayer sans fin. Le défi est
+     * donc détruit au bout de cinq essais — l'utilisateur légitime refait une
+     * connexion, l'attaquant repart de zéro à chaque fois et n'accumule rien.
+     */
+    public function twoFactorChallenge(Request $request, TotpService $totp): JsonResponse
+    {
+        $request->validate([
+            'challenge' => 'required|string',
+            'code' => 'required_without:recovery_code|nullable|string',
+            'recovery_code' => 'required_without:code|nullable|string',
+        ], [
+            'challenge.required' => 'Session de connexion expirée, recommencez.',
+            'code.required_without' => 'Saisissez le code de votre application ou un code de secours.',
+        ]);
+
+        $key = $this->challengeKey($request->challenge);
+        $state = Cache::get($key);
+        $user = $state ? User::find($state['user_id']) : null;
+
+        if (! $user || ! $user->hasTwoFactorEnabled()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Session de connexion expirée. Reconnectez-vous.',
+                'error_code' => 'CHALLENGE_EXPIRED',
+            ], 422);
+        }
+
+        if (filled($request->code) && $totp->verify($user->two_factor_secret, $request->code)) {
+            Cache::forget($key);
+
+            return $this->issueSession($user);
+        }
+
+        if (filled($request->recovery_code) && $this->consumeRecoveryCode($user, $request->recovery_code)) {
+            Cache::forget($key);
+
+            return $this->issueSession($user);
+        }
+
+        // Essai manqué : on rapproche le défi de sa fin.
+        $state['attempts']++;
+
+        if ($state['attempts'] >= 5) {
+            Cache::forget($key);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Trop de tentatives. Reconnectez-vous.',
+                'error_code' => 'CHALLENGE_BURNED',
+            ], 429);
+        }
+
+        Cache::put($key, $state, now()->addMinutes(5));
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Code incorrect.',
+            'error_code' => 'INVALID_CODE',
+            'attempts_left' => 5 - $state['attempts'],
+        ], 422);
+    }
+
+    /**
+     * Un code de secours ne sert qu'une fois — sinon ce n'est plus un secours,
+     * c'est un mot de passe permanent noté sur un bout de papier.
+     */
+    private function consumeRecoveryCode(User $user, string $provided): bool
+    {
+        $codes = $user->two_factor_recovery_codes ?? [];
+        $provided = trim($provided);
+        $match = null;
+
+        // Parcours complet et comparaison à temps constant : s'arrêter au bon
+        // code rendrait sa position mesurable.
+        foreach ($codes as $code) {
+            if (hash_equals($code, $provided)) {
+                $match = $code;
+            }
+        }
+
+        if ($match === null) {
+            return false;
+        }
+
+        $user->two_factor_recovery_codes = array_values(array_filter(
+            $codes,
+            fn ($code) => ! hash_equals($code, $match)
+        ));
+        $user->save();
+
+        return true;
     }
 
     /**
