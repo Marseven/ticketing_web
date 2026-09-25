@@ -125,10 +125,7 @@ class ParcoursVersementTest extends TestCase
         Notification::fake();
         Sanctum::actingAs($this->patron);
 
-        $rep = $this->demander(50000);
-        fwrite(STDERR, "\nDEMANDE(" . $rep->status() . ") " . substr($rep->getContent(), 0, 260)
-            . "\n  payouts=" . Payout::count() . " solde=" . $this->solde($this->organisateur) . "\n");
-        $rep->assertSuccessful();
+        $this->demander(50000)->assertSuccessful();
 
         $versement = Payout::latest('id')->firstOrFail();
 
