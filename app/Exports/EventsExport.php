@@ -28,7 +28,30 @@ class EventsExport implements FromCollection, WithHeadings, WithMapping, WithSty
      */
     public function collection()
     {
-        return Event::with(['organizer', 'category', 'venue', 'tickets', 'ticketTypes'])
+        // ⚠️ Cette requête chargeait `tickets` — TOUS les billets de TOUS les
+        // événements de la période — pour n'en garder que deux comptages. Sur
+        // une plateforme qui en vend des milliers, cela remplit la mémoire
+        // avant même d'écrire une ligne : le processus est tué, et l'erreur
+        // fatale échappe au journaliseur de Laravel. D'où un 500 sans la
+        // moindre trace, constaté en production.
+        //
+        // Les comptages et la recette sont désormais calculés par la base,
+        // qui sait le faire sans rien rapatrier. `map()` n'a plus aucune
+        // requête à lancer : c'était trois de plus par événement.
+        return Event::query()
+            ->with(['organizer:id,name', 'category:id,name', 'venue:id,name,city'])
+            ->withCount([
+                'tickets as tickets_sold_count' => fn ($q) => $q->whereIn('status', ['issued', 'used']),
+                'tickets as tickets_used_count' => fn ($q) => $q->where('status', 'used'),
+            ])
+            ->withSum('ticketTypes as total_capacity', 'available_quantity')
+            ->addSelect([
+                'revenue' => \App\Models\Order::query()
+                    ->selectRaw('COALESCE(SUM(orders.total_amount), 0)')
+                    ->join('tickets', 'tickets.order_id', '=', 'orders.id')
+                    ->whereColumn('tickets.event_id', 'events.id')
+                    ->where('orders.status', 'paid'),
+            ])
             ->whereBetween('created_at', [$this->startDate, $this->endDate])
             ->orderBy('created_at', 'desc')
             ->get();
@@ -61,18 +84,14 @@ class EventsExport implements FromCollection, WithHeadings, WithMapping, WithSty
      */
     public function map($event): array
     {
-        $ticketsSold = $event->tickets()->whereIn('status', ['issued', 'used'])->count();
-        $ticketsUsed = $event->tickets()->where('status', 'used')->count();
+        // Tout vient déjà de la requête : aucune requête par ligne.
+        $ticketsSold = (int) ($event->tickets_sold_count ?? 0);
+        $ticketsUsed = (int) ($event->tickets_used_count ?? 0);
 
-        // Calculer la capacité totale
-        $totalCapacity = $event->ticketTypes->sum('available_quantity') ?: 0;
+        $totalCapacity = (int) ($event->total_capacity ?? 0);
         $fillRate = $totalCapacity > 0 ? round(($ticketsSold / $totalCapacity) * 100, 2) : 0;
 
-        // Calculer les revenus
-        $revenue = $event->tickets()
-            ->join('orders', 'tickets.order_id', '=', 'orders.id')
-            ->where('orders.status', 'paid')
-            ->sum('orders.total_amount');
+        $revenue = (float) ($event->revenue ?? 0);
 
         return [
             $event->title,
@@ -81,7 +100,7 @@ class EventsExport implements FromCollection, WithHeadings, WithMapping, WithSty
             $event->venue ? $event->venue->name : 'N/A',
             $event->venue ? $event->venue->city : 'N/A',
             $this->getStatusLabel($event->status),
-            $event->created_at->format('d/m/Y H:i'),
+            $event->created_at?->format('d/m/Y H:i') ?? '—',
             $event->published_at ? $event->published_at->format('d/m/Y H:i') : 'Non publié',
             $ticketsSold,
             $ticketsUsed,

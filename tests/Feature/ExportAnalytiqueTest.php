@@ -132,4 +132,49 @@ class ExportAnalytiqueTest extends TestCase
 
         $this->get($this->url('events'))->assertOk();
     }
+
+    public function test_les_chiffres_de_l_export_des_evenements_sont_justes(): void
+    {
+        // Les comptages et la recette sont passés des boucles PHP à la base.
+        // Un calcul déplacé est un calcul qui peut changer de résultat sans
+        // que personne ne s'en aperçoive : ce test fige les valeurs.
+        $evenement = $this->evenementAvecVentes();
+
+        $export = new \App\Exports\EventsExport(
+            now()->subMonth()->format('Y-m-d'),
+            now()->addDay()->format('Y-m-d')
+        );
+
+        $ligne = $export->map($export->collection()->firstWhere('id', $evenement->id));
+
+        $this->assertSame('Chill Expo', $ligne[0]);
+        $this->assertSame(1, $ligne[8], 'un billet vendu');
+        $this->assertSame(0, $ligne[9], 'aucun billet utilisé');
+        $this->assertSame(50, $ligne[10], 'la capacité déclarée');
+        $this->assertSame(2.0, $ligne[11], 'taux de remplissage : 1 sur 50');
+        $this->assertSame('5 000', $ligne[12], 'la recette de la commande payée');
+    }
+
+    public function test_l_export_ne_lance_pas_une_requete_par_evenement(): void
+    {
+        // La cause du 500 en production : l'export chargeait tous les billets
+        // de tous les événements, puis relançait trois requêtes par ligne.
+        for ($i = 0; $i < 5; $i++) {
+            $this->evenementAvecVentes();
+        }
+
+        $export = new \App\Exports\EventsExport(
+            now()->subMonth()->format('Y-m-d'),
+            now()->addDay()->format('Y-m-d')
+        );
+        $evenements = $export->collection();
+
+        \Illuminate\Support\Facades\DB::enableQueryLog();
+        $evenements->each(fn ($evenement) => $export->map($evenement));
+        $requetes = count(\Illuminate\Support\Facades\DB::getQueryLog());
+        \Illuminate\Support\Facades\DB::disableQueryLog();
+
+        $this->assertSame(0, $requetes,
+            'la mise en forme ne doit déclencher aucune requête');
+    }
 }
