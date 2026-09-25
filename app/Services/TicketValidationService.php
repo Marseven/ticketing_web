@@ -79,7 +79,8 @@ class TicketValidationService
                 }
 
                 // 3) Déjà scanné ? (anti double-scan)
-                $existing = $ticket->checkins()->where('result', 'valid')->latest('scanned_at')->first();
+                $existing = $ticket->checkins()->with('scanner:id,name')
+                    ->where('result', 'valid')->latest('scanned_at')->first();
                 if ($existing) {
                     $this->recordCheckin($ticket, 'duplicate', $ctx, $scanned);
                     return $this->fail('duplicate', 'Ce billet a déjà été scanné le '
@@ -89,6 +90,10 @@ class TicketValidationService
                         'status_before' => $ticket->status,
                         'status_after' => $ticket->status,
                         'first_scan' => $existing->scanned_at->format('d/m/Y H:i:s'),
+                        // Qui avait laissé entrer la première fois : c'est la
+                        // question qu'on se pose quand deux personnes se
+                        // présentent avec le même billet.
+                        'first_scan_by' => $existing->scanner?->name,
                         'security_check' => $security,
                     ]);
                 }
@@ -130,6 +135,11 @@ class TicketValidationService
                     'result' => 'valid',
                     'valid' => true,
                     'message' => 'Billet validé avec succès',
+                    // Qui a ouvert la porte. L'information était enregistrée
+                    // mais ne ressortait nulle part : l'agent ne voyait pas
+                    // son propre nom, et en cas de contestation il fallait
+                    // aller lire la base pour savoir qui avait laissé entrer.
+                    'scanned_by' => $checkin?->scanner?->name,
                     'source' => $ticket->ticket_source,
                     'status_before' => $before,
                     'status_after' => 'used',
@@ -207,6 +217,8 @@ class TicketValidationService
             'status_before' => null,
             'status_after' => null,
             'first_scan' => null,
+            'first_scan_by' => null,
+            'scanned_by' => null,
             'security_check' => $extra['security_check'] ?? null,
             'ticket' => null,
             'checkin' => null,

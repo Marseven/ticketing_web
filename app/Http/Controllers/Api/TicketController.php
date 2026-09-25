@@ -421,12 +421,21 @@ class TicketController extends Controller
     {
         $checkinData = [
             'ticket_id' => $ticket?->id,
-            'scanned_by' => auth()->id() ?? 1, // Utilisateur qui scanne
+            // ⚠️ Jamais de valeur de repli ici. C'était `auth()->id() ?? 1` :
+            // un scan sans agent identifié était attribué à l'utilisateur
+            // n° 1. Une trace fausse est pire que pas de trace — elle a
+            // l'apparence d'une preuve. La table exige un auteur, donc un scan
+            // anonyme ne doit pas être journalisé du tout.
+            'scanned_by' => auth()->id(),
             'device_id' => $request->header('X-Device-ID'),
             'scanned_at' => now(),
             'result' => $result,
             'location_hint' => $request->ip(),
         ];
+
+        if (empty($checkinData['scanned_by'])) {
+            return;
+        }
 
         Checkin::create($checkinData);
 

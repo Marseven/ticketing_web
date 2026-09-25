@@ -100,6 +100,7 @@
                 <th>Origine</th>
                 <th>Statut</th>
                 <th>Scanné le</th>
+                <th>Scanné par</th>
             </tr>
         </thead>
         <tbody>
@@ -116,10 +117,11 @@
                     <td>{{ $billet['origine'] }}</td>
                     <td class="{{ $billet['statut'] === 'Entré' ? 'entre' : '' }}">{{ $billet['statut'] }}</td>
                     <td>{{ $billet['scanne_le'] }}</td>
+                    <td>{{ $billet['scanne_par'] }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="11" style="padding: 6mm; text-align: center; color: #777;">
+                    <td colspan="12" style="padding: 6mm; text-align: center; color: #777;">
                         Aucun billet vendu pour cet événement.
                     </td>
                 </tr>

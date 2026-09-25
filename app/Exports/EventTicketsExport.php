@@ -62,6 +62,9 @@ class EventTicketsExport implements FromCollection, WithHeadings, WithMapping, W
                 'order:id,reference,guest_name,guest_email,guest_phone,currency',
                 'order.items:id,order_id,ticket_type_id,unit_price',
                 'order.payments:id,order_id,payer_phone',
+                // Qui a laissé entrer : le dernier scan valide, et son auteur.
+                'checkins' => fn ($q) => $q->where('result', 'valid')
+                    ->latest('scanned_at')->limit(1)->with('scanner:id,name'),
             ])
             ->orderBy('created_at');
     }
@@ -83,6 +86,7 @@ class EventTicketsExport implements FromCollection, WithHeadings, WithMapping, W
             'Statut',
             'Acheté le',
             'Scanné le',
+            'Scanné par',
         ];
     }
 
@@ -106,7 +110,20 @@ class EventTicketsExport implements FromCollection, WithHeadings, WithMapping, W
             self::statut($ticket),
             $ticket->created_at?->format('d/m/Y H:i') ?? '—',
             $ticket->used_at?->format('d/m/Y H:i') ?? '—',
+            self::scannePar($ticket),
         ];
+    }
+
+    /**
+     * L'agent qui a validé le billet à l'entrée.
+     *
+     * C'est la question qu'on se pose après coup : qui a laissé entrer ? Elle
+     * était enregistrée depuis toujours dans `checkins`, mais ne ressortait
+     * sur aucun document.
+     */
+    public static function scannePar(Ticket $ticket): string
+    {
+        return $ticket->checkins->first()?->scanner?->name ?? '—';
     }
 
     /** Le numéro qui a réglé, souvent différent de celui du compte. */

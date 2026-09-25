@@ -81,6 +81,7 @@ class EventTicketExportController extends Controller
             'origine' => EventTicketsExport::origine($billet),
             'statut' => EventTicketsExport::statut($billet),
             'scanne_le' => $billet->used_at?->format('d/m/Y H:i') ?? '—',
+            'scanne_par' => EventTicketsExport::scannePar($billet),
         ]);
 
         $pdf = Pdf::loadView('pdf.event-tickets', [

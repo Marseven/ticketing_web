@@ -265,4 +265,39 @@ class ExportBilletsEvenementTest extends TestCase
 
         $this->getJson($this->url('docx'))->assertStatus(422);
     }
+
+    public function test_l_export_dit_qui_a_laisse_entrer(): void
+    {
+        // La question qu'on se pose après coup, et en cas de contestation :
+        // quel agent a validé ce billet ? L'information était enregistrée
+        // depuis toujours dans `checkins`, mais ne ressortait sur aucun
+        // document — il fallait aller lire la base.
+        $billet = $this->billetVendu('used');
+        $agent = $this->utilisateur('organizer', $this->organisateur);
+
+        \App\Models\Checkin::create([
+            'ticket_id' => $billet->id,
+            'scanned_by' => $agent->id,
+            'device_id' => 'portique-1',
+            'result' => 'valid',
+            'scanned_at' => now(),
+        ]);
+
+        $export = new \App\Exports\EventTicketsExport($this->evenement);
+        $ligne = $export->map($export->collection()->first());
+
+        $this->assertSame($agent->name, $ligne[14], 'le nom de l\'agent figure au tableur');
+    }
+
+    public function test_un_billet_jamais_scanne_ne_designe_personne(): void
+    {
+        // Ne jamais inventer d'auteur : une trace fausse a l'apparence d'une
+        // preuve, ce qui est pire que pas de trace du tout.
+        $this->billetVendu('issued');
+
+        $export = new \App\Exports\EventTicketsExport($this->evenement);
+        $ligne = $export->map($export->collection()->first());
+
+        $this->assertSame('—', $ligne[14]);
+    }
 }

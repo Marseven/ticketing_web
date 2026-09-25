@@ -215,6 +215,13 @@ class ScanController extends Controller
             'result' => $r['result'] === 'not_found' ? 'invalid' : $r['result'],
             'scan_id' => $r['checkin']?->id,
             'source' => $r['source'],
+            // Qui vient de valider, et — sur un doublon — qui avait laissé
+            // entrer la première fois. C'est la question posée sur place quand
+            // deux personnes se présentent avec le même billet, et l'agent ne
+            // devait pas avoir à ouvrir la base pour y répondre.
+            'scanned_by' => $r['scanned_by'] ?? null,
+            'first_scan' => $r['first_scan'] ?? null,
+            'first_scan_by' => $r['first_scan_by'] ?? null,
             'ticket' => $r['ticket'],
         ], $httpStatus);
     }
