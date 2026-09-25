@@ -15,11 +15,21 @@
           <p v-if="event" class="text-gray-600">{{ event.title }}</p>
         </div>
         <div class="flex space-x-3">
-          <button @click="exportSalesData" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+          <!-- Deux usages distincts : le tableur pour rapprocher les ventes,
+               le PDF pour l'imprimer et l'emporter à l'entrée. -->
+          <button @click="exporterBillets('xlsx')" :disabled="exportEnCours"
+                  class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 min-h-[44px] disabled:opacity-60">
             <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path>
             </svg>
-            Exporter
+            {{ exportEnCours ? 'Préparation…' : 'Billets (Excel)' }}
+          </button>
+          <button @click="exporterBillets('pdf')" :disabled="exportEnCours"
+                  class="bg-primea-blue text-white px-4 py-2 rounded-lg hover:opacity-90 min-h-[44px] disabled:opacity-60">
+            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            Billets (PDF)
           </button>
           <button @click="$router.push(`/organizer/events/${eventId}/physical-sales`)" 
                   class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
@@ -325,6 +335,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import Swal from 'sweetalert2'
 import { useRoute } from 'vue-router'
+import { errorMessage } from '../../utils/formErrors'
 
 export default {
   name: 'EventSalesDetails',
@@ -458,31 +469,61 @@ export default {
       }
     }
 
-    const exportSalesData = async () => {
+    const exportEnCours = ref(false)
+
+    /**
+     * Télécharger la liste des billets vendus.
+     *
+     * L'ancienne version appelait une route qui n'existait pas, et avalait
+     * l'échec sans rien dire : le bouton semblait ne rien faire. Un refus
+     * s'affiche désormais, et le nom du fichier vient du serveur plutôt que
+     * d'être reconstruit ici — sinon les deux finissent par diverger.
+     */
+    const exporterBillets = async (format) => {
+      exportEnCours.value = true
+
       try {
-        const response = await fetch(`/api/v1/organizer/events/${eventId}/export`, {
+        const response = await fetch(`/api/v1/events/${eventId}/tickets/export?format=${format}`, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json'
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
         })
-        
-        if (response.ok) {
-          const blob = await response.blob()
-          const url = window.URL.createObjectURL(blob)
-          const a = document.createElement('a')
-          a.href = url
-          a.download = `ventes-${event.value?.title || 'evenement'}-${new Date().toISOString().split('T')[0]}.csv`
-          document.body.appendChild(a)
-          a.click()
-          window.URL.revokeObjectURL(url)
-          document.body.removeChild(a)
+
+        if (!response.ok) {
+          const corps = await response.json().catch(() => ({}))
+          Swal.fire({
+            icon: 'error',
+            title: 'Export impossible',
+            text: errorMessage(corps, 'Le fichier n\'a pas pu être généré.'),
+            confirmButtonColor: '#272d63'
+          })
+          return
         }
+
+        const entete = response.headers.get('content-disposition') || ''
+        const nom = entete.match(/filename="?([^";]+)"?/)?.[1]
+          || `billets-evenement.${format}`
+
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = nom
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
       } catch (error) {
-        console.error('Erreur export:', error)
-        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur lors de l\'export des données', confirmButtonColor: '#272d63' })
+        Swal.fire({
+          icon: 'error',
+          title: 'Connexion impossible',
+          text: 'Le serveur n\'a pas répondu.',
+          confirmButtonColor: '#272d63'
+        })
+      } finally {
+        exportEnCours.value = false
       }
-    }
+    }    }
 
     // Utilitaires
     const formatAmount = (amount) => {
@@ -567,7 +608,8 @@ export default {
       loadSalesBySchedule,
       loadTickets,
       changePage,
-      exportSalesData,
+      exporterBillets,
+      exportEnCours,
 
       // Utilitaires
       formatAmount,

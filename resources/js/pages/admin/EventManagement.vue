@@ -201,6 +201,16 @@
                 <button @click="showShareQr(event)" class="text-primea-blue hover:text-primea-yellow" title="QR code menant à la page d'achat, pour l'affiche ou le flyer">
                   QR
                 </button>
+                <button @click="exporterBillets(event, 'xlsx')" :disabled="exportEnCours"
+                        class="text-green-700 hover:text-green-900 disabled:opacity-50"
+                        title="Liste des billets vendus, en tableur">
+                  Excel
+                </button>
+                <button @click="exporterBillets(event, 'pdf')" :disabled="exportEnCours"
+                        class="text-red-700 hover:text-red-900 disabled:opacity-50"
+                        title="Liste des billets vendus, à imprimer pour l'entrée">
+                  PDF
+                </button>
               </td>
             </tr>
           </tbody>
@@ -1109,6 +1119,55 @@ export default {
       return res.json()
     }
 
+    const exportEnCours = ref(false)
+
+    /**
+     * Télécharger la liste des billets vendus d'un événement.
+     *
+     * Le nom du fichier vient de l'en-tête de la réponse : le serveur le
+     * compose déjà, et le refaire ici garantirait qu'ils divergent un jour.
+     */
+    const exporterBillets = async (event, format) => {
+      exportEnCours.value = true
+
+      try {
+        const response = await fetch(`/api/v1/events/${event.id}/tickets/export?format=${format}`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        })
+
+        if (!response.ok) {
+          const corps = await response.json().catch(() => ({}))
+          Swal.fire({
+            icon: 'error',
+            title: 'Export impossible',
+            text: errorMessage(corps, 'Le fichier n\'a pas pu être généré.'),
+            confirmButtonColor: '#272d63'
+          })
+          return
+        }
+
+        const entete = response.headers.get('content-disposition') || ''
+        const nom = entete.match(/filename="?([^";]+)"?/)?.[1] || `billets.${format}`
+
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = nom
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+      } catch (error) {
+        Swal.fire({
+          icon: 'error', title: 'Connexion impossible',
+          text: 'Le serveur n\'a pas répondu.', confirmButtonColor: '#272d63'
+        })
+      } finally {
+        exportEnCours.value = false
+      }
+    }
+
     const showShareQr = async (event) => {
       try {
         const res = await fetch(`/api/v1/admin/events/${event.id}/share-qr`, {
@@ -1297,6 +1356,8 @@ export default {
       openTracking,
       copyTrackingLink,
       showShareQr,
+      exporterBillets,
+      exportEnCours,
       addSchedule,
       removeSchedule,
       addTicketType,

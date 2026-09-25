@@ -130,6 +130,12 @@ Route::prefix('v1')->group(function () {
         // Sessions ouvertes (jetons Sanctum). L'écran les proposait déjà, sans
         // qu'aucune route ne réponde : « déconnecter partout » annonçait un
         // succès sans rien révoquer.
+        // Liste des billets vendus d'un événement, en tableur ou en PDF.
+        // Accessible à l'organisateur pour SES événements et à
+        // l'administration pour tous : c'est un fichier nominatif.
+        Route::get('events/{event}/tickets/export', App\Http\Controllers\Api\EventTicketExportController::class)
+            ->name('events.tickets.export');
+
         Route::get('profile/sessions', [App\Http\Controllers\Api\SessionsController::class, 'index']);
         Route::delete('profile/sessions/{id}', [App\Http\Controllers\Api\SessionsController::class, 'destroy']);
         Route::post('profile/sessions/logout-others', [App\Http\Controllers\Api\SessionsController::class, 'destroyOthers']);
