@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Http\Request;
+
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -54,5 +56,21 @@ return Application::configure(basePath: dirname(__DIR__))
         });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Une route d'API répond toujours en JSON, même à un navigateur.
         //
+        // ⚠️ Sans cela, une requête non authentifiée qui accepte du HTML — une
+        // URL collée dans la barre d'adresse, ou un bouton qui navigue au lieu
+        // de récupérer — faisait tenter à Laravel une redirection vers
+        // `route('login')`. Cette route n'existe pas dans cette application :
+        // l'exception remontait et le serveur rendait une erreur 500 là où un
+        // 401 s'imposait.
+        //
+        // Le symptôme trompait doublement : un administrateur lisait
+        // « 500 Server Error » sur l'URL d'un export et concluait que l'export
+        // était cassé, alors qu'il lui manquait seulement un jeton — et le
+        // journal ne parlait que d'une route de connexion introuvable, sans
+        // jamais nommer la fonctionnalité.
+        $exceptions->shouldRenderJsonWhen(
+            fn (Request $request) => $request->is('api/*') || $request->expectsJson()
+        );
     })->create();

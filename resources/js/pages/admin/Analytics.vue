@@ -621,32 +621,72 @@ export default {
     }
 
     // Export Methods
-    const exportSales = () => {
-      const startDate = new Date()
-      startDate.setDate(startDate.getDate() - selectedPeriod.value)
-      const endDate = new Date()
+    const exportEnCours = ref(false)
 
-      const url = `/api/v1/admin/analytics/export/sales?start_date=${startDate.toISOString().split('T')[0]}&end_date=${endDate.toISOString().split('T')[0]}`
-      window.open(url, '_blank')
+    /**
+     * Télécharger un export d'analytique.
+     *
+     * ⚠️ C'était `window.open(url)`. Le navigateur NAVIGUE alors vers l'API
+     * sans porter le jeton d'authentification : la requête était refusée, et
+     * comme l'application n'a pas de route de connexion nommée, Laravel rendait
+     * une erreur 500. L'administrateur lisait « 500 Server Error » et concluait
+     * que l'export était cassé, alors qu'il manquait seulement l'autorisation.
+     *
+     * On récupère donc le fichier avec le jeton, puis on le remet au navigateur.
+     */
+    const telechargerExport = async (quoi) => {
+      const debut = new Date()
+      debut.setDate(debut.getDate() - selectedPeriod.value)
+      const fin = new Date()
+
+      const parametres = new URLSearchParams({
+        start_date: debut.toISOString().split('T')[0],
+        end_date: fin.toISOString().split('T')[0]
+      })
+
+      exportEnCours.value = true
+
+      try {
+        const response = await fetch(`/api/v1/admin/analytics/export/${quoi}?${parametres}`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        })
+
+        if (!response.ok) {
+          const corps = await response.json().catch(() => ({}))
+          Swal.fire({
+            icon: 'error',
+            title: 'Export impossible',
+            text: errorMessage(corps, 'Le fichier n\'a pas pu être généré.'),
+            confirmButtonColor: '#272d63'
+          })
+          return
+        }
+
+        const entete = response.headers.get('content-disposition') || ''
+        const nom = entete.match(/filename="?([^";]+)"?/)?.[1] || `${quoi}.xlsx`
+
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = nom
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+      } catch (error) {
+        Swal.fire({
+          icon: 'error', title: 'Connexion impossible',
+          text: 'Le serveur n\'a pas répondu.', confirmButtonColor: '#272d63'
+        })
+      } finally {
+        exportEnCours.value = false
+      }
     }
 
-    const exportEvents = () => {
-      const startDate = new Date()
-      startDate.setDate(startDate.getDate() - selectedPeriod.value)
-      const endDate = new Date()
-
-      const url = `/api/v1/admin/analytics/export/events?start_date=${startDate.toISOString().split('T')[0]}&end_date=${endDate.toISOString().split('T')[0]}`
-      window.open(url, '_blank')
-    }
-
-    const exportFinancial = () => {
-      const startDate = new Date()
-      startDate.setDate(startDate.getDate() - selectedPeriod.value)
-      const endDate = new Date()
-
-      const url = `/api/v1/admin/analytics/export/financial?start_date=${startDate.toISOString().split('T')[0]}&end_date=${endDate.toISOString().split('T')[0]}`
-      window.open(url, '_blank')
-    }
+    const exportSales = () => telechargerExport('sales')
+    const exportEvents = () => telechargerExport('events')
+    const exportFinancial = () => telechargerExport('financial')
 
     // Utilities
     const formatAmount = (amount) => {
@@ -675,6 +715,7 @@ export default {
       predictionsChartOptions,
       loadAllData,
       exportSales,
+      exportEnCours,
       exportEvents,
       exportFinancial,
       formatAmount
