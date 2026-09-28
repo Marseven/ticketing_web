@@ -451,7 +451,38 @@ class EventController extends Controller
                 // place que la caisse va refuser.
                 $reservedQuantities = $this->reservedQuantities($ticketTypeIds);
 
-                $ticketTypes = $ticketTypesQuery->map(function($ticketType) use ($soldQuantities, $reservedQuantities) {
+                // Tarification dynamique : le prix EFFECTIF à cet instant, et
+                // le prochain palier.
+                //
+                // ⚠️ La liste le calculait déjà, pas la fiche : un événement en
+                // prévente s'annonçait à 5 500 F sur l'accueil et à 10 000 F sur
+                // sa propre page — celle où l'on décide d'acheter. L'acheteur
+                // voyait le plein tarif et l'affiche mentait.
+                $currentPriceMap = [];
+                $nextTierMap = [];
+
+                if ($event->use_variable_pricing) {
+                    foreach ($event->ticketTypes as $tt) {
+                        $tt->setRelation('event', $event);
+                        $currentPriceMap[$tt->id] = $tt->getPriceFor(null, null, now()->toDateTimeString());
+
+                        $next = $tt->ticketPrices()
+                            ->where('status', 'active')
+                            ->whereNotNull('valid_from')
+                            ->where('valid_from', '>', now())
+                            ->orderBy('valid_from')
+                            ->first();
+
+                        if ($next) {
+                            $nextTierMap[$tt->id] = [
+                                'price' => (float) $next->price,
+                                'starts_at' => $next->valid_from->toIso8601String(),
+                            ];
+                        }
+                    }
+                }
+
+                $ticketTypes = $ticketTypesQuery->map(function($ticketType) use ($soldQuantities, $reservedQuantities, $currentPriceMap, $nextTierMap, $event) {
                     // Utiliser les quantités pré-chargées
                     $soldQuantity = (int) ($soldQuantities[$ticketType->id] ?? 0);
                     $occupied = $soldQuantity + (int) ($reservedQuantities[$ticketType->id] ?? 0);
@@ -464,7 +495,11 @@ class EventController extends Controller
                         'id' => $ticketType->id,
                         'name' => $ticketType->name,
                         'description' => $ticketType->description,
-                        'price' => (float) $ticketType->price,
+                        // Le prix effectif, celui que la caisse appliquera.
+                        'price' => (float) ($currentPriceMap[$ticketType->id] ?? $ticketType->price),
+                        'base_price' => (float) $ticketType->price,
+                        'is_variable_pricing' => (bool) $event->use_variable_pricing,
+                        'next_tier' => $nextTierMap[$ticketType->id] ?? null,
                         'currency' => $ticketType->currency ?? 'XAF',
                         'available_quantity' => $ticketType->available_quantity,
                         'sold_quantity' => $soldQuantity,
