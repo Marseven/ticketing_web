@@ -890,6 +890,15 @@ class AdminController extends Controller
             'ticket_types.*.price' => 'required|numeric|min:0',
             'ticket_types.*.capacity' => 'required|integer|min:1',
             'ticket_types.*.description' => 'nullable|string|max:2000',
+            'use_variable_pricing' => 'sometimes|boolean',
+            'price_tiers' => 'nullable|array',
+            'price_tiers.*.ticket_type_id' => 'nullable|integer|exists:ticket_types,id',
+            'price_tiers.*.ticket_index' => 'nullable|integer|min:0',
+            'price_tiers.*.price' => 'required|numeric|min:0',
+            'price_tiers.*.valid_from' => 'nullable|date',
+            'price_tiers.*.valid_until' => 'nullable|date|after:price_tiers.*.valid_from',
+            'price_tiers.*.priority' => 'nullable|integer|min:0',
+            'price_tiers.*.description' => 'nullable|string|max:2000',
         ]);
 
         if ($validator->fails()) {
@@ -978,12 +987,23 @@ class AdminController extends Controller
                 }
             }
 
+            // Paliers de prix (prévente), une fois les catégories créées : un
+            // palier s'y rattache, et à la création elles n'ont pas encore
+            // d'identifiant — le formulaire les désigne donc par position.
+            if ($request->has('use_variable_pricing') || $request->has('price_tiers')) {
+                app(\App\Services\TicketPriceSync::class)->sync(
+                    $event->fresh(),
+                    $request->boolean('use_variable_pricing'),
+                    $request->input('price_tiers')
+                );
+            }
+
             DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Événement créé avec succès',
-                'data' => ['event' => $event->load(['organizer', 'category', 'venue', 'schedules', 'ticketTypes'])]
+                'data' => ['event' => $event->load(['organizer', 'category', 'venue', 'schedules', 'ticketTypes.ticketPrices'])]
             ]);
 
         } catch (\Exception $e) {
@@ -1006,7 +1026,7 @@ class AdminController extends Controller
     public function showEvent(Request $request, $eventId): JsonResponse
     {
         try {
-            $event = Event::with(['organizer', 'category', 'venue', 'schedules', 'ticketTypes'])
+            $event = Event::with(['organizer', 'category', 'venue', 'schedules', 'ticketTypes.ticketPrices'])
                 ->find($eventId);
 
             if (!$event) {
@@ -1063,6 +1083,15 @@ class AdminController extends Controller
             'ticket_types.*.price' => 'required|numeric|min:0',
             'ticket_types.*.capacity' => 'required|integer|min:1',
             'ticket_types.*.description' => 'nullable|string|max:2000',
+            'use_variable_pricing' => 'sometimes|boolean',
+            'price_tiers' => 'nullable|array',
+            'price_tiers.*.ticket_type_id' => 'nullable|integer|exists:ticket_types,id',
+            'price_tiers.*.ticket_index' => 'nullable|integer|min:0',
+            'price_tiers.*.price' => 'required|numeric|min:0',
+            'price_tiers.*.valid_from' => 'nullable|date',
+            'price_tiers.*.valid_until' => 'nullable|date|after:price_tiers.*.valid_from',
+            'price_tiers.*.priority' => 'nullable|integer|min:0',
+            'price_tiers.*.description' => 'nullable|string|max:2000',
         ]);
 
         if ($validator->fails()) {
@@ -1178,12 +1207,22 @@ class AdminController extends Controller
                     ->sync($event, $request->input('ticket_types', []));
             }
 
+            // Paliers de prix (prévente). Posés APRÈS les catégories, qui
+            // doivent exister pour qu'un palier puisse s'y rattacher.
+            if ($request->has('use_variable_pricing') || $request->has('price_tiers')) {
+                app(\App\Services\TicketPriceSync::class)->sync(
+                    $event->fresh(),
+                    $request->boolean('use_variable_pricing'),
+                    $request->input('price_tiers')
+                );
+            }
+
             DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Événement mis à jour avec succès',
-                'data' => ['event' => $event->fresh()->load(['organizer', 'category', 'venue', 'schedules', 'ticketTypes'])]
+                'data' => ['event' => $event->fresh()->load(['organizer', 'category', 'venue', 'schedules', 'ticketTypes.ticketPrices'])]
             ]);
 
         } catch (\Exception $e) {

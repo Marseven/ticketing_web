@@ -453,6 +453,69 @@
                   Ajouter un type de billet
                 </button>
               </div>
+
+              <!-- Prévente / tarification par période -->
+              <div class="mt-6 border-t border-gray-200 pt-5">
+                <div class="flex items-center justify-between mb-3">
+                  <h4 class="text-base font-semibold text-primea-blue">Prévente / Tarification par période</h4>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" v-model="eventForm.use_variable_pricing"
+                           class="rounded border-gray-300 text-primea-blue focus:ring-primea-blue" />
+                    <span class="text-sm text-gray-700">Activer</span>
+                  </label>
+                </div>
+
+                <div v-if="eventForm.use_variable_pricing">
+                  <p class="text-xs text-gray-500 mb-3">
+                    Le prix appliqué à l'achat est celui dont la période contient l'instant présent.
+                    Hors de toute période, c'est le prix du type de billet qui s'applique.
+                    Exemple : 5 500 F jusqu'au 1er décembre, puis 10 000 F.
+                  </p>
+
+                  <div v-for="(tier, index) in eventForm.price_tiers" :key="index"
+                       class="grid grid-cols-1 md:grid-cols-6 gap-2 mb-2 items-end bg-gray-50 p-3 rounded-lg">
+                    <div class="md:col-span-2">
+                      <label class="block text-xs text-gray-600 mb-1">Type de billet</label>
+                      <select v-model.number="tier.ticket_index"
+                              class="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm">
+                        <option v-for="(tt, i) in eventForm.ticket_types" :key="i" :value="i">
+                          {{ tt.name || ('Billet ' + (i + 1)) }}
+                        </option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-xs text-gray-600 mb-1">Prix (XAF)</label>
+                      <input v-model.number="tier.price" type="number" min="0"
+                             class="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm" />
+                    </div>
+                    <div>
+                      <label class="block text-xs text-gray-600 mb-1">À partir de</label>
+                      <input v-model="tier.valid_from" type="datetime-local"
+                             class="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm" />
+                    </div>
+                    <div>
+                      <label class="block text-xs text-gray-600 mb-1">Jusqu'à</label>
+                      <input v-model="tier.valid_until" type="datetime-local"
+                             class="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm" />
+                    </div>
+                    <div>
+                      <button type="button" @click="removePriceTier(index)"
+                              class="w-full bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 text-sm min-h-[40px]">
+                        Retirer
+                      </button>
+                    </div>
+                  </div>
+
+                  <button type="button" @click="addPriceTier"
+                          class="mt-1 bg-primea-blue text-white px-4 py-2 rounded-lg hover:opacity-90 text-sm min-h-[40px]">
+                    Ajouter un palier
+                  </button>
+
+                  <p class="text-xs text-gray-400 mt-2">
+                    « À partir de » vide = actif immédiatement. « Jusqu'à » vide = sans fin.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
           
@@ -641,6 +704,8 @@ export default {
       image: {},
       schedules: [],
       ticket_types: [],
+      use_variable_pricing: false,
+      price_tiers: [],
       show_remaining_seats: false,
       sales_start_at: '',
       service_fee_bearer: 'platform',
@@ -863,7 +928,13 @@ export default {
               price: t.price,
               capacity: t.capacity || t.available_quantity || t.max_quantity || t.quantity || 0,
               description: t.description || ''
-            }))
+            })),
+            use_variable_pricing: !!data.data.event.use_variable_pricing,
+            // Recharger les paliers existants : un formulaire qui repart vide
+            // les effacerait au premier enregistrement.
+            price_tiers: chargerPaliers(
+              data.data.event.ticket_types || data.data.event.ticketTypes || []
+            )
           })
           
           // Assurer qu'il y a au moins un type de billet vide si aucun n'existe
@@ -904,6 +975,23 @@ export default {
 
         // Nettoyer les données
         delete formData.image
+
+        // Paliers de prix : ne transmettre que ceux qui portent un prix, et
+        // convertir les champs de date vides en null — une chaîne vide n'est
+        // pas une date et la validation la refuse.
+        if (formData.use_variable_pricing) {
+          formData.price_tiers = (eventForm.price_tiers || [])
+            .filter((tier) => tier.price !== '' && tier.price !== null)
+            .map((tier) => ({
+              ticket_index: tier.ticket_index ?? 0,
+              ticket_type_id: tier.ticket_type_id || null,
+              price: Number(tier.price),
+              valid_from: tier.valid_from || null,
+              valid_until: tier.valid_until || null
+            }))
+        } else {
+          formData.price_tiers = []
+        }
         
         const response = await fetch(url, {
           method,
@@ -1018,7 +1106,13 @@ export default {
               price: t.price,
               capacity: t.capacity || t.available_quantity || t.max_quantity || t.quantity || 0,
               description: t.description || ''
-            }))
+            })),
+            use_variable_pricing: !!data.data.event.use_variable_pricing,
+            // Recharger les paliers existants : un formulaire qui repart vide
+            // les effacerait au premier enregistrement.
+            price_tiers: chargerPaliers(
+              data.data.event.ticket_types || data.data.event.ticketTypes || []
+            )
           })
           
           // Assurer qu'il y a au moins un horaire et un type de billet vide
@@ -1262,6 +1356,42 @@ export default {
       eventForm.ticket_types.splice(index, 1)
     }
 
+    /**
+     * Les paliers de prix tels que le formulaire les manipule.
+     *
+     * Le serveur les renvoie rattachés à leur catégorie ; l'écran les désigne
+     * par POSITION, car à la création les catégories n'ont pas encore
+     * d'identifiant. On conserve les deux : l'identifiant quand il existe,
+     * l'index dans tous les cas.
+     */
+    const chargerPaliers = (categories) => {
+      const paliers = []
+
+      categories.forEach((categorie, index) => {
+        (categorie.ticket_prices || categorie.ticketPrices || []).forEach((palier) => {
+          paliers.push({
+            ticket_index: index,
+            ticket_type_id: categorie.id,
+            price: Number(palier.price),
+            valid_from: toDateTimeLocal(palier.valid_from) || '',
+            valid_until: toDateTimeLocal(palier.valid_until) || ''
+          })
+        })
+      })
+
+      return paliers
+    }
+
+    const addPriceTier = () => {
+      eventForm.price_tiers.push({
+        ticket_index: 0, price: 0, valid_from: '', valid_until: ''
+      })
+    }
+
+    const removePriceTier = (index) => {
+      eventForm.price_tiers.splice(index, 1)
+    }
+
     // Utilitaires
     const formatAmount = (amount) => {
       return new Intl.NumberFormat('fr-FR').format(amount)
@@ -1362,6 +1492,8 @@ export default {
       removeSchedule,
       addTicketType,
       removeTicketType,
+      addPriceTier,
+      removePriceTier,
       cancelNewVenue,
       handleImageChange,
       
