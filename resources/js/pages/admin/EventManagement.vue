@@ -441,10 +441,66 @@
                   </div>
                   
                   <div class="flex items-end">
-                    <button type="button" @click="removeTicketType(index)" 
-                            class="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700">
+                    <button type="button" @click="removeTicketType(index)" class="w-full bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 text-sm min-h-[40px]">
                       Supprimer
                     </button>
+                  </div>
+
+                  <!-- Paliers de prix de CE billet.
+                       Ils n'ont de sens qu'avec une date d'ouverture des
+                       ventes : sans elle, il n'y a pas de « avant » ni
+                       d'« après » à tarifer. -->
+                  <div class="md:col-span-5 border-t border-gray-200 pt-3 mt-1">
+                    <div v-if="!eventForm.sales_start_at" class="text-xs text-gray-500">
+                      Renseignez une <strong>date d'ouverture des ventes</strong> ci-dessus pour
+                      définir des paliers de prix sur ce billet.
+                    </div>
+
+                    <div v-else>
+                      <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-primea-blue">
+                          Paliers de prix — {{ ticketType.name || ('Billet ' + (index + 1)) }}
+                        </span>
+                        <button type="button" @click="addPriceTier(index)"
+                                class="text-xs bg-primea-blue text-white px-3 py-1.5 rounded-lg hover:opacity-90 min-h-[32px]">
+                          Ajouter un palier
+                        </button>
+                      </div>
+
+                      <p v-if="!(ticketType.price_tiers || []).length" class="text-xs text-gray-500">
+                        Aucun palier : ce billet reste à {{ formatAmount(ticketType.price || 0) }} XAF
+                        pendant toute la vente.
+                      </p>
+
+                      <div v-for="(tier, t) in (ticketType.price_tiers || [])" :key="t"
+                           class="grid grid-cols-1 md:grid-cols-4 gap-2 mb-2 items-end bg-white p-2 rounded-lg border border-gray-200">
+                        <div>
+                          <label class="block text-xs text-gray-600 mb-1">Prix (XAF)</label>
+                          <input v-model.number="tier.price" type="number" min="0"
+                                 class="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm" />
+                        </div>
+                        <div>
+                          <label class="block text-xs text-gray-600 mb-1">À partir de</label>
+                          <input v-model="tier.valid_from" type="datetime-local"
+                                 class="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm" />
+                        </div>
+                        <div>
+                          <label class="block text-xs text-gray-600 mb-1">Jusqu'à</label>
+                          <input v-model="tier.valid_until" type="datetime-local"
+                                 class="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm" />
+                        </div>
+                        <div>
+                          <button type="button" @click="removePriceTier(index, t)"
+                                  class="w-full bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 text-sm min-h-[40px]">
+                            Retirer
+                          </button>
+                        </div>
+                      </div>
+
+                      <p v-if="(ticketType.price_tiers || []).length" class="text-xs text-gray-400">
+                        « À partir de » vide = dès l'ouverture des ventes. « Jusqu'à » vide = sans fin.
+                      </p>
+                    </div>
                   </div>
                 </div>
                 
@@ -454,68 +510,6 @@
                 </button>
               </div>
 
-              <!-- Prévente / tarification par période -->
-              <div class="mt-6 border-t border-gray-200 pt-5">
-                <div class="flex items-center justify-between mb-3">
-                  <h4 class="text-base font-semibold text-primea-blue">Prévente / Tarification par période</h4>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" v-model="eventForm.use_variable_pricing"
-                           class="rounded border-gray-300 text-primea-blue focus:ring-primea-blue" />
-                    <span class="text-sm text-gray-700">Activer</span>
-                  </label>
-                </div>
-
-                <div v-if="eventForm.use_variable_pricing">
-                  <p class="text-xs text-gray-500 mb-3">
-                    Le prix appliqué à l'achat est celui dont la période contient l'instant présent.
-                    Hors de toute période, c'est le prix du type de billet qui s'applique.
-                    Exemple : 5 500 F jusqu'au 1er décembre, puis 10 000 F.
-                  </p>
-
-                  <div v-for="(tier, index) in eventForm.price_tiers" :key="index"
-                       class="grid grid-cols-1 md:grid-cols-6 gap-2 mb-2 items-end bg-gray-50 p-3 rounded-lg">
-                    <div class="md:col-span-2">
-                      <label class="block text-xs text-gray-600 mb-1">Type de billet</label>
-                      <select v-model.number="tier.ticket_index"
-                              class="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm">
-                        <option v-for="(tt, i) in eventForm.ticket_types" :key="i" :value="i">
-                          {{ tt.name || ('Billet ' + (i + 1)) }}
-                        </option>
-                      </select>
-                    </div>
-                    <div>
-                      <label class="block text-xs text-gray-600 mb-1">Prix (XAF)</label>
-                      <input v-model.number="tier.price" type="number" min="0"
-                             class="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm" />
-                    </div>
-                    <div>
-                      <label class="block text-xs text-gray-600 mb-1">À partir de</label>
-                      <input v-model="tier.valid_from" type="datetime-local"
-                             class="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm" />
-                    </div>
-                    <div>
-                      <label class="block text-xs text-gray-600 mb-1">Jusqu'à</label>
-                      <input v-model="tier.valid_until" type="datetime-local"
-                             class="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm" />
-                    </div>
-                    <div>
-                      <button type="button" @click="removePriceTier(index)"
-                              class="w-full bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 text-sm min-h-[40px]">
-                        Retirer
-                      </button>
-                    </div>
-                  </div>
-
-                  <button type="button" @click="addPriceTier"
-                          class="mt-1 bg-primea-blue text-white px-4 py-2 rounded-lg hover:opacity-90 text-sm min-h-[40px]">
-                    Ajouter un palier
-                  </button>
-
-                  <p class="text-xs text-gray-400 mt-2">
-                    « À partir de » vide = actif immédiatement. « Jusqu'à » vide = sans fin.
-                  </p>
-                </div>
-              </div>
             </div>
           </div>
           
@@ -705,7 +699,6 @@ export default {
       schedules: [],
       ticket_types: [],
       use_variable_pricing: false,
-      price_tiers: [],
       show_remaining_seats: false,
       sales_start_at: '',
       service_fee_bearer: 'platform',
@@ -871,7 +864,7 @@ export default {
         new_venue_city: '',
         new_venue_address: '',
         schedules: [{ starts_at: '', ends_at: '' }],
-        ticket_types: [{ name: '', price: 0, capacity: 0, description: '' }]
+        ticket_types: [{ name: '', price: 0, capacity: 0, description: '', price_tiers: [] }]
       })
       showNewVenue.value = false
       showModal.value = true
@@ -927,14 +920,11 @@ export default {
               name: t.name,
               price: t.price,
               capacity: t.capacity || t.available_quantity || t.max_quantity || t.quantity || 0,
-              description: t.description || ''
-            })),
-            use_variable_pricing: !!data.data.event.use_variable_pricing,
-            // Recharger les paliers existants : un formulaire qui repart vide
-            // les effacerait au premier enregistrement.
-            price_tiers: chargerPaliers(
-              data.data.event.ticket_types || data.data.event.ticketTypes || []
-            )
+              description: t.description || '',
+              // Recharger les paliers existants : un formulaire qui repart
+              // vide les effacerait au premier enregistrement.
+              price_tiers: chargerPaliers(t)
+            }))
           })
           
           // Assurer qu'il y a au moins un type de billet vide si aucun n'existe
@@ -976,22 +966,40 @@ export default {
         // Nettoyer les données
         delete formData.image
 
-        // Paliers de prix : ne transmettre que ceux qui portent un prix, et
-        // convertir les champs de date vides en null — une chaîne vide n'est
-        // pas une date et la validation la refuse.
-        if (formData.use_variable_pricing) {
-          formData.price_tiers = (eventForm.price_tiers || [])
-            .filter((tier) => tier.price !== '' && tier.price !== null)
-            .map((tier) => ({
-              ticket_index: tier.ticket_index ?? 0,
-              ticket_type_id: tier.ticket_type_id || null,
-              price: Number(tier.price),
-              valid_from: tier.valid_from || null,
-              valid_until: tier.valid_until || null
-            }))
-        } else {
-          formData.price_tiers = []
+        // Les paliers sont saisis DANS chaque billet ; le serveur les attend
+        // à plat. On aplatit ici, en gardant le lien vers le billet : par
+        // identifiant quand il existe, par position sinon — à la création les
+        // billets n'ont pas encore d'identifiant.
+        //
+        // Les paliers n'ont de sens qu'avec une date d'ouverture des ventes :
+        // sans elle, il n'y a ni « avant » ni « après » à tarifer.
+        const paliers = []
+
+        if (eventForm.sales_start_at) {
+          eventForm.ticket_types.forEach((billet, index) => {
+            (billet.price_tiers || [])
+              .filter((tier) => tier.price !== '' && tier.price !== null)
+              .forEach((tier) => {
+                paliers.push({
+                  ticket_index: index,
+                  ticket_type_id: billet.id || null,
+                  price: Number(tier.price),
+                  valid_from: tier.valid_from || null,
+                  valid_until: tier.valid_until || null
+                })
+              })
+          })
         }
+
+        formData.price_tiers = paliers
+        // Le drapeau suit les paliers : en poser sans le lever les rendrait
+        // inertes, et tout le monde paierait le plein tarif en silence.
+        formData.use_variable_pricing = paliers.length > 0
+
+        formData.ticket_types = (eventForm.ticket_types || []).map((billet) => {
+          const { price_tiers, ...reste } = billet
+          return reste
+        })
         
         const response = await fetch(url, {
           method,
@@ -1105,14 +1113,11 @@ export default {
               name: t.name,
               price: t.price,
               capacity: t.capacity || t.available_quantity || t.max_quantity || t.quantity || 0,
-              description: t.description || ''
-            })),
-            use_variable_pricing: !!data.data.event.use_variable_pricing,
-            // Recharger les paliers existants : un formulaire qui repart vide
-            // les effacerait au premier enregistrement.
-            price_tiers: chargerPaliers(
-              data.data.event.ticket_types || data.data.event.ticketTypes || []
-            )
+              description: t.description || '',
+              // Recharger les paliers existants : un formulaire qui repart
+              // vide les effacerait au premier enregistrement.
+              price_tiers: chargerPaliers(t)
+            }))
           })
           
           // Assurer qu'il y a au moins un horaire et un type de billet vide
@@ -1349,7 +1354,7 @@ export default {
     }
 
     const addTicketType = () => {
-      eventForm.ticket_types.push({ name: '', price: 0, capacity: 0, description: '' })
+      eventForm.ticket_types.push({ name: '', price: 0, capacity: 0, description: '', price_tiers: [] })
     }
 
     const removeTicketType = (index) => {
@@ -1364,32 +1369,29 @@ export default {
      * d'identifiant. On conserve les deux : l'identifiant quand il existe,
      * l'index dans tous les cas.
      */
-    const chargerPaliers = (categories) => {
-      const paliers = []
-
-      categories.forEach((categorie, index) => {
-        (categorie.ticket_prices || categorie.ticketPrices || []).forEach((palier) => {
-          paliers.push({
-            ticket_index: index,
-            ticket_type_id: categorie.id,
-            price: Number(palier.price),
-            valid_from: toDateTimeLocal(palier.valid_from) || '',
-            valid_until: toDateTimeLocal(palier.valid_until) || ''
-          })
-        })
-      })
-
-      return paliers
+    const chargerPaliers = (categorie) => {
+      return (categorie.ticket_prices || categorie.ticketPrices || []).map((palier) => ({
+        price: Number(palier.price),
+        valid_from: toDateTimeLocal(palier.valid_from) || '',
+        valid_until: toDateTimeLocal(palier.valid_until) || ''
+      }))
     }
 
-    const addPriceTier = () => {
-      eventForm.price_tiers.push({
-        ticket_index: 0, price: 0, valid_from: '', valid_until: ''
-      })
+    /**
+     * Les paliers appartiennent au TYPE DE BILLET, pas à l'événement.
+     *
+     * C'est ainsi qu'on les pense : « ce billet vaut tant jusqu'à telle date,
+     * tant ensuite ». Les regrouper dans un bloc séparé obligeait à redire à
+     * chaque ligne de quel billet on parlait.
+     */
+    const addPriceTier = (indexBillet) => {
+      const billet = eventForm.ticket_types[indexBillet]
+      if (!billet.price_tiers) billet.price_tiers = []
+      billet.price_tiers.push({ price: billet.price || 0, valid_from: '', valid_until: '' })
     }
 
-    const removePriceTier = (index) => {
-      eventForm.price_tiers.splice(index, 1)
+    const removePriceTier = (indexBillet, indexPalier) => {
+      eventForm.ticket_types[indexBillet].price_tiers.splice(indexPalier, 1)
     }
 
     // Utilitaires

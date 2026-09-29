@@ -254,4 +254,52 @@ class PaliersDePrixAdminTest extends TestCase
         $this->assertSame(5500.0,
             (float) $type->fresh()->getPriceFor(null, null, now()->addMonth()->toDateTimeString()));
     }
+
+    public function test_sans_date_d_ouverture_des_ventes_aucun_palier_n_est_pose(): void
+    {
+        // Règle métier : un palier n'a de sens qu'entre un « avant » et un
+        // « après » l'ouverture des ventes. L'écran n'en propose donc pas tant
+        // que la date manque — et le serveur ne doit pas en inventer.
+        $this->postJson('/api/v1/admin/events', $this->formulaire([
+            'use_variable_pricing' => false,
+            'price_tiers' => [],
+        ]))->assertSuccessful();
+
+        $evenement = $this->evenementCree();
+        $type = TicketType::where('event_id', $evenement->id)->firstOrFail();
+
+        $this->assertSame(0, TicketPrice::where('ticket_type_id', $type->id)->count());
+        $this->assertSame(10000.0, (float) $type->getPriceFor());
+    }
+
+    public function test_chaque_billet_garde_ses_propres_paliers(): void
+    {
+        // Les paliers appartiennent au TYPE DE BILLET : deux catégories d'un
+        // même événement doivent pouvoir suivre des grilles différentes.
+        $this->postJson('/api/v1/admin/events', $this->formulaire([
+            'ticket_types' => [
+                ['name' => 'Standard', 'price' => 10000, 'capacity' => 1000],
+                ['name' => 'VIP', 'price' => 25000, 'capacity' => 100],
+            ],
+            'use_variable_pricing' => true,
+            'price_tiers' => [
+                ['ticket_index' => 0, 'price' => 5500,
+                 'valid_until' => now()->addMonths(2)->format('Y-m-d H:i:s')],
+                ['ticket_index' => 1, 'price' => 20000,
+                 'valid_until' => now()->addMonths(2)->format('Y-m-d H:i:s')],
+            ],
+        ]))->assertSuccessful();
+
+        $evenement = $this->evenementCree();
+        $standard = TicketType::where('event_id', $evenement->id)->where('name', 'Standard')->firstOrFail();
+        $vip = TicketType::where('event_id', $evenement->id)->where('name', 'VIP')->firstOrFail();
+
+        $quand = now()->addMonth()->toDateTimeString();
+
+        $this->assertSame(5500.0, (float) $standard->getPriceFor(null, null, $quand));
+        $this->assertSame(20000.0, (float) $vip->getPriceFor(null, null, $quand));
+
+        $this->assertSame(1, TicketPrice::where('ticket_type_id', $standard->id)->count(),
+            'le palier du Standard ne déborde pas sur le VIP');
+    }
 }
