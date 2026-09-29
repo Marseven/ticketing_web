@@ -255,21 +255,26 @@ class PaliersDePrixAdminTest extends TestCase
             (float) $type->fresh()->getPriceFor(null, null, now()->addMonth()->toDateTimeString()));
     }
 
-    public function test_sans_date_d_ouverture_des_ventes_aucun_palier_n_est_pose(): void
+    public function test_les_paliers_ne_dependent_pas_de_l_ouverture_des_ventes(): void
     {
-        // Règle métier : un palier n'a de sens qu'entre un « avant » et un
-        // « après » l'ouverture des ventes. L'écran n'en propose donc pas tant
-        // que la date manque — et le serveur ne doit pas en inventer.
+        // Ce sont deux mécanismes distincts. Un palier dit seulement « ce
+        // billet coûte tant, entre telle et telle date » : il vaut pour un
+        // événement en vente depuis toujours, sans aucune date d'ouverture.
+        // La prévente, elle, a sa propre date et sa propre logique.
         $this->postJson('/api/v1/admin/events', $this->formulaire([
-            'use_variable_pricing' => false,
-            'price_tiers' => [],
+            'use_variable_pricing' => true,
+            'price_tiers' => $this->paliers(),
         ]))->assertSuccessful();
 
         $evenement = $this->evenementCree();
+
+        $this->assertNull($evenement->sales_start_at, 'aucune ouverture des ventes n\'est fixée');
+
         $type = TicketType::where('event_id', $evenement->id)->firstOrFail();
 
-        $this->assertSame(0, TicketPrice::where('ticket_type_id', $type->id)->count());
-        $this->assertSame(10000.0, (float) $type->getPriceFor());
+        $this->assertSame(2, TicketPrice::where('ticket_type_id', $type->id)->count());
+        $this->assertSame(5500.0,
+            (float) $type->getPriceFor(null, null, now()->addMonth()->toDateTimeString()));
     }
 
     public function test_chaque_billet_garde_ses_propres_paliers(): void

@@ -446,20 +446,14 @@
                     </button>
                   </div>
 
-                  <!-- Paliers de prix de CE billet.
-                       Ils n'ont de sens qu'avec une date d'ouverture des
-                       ventes : sans elle, il n'y a pas de « avant » ni
-                       d'« après » à tarifer. -->
+                  <!-- Paliers de prix de CE billet : combien il coûte, et
+                       pendant quelle période. Indépendant de l'ouverture des
+                       ventes, qui est un autre mécanisme. -->
                   <div class="md:col-span-5 border-t border-gray-200 pt-3 mt-1">
-                    <div v-if="!eventForm.sales_start_at" class="text-xs text-gray-500">
-                      Renseignez une <strong>date d'ouverture des ventes</strong> ci-dessus pour
-                      définir des paliers de prix sur ce billet.
-                    </div>
-
-                    <div v-else>
+                    <div>
                       <div class="flex items-center justify-between mb-2">
                         <span class="text-xs font-semibold text-primea-blue">
-                          Paliers de prix — {{ ticketType.name || ('Billet ' + (index + 1)) }}
+                          Paliers de prix par période — {{ ticketType.name || ('Billet ' + (index + 1)) }}
                         </span>
                         <button type="button" @click="addPriceTier(index)"
                                 class="text-xs bg-primea-blue text-white px-3 py-1.5 rounded-lg hover:opacity-90 min-h-[32px]">
@@ -498,7 +492,8 @@
                       </div>
 
                       <p v-if="(ticketType.price_tiers || []).length" class="text-xs text-gray-400">
-                        « À partir de » vide = dès l'ouverture des ventes. « Jusqu'à » vide = sans fin.
+                        « À partir de » vide = actif immédiatement. « Jusqu'à » vide = sans fin.
+                        Hors de toute période, c'est le prix ci-dessus qui s'applique.
                       </p>
                     </div>
                   </div>
@@ -971,25 +966,25 @@ export default {
         // identifiant quand il existe, par position sinon — à la création les
         // billets n'ont pas encore d'identifiant.
         //
-        // Les paliers n'ont de sens qu'avec une date d'ouverture des ventes :
-        // sans elle, il n'y a ni « avant » ni « après » à tarifer.
+        // ⚠️ Indépendant de l'ouverture des ventes. Un palier dit seulement
+        // « ce billet coûte tant, entre telle et telle date » ; il vaut aussi
+        // bien pour un événement en vente depuis toujours. La prévente est un
+        // autre mécanisme, qui a sa propre date.
         const paliers = []
 
-        if (eventForm.sales_start_at) {
-          eventForm.ticket_types.forEach((billet, index) => {
-            (billet.price_tiers || [])
-              .filter((tier) => tier.price !== '' && tier.price !== null)
-              .forEach((tier) => {
-                paliers.push({
-                  ticket_index: index,
-                  ticket_type_id: billet.id || null,
-                  price: Number(tier.price),
-                  valid_from: tier.valid_from || null,
-                  valid_until: tier.valid_until || null
-                })
+        eventForm.ticket_types.forEach((billet, index) => {
+          (billet.price_tiers || [])
+            .filter((tier) => tier.price !== '' && tier.price !== null)
+            .forEach((tier) => {
+              paliers.push({
+                ticket_index: index,
+                ticket_type_id: billet.id || null,
+                price: Number(tier.price),
+                valid_from: tier.valid_from || null,
+                valid_until: tier.valid_until || null
               })
-          })
-        }
+            })
+        })
 
         formData.price_tiers = paliers
         // Le drapeau suit les paliers : en poser sans le lever les rendrait
